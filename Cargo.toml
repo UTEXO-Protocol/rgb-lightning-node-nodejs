@@ -1,0 +1,50 @@
+[package]
+name = "rln-node"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+description = "Node-API bindings for rgb-lightning-node (RGB Lightning Node)"
+publish = false
+
+# napi-rs builds a cdylib (becomes <crate>.node at install time).
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+napi = { version = "2.16", default-features = false, features = ["napi8", "serde-json"] }
+napi-derive = "2.16"
+
+# Pulls in the same `rln-c-ffi` static-library crate used by the bare
+# addon — see ../../rgb-lightning-node/bindings/c-ffi. While developing
+# locally we point at the workspace sibling; CI release builds will
+# switch this to a `git = "...", tag = "..."` pin against the UTEXO
+# upstream once PR #25 lands.
+rln-c-ffi = { path = "../../rgb-lightning-node/bindings/c-ffi" }
+
+[build-dependencies]
+napi-build = "2"
+
+[profile.release]
+lto = true
+opt-level = 3
+strip = "symbols"
+codegen-units = 1
+
+# Mirror the parent crate's `[patch.crates-io]` block so registry crates
+# resolve to the same revisions the parent is pinned against. Without
+# this, `vls-core` resolves to a crates.io version that lacks the
+# `rgb-commitment-compat` feature signer-external relies on, and the
+# whole graph fails to lock. Must be kept in sync with
+# `rgb-lightning-node/bindings/c-ffi/Cargo.toml`.
+[patch.crates-io]
+lightning                      = { git = "https://github.com/rmn-boiko/rust-lightning.git", branch = "feat/external-signer-compatibility" }
+lightning-background-processor = { git = "https://github.com/rmn-boiko/rust-lightning.git", branch = "feat/external-signer-compatibility" }
+lightning-block-sync           = { git = "https://github.com/rmn-boiko/rust-lightning.git", branch = "feat/external-signer-compatibility" }
+lightning-dns-resolver         = { git = "https://github.com/rmn-boiko/rust-lightning.git", branch = "feat/external-signer-compatibility" }
+lightning-invoice              = { git = "https://github.com/rmn-boiko/rust-lightning.git", branch = "feat/external-signer-compatibility" }
+lightning-net-tokio            = { git = "https://github.com/rmn-boiko/rust-lightning.git", branch = "feat/external-signer-compatibility" }
+lightning-persister            = { git = "https://github.com/rmn-boiko/rust-lightning.git", branch = "feat/external-signer-compatibility" }
+lightning-rapid-gossip-sync    = { git = "https://github.com/rmn-boiko/rust-lightning.git", branch = "feat/external-signer-compatibility" }
+vls-core                       = { git = "https://github.com/rmn-boiko/vls-core.git", branch = "feat/rgb-compatibility" }
+vls-protocol-signer            = { git = "https://github.com/rmn-boiko/vls-protocol-signer.git", branch = "feat/rgb-compatibility" }
+

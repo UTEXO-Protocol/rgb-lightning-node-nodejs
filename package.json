@@ -1,0 +1,40 @@
+{
+  "name": "@utexo/rgb-lightning-node-nodejs",
+  "version": "0.1.0-beta.0",
+  "description": "Node.js (napi-rs) bindings for rgb-lightning-node",
+  "keywords": [
+    "rgb",
+    "lightning",
+    "ldk",
+    "bolt11",
+    "utexo"
+  ],
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "scripts/",
+    "src/",
+    "build.rs",
+    "Cargo.toml",
+    "README.md"
+  ],
+  "scripts": {
+    "postinstall": "bash scripts/download-libs.sh",
+    "build": "napi build --platform --release",
+    "build:debug": "napi build --platform"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^3.6.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jainakin/rgb-lightning-node-nodejs.git"
+  },
+  "license": "Apache-2.0",
+  "author": "UTEXO"
+}
