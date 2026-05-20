@@ -23,13 +23,20 @@ use napi_derive::napi;
 
 use rlncffi::{
     free_native_external_signer, free_sdk_node, rln_address, rln_asset_balance,
-    rln_btc_balance, rln_close_channel, rln_connect_peer, rln_create_utxos,
-    rln_decode_ln_invoice, rln_disconnect_peer, rln_free_string,
-    rln_issue_asset_nia, rln_keysend, rln_list_assets, rln_list_channels,
-    rln_list_payments, rln_list_peers, rln_list_transfers, rln_list_unspents,
-    rln_ln_invoice, rln_native_external_signer_bootstrap,
-    rln_native_external_signer_new, rln_network_info, rln_node_info,
-    rln_open_channel, rln_refresh_transfers, rln_rgb_invoice,
+    rln_asset_metadata, rln_btc_balance, rln_cancel_hodl_invoice,
+    rln_check_indexer_url, rln_check_proxy_endpoint, rln_claim_hodl_invoice,
+    rln_close_channel, rln_connect_peer, rln_create_utxos,
+    rln_decode_ln_invoice, rln_decode_rgb_invoice, rln_disconnect_peer,
+    rln_estimate_fee, rln_fail_transfers, rln_free_string,
+    rln_get_asset_media, rln_get_channel_id, rln_get_payment, rln_get_swap,
+    rln_inflate, rln_invoice_status, rln_issue_asset_cfa, rln_issue_asset_ifa,
+    rln_issue_asset_nia, rln_issue_asset_uda, rln_keysend, rln_list_assets,
+    rln_list_channels, rln_list_payments, rln_list_peers, rln_list_swaps,
+    rln_list_transactions, rln_list_transfers, rln_list_unspents,
+    rln_ln_invoice, rln_maker_execute, rln_maker_init,
+    rln_native_external_signer_bootstrap, rln_native_external_signer_new,
+    rln_network_info, rln_node_info, rln_open_channel, rln_post_asset_media,
+    rln_refresh_transfers, rln_rgb_invoice,
     rln_sdk_node_attach_native_external_signer,
     rln_sdk_node_detach_external_signer,
     rln_sdk_node_init_with_external_signer,
@@ -37,8 +44,8 @@ use rlncffi::{
     rln_sdk_node_shutdown,
     rln_sdk_node_unlock_with_attached_external_signer,
     rln_sdk_node_unlock_with_native_external_signer, rln_send_btc,
-    rln_send_payment, rln_send_rgb, rln_sync, COpaqueStruct, CResult,
-    CResultString, CResultValue,
+    rln_send_onion_message, rln_send_payment, rln_send_rgb, rln_sign_message,
+    rln_sync, rln_taker, COpaqueStruct, CResult, CResultString, CResultValue,
 };
 
 // ---------------------------------------------------------------------------
@@ -178,6 +185,18 @@ macro_rules! fwd_noarg {
     }};
 }
 
+/// `fn(&COpaqueStruct, *const c_char) -> CResultString` — single
+/// raw-string argument (asset id, invoice, hex blob, …). Distinct
+/// from `fwd_json_req!` only in name; both have the same body but
+/// keeping them split documents intent at the call site.
+macro_rules! fwd_str_arg {
+    ($self:ident, $func:ident, $arg:ident) => {{
+        let arg_c = cstring(&$arg)?;
+        let res = unsafe { $func(&$self.handle, arg_c.as_ptr()) };
+        take_cresult_string(res)
+    }};
+}
+
 #[napi]
 impl SdkNode {
     /// Initial node construction. `requestJson` is a JsonSdkInitRequest
@@ -295,6 +314,13 @@ impl SdkNode {
     }
     #[napi]
     pub fn list_channels(&self) -> Result<String> { fwd_noarg!(self, rln_list_channels) }
+    /// `temporaryChannelIdHex` is the 64-char hex temp id returned by
+    /// `openChannel`; this resolves it to the permanent channel id once
+    /// the funding tx confirms.
+    #[napi]
+    pub fn get_channel_id(&self, temporary_channel_id_hex: String) -> Result<String> {
+        fwd_str_arg!(self, rln_get_channel_id, temporary_channel_id_hex)
+    }
 
     // -- BTC + UTXOs ------------------------------------------------------
 
@@ -323,6 +349,20 @@ impl SdkNode {
     pub fn create_utxos(&self, request_json: String) -> Result<String> {
         fwd_json_req!(self, rln_create_utxos, request_json)
     }
+    #[napi]
+    pub fn list_transactions(&self, skip_sync: bool) -> Result<String> {
+        let res = unsafe { rln_list_transactions(&self.handle, skip_sync) };
+        take_cresult_string(res)
+    }
+    /// `blocks` ∈ [1..=65535]; returned JSON has `fee_rate` in sat/vB.
+    #[napi]
+    pub fn estimate_fee(&self, blocks: u32) -> Result<String> {
+        let blocks_u16 = u16::try_from(blocks).map_err(|_| {
+            NapiError::from_reason("estimateFee: blocks must fit in u16 (1..=65535)")
+        })?;
+        let res = unsafe { rln_estimate_fee(&self.handle, blocks_u16) };
+        take_cresult_string(res)
+    }
 
     // -- Lightning invoices / payments ------------------------------------
 
@@ -330,9 +370,22 @@ impl SdkNode {
     pub fn ln_invoice(&self, request_json: String) -> Result<String> {
         fwd_json_req!(self, rln_ln_invoice, request_json)
     }
+    /// C-FFI expects the raw BOLT11 string, not a JSON envelope.
     #[napi]
-    pub fn decode_ln_invoice(&self, request_json: String) -> Result<String> {
-        fwd_json_req!(self, rln_decode_ln_invoice, request_json)
+    pub fn decode_ln_invoice(&self, invoice: String) -> Result<String> {
+        fwd_str_arg!(self, rln_decode_ln_invoice, invoice)
+    }
+    #[napi]
+    pub fn invoice_status(&self, invoice: String) -> Result<String> {
+        fwd_str_arg!(self, rln_invoice_status, invoice)
+    }
+    #[napi]
+    pub fn cancel_hodl_invoice(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_cancel_hodl_invoice, request_json)
+    }
+    #[napi]
+    pub fn claim_hodl_invoice(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_claim_hodl_invoice, request_json)
     }
     #[napi]
     pub fn send_payment(&self, request_json: String) -> Result<String> {
@@ -344,12 +397,36 @@ impl SdkNode {
     }
     #[napi]
     pub fn list_payments(&self) -> Result<String> { fwd_noarg!(self, rln_list_payments) }
+    /// `paymentType` is one of `"sent"` / `"received"` / `"swap"`.
+    #[napi]
+    pub fn get_payment(
+        &self,
+        payment_hash_hex: String,
+        payment_type: String,
+    ) -> Result<String> {
+        let hash_c = cstring(&payment_hash_hex)?;
+        let type_c = cstring(&payment_type)?;
+        let res = unsafe { rln_get_payment(&self.handle, hash_c.as_ptr(), type_c.as_ptr()) };
+        take_cresult_string(res)
+    }
 
     // -- RGB assets -------------------------------------------------------
 
     #[napi]
     pub fn issue_asset_nia(&self, request_json: String) -> Result<String> {
         fwd_json_req!(self, rln_issue_asset_nia, request_json)
+    }
+    #[napi]
+    pub fn issue_asset_uda(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_issue_asset_uda, request_json)
+    }
+    #[napi]
+    pub fn issue_asset_cfa(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_issue_asset_cfa, request_json)
+    }
+    #[napi]
+    pub fn issue_asset_ifa(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_issue_asset_ifa, request_json)
     }
     /// `filterAssetSchemasJson` is a JSON array of schema names to
     /// filter by (`["Nia", "Cfa", "Uda", "Ifa"]` for all). Empty array
@@ -361,13 +438,19 @@ impl SdkNode {
     /// `assetId` is the bare contract id ("rgb:..."), not a JSON request.
     #[napi]
     pub fn get_asset_balance(&self, asset_id: String) -> Result<String> {
-        let s = cstring(&asset_id)?;
-        let res = unsafe { rln_asset_balance(&self.handle, s.as_ptr()) };
-        take_cresult_string(res)
+        fwd_str_arg!(self, rln_asset_balance, asset_id)
+    }
+    #[napi]
+    pub fn asset_metadata(&self, asset_id: String) -> Result<String> {
+        fwd_str_arg!(self, rln_asset_metadata, asset_id)
     }
     #[napi]
     pub fn rgb_invoice(&self, request_json: String) -> Result<String> {
         fwd_json_req!(self, rln_rgb_invoice, request_json)
+    }
+    #[napi]
+    pub fn decode_rgb_invoice(&self, invoice: String) -> Result<String> {
+        fwd_str_arg!(self, rln_decode_rgb_invoice, invoice)
     }
     #[napi]
     pub fn send_rgb(&self, request_json: String) -> Result<String> {
@@ -382,9 +465,69 @@ impl SdkNode {
         take_cresult_string(res).map(|_| ())
     }
     #[napi]
+    pub fn fail_transfers(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_fail_transfers, request_json)
+    }
+    #[napi]
+    pub fn inflate(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_inflate, request_json)
+    }
+    #[napi]
     pub fn list_transfers(&self, asset_id: String) -> Result<String> {
-        let s = cstring(&asset_id)?;
-        let res = unsafe { rln_list_transfers(&self.handle, s.as_ptr()) };
+        fwd_str_arg!(self, rln_list_transfers, asset_id)
+    }
+
+    // -- Asset media ------------------------------------------------------
+
+    #[napi]
+    pub fn get_asset_media(&self, digest: String) -> Result<String> {
+        fwd_str_arg!(self, rln_get_asset_media, digest)
+    }
+    #[napi]
+    pub fn post_asset_media(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_post_asset_media, request_json)
+    }
+
+    // -- Signing / onion / diagnostics ------------------------------------
+
+    /// Returns `{ signature: "..." }` — VLS signs in-process.
+    #[napi]
+    pub fn sign_message(&self, message: String) -> Result<String> {
+        fwd_str_arg!(self, rln_sign_message, message)
+    }
+    #[napi]
+    pub fn send_onion_message(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_send_onion_message, request_json)
+    }
+    #[napi]
+    pub fn check_indexer_url(&self, indexer_url: String) -> Result<String> {
+        fwd_str_arg!(self, rln_check_indexer_url, indexer_url)
+    }
+    #[napi]
+    pub fn check_proxy_endpoint(&self, proxy_endpoint: String) -> Result<String> {
+        fwd_str_arg!(self, rln_check_proxy_endpoint, proxy_endpoint)
+    }
+
+    // -- Atomic swaps (exposed for parity with bare; WDK does not surface) -
+
+    #[napi]
+    pub fn maker_init(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_maker_init, request_json)
+    }
+    #[napi]
+    pub fn maker_execute(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_maker_execute, request_json)
+    }
+    #[napi]
+    pub fn taker(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_taker, request_json)
+    }
+    #[napi]
+    pub fn list_swaps(&self) -> Result<String> { fwd_noarg!(self, rln_list_swaps) }
+    #[napi]
+    pub fn get_swap(&self, payment_hash: String, taker_flag: bool) -> Result<String> {
+        let hash_c = cstring(&payment_hash)?;
+        let res = unsafe { rln_get_swap(&self.handle, hash_c.as_ptr(), taker_flag) };
         take_cresult_string(res)
     }
 }
