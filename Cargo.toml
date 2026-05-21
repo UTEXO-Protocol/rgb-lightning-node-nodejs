@@ -14,11 +14,9 @@ crate-type = ["cdylib"]
 napi = { version = "2.16", default-features = false, features = ["napi8", "serde-json"] }
 napi-derive = "2.16"
 
-# Pulls in the same `rln-c-ffi` static-library crate used by the bare
-# addon — see ../../rgb-lightning-node/bindings/c-ffi. While developing
-# locally we point at the workspace sibling; CI release builds will
-# switch this to a `git = "...", tag = "..."` pin against the UTEXO
-# upstream once PR #25 lands.
+# Path dep for local builds; release prebuilds ship the compiled `.node`
+# via GitHub Releases (see scripts/download-libs.sh) so consumers don't
+# need this sibling checkout.
 rln-c-ffi = { path = "../../rgb-lightning-node/bindings/c-ffi" }
 
 [build-dependencies]
