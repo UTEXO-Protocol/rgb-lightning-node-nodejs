@@ -42,6 +42,7 @@ use rlncffi::{
     rln_sdk_node_init_with_external_signer,
     rln_sdk_node_init_with_native_external_signer, rln_sdk_node_new,
     rln_sdk_node_shutdown,
+    rln_sdk_node_vss_clear_fence,
     rln_sdk_node_unlock_with_attached_external_signer,
     rln_sdk_node_unlock_with_native_external_signer, rln_send_btc,
     rln_send_onion_message, rln_send_payment, rln_send_rgb, rln_sign_message,
@@ -279,6 +280,17 @@ impl SdkNode {
     #[napi]
     pub fn shutdown(&self) -> Result<()> {
         let res = unsafe { rln_sdk_node_shutdown(&self.handle) };
+        take_cresult_string(res).map(|_| ())
+    }
+
+    /// Take over a stale VSS ownership fence after the previous node died
+    /// holding it. Request JSON: `{"password": "..."}`. Throws
+    /// `Rln(FailedVssInit)` if VSS isn't configured / the takeover fails.
+    #[napi]
+    pub fn vss_clear_fence(&self, request_json: String) -> Result<()> {
+        let c = std::ffi::CString::new(request_json)
+            .map_err(|_| napi::Error::from_reason("request contains null byte"))?;
+        let res = unsafe { rln_sdk_node_vss_clear_fence(&self.handle, c.as_ptr()) };
         take_cresult_string(res).map(|_| ())
     }
 

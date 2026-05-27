@@ -37,6 +37,9 @@ export class SdkNode {
   detachExternalSigner(): void
   shutdown(): void
 
+  /** Forces takeover of a stale VSS ownership fence. JSON `{"password":"..."}`. */
+  vssClearFence(requestJson: string): void
+
   // -- Node info / sync --------------------------------------------------
   nodeInfo(): string
   networkInfo(): string

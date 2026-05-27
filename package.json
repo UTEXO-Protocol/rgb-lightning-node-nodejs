@@ -1,6 +1,6 @@
 {
   "name": "@utexo/rgb-lightning-node-nodejs",
-  "version": "0.1.0-beta.5",
+  "version": "0.1.0-beta.6",
   "description": "Node.js (napi-rs) bindings for rgb-lightning-node",
   "keywords": [
     "rgb",

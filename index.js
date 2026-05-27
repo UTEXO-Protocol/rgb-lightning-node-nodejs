@@ -84,6 +84,12 @@ class SdkNode {
     this._closed = true
   }
 
+  // Forces takeover of a stale VSS ownership fence after a previous node
+  // died holding it. Throws if VSS isn't configured. Pointing two live
+  // nodes at the same VSS store corrupts state — call only when certain
+  // the previous owner is gone.
+  vssClearFence (request) { this._inner.vssClearFence(JSON.stringify(request)) }
+
   // Info / network / sync
   nodeInfo () { return JSON.parse(this._inner.nodeInfo()) }
   networkInfo () { return JSON.parse(this._inner.networkInfo()) }
