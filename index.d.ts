@@ -40,6 +40,9 @@ export class SdkNode {
   /** Forces takeover of a stale VSS ownership fence. JSON `{"password":"..."}`. */
   vssClearFence(requestJson: string): void
 
+  /** APay receiver-side registration with an LSP. Returns AsyncOrderNewResponse JSON. */
+  apayNew(hostNodeId: string): string
+
   // -- Node info / sync --------------------------------------------------
   nodeInfo(): string
   networkInfo(): string

@@ -41,6 +41,7 @@ use rlncffi::{
     rln_sdk_node_detach_external_signer,
     rln_sdk_node_init_with_external_signer,
     rln_sdk_node_init_with_native_external_signer, rln_sdk_node_new,
+    rln_sdk_node_apay_new,
     rln_sdk_node_shutdown,
     rln_sdk_node_vss_clear_fence,
     rln_sdk_node_unlock_with_attached_external_signer,
@@ -292,6 +293,17 @@ impl SdkNode {
             .map_err(|_| napi::Error::from_reason("request contains null byte"))?;
         let res = unsafe { rln_sdk_node_vss_clear_fence(&self.handle, c.as_ptr()) };
         take_cresult_string(res).map(|_| ())
+    }
+
+    /// APay receiver-side registration with an LSP. Pass the LSP's node_id
+    /// as a hex string. Returns the JSON `AsyncOrderNewResponse`. Upstream
+    /// PR #51.
+    #[napi]
+    pub fn apay_new(&self, host_node_id: String) -> Result<String> {
+        let c = std::ffi::CString::new(host_node_id)
+            .map_err(|_| napi::Error::from_reason("host_node_id contains null byte"))?;
+        let res = unsafe { rln_sdk_node_apay_new(&self.handle, c.as_ptr()) };
+        take_cresult_string(res)
     }
 
     // -- Node info / sync --------------------------------------------------

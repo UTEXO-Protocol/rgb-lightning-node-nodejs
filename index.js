@@ -90,6 +90,13 @@ class SdkNode {
   // the previous owner is gone.
   vssClearFence (request) { this._inner.vssClearFence(JSON.stringify(request)) }
 
+  // APay receiver-side: register this node with an LSP as an async-order
+  // recipient. Pass the LSP's node_id (hex). Returns the parsed
+  // AsyncOrderNewResponse (request_id, host_node_id, protocol_version,
+  // order_id, status, accepted_through_index, next_index_expected,
+  // unused_hashes, refill_batch_size, first_hash_index).
+  apayNew (hostNodeId) { return JSON.parse(this._inner.apayNew(hostNodeId)) }
+
   // Info / network / sync
   nodeInfo () { return JSON.parse(this._inner.nodeInfo()) }
   networkInfo () { return JSON.parse(this._inner.networkInfo()) }
