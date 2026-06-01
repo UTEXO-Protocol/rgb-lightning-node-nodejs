@@ -7,6 +7,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 while pre-`1.0`.
 
+## [Unreleased]
+
+### Changed
+- Upstream `rgb-lightning-node` reference moved from SHA `0824529`
+  (rmn-boiko fork tip) to the official tag
+  [`v0.5.0-beta.1`](https://github.com/UTEXO-Protocol/rgb-lightning-node/releases/tag/v0.5.0-beta.1).
+  The two trees are byte-identical
+  (`2a31b8a97c64334aa5e30385e079b18a08f805a1`) — pre-built beta.7
+  artifacts from the SHA pin are functionally equivalent to a fresh
+  build from the tag. The next napi cut should record the tag as the
+  upstream reference. The local C-FFI patches that expose
+  `apay_new` + `vss_clear_fence` continue to be required against
+  v0.5.0-beta.1 — see
+  [`rgb-lightning-node-bare/patches/`](https://github.com/UTEXO-Protocol/rgb-lightning-node-bare/tree/main/patches).
+
 ## [0.1.0-beta.7] — 2026-05-31
 
 ### Added
