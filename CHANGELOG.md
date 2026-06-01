@@ -22,6 +22,14 @@ while pre-`1.0`.
   v0.5.0-beta.1 — see
   [`rgb-lightning-node-bare/patches/`](https://github.com/UTEXO-Protocol/rgb-lightning-node-bare/tree/main/patches).
 
+## [0.1.0-beta.8] — 2026-06-01
+
+### Added
+- `vssBackup()` napi method — exposes upstream `vss_backup()` for
+  app-controlled VSS flush. Returns `{ version }` of the snapshot
+  just persisted. Built against `rgb-lightning-node` v0.5.0-beta.1
+  + the C-FFI patch series that adds `rln_sdk_node_vss_backup`.
+
 ## [0.1.0-beta.7] — 2026-05-31
 
 ### Added

@@ -40,6 +40,9 @@ export class SdkNode {
   /** Forces takeover of a stale VSS ownership fence. JSON `{"password":"..."}`. */
   vssClearFence(requestJson: string): void
 
+  /** Force an immediate VSS backup flush. Returns JSON `{ version: i64 }` of the snapshot just persisted. */
+  vssBackup(): string
+
   /** APay receiver-side registration with an LSP. Returns AsyncOrderNewResponse JSON. */
   apayNew(hostNodeId: string): string
 
