@@ -90,6 +90,11 @@ class SdkNode {
   // the previous owner is gone.
   vssClearFence (request) { this._inner.vssClearFence(JSON.stringify(request)) }
 
+  // Force an immediate VSS backup flush. Returns `{ version }` where
+  // version is the snapshot index just persisted. Throws if VSS isn't
+  // configured / the flush fails. Backed by upstream vss_backup() PR.
+  vssBackup () { return JSON.parse(this._inner.vssBackup()) }
+
   // APay receiver-side: register this node with an LSP as an async-order
   // recipient. Pass the LSP's node_id (hex). Returns the parsed
   // AsyncOrderNewResponse (request_id, host_node_id, protocol_version,

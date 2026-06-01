@@ -44,6 +44,7 @@ use rlncffi::{
     rln_sdk_node_apay_new,
     rln_sdk_node_shutdown,
     rln_sdk_node_vss_clear_fence,
+    rln_sdk_node_vss_backup,
     rln_sdk_node_unlock_with_attached_external_signer,
     rln_sdk_node_unlock_with_native_external_signer, rln_send_btc,
     rln_send_onion_message, rln_send_payment, rln_send_rgb, rln_sign_message,
@@ -293,6 +294,17 @@ impl SdkNode {
             .map_err(|_| napi::Error::from_reason("request contains null byte"))?;
         let res = unsafe { rln_sdk_node_vss_clear_fence(&self.handle, c.as_ptr()) };
         take_cresult_string(res).map(|_| ())
+    }
+
+    /// Force an immediate VSS backup flush. Returns `{"version": i64}` JSON
+    /// where version is the snapshot index just persisted. Throws
+    /// `Rln(FailedVssInit)` if VSS isn't configured / the flush fails.
+    /// Use for app-controlled checkpoints (e.g. save state before app
+    /// suspend) rather than relying on the implicit on-write flush.
+    #[napi]
+    pub fn vss_backup(&self) -> Result<String> {
+        let res = unsafe { rln_sdk_node_vss_backup(&self.handle) };
+        take_cresult_string(res)
     }
 
     /// APay receiver-side registration with an LSP. Pass the LSP's node_id
