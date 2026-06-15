@@ -34,15 +34,21 @@ codegen-units = 1
 # `rgb-commitment-compat` feature signer-external relies on, and the
 # whole graph fails to lock. Must be kept in sync with
 # `rgb-lightning-node/bindings/c-ffi/Cargo.toml`.
+#
+# `lightning` MUST resolve to the SAME rust-lightning the parent crate
+# builds — the pinned submodule at `rgb-lightning-node/rust-lightning`.
+# The parent's v0.5.2 source uses fork APIs (e.g. `RgbInfo.batch_transfer_idx`)
+# that only exist at the submodule commit; a separate `rmn-boiko` branch tip
+# drifts behind and fails to compile the parent source.
 [patch.crates-io]
-lightning                      = { git = "https://github.com/rmn-boiko/rust-lightning.git", branch = "feat/external-signer-compatibility" }
-lightning-background-processor = { git = "https://github.com/rmn-boiko/rust-lightning.git", branch = "feat/external-signer-compatibility" }
-lightning-block-sync           = { git = "https://github.com/rmn-boiko/rust-lightning.git", branch = "feat/external-signer-compatibility" }
-lightning-dns-resolver         = { git = "https://github.com/rmn-boiko/rust-lightning.git", branch = "feat/external-signer-compatibility" }
-lightning-invoice              = { git = "https://github.com/rmn-boiko/rust-lightning.git", branch = "feat/external-signer-compatibility" }
-lightning-net-tokio            = { git = "https://github.com/rmn-boiko/rust-lightning.git", branch = "feat/external-signer-compatibility" }
-lightning-persister            = { git = "https://github.com/rmn-boiko/rust-lightning.git", branch = "feat/external-signer-compatibility" }
-lightning-rapid-gossip-sync    = { git = "https://github.com/rmn-boiko/rust-lightning.git", branch = "feat/external-signer-compatibility" }
-vls-core                       = { git = "https://github.com/rmn-boiko/vls-core.git", branch = "feat/rgb-compatibility" }
-vls-protocol-signer            = { git = "https://github.com/rmn-boiko/vls-protocol-signer.git", branch = "feat/rgb-compatibility" }
+lightning                      = { path = "../../rgb-lightning-node/rust-lightning/lightning" }
+lightning-background-processor = { path = "../../rgb-lightning-node/rust-lightning/lightning-background-processor" }
+lightning-block-sync           = { path = "../../rgb-lightning-node/rust-lightning/lightning-block-sync" }
+lightning-dns-resolver         = { path = "../../rgb-lightning-node/rust-lightning/lightning-dns-resolver" }
+lightning-invoice              = { path = "../../rgb-lightning-node/rust-lightning/lightning-invoice" }
+lightning-net-tokio            = { path = "../../rgb-lightning-node/rust-lightning/lightning-net-tokio" }
+lightning-persister            = { path = "../../rgb-lightning-node/rust-lightning/lightning-persister" }
+lightning-rapid-gossip-sync    = { path = "../../rgb-lightning-node/rust-lightning/lightning-rapid-gossip-sync" }
+vls-core                       = { git = "https://github.com/UTEXO-Protocol/vls-core.git", branch = "feat/rgb-compatibility" }
+vls-protocol-signer            = { git = "https://github.com/UTEXO-Protocol/vls-protocol-signer.git", branch = "feat/rgb-compatibility" }
 

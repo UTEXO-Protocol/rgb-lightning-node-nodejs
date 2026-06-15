@@ -562,7 +562,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b59a3f7fbe678874fa34354097644a171276e02a49934c13b3d61c54610ddf39"
 dependencies = [
  "bdk_core",
- "electrum-client",
+ "electrum-client 0.24.1",
 ]
 
 [[package]]
@@ -1613,6 +1613,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "48c757948c5ede0e46177b7add2e67155f70e33c07fea8284df6576da70b3719"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "electrum-client"
+version = "0.20.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8c7b1f8783238bb18e6e137875b0a66f3dffe6c7ea84066e05d033cf180b150f"
+dependencies = [
+ "bitcoin",
+ "byteorder",
+ "libc",
+ "log",
+ "rustls 0.23.39",
+ "serde",
+ "serde_json",
+ "webpki-roots 0.25.4",
+ "winapi",
 ]
 
 [[package]]
@@ -2717,7 +2734,6 @@ dependencies = [
 [[package]]
 name = "lightning"
 version = "0.2.2"
-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
 dependencies = [
  "bech32 0.11.1",
  "bincode",
@@ -2727,10 +2743,10 @@ dependencies = [
  "hashbrown 0.13.2",
  "libm",
  "lightning-invoice 0.34.0",
- "lightning-macros 0.2.1 (git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility)",
+ "lightning-macros 0.2.1",
  "lightning-types 0.3.1",
  "musig2",
- "possiblyrandom 0.2.0 (git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility)",
+ "possiblyrandom 0.2.0",
  "rgb-lib",
  "serde",
  "tokio",
@@ -2739,7 +2755,6 @@ dependencies = [
 [[package]]
 name = "lightning-background-processor"
 version = "0.2.0"
-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
 dependencies = [
  "bitcoin",
  "bitcoin-io",
@@ -2747,13 +2762,12 @@ dependencies = [
  "lightning 0.2.2",
  "lightning-liquidity",
  "lightning-rapid-gossip-sync",
- "possiblyrandom 0.2.0 (git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility)",
+ "possiblyrandom 0.2.0",
 ]
 
 [[package]]
 name = "lightning-block-sync"
 version = "0.2.0"
-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
 dependencies = [
  "bitcoin",
  "chunked_transfer",
@@ -2765,7 +2779,6 @@ dependencies = [
 [[package]]
 name = "lightning-dns-resolver"
 version = "0.3.0"
-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
 dependencies = [
  "dnssec-prover",
  "lightning 0.2.2",
@@ -2787,7 +2800,6 @@ dependencies = [
 [[package]]
 name = "lightning-invoice"
 version = "0.34.0"
-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
 dependencies = [
  "bech32 0.11.1",
  "bitcoin",
@@ -2799,16 +2811,24 @@ dependencies = [
 [[package]]
 name = "lightning-liquidity"
 version = "0.2.0"
-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
 dependencies = [
  "bitcoin",
  "chrono",
  "lightning 0.2.2",
  "lightning-invoice 0.34.0",
- "lightning-macros 0.2.1 (git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility)",
+ "lightning-macros 0.2.1",
  "lightning-types 0.3.1",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "lightning-macros"
+version = "0.2.1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.117",
 ]
 
 [[package]]
@@ -2823,19 +2843,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "lightning-macros"
-version = "0.2.1"
-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.117",
-]
-
-[[package]]
 name = "lightning-net-tokio"
 version = "0.2.0"
-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
 dependencies = [
  "bitcoin",
  "lightning 0.2.2",
@@ -2845,7 +2854,6 @@ dependencies = [
 [[package]]
 name = "lightning-persister"
 version = "0.2.0"
-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
 dependencies = [
  "bitcoin",
  "lightning 0.2.2",
@@ -2856,12 +2864,24 @@ dependencies = [
 [[package]]
 name = "lightning-rapid-gossip-sync"
 version = "0.2.0"
-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
 dependencies = [
  "bitcoin",
  "bitcoin-io",
  "bitcoin_hashes",
  "lightning 0.2.2",
+]
+
+[[package]]
+name = "lightning-transaction-sync"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b7260095a79a44b09ebd97e77855ec8b7996ab939223369f66244974a374bd2c"
+dependencies = [
+ "bitcoin",
+ "electrum-client 0.24.1",
+ "esplora-client",
+ "lightning 0.2.2",
+ "lightning-macros 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -2876,7 +2896,6 @@ dependencies = [
 [[package]]
 name = "lightning-types"
 version = "0.3.1"
-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
 dependencies = [
  "bitcoin",
 ]
@@ -3583,8 +3602,6 @@ dependencies = [
 [[package]]
 name = "possiblyrandom"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b122a615d72104fb3d8b26523fdf9232cd8ee06949fb37e4ce3ff964d15dffd"
 dependencies = [
  "getrandom 0.2.17",
 ]
@@ -3592,7 +3609,8 @@ dependencies = [
 [[package]]
 name = "possiblyrandom"
 version = "0.2.0"
-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1b122a615d72104fb3d8b26523fdf9232cd8ee06949fb37e4ce3ff964d15dffd"
 dependencies = [
  "getrandom 0.2.17",
 ]
@@ -4280,6 +4298,8 @@ dependencies = [
  "chrono",
  "clap",
  "dirs",
+ "electrum-client 0.20.0",
+ "esplora-client",
  "futures",
  "hex-conservative 0.3.2",
  "lightning 0.2.2",
@@ -4291,6 +4311,7 @@ dependencies = [
  "lightning-net-tokio",
  "lightning-persister",
  "lightning-rapid-gossip-sync",
+ "lightning-transaction-sync",
  "magic-crypt",
  "prost 0.13.5",
  "rand 0.8.6",
@@ -4299,6 +4320,7 @@ dependencies = [
  "rgb-lib",
  "rgb-psbt-utils",
  "rln-migration",
+ "rustls 0.23.39",
  "scrypt",
  "sea-orm",
  "serde",
@@ -4335,7 +4357,7 @@ dependencies = [
  "baid64",
  "base85",
  "chrono",
- "electrum-client",
+ "electrum-client 0.24.1",
  "esplora-client",
  "getrandom 0.3.4",
  "indexmap",
@@ -6360,7 +6382,7 @@ dependencies = [
 [[package]]
 name = "vls-core"
 version = "0.14.0"
-source = "git+https://github.com/rmn-boiko/vls-core.git?branch=feat%2Frgb-compatibility#7567813b4a9a90349afd05e1efa73134ea31364b"
+source = "git+https://github.com/UTEXO-Protocol/vls-core.git?branch=feat%2Frgb-compatibility#45c72edfd58620849eb486925439a76526b415ae"
 dependencies = [
  "ahash",
  "anyhow",
@@ -6432,7 +6454,7 @@ dependencies = [
 [[package]]
 name = "vls-protocol-signer"
 version = "0.14.0"
-source = "git+https://github.com/rmn-boiko/vls-protocol-signer.git?branch=feat%2Frgb-compatibility#dddd336fcdf84c4febdd7af8363bda8d1721d893"
+source = "git+https://github.com/UTEXO-Protocol/vls-protocol-signer.git?branch=feat%2Frgb-compatibility#dddd336fcdf84c4febdd7af8363bda8d1721d893"
 dependencies = [
  "bit-vec",
  "log",
