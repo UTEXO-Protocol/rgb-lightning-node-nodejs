@@ -264,3 +264,32 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public
+
+  # ==========================================================================
+  # Job 4: Chain the wdk-rgb-lightning release. Runs only after this binding
+  # has published its prebuilds, so the wdk release always sees native
+  # artifacts already on GitHub Releases. The sibling bare binding publishes
+  # in parallel (triggered directly from rgb-lightning-node); designating
+  # this (nodejs) job as the single wdk trigger avoids a double dispatch.
+  # ==========================================================================
+  trigger-wdk:
+    name: Trigger wdk-rgb-lightning release
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve RLN version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "repository_dispatch" ]; then
+            echo "rln=${{ github.event.client_payload.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "rln=${{ inputs.rln_version }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Dispatch rln-release to wdk-rgb-lightning
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.REPO_DISPATCH_TOKEN }}
+          repository: UTEXO-Protocol/wdk-rgb-lightning
+          event-type: rln-release
+          client-payload: '{"version": "${{ steps.version.outputs.rln }}"}'
