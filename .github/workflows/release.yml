@@ -1,0 +1,266 @@
+name: Build and Release (Node)
+
+# napi-rs matrix CI for @utexo/rgb-lightning-node-nodejs. Builds the
+# platform-specific `.node` addon for every host the package's loader
+# (index.js) + scripts/download-libs.sh know about, then attaches them to
+# a GitHub Release and publishes the JS wrapper to npm.
+#
+# Same patch dependency as @utexo/rgb-lightning-node-bare: clone
+# rgb-lightning-node at the pinned tag, `git apply` our C-FFI patch series
+# (fail fast on conflict), then `napi build`. The path-dep layout in
+# Cargo.toml (`../../rgb-lightning-node/...`) drives where the clone lands.
+#
+# Produced assets are named `index-<suffix>.node` to match the suffixes
+# resolved in index.js / download-libs.sh:
+#   darwin-arm64, darwin-x64, linux-x64-gnu, linux-x64-musl, linux-arm64-gnu
+
+on:
+  repository_dispatch:
+    types: [rln-release]
+
+  workflow_dispatch:
+    inputs:
+      rln_version:
+        description: 'rgb-lightning-node tag to pin (e.g. v0.5.0-beta.1)'
+        required: true
+        default: 'v0.5.0-beta.1'
+        type: string
+
+env:
+  RUST_TOOLCHAIN: '1.88.0'
+
+jobs:
+  # ==========================================================================
+  # Job 1: Build the napi addon natively (host == target) for the gnu/darwin
+  # targets. Cross-libc (musl) is handled in a separate container job below.
+  # ==========================================================================
+  build-native:
+    name: Build addon (${{ matrix.suffix }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-14
+            target: aarch64-apple-darwin
+            suffix: darwin-arm64
+          # Intel macOS is cross-compiled on an arm64 mac — GitHub's Intel
+          # runner is being retired and WarpBuild has no x64 macOS.
+          - runner: macos-14
+            target: x86_64-apple-darwin
+            suffix: darwin-x64
+          - runner: warp-ubuntu-latest-x64-16x
+            target: x86_64-unknown-linux-gnu
+            suffix: linux-x64-gnu
+          - runner: warp-ubuntu-latest-arm64-16x
+            target: aarch64-unknown-linux-gnu
+            suffix: linux-arm64-gnu
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Resolve RLN version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "repository_dispatch" ]; then
+            echo "rln=${{ github.event.client_payload.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "rln=${{ inputs.rln_version }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Clone and patch rgb-lightning-node
+        env:
+          RLN_VERSION: ${{ steps.version.outputs.rln }}
+        run: |
+          set -euo pipefail
+          # Cargo.toml path deps point at ../../rgb-lightning-node relative
+          # to the repo root, so the clone must land exactly there.
+          RLN_DIR="$(cd "$GITHUB_WORKSPACE/../.." && pwd)/rgb-lightning-node"
+          git clone --recurse-submodules --shallow-submodules --depth 1 \
+            --branch "$RLN_VERSION" \
+            "https://github.com/UTEXO-Protocol/rgb-lightning-node.git" "$RLN_DIR"
+          PATCH="$GITHUB_WORKSPACE/patches/c-ffi-utexo-patches-${RLN_VERSION}.patch"
+          if [ ! -f "$PATCH" ]; then
+            echo "::error::No patch found for $RLN_VERSION at $PATCH"; ls -1 "$GITHUB_WORKSPACE/patches/" || true; exit 1
+          fi
+          git -C "$RLN_DIR" apply --verbose --check "$PATCH"
+          git -C "$RLN_DIR" apply --verbose "$PATCH"
+
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          target: ${{ matrix.target }}
+          rustflags: ''
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies (skip postinstall download)
+        run: npm install --ignore-scripts
+
+      - name: Build napi addon
+        run: npx napi build --release --target ${{ matrix.target }}
+
+      - name: Stage addon as index-<suffix>.node
+        run: |
+          set -euo pipefail
+          # napi build regenerates index.js / index.d.ts — restore the
+          # committed (hand-rolled) versions so they aren't clobbered.
+          git checkout -- index.js index.d.ts 2>/dev/null || true
+          NODE_FILE=$(find . -maxdepth 1 -name '*.node' -type f | head -1)
+          test -n "$NODE_FILE"
+          mkdir -p dist
+          cp "$NODE_FILE" "dist/index-${{ matrix.suffix }}.node"
+          ls -lh dist/
+
+      - name: Upload addon artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-${{ matrix.suffix }}
+          path: dist/index-${{ matrix.suffix }}.node
+          retention-days: 1
+
+  # ==========================================================================
+  # Job 2: Build the musl addon inside an Alpine container (host == target).
+  # ==========================================================================
+  build-musl:
+    name: Build addon (linux-x64-musl)
+    runs-on: warp-ubuntu-latest-x64-16x
+    container:
+      image: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-alpine
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build prerequisites
+        run: apk add --no-cache bash git perl cmake clang llvm-dev openssl-dev sqlite-dev build-base
+
+      - name: Resolve RLN version
+        id: version
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" == "repository_dispatch" ]; then
+            echo "rln=${{ github.event.client_payload.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "rln=${{ inputs.rln_version }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Clone and patch rgb-lightning-node
+        shell: bash
+        env:
+          RLN_VERSION: ${{ steps.version.outputs.rln }}
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory '*'
+          RLN_DIR="$(cd "$GITHUB_WORKSPACE/../.." && pwd)/rgb-lightning-node"
+          git clone --recurse-submodules --shallow-submodules --depth 1 \
+            --branch "$RLN_VERSION" \
+            "https://github.com/UTEXO-Protocol/rgb-lightning-node.git" "$RLN_DIR"
+          PATCH="$GITHUB_WORKSPACE/patches/c-ffi-utexo-patches-${RLN_VERSION}.patch"
+          if [ ! -f "$PATCH" ]; then
+            echo "::error::No patch found for $RLN_VERSION at $PATCH"; ls -1 "$GITHUB_WORKSPACE/patches/" || true; exit 1
+          fi
+          git -C "$RLN_DIR" apply --verbose --check "$PATCH"
+          git -C "$RLN_DIR" apply --verbose "$PATCH"
+
+      - name: Install dependencies (skip postinstall download)
+        run: npm install --ignore-scripts
+
+      - name: Build napi addon (musl)
+        run: npx napi build --release --target x86_64-unknown-linux-musl
+
+      - name: Stage addon as index-linux-x64-musl.node
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout -- index.js index.d.ts 2>/dev/null || true
+          NODE_FILE=$(find . -maxdepth 1 -name '*.node' -type f | head -1)
+          test -n "$NODE_FILE"
+          mkdir -p dist
+          cp "$NODE_FILE" "dist/index-linux-x64-musl.node"
+          ls -lh dist/
+
+      - name: Upload addon artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-linux-x64-musl
+          path: dist/index-linux-x64-musl.node
+          retention-days: 1
+
+  # ==========================================================================
+  # Job 3: Release — attach all .node addons to a GH Release + npm publish.
+  # ==========================================================================
+  release:
+    name: Release and Publish
+    needs: [build-native, build-musl]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve RLN version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "repository_dispatch" ]; then
+            echo "rln=${{ github.event.client_payload.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "rln=${{ inputs.rln_version }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Bump package prerelease version
+        run: npm version prerelease --preid=beta --no-git-tag-version
+
+      - name: Read package version
+        id: pkg
+        run: echo "version=v$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json
+          git commit -m "chore: release ${{ steps.pkg.outputs.version }} (RLN ${{ steps.version.outputs.rln }})"
+          git push
+
+      - name: Download all addon artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: node-*
+          path: artifacts
+
+      - name: Prepare release assets
+        run: |
+          set -euo pipefail
+          mkdir -p release-assets
+          find artifacts -name 'index-*.node' -exec cp {} release-assets/ \;
+          ls -lh release-assets/
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.pkg.outputs.version }}"
+          gh release create "$VERSION" \
+            --title "Release $VERSION" \
+            --notes "Automated release. Built against rgb-lightning-node ${{ steps.version.outputs.rln }}. Contains napi prebuilds for darwin-arm64, darwin-x64, linux-x64-gnu, linux-x64-musl and linux-arm64-gnu." \
+            --prerelease --latest || echo "Release may already exist, updating assets..."
+          gh release upload "$VERSION" release-assets/* --clobber
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public
