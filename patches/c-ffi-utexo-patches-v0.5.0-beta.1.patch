@@ -1,0 +1,1116 @@
+diff --git a/bindings/c-ffi/Cargo.lock b/bindings/c-ffi/Cargo.lock
+index 6041c08..72f0eef 100644
+--- a/bindings/c-ffi/Cargo.lock
++++ b/bindings/c-ffi/Cargo.lock
+@@ -177,7 +177,7 @@ version = "1.1.5"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "40c48f72fd53cd289104fc64099abca73db4166ad86ea0b4341abe65af83dadc"
+ dependencies = [
+- "windows-sys 0.60.2",
++ "windows-sys 0.61.2",
+ ]
+ 
+ [[package]]
+@@ -188,7 +188,7 @@ checksum = "291e6a250ff86cd4a820112fb8898808a366d8f9f58ce16d1f538353ad55747d"
+ dependencies = [
+  "anstyle",
+  "once_cell_polyfill",
+- "windows-sys 0.60.2",
++ "windows-sys 0.61.2",
+ ]
+ 
+ [[package]]
+@@ -577,9 +577,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "bdk_file_store"
+-version = "0.21.1"
++version = "0.22.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "446f02da319941ea78454a479fca72707f3355a62db3bb1c2c13b94e7f963ce0"
++checksum = "c7b9a98edb58d02b601239832674a9ca9f1465e08e1dd1fac3a0e34004372406"
+ dependencies = [
+  "bdk_core",
+  "bincode",
+@@ -588,9 +588,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "bdk_wallet"
+-version = "2.0.0"
++version = "3.0.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "f278518ee6f2a17711fd4662dc34ce6153792a7a21575f05a9c8e2cb9ba36245"
++checksum = "67f3c4f9526d22374fca5b7ff1d6bf8d921ab56db2dac8df66a2c5561b31d4ef"
+ dependencies = [
+  "bdk_chain",
+  "bdk_file_store",
+@@ -666,7 +666,7 @@ dependencies = [
+  "p256",
+  "pkcs8 0.9.0",
+  "prost 0.10.4",
+- "prost-types",
++ "prost-types 0.10.1",
+  "rand 0.8.6",
+  "rand_core 0.6.4",
+  "regex",
+@@ -805,6 +805,19 @@ dependencies = [
+  "serde_core",
+ ]
+ 
++[[package]]
++name = "bitreq"
++version = "0.3.5"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "6df90cd78f0510165fd370574676aeb57dbec0ee3bfff68645bb7b0e9a65dbd5"
++dependencies = [
++ "rustls 0.23.39",
++ "rustls-webpki 0.103.13",
++ "tokio",
++ "tokio-rustls",
++ "webpki-roots 1.0.7",
++]
++
+ [[package]]
+ name = "blake3"
+ version = "1.8.4"
+@@ -993,6 +1006,12 @@ dependencies = [
+  "rand_core 0.10.1",
+ ]
+ 
++[[package]]
++name = "chacha20-poly1305"
++version = "0.1.2"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "4b4b0fc281743d80256607bd65e8beedc42cb0787ea119c85b81b4c0eab85e5f"
++
+ [[package]]
+ name = "chacha20poly1305"
+ version = "0.10.1"
+@@ -1292,7 +1311,7 @@ version = "0.9.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "804169db156b21258a2545757336922d93dfa229892c75911a0ad141aa0ff241"
+ dependencies = [
+- "petgraph",
++ "petgraph 0.8.3",
+  "serde",
+ ]
+ 
+@@ -1669,7 +1688,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
+ dependencies = [
+  "libc",
+- "windows-sys 0.52.0",
++ "windows-sys 0.61.2",
+ ]
+ 
+ [[package]]
+@@ -1748,6 +1767,12 @@ version = "0.1.9"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
+ 
++[[package]]
++name = "fixedbitset"
++version = "0.4.2"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
++
+ [[package]]
+ name = "fixedbitset"
+ version = "0.5.7"
+@@ -2480,7 +2505,7 @@ checksum = "3640c1c38b8e4e43584d8df18be5fc6b0aa314ce6ebf51b53313d4306cca8e46"
+ dependencies = [
+  "hermit-abi",
+  "libc",
+- "windows-sys 0.52.0",
++ "windows-sys 0.61.2",
+ ]
+ 
+ [[package]]
+@@ -2663,7 +2688,7 @@ dependencies = [
+ [[package]]
+ name = "lightning"
+ version = "0.2.2"
+-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa3879b0c87fb3e4b16df383fcd03c1e31c8a7e5"
++source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
+ dependencies = [
+  "bech32 0.11.1",
+  "bincode",
+@@ -2677,7 +2702,7 @@ dependencies = [
+  "lightning-types 0.3.1",
+  "musig2",
+  "possiblyrandom 0.2.0 (git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility)",
+- "rgb-lib 0.3.0-beta.5 (git+https://github.com/UTEXO-Protocol/rgb-lib.git?branch=dev)",
++ "rgb-lib",
+  "serde",
+  "tokio",
+ ]
+@@ -2685,7 +2710,7 @@ dependencies = [
+ [[package]]
+ name = "lightning-background-processor"
+ version = "0.2.0"
+-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa3879b0c87fb3e4b16df383fcd03c1e31c8a7e5"
++source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
+ dependencies = [
+  "bitcoin",
+  "bitcoin-io",
+@@ -2699,7 +2724,7 @@ dependencies = [
+ [[package]]
+ name = "lightning-block-sync"
+ version = "0.2.0"
+-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa3879b0c87fb3e4b16df383fcd03c1e31c8a7e5"
++source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
+ dependencies = [
+  "bitcoin",
+  "chunked_transfer",
+@@ -2711,7 +2736,7 @@ dependencies = [
+ [[package]]
+ name = "lightning-dns-resolver"
+ version = "0.3.0"
+-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa3879b0c87fb3e4b16df383fcd03c1e31c8a7e5"
++source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
+ dependencies = [
+  "dnssec-prover",
+  "lightning 0.2.2",
+@@ -2733,19 +2758,19 @@ dependencies = [
+ [[package]]
+ name = "lightning-invoice"
+ version = "0.34.0"
+-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa3879b0c87fb3e4b16df383fcd03c1e31c8a7e5"
++source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
+ dependencies = [
+  "bech32 0.11.1",
+  "bitcoin",
+  "lightning-types 0.3.1",
+- "rgb-lib 0.3.0-beta.5 (git+https://github.com/UTEXO-Protocol/rgb-lib.git?branch=dev)",
++ "rgb-lib",
+  "serde",
+ ]
+ 
+ [[package]]
+ name = "lightning-liquidity"
+ version = "0.2.0"
+-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa3879b0c87fb3e4b16df383fcd03c1e31c8a7e5"
++source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
+ dependencies = [
+  "bitcoin",
+  "chrono",
+@@ -2771,7 +2796,7 @@ dependencies = [
+ [[package]]
+ name = "lightning-macros"
+ version = "0.2.1"
+-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa3879b0c87fb3e4b16df383fcd03c1e31c8a7e5"
++source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
+ dependencies = [
+  "proc-macro2",
+  "quote",
+@@ -2781,7 +2806,7 @@ dependencies = [
+ [[package]]
+ name = "lightning-net-tokio"
+ version = "0.2.0"
+-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa3879b0c87fb3e4b16df383fcd03c1e31c8a7e5"
++source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
+ dependencies = [
+  "bitcoin",
+  "lightning 0.2.2",
+@@ -2791,7 +2816,7 @@ dependencies = [
+ [[package]]
+ name = "lightning-persister"
+ version = "0.2.0"
+-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa3879b0c87fb3e4b16df383fcd03c1e31c8a7e5"
++source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
+ dependencies = [
+  "bitcoin",
+  "lightning 0.2.2",
+@@ -2802,7 +2827,7 @@ dependencies = [
+ [[package]]
+ name = "lightning-rapid-gossip-sync"
+ version = "0.2.0"
+-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa3879b0c87fb3e4b16df383fcd03c1e31c8a7e5"
++source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
+ dependencies = [
+  "bitcoin",
+  "bitcoin-io",
+@@ -2822,11 +2847,17 @@ dependencies = [
+ [[package]]
+ name = "lightning-types"
+ version = "0.3.1"
+-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa3879b0c87fb3e4b16df383fcd03c1e31c8a7e5"
++source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
+ dependencies = [
+  "bitcoin",
+ ]
+ 
++[[package]]
++name = "linux-raw-sys"
++version = "0.4.15"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "d26c52dbd32dccf2d10cac7725f8eae5296885fb5703b261f7d0a0739ec807ab"
++
+ [[package]]
+ name = "linux-raw-sys"
+ version = "0.12.1"
+@@ -3017,6 +3048,12 @@ dependencies = [
+  "version_check",
+ ]
+ 
++[[package]]
++name = "multimap"
++version = "0.8.3"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "e5ce46fe64a9d73be07dcbe690a38ce1b293be448fd8ce1e6c1b8062c9f72c6a"
++
+ [[package]]
+ name = "musig2"
+ version = "0.1.0"
+@@ -3080,7 +3117,7 @@ version = "0.50.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "7957b9740744892f114936ab4a57b3f487491bbeafaf8083688b16841a4240e5"
+ dependencies = [
+- "windows-sys 0.60.2",
++ "windows-sys 0.61.2",
+ ]
+ 
+ [[package]]
+@@ -3348,13 +3385,23 @@ version = "2.3.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
+ 
++[[package]]
++name = "petgraph"
++version = "0.6.5"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "b4c5cc86750666a3ed20bdaf5ca2a0344f9c67674cae0515bec2da16fbaa47db"
++dependencies = [
++ "fixedbitset 0.4.2",
++ "indexmap",
++]
++
+ [[package]]
+ name = "petgraph"
+ version = "0.8.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "8701b58ea97060d5e5b155d383a69952a60943f0e6dfe30b04c287beb0b27455"
+ dependencies = [
+- "fixedbitset",
++ "fixedbitset 0.5.7",
+  "hashbrown 0.15.5",
+  "indexmap",
+  "serde",
+@@ -3457,7 +3504,7 @@ dependencies = [
+ [[package]]
+ name = "possiblyrandom"
+ version = "0.2.0"
+-source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa3879b0c87fb3e4b16df383fcd03c1e31c8a7e5"
++source = "git+https://github.com/rmn-boiko/rust-lightning.git?branch=feat%2Fexternal-signer-compatibility#aa313818b54e873014bc8c429823f1ace1cd8913"
+ dependencies = [
+  "getrandom 0.2.17",
+ ]
+@@ -3486,6 +3533,16 @@ dependencies = [
+  "zerocopy",
+ ]
+ 
++[[package]]
++name = "prettyplease"
++version = "0.1.25"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "6c8646e95016a7a6c4adea95bafa8a16baab64b583356217f2c85db4a39d9a86"
++dependencies = [
++ "proc-macro2",
++ "syn 1.0.109",
++]
++
+ [[package]]
+ name = "prettyplease"
+ version = "0.2.37"
+@@ -3559,6 +3616,16 @@ dependencies = [
+  "prost-derive 0.10.1",
+ ]
+ 
++[[package]]
++name = "prost"
++version = "0.11.9"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "0b82eaa1d779e9a4bc1c3217db8ffbeabaae1dca241bf70183242128d48681cd"
++dependencies = [
++ "bytes",
++ "prost-derive 0.11.9",
++]
++
+ [[package]]
+ name = "prost"
+ version = "0.13.5"
+@@ -3569,6 +3636,28 @@ dependencies = [
+  "prost-derive 0.13.5",
+ ]
+ 
++[[package]]
++name = "prost-build"
++version = "0.11.9"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "119533552c9a7ffacc21e099c24a0ac8bb19c2a2a3f363de84cd9b844feab270"
++dependencies = [
++ "bytes",
++ "heck 0.4.1",
++ "itertools",
++ "lazy_static",
++ "log",
++ "multimap",
++ "petgraph 0.6.5",
++ "prettyplease 0.1.25",
++ "prost 0.11.9",
++ "prost-types 0.11.9",
++ "regex",
++ "syn 1.0.109",
++ "tempfile",
++ "which",
++]
++
+ [[package]]
+ name = "prost-derive"
+ version = "0.10.1"
+@@ -3582,6 +3671,19 @@ dependencies = [
+  "syn 1.0.109",
+ ]
+ 
++[[package]]
++name = "prost-derive"
++version = "0.11.9"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "e5d2d8d10f3c6ded6da8b05b5fb3b8a5082514344d56c9f871412d29b4e075b4"
++dependencies = [
++ "anyhow",
++ "itertools",
++ "proc-macro2",
++ "quote",
++ "syn 1.0.109",
++]
++
+ [[package]]
+ name = "prost-derive"
+ version = "0.13.5"
+@@ -3605,6 +3707,15 @@ dependencies = [
+  "prost 0.10.4",
+ ]
+ 
++[[package]]
++name = "prost-types"
++version = "0.11.9"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "213622a1460818959ac1181aaeb2dc9c7f63df720db7d788b3e24eacd1983e13"
++dependencies = [
++ "prost 0.11.9",
++]
++
+ [[package]]
+ name = "quinn"
+ version = "0.11.9"
+@@ -3991,9 +4102,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "rgb-invoicing"
+-version = "0.11.1-rc.9"
++version = "0.11.1-rc.10"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "5a22f7125c70fd8e959d85d29c0bdbeecb173d6aed9a72eae71f1e43bade383f"
++checksum = "10400124af86de579b0f13603e014512b6166ad94ea791212b71579ffb91dd8a"
+ dependencies = [
+  "amplify",
+  "baid64",
+@@ -4010,50 +4121,8 @@ dependencies = [
+ 
+ [[package]]
+ name = "rgb-lib"
+-version = "0.3.0-beta.5"
+-source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?branch=dev#5aabef63b8fc004fa51a143f47c687fc6dc9c0e5"
+-dependencies = [
+- "amplify",
+- "base64 0.22.1",
+- "bdk_electrum",
+- "bdk_esplora",
+- "bdk_wallet",
+- "chacha20poly1305",
+- "file-format",
+- "generic-array",
+- "hex",
+- "rand 0.10.1",
+- "reqwest 0.13.2",
+- "rgb-invoicing",
+- "rgb-lib-migration 0.3.0-beta.3 (git+https://github.com/UTEXO-Protocol/rgb-lib.git?branch=dev)",
+- "rgb-ops",
+- "rgb-psbt-utils",
+- "rgb-schemas",
+- "rgb-strict-encoding",
+- "rgb-strict-types",
+- "rustls 0.23.39",
+- "scrypt",
+- "sea-orm",
+- "sea-query",
+- "serde",
+- "serde_json",
+- "slog",
+- "slog-async",
+- "slog-term",
+- "tempfile",
+- "thiserror 2.0.18",
+- "time",
+- "tokio",
+- "typenum",
+- "url",
+- "walkdir",
+- "zip 8.5.1",
+-]
+-
+-[[package]]
+-name = "rgb-lib"
+-version = "0.3.0-beta.5"
+-source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?rev=5aabef63b8fc004fa51a143f47c687fc6dc9c0e5#5aabef63b8fc004fa51a143f47c687fc6dc9c0e5"
++version = "0.3.0-beta.6"
++source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?branch=dev#0d46c9a51765b41044b37682828a52a1676761f2"
+ dependencies = [
+  "amplify",
+  "base64 0.22.1",
+@@ -4064,10 +4133,11 @@ dependencies = [
+  "file-format",
+  "generic-array",
+  "hex",
++ "hkdf",
+  "rand 0.10.1",
+  "reqwest 0.13.2",
+  "rgb-invoicing",
+- "rgb-lib-migration 0.3.0-beta.3 (git+https://github.com/UTEXO-Protocol/rgb-lib.git?rev=5aabef63b8fc004fa51a143f47c687fc6dc9c0e5)",
++ "rgb-lib-migration",
+  "rgb-ops",
+  "rgb-psbt-utils",
+  "rgb-schemas",
+@@ -4079,6 +4149,7 @@ dependencies = [
+  "sea-query",
+  "serde",
+  "serde_json",
++ "sha2 0.10.9",
+  "slog",
+  "slog-async",
+  "slog-term",
+@@ -4088,23 +4159,15 @@ dependencies = [
+  "tokio",
+  "typenum",
+  "url",
++ "vss-client-ng",
+  "walkdir",
+  "zip 8.5.1",
+ ]
+ 
+ [[package]]
+ name = "rgb-lib-migration"
+-version = "0.3.0-beta.3"
+-source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?branch=dev#5aabef63b8fc004fa51a143f47c687fc6dc9c0e5"
+-dependencies = [
+- "sea-orm-migration",
+- "tokio",
+-]
+-
+-[[package]]
+-name = "rgb-lib-migration"
+-version = "0.3.0-beta.3"
+-source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?rev=5aabef63b8fc004fa51a143f47c687fc6dc9c0e5#5aabef63b8fc004fa51a143f47c687fc6dc9c0e5"
++version = "0.3.0-beta.4"
++source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?branch=dev#0d46c9a51765b41044b37682828a52a1676761f2"
+ dependencies = [
+  "sea-orm-migration",
+  "tokio",
+@@ -4124,6 +4187,7 @@ dependencies = [
+  "biscuit-auth",
+  "bitcoin",
+  "bitcoin-bech32",
++ "chacha20 0.9.1",
+  "chacha20poly1305",
+  "chrono",
+  "clap",
+@@ -4144,8 +4208,10 @@ dependencies = [
+  "rand 0.8.6",
+  "regex",
+  "reqwest 0.12.28",
+- "rgb-lib 0.3.0-beta.5 (git+https://github.com/UTEXO-Protocol/rgb-lib.git?rev=5aabef63b8fc004fa51a143f47c687fc6dc9c0e5)",
++ "rgb-lib",
++ "rgb-psbt-utils",
+  "rln-migration",
++ "rustls 0.23.39",
+  "scrypt",
+  "sea-orm",
+  "serde",
+@@ -4167,15 +4233,16 @@ dependencies = [
+  "vls-protocol",
+  "vls-protocol-client",
+  "vls-protocol-signer",
++ "vss-client-ng",
+  "walkdir",
+  "zip 2.4.2",
+ ]
+ 
+ [[package]]
+ name = "rgb-ops"
+-version = "0.11.1-rc.9"
++version = "0.11.1-rc.10"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "5bb298dfc6cddd4367c850bf621fca6b2b77a16c2ce472bc4e576811fe5b29be"
++checksum = "3782a5ff1e5408e23c2d14fc556347684f5c8f72d96c4ca357527a3dbffb7378"
+ dependencies = [
+  "amplify",
+  "baid64",
+@@ -4194,14 +4261,15 @@ dependencies = [
+  "rgb-strict-encoding",
+  "rgb-strict-types",
+  "serde",
++ "serde_json",
+  "wasm-bindgen",
+ ]
+ 
+ [[package]]
+ name = "rgb-psbt-utils"
+-version = "0.11.1-rc.9"
++version = "0.11.1-rc.10"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "9faab66bd883c85ffcb35f8dfa9d676184c5924f5076ffd9c72943bdf5b3df3c"
++checksum = "0107634634c424a8b268ec6549df08da676768ec6ddbcda51f12e7882daeeee6"
+ dependencies = [
+  "amplify",
+  "baid64",
+@@ -4214,9 +4282,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "rgb-schemas"
+-version = "0.11.1-rc.9"
++version = "0.11.1-rc.10"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "f1a80e2f45e850293c97d0e4fcd9b1c066a666b52b66617f4476365346c92111"
++checksum = "1903961c836cc3f6963b06c69cb47491a815309f265439f20c932e0a3aa16a78"
+ dependencies = [
+  "amplify",
+  "rgb-aluvm",
+@@ -4367,6 +4435,19 @@ dependencies = [
+  "semver",
+ ]
+ 
++[[package]]
++name = "rustix"
++version = "0.38.44"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "fdb5bc1ae2baa591800df16c9ca78619bf65c0488b41b96ccec5d11220d8c154"
++dependencies = [
++ "bitflags",
++ "errno",
++ "libc",
++ "linux-raw-sys 0.4.15",
++ "windows-sys 0.52.0",
++]
++
+ [[package]]
+ name = "rustix"
+ version = "1.1.4"
+@@ -4376,8 +4457,8 @@ dependencies = [
+  "bitflags",
+  "errno",
+  "libc",
+- "linux-raw-sys",
+- "windows-sys 0.52.0",
++ "linux-raw-sys 0.12.1",
++ "windows-sys 0.61.2",
+ ]
+ 
+ [[package]]
+@@ -4448,7 +4529,7 @@ dependencies = [
+  "security-framework",
+  "security-framework-sys",
+  "webpki-root-certs",
+- "windows-sys 0.52.0",
++ "windows-sys 0.61.2",
+ ]
+ 
+ [[package]]
+@@ -5022,11 +5103,14 @@ dependencies = [
+ [[package]]
+ name = "signer-external"
+ version = "0.1.0-alpha"
+-source = "git+https://github.com/rmn-boiko/rln-external-signer.git?branch=feat%2Frgb-compatibility#b89d44c7029eb2179c66d7b1ea5f89c6413af8f0"
++source = "git+https://github.com/UTEXO-Protocol/rln-external-signer.git?branch=main#1efe6a61fc18af264188f99ac28482e74a2c0964"
+ dependencies = [
+  "base64 0.22.1",
+  "bitcoin",
++ "chacha20 0.9.1",
++ "chacha20poly1305",
+  "hex",
++ "poly1305",
+  "serde",
+  "serde_json",
+  "thiserror 2.0.18",
+@@ -5109,7 +5193,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "3a766e1110788c36f4fa1c2b71b387a7815aa65f88ce0229841826633d93723e"
+ dependencies = [
+  "libc",
+- "windows-sys 0.60.2",
++ "windows-sys 0.61.2",
+ ]
+ 
+ [[package]]
+@@ -5469,8 +5553,8 @@ dependencies = [
+  "fastrand",
+  "getrandom 0.4.2",
+  "once_cell",
+- "rustix",
+- "windows-sys 0.52.0",
++ "rustix 1.1.4",
++ "windows-sys 0.61.2",
+ ]
+ 
+ [[package]]
+@@ -5479,7 +5563,7 @@ version = "1.2.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "d8c27177b12a6399ffc08b98f76f7c9a1f4fe9fc967c784c5a071fa8d93cf7e1"
+ dependencies = [
+- "windows-sys 0.60.2",
++ "windows-sys 0.61.2",
+ ]
+ 
+ [[package]]
+@@ -6254,6 +6338,24 @@ dependencies = [
+  "vls-protocol",
+ ]
+ 
++[[package]]
++name = "vss-client-ng"
++version = "0.4.1"
++source = "git+https://github.com/lightningdevkit/vss-client?rev=ad63805047561dcf3117cd992ad6d8bc3881adef#ad63805047561dcf3117cd992ad6d8bc3881adef"
++dependencies = [
++ "async-trait",
++ "base64 0.22.1",
++ "bitcoin",
++ "bitcoin_hashes",
++ "bitreq",
++ "chacha20-poly1305",
++ "log",
++ "prost 0.11.9",
++ "prost-build",
++ "rand 0.8.6",
++ "tokio",
++]
++
+ [[package]]
+ name = "walkdir"
+ version = "2.5.0"
+@@ -6455,6 +6557,18 @@ dependencies = [
+  "nom",
+ ]
+ 
++[[package]]
++name = "which"
++version = "4.4.2"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "87ba24419a2078cd2b0f2ede2691b6c66d8e47836da3b6db8265ebad47afbfc7"
++dependencies = [
++ "either",
++ "home",
++ "once_cell",
++ "rustix 0.38.44",
++]
++
+ [[package]]
+ name = "whoami"
+ version = "1.6.1"
+@@ -6487,7 +6601,7 @@ version = "0.1.11"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
+ dependencies = [
+- "windows-sys 0.48.0",
++ "windows-sys 0.61.2",
+ ]
+ 
+ [[package]]
+@@ -6904,7 +7018,7 @@ dependencies = [
+  "anyhow",
+  "heck 0.5.0",
+  "indexmap",
+- "prettyplease",
++ "prettyplease 0.2.37",
+  "syn 2.0.117",
+  "wasm-metadata",
+  "wit-bindgen-core",
+@@ -6918,7 +7032,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "0c0f9bfd77e6a48eccf51359e3ae77140a7f50b1e2ebfe62422d8afdaffab17a"
+ dependencies = [
+  "anyhow",
+- "prettyplease",
++ "prettyplease 0.2.37",
+  "proc-macro2",
+  "quote",
+  "syn 2.0.117",
+diff --git a/bindings/c-ffi/Cargo.toml b/bindings/c-ffi/Cargo.toml
+index e436989..5c1718b 100644
+--- a/bindings/c-ffi/Cargo.toml
++++ b/bindings/c-ffi/Cargo.toml
+@@ -13,7 +13,7 @@ crate-type = ["staticlib", "rlib"]
+ name = "rlncffi"
+ 
+ [dependencies]
+-rgb-lightning-node = { path = "../..", features = ["uniffi", "vls"] }
++rgb-lightning-node = { path = "../..", features = ["uniffi", "vls", "vss"] }
+ # Direct deps so we can construct typed wrappers by their real crate paths —
+ # `rgb_lightning_node::PaymentHash` etc. are aliases and Rust 2021 doesn't
+ # allow tuple-struct construction through an alias. Unified with the parent
+diff --git a/bindings/c-ffi/rln.h b/bindings/c-ffi/rln.h
+index 8f615cb..f6ff813 100644
+--- a/bindings/c-ffi/rln.h
++++ b/bindings/c-ffi/rln.h
+@@ -152,6 +152,16 @@ struct CResultString rln_rgb_invoice(const struct COpaqueStruct *node, const cha
+ 
+ struct CResultString rln_sdk_initialize(const char *request_json);
+ 
++/**
++ * APay receiver-side registration with an LSP. Argument is the LSP's
++ * node_id as a hex string (compressed secp256k1). Returns JSON of
++ * `AsyncOrderNewResponse` (request_id, host_node_id, protocol_version,
++ * order_id, status, accepted_through_index, next_index_expected,
++ * unused_hashes, refill_batch_size, first_hash_index). Upstream PR #51.
++ */
++struct CResultString rln_sdk_node_apay_new(const struct COpaqueStruct *node,
++                                           const char *host_node_id);
++
+ struct CResultString rln_sdk_node_attach_native_external_signer(const struct COpaqueStruct *node,
+                                                                 const struct COpaqueStruct *signer);
+ 
+@@ -181,6 +191,29 @@ struct CResultString rln_sdk_node_unlock_with_native_external_signer(const struc
+                                                                      const struct COpaqueStruct *signer,
+                                                                      const char *request_json);
+ 
++/**
++ * Force an immediate VSS backup flush. Returns `{"version": i64}` JSON
++ * where version is the snapshot index just persisted. Throws
++ * `FailedVssInit` if VSS isn't configured (vssUrl unset at init) or
++ * the flush fails (server unreachable, auth rejected, etc).
++ *
++ * Useful for app-controlled checkpoints (e.g. "save state before app
++ * suspend") rather than relying on the implicit on-write flush. The
++ * HTTP equivalent is `POST /vssbackup`; the UniFFI equivalent is
++ * `SdkNode::vss_backup()` (uniffi_api/mod.rs:346).
++ */
++struct CResultString rln_sdk_node_vss_backup(const struct COpaqueStruct *node);
++
++/**
++ * Take over a stale VSS ownership fence after a previous node died holding
++ * it. Request JSON: `{"password": "..."}`. Returns empty success or
++ * `FailedVssInit` if VSS isn't configured / the takeover fails. Pointing
++ * two live nodes at the same VSS store corrupts state — only call this
++ * when you're certain the previous owner is gone.
++ */
++struct CResultString rln_sdk_node_vss_clear_fence(const struct COpaqueStruct *node,
++                                                  const char *request_json);
++
+ struct CResultString rln_sdk_shutdown(void);
+ 
+ struct CResultString rln_send_btc(const struct COpaqueStruct *node, const char *request_json);
+diff --git a/bindings/c-ffi/rln.hpp b/bindings/c-ffi/rln.hpp
+index 3944dda..e18c715 100644
+--- a/bindings/c-ffi/rln.hpp
++++ b/bindings/c-ffi/rln.hpp
+@@ -136,6 +136,13 @@ CResultString rln_rgb_invoice(const COpaqueStruct *node, const char *request_jso
+ 
+ CResultString rln_sdk_initialize(const char *request_json);
+ 
++/// APay receiver-side registration with an LSP. Argument is the LSP's
++/// node_id as a hex string (compressed secp256k1). Returns JSON of
++/// `AsyncOrderNewResponse` (request_id, host_node_id, protocol_version,
++/// order_id, status, accepted_through_index, next_index_expected,
++/// unused_hashes, refill_batch_size, first_hash_index). Upstream PR #51.
++CResultString rln_sdk_node_apay_new(const COpaqueStruct *node, const char *host_node_id);
++
+ CResultString rln_sdk_node_attach_native_external_signer(const COpaqueStruct *node,
+                                                          const COpaqueStruct *signer);
+ 
+@@ -164,6 +171,24 @@ CResultString rln_sdk_node_unlock_with_native_external_signer(const COpaqueStruc
+                                                               const COpaqueStruct *signer,
+                                                               const char *request_json);
+ 
++/// Force an immediate VSS backup flush. Returns `{"version": i64}` JSON
++/// where version is the snapshot index just persisted. Throws
++/// `FailedVssInit` if VSS isn't configured (vssUrl unset at init) or
++/// the flush fails (server unreachable, auth rejected, etc).
++///
++/// Useful for app-controlled checkpoints (e.g. "save state before app
++/// suspend") rather than relying on the implicit on-write flush. The
++/// HTTP equivalent is `POST /vssbackup`; the UniFFI equivalent is
++/// `SdkNode::vss_backup()` (uniffi_api/mod.rs:346).
++CResultString rln_sdk_node_vss_backup(const COpaqueStruct *node);
++
++/// Take over a stale VSS ownership fence after a previous node died holding
++/// it. Request JSON: `{"password": "..."}`. Returns empty success or
++/// `FailedVssInit` if VSS isn't configured / the takeover fails. Pointing
++/// two live nodes at the same VSS store corrupts state — only call this
++/// when you're certain the previous owner is gone.
++CResultString rln_sdk_node_vss_clear_fence(const COpaqueStruct *node, const char *request_json);
++
+ CResultString rln_sdk_shutdown();
+ 
+ CResultString rln_send_btc(const COpaqueStruct *node, const char *request_json);
+diff --git a/bindings/c-ffi/src/api.rs b/bindings/c-ffi/src/api.rs
+index 09b4df7..af4eee0 100644
+--- a/bindings/c-ffi/src/api.rs
++++ b/bindings/c-ffi/src/api.rs
+@@ -96,6 +96,49 @@ pub(crate) fn sdk_node_shutdown(node: &COpaqueStruct) -> Result<String, Error> {
+     ok_void()
+ }
+ 
++// Takes over a stale VSS ownership fence after a previous node died holding it.
++// Authenticates with the wallet password. Empty success response on takeover;
++// returns FailedVssInit if VSS isn't configured or the takeover fails.
++pub(crate) fn sdk_node_vss_clear_fence(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> Result<String, Error> {
++    let node = require_handle(node)?;
++    let req: JsonVssClearFenceRequest = parse_req(request_json)?;
++    node.vss_clear_fence(req.into())?;
++    ok_void()
++}
++
++// Force an immediate VSS backup flush. Returns the version number of
++// the snapshot just persisted. Mirrors the HTTP /vssbackup route +
++// the `vss_backup()` UniFFI method (uniffi_api/mod.rs:346). Useful for
++// app-controlled checkpoints (e.g. "save state before app suspend")
++// rather than relying on the implicit on-write flush.
++//
++// Returns FailedVssInit if VSS isn't configured (vssUrl unset at
++// init time) or the flush fails (server unreachable, etc).
++pub(crate) fn sdk_node_vss_backup(node: &COpaqueStruct) -> Result<String, Error> {
++    let node = require_handle(node)?;
++    let version = node.vss_backup()?;
++    json(serde_json::json!({ "version": version }))
++}
++
++// APay receiver-side: register this node with an LSP as an async-order
++// recipient. PR #51 upstream — returns AsyncOrderNewResponse (request_id,
++// host_node_id, protocol_version, order_id, status, accepted_through_index,
++// next_index_expected, unused_hashes, refill_batch_size, first_hash_index).
++// We don't name the response type here — `core_types::async_order` is a
++// private module — but rely on the impl's `Serialize` derive via the
++// generic `json()` helper. Input: the LSP's node_id as a hex string.
++pub(crate) fn sdk_node_apay_new(
++    node: &COpaqueStruct,
++    host_node_id: *const c_char,
++) -> Result<String, Error> {
++    let node = require_handle(node)?;
++    let response = node.apay_new(ptr_to_string(host_node_id))?;
++    json(response)
++}
++
+ // ---------------------------------------------------------------------------
+ // Channels / peers
+ // ---------------------------------------------------------------------------
+diff --git a/bindings/c-ffi/src/json_types.rs b/bindings/c-ffi/src/json_types.rs
+index a437482..33a4ec8 100644
+--- a/bindings/c-ffi/src/json_types.rs
++++ b/bindings/c-ffi/src/json_types.rs
+@@ -29,7 +29,7 @@ use rgb_lightning_node::{
+     SdkPostAssetMediaRequest, SdkPostAssetMediaResponse, SdkRefreshTransfersRequest,
+     SdkRgbInvoiceRequest, SdkRgbInvoiceResponse, SdkSendBtcRequest, SdkSendBtcResponse,
+     SdkExternalSignerBootstrap, SdkSendOnionMessageRequest, SdkSendPaymentRequest,
+-    SdkSendPaymentResponse, SdkTakerRequest, SdkUnlockRequest, SendRgbRequest, SendRgbResponse,
++    SdkSendPaymentResponse, SdkTakerRequest, SdkUnlockRequest, SdkVssClearFenceRequest, SendRgbRequest, SendRgbResponse,
+     AssetRecipients, RgbRecipient,
+     SignMessageResponse, Swap, SwapList, SwapStatus, Token, TokenLight, Transaction,
+     TransactionType, Transfer, TransferTransportEndpoint, TransportEndpoint, Txid, Unspent, Utxo,
+@@ -125,6 +125,14 @@ pub(crate) struct JsonSdkInitRequest {
+     pub lsp_base_url: Option<String>,
+     #[serde(default)]
+     pub lsp_bearer_token: Option<String>,
++    // VSS cloud-backup config (added in the dev→feat/external-signer merge).
++    // All optional; omit / pass null to disable VSS.
++    #[serde(default)]
++    pub vss_url: Option<String>,
++    #[serde(default)]
++    pub vss_allow_http: bool,
++    #[serde(default)]
++    pub vss_allow_empty_restore: bool,
+ }
+ 
+ impl TryFrom<JsonSdkInitRequest> for SdkInitRequest {
+@@ -144,6 +152,9 @@ impl TryFrom<JsonSdkInitRequest> for SdkInitRequest {
+             virtual_peer_pubkeys,
+             lsp_base_url: j.lsp_base_url,
+             lsp_bearer_token: j.lsp_bearer_token,
++            vss_url: j.vss_url,
++            vss_allow_http: j.vss_allow_http,
++            vss_allow_empty_restore: j.vss_allow_empty_restore,
+         })
+     }
+ }
+@@ -181,6 +192,24 @@ impl From<JsonSdkUnlockRequest> for SdkUnlockRequest {
+     }
+ }
+ 
++// VSS ownership-marker takeover (upstream PR #47). If a previous node holding
++// the VSS write fence died without releasing it, no fresh node can claim the
++// store. This call authenticates with the wallet password and forcibly
++// rewrites the fence so the current node takes ownership. Use sparingly —
++// pointing two live nodes at the same VSS store corrupts state.
++#[derive(Debug, Deserialize)]
++pub(crate) struct JsonVssClearFenceRequest {
++    pub password: String,
++}
++
++impl From<JsonVssClearFenceRequest> for SdkVssClearFenceRequest {
++    fn from(j: JsonVssClearFenceRequest) -> Self {
++        SdkVssClearFenceRequest {
++            password: j.password,
++        }
++    }
++}
++
+ // External-signer mode has no password: the seed never reaches RLN.
+ #[derive(Debug, Deserialize)]
+ pub(crate) struct JsonSdkExternalUnlockRequest {
+@@ -589,6 +618,14 @@ pub(crate) struct JsonLnInvoiceRequest {
+     pub payment_hash: Option<String>,
+     #[serde(default)]
+     pub description_hash: Option<String>,
++    // APay outbound flow (added by upstream PR #29). Wallets register a batch of
++    // payment hashes with the LSP; the LSP later calls /apay/outboundinvoice on
++    // the wallet RLN to materialise the outbound invoice for one of those hashes.
++    // That outbound invoice needs a tunable min_final_cltv_expiry_delta so the
++    // LSP can satisfy its claim-deadline policy. Optional; omit for the regular
++    // (non-APay) invoice path.
++    #[serde(default)]
++    pub min_final_cltv_expiry_delta: Option<u16>,
+ }
+ 
+ impl TryFrom<JsonLnInvoiceRequest> for LnInvoiceRequest {
+@@ -601,6 +638,7 @@ impl TryFrom<JsonLnInvoiceRequest> for LnInvoiceRequest {
+             asset_amount: j.asset_amount,
+             payment_hash: j.payment_hash.map(|s| parse_payment_hash(&s)).transpose()?,
+             description_hash: j.description_hash,
++            min_final_cltv_expiry_delta: j.min_final_cltv_expiry_delta,
+         })
+     }
+ }
+@@ -874,6 +912,11 @@ pub(crate) struct JsonSendRgbRequest {
+     pub donation: bool,
+     pub fee_rate: u64,
+     pub min_confirmations: u8,
++    // `skip_sync` dropped upstream in the dev→feat/external-signer merge
++    // (see Diego's VSS PR commit msg "drop unused skip_sync from RGB send").
++    // Kept in the JSON shape as a `#[serde(default)]` so existing JS callers
++    // that still send it don't 400 — the value is ignored.
++    #[serde(default)]
+     pub skip_sync: bool,
+     pub recipient_groups: Vec<JsonAssetRecipients>,
+ }
+@@ -881,11 +924,12 @@ pub(crate) struct JsonSendRgbRequest {
+ impl TryFrom<JsonSendRgbRequest> for SendRgbRequest {
+     type Error = Error;
+     fn try_from(j: JsonSendRgbRequest) -> Result<Self, Self::Error> {
++        // skip_sync ignored intentionally; field no longer exists on SendRgbRequest.
++        let _ = j.skip_sync;
+         Ok(SendRgbRequest {
+             donation: j.donation,
+             fee_rate: j.fee_rate,
+             min_confirmations: j.min_confirmations,
+-            skip_sync: j.skip_sync,
+             recipient_groups: j
+                 .recipient_groups
+                 .into_iter()
+@@ -1621,7 +1665,12 @@ pub(crate) enum TransactionTypeStr {
+     RgbSend,
+     Drain,
+     CreateUtxos,
+-    User,
++    // rgb-lib 0.3.0-beta.6 split the old catch-all `User` variant into
++    // `SendBtc` (plain BTC send) and `Incoming` (anything else credited to
++    // the wallet). JS callers that previously matched on "User" should
++    // accept either tag.
++    SendBtc,
++    Incoming,
+ }
+ 
+ impl From<TransactionType> for TransactionTypeStr {
+@@ -1630,7 +1679,8 @@ impl From<TransactionType> for TransactionTypeStr {
+             TransactionType::RgbSend => TransactionTypeStr::RgbSend,
+             TransactionType::Drain => TransactionTypeStr::Drain,
+             TransactionType::CreateUtxos => TransactionTypeStr::CreateUtxos,
+-            TransactionType::User => TransactionTypeStr::User,
++            TransactionType::SendBtc => TransactionTypeStr::SendBtc,
++            TransactionType::Incoming => TransactionTypeStr::Incoming,
+         }
+     }
+ }
+diff --git a/bindings/c-ffi/src/lib.rs b/bindings/c-ffi/src/lib.rs
+index 5763d20..989d4ed 100644
+--- a/bindings/c-ffi/src/lib.rs
++++ b/bindings/c-ffi/src/lib.rs
+@@ -113,6 +113,46 @@ pub extern "C" fn rln_sdk_node_shutdown(node: &COpaqueStruct) -> CResultString {
+     ffi_call!("rln_sdk_node_shutdown", api::sdk_node_shutdown(node))
+ }
+ 
++/// Take over a stale VSS ownership fence after a previous node died holding
++/// it. Request JSON: `{"password": "..."}`. Returns empty success or
++/// `FailedVssInit` if VSS isn't configured / the takeover fails. Pointing
++/// two live nodes at the same VSS store corrupts state — only call this
++/// when you're certain the previous owner is gone.
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_sdk_node_vss_clear_fence(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> CResultString {
++    ffi_call!("rln_sdk_node_vss_clear_fence", api::sdk_node_vss_clear_fence(node, request_json))
++}
++
++/// Force an immediate VSS backup flush. Returns `{"version": i64}` JSON
++/// where version is the snapshot index just persisted. Throws
++/// `FailedVssInit` if VSS isn't configured (vssUrl unset at init) or
++/// the flush fails (server unreachable, auth rejected, etc).
++///
++/// Useful for app-controlled checkpoints (e.g. "save state before app
++/// suspend") rather than relying on the implicit on-write flush. The
++/// HTTP equivalent is `POST /vssbackup`; the UniFFI equivalent is
++/// `SdkNode::vss_backup()` (uniffi_api/mod.rs:346).
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_sdk_node_vss_backup(node: &COpaqueStruct) -> CResultString {
++    ffi_call!("rln_sdk_node_vss_backup", api::sdk_node_vss_backup(node))
++}
++
++/// APay receiver-side registration with an LSP. Argument is the LSP's
++/// node_id as a hex string (compressed secp256k1). Returns JSON of
++/// `AsyncOrderNewResponse` (request_id, host_node_id, protocol_version,
++/// order_id, status, accepted_through_index, next_index_expected,
++/// unused_hashes, refill_batch_size, first_hash_index). Upstream PR #51.
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_sdk_node_apay_new(
++    node: &COpaqueStruct,
++    host_node_id: *const c_char,
++) -> CResultString {
++    ffi_call!("rln_sdk_node_apay_new", api::sdk_node_apay_new(node, host_node_id))
++}
++
+ // ---------------------------------------------------------------------------
+ // Channels / peers
+ // ---------------------------------------------------------------------------
+diff --git a/bindings/c-ffi/src/utils.rs b/bindings/c-ffi/src/utils.rs
+index 9213414..bceb5a5 100644
+--- a/bindings/c-ffi/src/utils.rs
++++ b/bindings/c-ffi/src/utils.rs
+@@ -110,6 +110,19 @@ fn rln_variant_tag(e: &RlnError) -> &'static str {
+         RlnError::InvalidRequest => "InvalidRequest",
+         RlnError::NotFound => "NotFound",
+         RlnError::Conflict => "Conflict",
++        RlnError::FailedBitcoindConnection => "FailedBitcoindConnection",
++        RlnError::FailedBdkSync => "FailedBdkSync",
++        RlnError::FailedBroadcast => "FailedBroadcast",
++        RlnError::FailedPeerConnection => "FailedPeerConnection",
++        RlnError::InsufficientCapacity => "InsufficientCapacity",
++        RlnError::InsufficientFunds => "InsufficientFunds",
++        RlnError::NoAvailableUtxos => "NoAvailableUtxos",
++        RlnError::NoRoute => "NoRoute",
++        RlnError::ExternalSignerRequired => "ExternalSignerRequired",
++        RlnError::ExternalSignerMismatch => "ExternalSignerMismatch",
++        RlnError::ExternalSignerUnavailable => "ExternalSignerUnavailable",
++        RlnError::ExternalSignerProtocolError => "ExternalSignerProtocolError",
++        RlnError::UnsupportedInExternalSignerMode => "UnsupportedInExternalSignerMode",
+         RlnError::Internal => "Internal",
+     }
+ }
