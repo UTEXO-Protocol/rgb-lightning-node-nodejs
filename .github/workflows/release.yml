@@ -186,6 +186,18 @@ jobs:
       - name: Install dependencies (skip postinstall download)
         run: npm install --ignore-scripts
 
+      - name: Configure Rust toolchain (musl)
+        # The napi-rs container ships rustup but with no default toolchain
+        # configured, so `napi build` -> `cargo metadata` fails with "rustup
+        # could not choose a version of cargo to run ... no default is
+        # configured". Pin the default to the RLN-required version and add the
+        # musl std (the container is Alpine, so x86_64-musl is a native build).
+        env:
+          RUST_TOOLCHAIN: ${{ env.RUST_TOOLCHAIN }}
+        run: |
+          rustup default "${RUST_TOOLCHAIN}"
+          rustup target add x86_64-unknown-linux-musl
+
       - name: Build napi addon (musl)
         shell: bash
         run: |
