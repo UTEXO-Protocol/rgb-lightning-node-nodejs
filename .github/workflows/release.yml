@@ -200,6 +200,14 @@ jobs:
 
       - name: Build napi addon (musl)
         shell: bash
+        # aws-lc-sys compiles C with clang by default, which targets
+        # x86_64-unknown-linux-musl and then can't find Alpine gcc's runtime
+        # (crtbeginS.o / libgcc) because Alpine's gcc triple is
+        # x86_64-alpine-linux-musl. Build its C with gcc, which knows its own
+        # runtime paths. CC/CXX are honoured by the cc crate aws-lc-sys uses.
+        env:
+          CC: gcc
+          CXX: g++
         run: |
           # Prefer Alpine edge's Node (>= 20.12, has node:util styleText) over
           # the image's bundled Node 18 so @napi-rs/cli v3 can run.
