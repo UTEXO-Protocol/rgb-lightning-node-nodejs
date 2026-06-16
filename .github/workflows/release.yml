@@ -83,8 +83,12 @@ jobs:
           if [ ! -f "$PATCH" ]; then
             echo "::error::No patch found for $RLN_VERSION at $PATCH"; ls -1 "$GITHUB_WORKSPACE/patches/" || true; exit 1
           fi
-          git -C "$RLN_DIR" apply --verbose --check "$PATCH"
-          git -C "$RLN_DIR" apply --verbose "$PATCH"
+          if [ -s "$PATCH" ]; then
+            git -C "$RLN_DIR" apply --verbose --check "$PATCH"
+            git -C "$RLN_DIR" apply --verbose "$PATCH"
+          else
+            echo "Patch $PATCH is empty — c-ffi already merged upstream at $RLN_VERSION; nothing to apply."
+          fi
 
       - name: Setup Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -163,8 +167,12 @@ jobs:
           if [ ! -f "$PATCH" ]; then
             echo "::error::No patch found for $RLN_VERSION at $PATCH"; ls -1 "$GITHUB_WORKSPACE/patches/" || true; exit 1
           fi
-          git -C "$RLN_DIR" apply --verbose --check "$PATCH"
-          git -C "$RLN_DIR" apply --verbose "$PATCH"
+          if [ -s "$PATCH" ]; then
+            git -C "$RLN_DIR" apply --verbose --check "$PATCH"
+            git -C "$RLN_DIR" apply --verbose "$PATCH"
+          else
+            echo "Patch $PATCH is empty — c-ffi already merged upstream at $RLN_VERSION; nothing to apply."
+          fi
 
       - name: Install dependencies (skip postinstall download)
         run: npm install --ignore-scripts
