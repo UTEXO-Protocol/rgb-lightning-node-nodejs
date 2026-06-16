@@ -144,7 +144,12 @@ jobs:
         # serves llvm-dev 22, whose files (LLVMgold.so, libLTO.so) collide with
         # the pre-installed llvm19 package. Allow the overwrite (llvm22 libclang
         # is fine for bindgen) so the install doesn't abort on the conflict.
-        run: apk add --no-cache --force-overwrite bash git perl cmake clang llvm-dev openssl-dev sqlite-dev build-base
+        #
+        # nodejs/npm: the napi-rs lts-alpine image bundles Node 18.20.5, but
+        # @napi-rs/cli v3 needs Node >= 20.12 (uses node:util `styleText`).
+        # Pull Alpine edge's current Node; the build step prepends /usr/bin to
+        # PATH so this Node wins over the image's bundled one.
+        run: apk add --no-cache --force-overwrite bash git perl cmake clang llvm-dev openssl-dev sqlite-dev build-base nodejs npm
 
       - name: Resolve RLN version
         id: version
@@ -182,7 +187,13 @@ jobs:
         run: npm install --ignore-scripts
 
       - name: Build napi addon (musl)
-        run: npx napi build --release --target x86_64-unknown-linux-musl
+        shell: bash
+        run: |
+          # Prefer Alpine edge's Node (>= 20.12, has node:util styleText) over
+          # the image's bundled Node 18 so @napi-rs/cli v3 can run.
+          export PATH="/usr/bin:$PATH"
+          node --version
+          npx napi build --release --target x86_64-unknown-linux-musl
 
       - name: Stage addon as index-linux-x64-musl.node
         shell: bash
