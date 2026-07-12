@@ -22,8 +22,10 @@
   ],
   "scripts": {
     "postinstall": "bash scripts/download-libs.sh",
-    "build": "napi build --platform --release",
-    "build:debug": "napi build --platform"
+    "build": "mkdir -p .napi-generated && napi build --platform --release --no-js --dts .napi-generated/index.d.ts && node scripts/stage-local-addon.js",
+    "build:debug": "mkdir -p .napi-generated && napi build --platform --no-js --dts .napi-generated/index.d.ts && node scripts/stage-local-addon.js",
+    "check:types": "tsc --noEmit --strict --skipLibCheck index.d.ts",
+    "test": "node test.js"
   },
   "engines": {
     "node": ">=18"

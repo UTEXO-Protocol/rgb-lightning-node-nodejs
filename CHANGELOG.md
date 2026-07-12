@@ -9,18 +9,28 @@ while pre-`1.0`.
 
 ## [Unreleased]
 
+### Added
+- `SdkNode.verifyMessage(message, signature)` with canonical Lightning
+  zbase32 verification, including locked external-signer nodes.
+- `rotateAddress()`, `listTransactionsByTxid()`, and
+  `listTransfersByTxid()` wrappers required by WDK's read-only account.
+- Native-addon smoke testing and strict checking of the public TypeScript
+  declarations in release CI.
+- A post-publish dispatch to `wdk-rgb-lightning`, restoring the dependency
+  order documented by the native SDK release workflow.
+
 ### Changed
-- Upstream `rgb-lightning-node` reference moved from SHA `0824529`
-  (rmn-boiko fork tip) to the official tag
-  [`v0.5.0-beta.1`](https://github.com/UTEXO-Protocol/rgb-lightning-node/releases/tag/v0.5.0-beta.1).
-  The two trees are byte-identical
-  (`2a31b8a97c64334aa5e30385e079b18a08f805a1`) — pre-built beta.7
-  artifacts from the SHA pin are functionally equivalent to a fresh
-  build from the tag. The next napi cut should record the tag as the
-  upstream reference. The local C-FFI patches that expose
-  `apay_new` + `vss_clear_fence` continue to be required against
-  v0.5.0-beta.1 — see
-  [`rgb-lightning-node-bare/patches/`](https://github.com/UTEXO-Protocol/rgb-lightning-node-bare/tree/main/patches).
+- The published TypeScript declarations now describe the parsed object-based
+  JavaScript facade instead of the internal JSON-string N-API layer, and cover
+  the complete facade surface.
+- Tag-specific C-FFI overlays are optional; current RLN tags build directly
+  from upstream when no overlay exists.
+- Release builds use reproducible `npm ci` installs.
+- NAPI builds write generated raw-layer declarations to an ignored staging
+  directory, preserving the committed object-based facade and its types.
+
+### Fixed
+- Release version commits now include `package-lock.json`.
 
 ## [0.1.0-beta.8] — 2026-06-01
 

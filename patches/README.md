@@ -1,19 +1,16 @@
 # UTEXO local patches over `rgb-lightning-node` upstream
 
-CI-only mirror of the patch series maintained in
+CI-only mirror of the optional patch series maintained in
 [`@utexo/rgb-lightning-node-bare`][bare]. Both bindings consume the same
 `rgb-lightning-node/bindings/c-ffi` crate, so the same patch is applied
 before the static lib / napi addon is built.
 
-The release workflow clones `rgb-lightning-node` at the pinned tag and runs
-`git apply patches/c-ffi-utexo-patches-<tag>.patch` (fail fast on conflict)
-before `napi build`. The patch adds the `rln_sdk_node_apay_new` and
-`rln_sdk_node_vss_clear_fence` extern "C" wrappers that upstream hasn't
-merged yet.
+The release workflow clones `rgb-lightning-node` at the pinned tag and applies
+`patches/c-ffi-utexo-patches-<tag>.patch` before `napi build` when that file
+exists and is non-empty. Current tags build directly from upstream.
 
-Keep this file in lock-step with the copy in the bare repo. When upstream
-exposes both wrappers natively, delete the patch from both repos and drop
-the `git apply` step from the workflow.
+Keep overlays in lock-step with the copy in the bare repo. Tags without a
+matching file are built directly from upstream.
 
 [bare]: https://github.com/UTEXO-Protocol/rgb-lightning-node-bare
 

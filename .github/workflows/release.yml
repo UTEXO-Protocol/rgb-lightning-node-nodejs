@@ -5,9 +5,9 @@ name: Build and Release (Node)
 # (index.js) + scripts/download-libs.sh know about, then attaches them to
 # a GitHub Release and publishes the JS wrapper to npm.
 #
-# Same patch dependency as @utexo/rgb-lightning-node-bare: clone
-# rgb-lightning-node at the pinned tag, `git apply` our C-FFI patch series
-# (fail fast on conflict), then `napi build`. The path-dep layout in
+# Same optional overlay model as @utexo/rgb-lightning-node-bare: clone
+# rgb-lightning-node at the pinned tag, apply a tag-specific C-FFI patch when
+# one exists, then `napi build`. The path-dep layout in
 # Cargo.toml (`../../rgb-lightning-node/...`) drives where the clone lands.
 #
 # Produced assets are named `index-<suffix>.node` to match the suffixes
@@ -21,9 +21,8 @@ on:
   workflow_dispatch:
     inputs:
       rln_version:
-        description: 'rgb-lightning-node tag to pin (e.g. v0.5.0-beta.1)'
+        description: 'rgb-lightning-node tag containing the required C-FFI surface'
         required: true
-        default: 'v0.5.0-beta.1'
         type: string
 
 env:
@@ -80,14 +79,13 @@ jobs:
             --branch "$RLN_VERSION" \
             "https://github.com/UTEXO-Protocol/rgb-lightning-node.git" "$RLN_DIR"
           PATCH="$GITHUB_WORKSPACE/patches/c-ffi-utexo-patches-${RLN_VERSION}.patch"
-          if [ ! -f "$PATCH" ]; then
-            echo "::error::No patch found for $RLN_VERSION at $PATCH"; ls -1 "$GITHUB_WORKSPACE/patches/" || true; exit 1
-          fi
           if [ -s "$PATCH" ]; then
             git -C "$RLN_DIR" apply --verbose --check "$PATCH"
             git -C "$RLN_DIR" apply --verbose "$PATCH"
+          elif [ -f "$PATCH" ]; then
+            echo "Patch $PATCH is empty; nothing to apply."
           else
-            echo "Patch $PATCH is empty — c-ffi already merged upstream at $RLN_VERSION; nothing to apply."
+            echo "No tag-specific C-FFI overlay for $RLN_VERSION; building upstream source directly."
           fi
 
       - name: Setup Rust
@@ -103,22 +101,32 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies (skip postinstall download)
-        run: npm install --ignore-scripts
+        run: npm ci --ignore-scripts
 
       - name: Build napi addon
-        run: npx napi build --release --target ${{ matrix.target }}
+        run: |
+          mkdir -p .napi-generated
+          npx napi build --platform --release --no-js \
+            --dts .napi-generated/index.d.ts \
+            --target ${{ matrix.target }}
 
       - name: Stage addon as index-<suffix>.node
         run: |
           set -euo pipefail
-          # napi build regenerates index.js / index.d.ts — restore the
-          # committed (hand-rolled) versions so they aren't clobbered.
-          git checkout -- index.js index.d.ts 2>/dev/null || true
           NODE_FILE=$(find . -maxdepth 1 -name '*.node' -type f | head -1)
           test -n "$NODE_FILE"
           mkdir -p dist
           cp "$NODE_FILE" "dist/index-${{ matrix.suffix }}.node"
           ls -lh dist/
+
+      - name: Check public TypeScript declarations
+        run: npm run check:types
+
+      - name: Smoke test native addon
+        if: matrix.suffix != 'darwin-x64'
+        run: |
+          cp "dist/index-${{ matrix.suffix }}.node" "index-${{ matrix.suffix }}.node"
+          npm test
 
       - name: Upload addon artifact
         uses: actions/upload-artifact@v4
@@ -173,18 +181,17 @@ jobs:
             --branch "$RLN_VERSION" \
             "https://github.com/UTEXO-Protocol/rgb-lightning-node.git" "$RLN_DIR"
           PATCH="$GITHUB_WORKSPACE/patches/c-ffi-utexo-patches-${RLN_VERSION}.patch"
-          if [ ! -f "$PATCH" ]; then
-            echo "::error::No patch found for $RLN_VERSION at $PATCH"; ls -1 "$GITHUB_WORKSPACE/patches/" || true; exit 1
-          fi
           if [ -s "$PATCH" ]; then
             git -C "$RLN_DIR" apply --verbose --check "$PATCH"
             git -C "$RLN_DIR" apply --verbose "$PATCH"
+          elif [ -f "$PATCH" ]; then
+            echo "Patch $PATCH is empty; nothing to apply."
           else
-            echo "Patch $PATCH is empty — c-ffi already merged upstream at $RLN_VERSION; nothing to apply."
+            echo "No tag-specific C-FFI overlay for $RLN_VERSION; building upstream source directly."
           fi
 
       - name: Install dependencies (skip postinstall download)
-        run: npm install --ignore-scripts
+        run: npm ci --ignore-scripts
 
       - name: Configure Rust toolchain (musl)
         # The napi-rs container ships rustup but with no default toolchain
@@ -213,18 +220,28 @@ jobs:
           # the image's bundled Node 18 so @napi-rs/cli v3 can run.
           export PATH="/usr/bin:$PATH"
           node --version
-          npx napi build --release --target x86_64-unknown-linux-musl
+          mkdir -p .napi-generated
+          npx napi build --platform --release --no-js \
+            --dts .napi-generated/index.d.ts \
+            --target x86_64-unknown-linux-musl
 
       - name: Stage addon as index-linux-x64-musl.node
         shell: bash
         run: |
           set -euo pipefail
-          git checkout -- index.js index.d.ts 2>/dev/null || true
           NODE_FILE=$(find . -maxdepth 1 -name '*.node' -type f | head -1)
           test -n "$NODE_FILE"
           mkdir -p dist
           cp "$NODE_FILE" "dist/index-linux-x64-musl.node"
           ls -lh dist/
+
+      - name: Check public TypeScript declarations
+        run: npm run check:types
+
+      - name: Smoke test native addon
+        run: |
+          cp dist/index-linux-x64-musl.node index-linux-x64-musl.node
+          npm test
 
       - name: Upload addon artifact
         uses: actions/upload-artifact@v4
@@ -274,7 +291,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json
+          git add package.json package-lock.json
           git commit -m "chore: release ${{ steps.pkg.outputs.version }} (RLN ${{ steps.version.outputs.rln }})"
           git push
 
@@ -307,3 +324,11 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public
+
+      - name: Trigger wdk-rgb-lightning release
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.REPO_DISPATCH_TOKEN }}
+          repository: UTEXO-Protocol/wdk-rgb-lightning
+          event-type: rln-release
+          client-payload: '{"version": "${{ steps.version.outputs.rln }}"}'
