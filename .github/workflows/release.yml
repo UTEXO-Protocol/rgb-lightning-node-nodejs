@@ -95,6 +95,17 @@ jobs:
           target: ${{ matrix.target }}
           rustflags: ''
 
+      - name: Pin signer-external to RLN-compatible commit
+        run: |
+          set -euo pipefail
+          # RLN tags use a branch dependency for signer-external. Keep release
+          # builds pinned to the signer revision expected by the cloned RLN tag,
+          # so a moving branch cannot break historical native builds.
+          if grep -q 'rln-external-signer.git?branch=main#594d8c08' Cargo.lock 2>/dev/null; then
+            echo "Pinning signer-external -> 59e2932"
+            cargo update -p signer-external --precise 59e2932eb5d3d40ac5ded2b8951a43ecdb7ad865
+          fi
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -204,6 +215,18 @@ jobs:
         run: |
           rustup default "${RUST_TOOLCHAIN}"
           rustup target add x86_64-unknown-linux-musl
+
+      - name: Pin signer-external to RLN-compatible commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          # RLN tags use a branch dependency for signer-external. Keep release
+          # builds pinned to the signer revision expected by the cloned RLN tag,
+          # so a moving branch cannot break historical native builds.
+          if grep -q 'rln-external-signer.git?branch=main#594d8c08' Cargo.lock 2>/dev/null; then
+            echo "Pinning signer-external -> 59e2932"
+            cargo update -p signer-external --precise 59e2932eb5d3d40ac5ded2b8951a43ecdb7ad865
+          fi
 
       - name: Build napi addon (musl)
         shell: bash
