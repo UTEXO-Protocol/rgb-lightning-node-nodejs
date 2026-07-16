@@ -32,11 +32,12 @@ use rlncffi::{
     rln_inflate, rln_invoice_status, rln_issue_asset_cfa, rln_issue_asset_ifa,
     rln_issue_asset_nia, rln_issue_asset_uda, rln_keysend, rln_list_assets,
     rln_list_channels, rln_list_payments, rln_list_peers, rln_list_swaps,
-    rln_list_transactions, rln_list_transfers, rln_list_unspents,
+    rln_list_transactions, rln_list_transactions_by_txid, rln_list_transfers,
+    rln_list_transfers_by_txid, rln_list_unspents,
     rln_ln_invoice, rln_maker_execute, rln_maker_init,
     rln_native_external_signer_bootstrap, rln_native_external_signer_new,
     rln_network_info, rln_node_info, rln_open_channel, rln_post_asset_media,
-    rln_refresh_transfers, rln_rgb_invoice,
+    rln_refresh_transfers, rln_rgb_invoice, rln_rotate_address,
     rln_sdk_node_attach_native_external_signer,
     rln_sdk_node_detach_external_signer,
     rln_sdk_node_init_with_external_signer,
@@ -48,7 +49,8 @@ use rlncffi::{
     rln_sdk_node_unlock_with_attached_external_signer,
     rln_sdk_node_unlock_with_native_external_signer, rln_send_btc,
     rln_send_onion_message, rln_send_payment, rln_send_rgb, rln_sign_message,
-    rln_sync, rln_taker, COpaqueStruct, CResult, CResultString, CResultValue,
+    rln_verify_message,
+    rln_sync, rln_taker, COpaqueStruct, CResultString, CResultValue,
 };
 
 // ---------------------------------------------------------------------------
@@ -363,6 +365,9 @@ impl SdkNode {
     #[napi]
     pub fn get_address(&self) -> Result<String> { fwd_noarg!(self, rln_address) }
 
+    #[napi]
+    pub fn rotate_address(&self) -> Result<String> { fwd_noarg!(self, rln_rotate_address) }
+
     /// `skipSync` mirrors the C-FFI `skip_sync` bool — `true` returns
     /// the cached balance without re-scanning electrum.
     #[napi]
@@ -388,6 +393,15 @@ impl SdkNode {
     #[napi]
     pub fn list_transactions(&self, skip_sync: bool) -> Result<String> {
         let res = unsafe { rln_list_transactions(&self.handle, skip_sync) };
+        take_cresult_string(res)
+    }
+
+    #[napi]
+    pub fn list_transactions_by_txid(&self, txid: String, skip_sync: bool) -> Result<String> {
+        let txid_c = cstring(&txid)?;
+        let res = unsafe {
+            rln_list_transactions_by_txid(&self.handle, txid_c.as_ptr(), skip_sync)
+        };
         take_cresult_string(res)
     }
     /// `blocks` ∈ [1..=65535]; returned JSON has `fee_rate` in sat/vB.
@@ -512,6 +526,10 @@ impl SdkNode {
     pub fn list_transfers(&self, asset_id: String) -> Result<String> {
         fwd_str_arg!(self, rln_list_transfers, asset_id)
     }
+    #[napi]
+    pub fn list_transfers_by_txid(&self, txid: String) -> Result<String> {
+        fwd_str_arg!(self, rln_list_transfers_by_txid, txid)
+    }
 
     // -- Asset media ------------------------------------------------------
 
@@ -530,6 +548,15 @@ impl SdkNode {
     #[napi]
     pub fn sign_message(&self, message: String) -> Result<String> {
         fwd_str_arg!(self, rln_sign_message, message)
+    }
+    #[napi]
+    pub fn verify_message(&self, message: String, signature: String) -> Result<String> {
+        let message_c = cstring(&message)?;
+        let signature_c = cstring(&signature)?;
+        let res = unsafe {
+            rln_verify_message(&self.handle, message_c.as_ptr(), signature_c.as_ptr())
+        };
+        take_cresult_string(res)
     }
     #[napi]
     pub fn send_onion_message(&self, request_json: String) -> Result<String> {

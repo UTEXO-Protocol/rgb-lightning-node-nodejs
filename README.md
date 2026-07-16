@@ -163,18 +163,18 @@ throw `napi::Error` on the C-FFI `Err` branch).
 
 | Group | Methods |
 |-------|---------|
-| Info / sync | `nodeInfo`, `networkInfo`, `sync`, `address` / `getAddress` |
+| Info / sync | `nodeInfo`, `networkInfo`, `sync`, `address` / `getAddress`, `rotateAddress` |
 | Peers | `connectPeer`, `disconnectPeer`, `listPeers` |
 | Channels | `openChannel`, `closeChannel`, `listChannels`, `getChannelId` |
 | Invoices | `lnInvoice`, `decodeLnInvoice`, `invoiceStatus`, `rgbInvoice`, `decodeRgbInvoice`, `cancelHodlInvoice`, `claimHodlInvoice` |
 | Payments | `sendPayment`, `keysend`, `listPayments`, `getPayment` |
 | Swaps | `makerInit`, `makerExecute`, `taker`, `listSwaps`, `getSwap` |
 | RGB issuance | `issueAssetNia`, `issueAssetUda`, `issueAssetCfa`, `issueAssetIfa` |
-| RGB assets | `listAssets`, `assetBalance`, `assetMetadata`, `sendRgb`, `inflate`, `listTransfers`, `refreshTransfers`, `failTransfers`, `getAssetMedia`, `postAssetMedia` |
-| BTC | `btcBalance`, `sendBtc`, `listTransactions`, `listUnspents`, `createUtxos`, `estimateFee` |
+| RGB assets | `listAssets`, `assetBalance`, `assetMetadata`, `sendRgb`, `inflate`, `listTransfers`, `listTransfersByTxid`, `refreshTransfers`, `failTransfers`, `getAssetMedia`, `postAssetMedia` |
+| BTC | `btcBalance`, `sendBtc`, `listTransactions`, `listTransactionsByTxid`, `listUnspents`, `createUtxos`, `estimateFee` |
 | VSS | `vssClearFence`, `vssBackup` |
 | APay | `apayNew` |
-| Signing / onion / diagnostics | `signMessage`, `sendOnionMessage`, `checkIndexerUrl`, `checkProxyEndpoint` |
+| Signing / onion / diagnostics | `signMessage`, `verifyMessage`, `sendOnionMessage`, `checkIndexerUrl`, `checkProxyEndpoint` |
 
 **Module-level helpers** — `uniffiHealthcheck()`, `uniffiIsInitialized()`,
 `sdkInitialize()`, `sdkShutdown()`. These exist for surface parity with the

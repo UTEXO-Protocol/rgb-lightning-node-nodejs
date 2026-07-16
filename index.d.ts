@@ -1,84 +1,118 @@
 // TypeScript surface for @utexo/rgb-lightning-node-nodejs.
 //
-// Mirrors @utexo/rgb-lightning-node-bare's JS shape (camelCase methods
-// over the underlying C-FFI). Each method takes / returns JSON strings
-// where the request bodies follow the schemas in
-// rgb-lightning-node/openapi.yaml.
-//
-// Hand-written for now; switch to napi-rs auto-generated `index.d.ts`
-// once we wire the `type-def` feature in the napi crate.
+// The Rust N-API layer exchanges JSON strings internally. The public
+// JavaScript facade in index.js owns that marshalling, so package consumers
+// pass plain objects and receive parsed JSON values.
+
+export type JsonPrimitive = string | number | boolean | null
+export type JsonValue = JsonPrimitive | JsonObject | JsonValue[]
+export interface JsonObject { [key: string]: JsonValue }
+export type JsonRequest = Record<string, unknown>
 
 export class NativeExternalSigner {
-  /**
-   * @param seedHex   32-byte VLS node entropy as a 64-char hex string.
-   * @param network   "mainnet" | "testnet" | "regtest" | "signet"
-   * @param permissiveSignerPolicy  Loosens the VLS policy filter for
-   *   in-process / single-user use. Pass `false` to enforce the full
-   *   simple policy.
-   */
-  static create(seedHex: string, network: string, permissiveSignerPolicy: boolean): NativeExternalSigner
+  static create(
+    seedHex: string,
+    network: 'mainnet' | 'testnet' | 'testnet4' | 'regtest' | 'signet',
+    permissiveSignerPolicy?: boolean
+  ): NativeExternalSigner
 
-  /** Returns JSON `{ node_id, account_xpub_*, master_fingerprint, … }`. */
-  bootstrap(): string
-
-  /** Explicit early-drop. Safe to call multiple times. */
+  bootstrap(): JsonObject
   destroy(): void
 }
 
 export class SdkNode {
-  static create(requestJson: string): SdkNode
+  static create(request: JsonRequest): SdkNode
 
-  // -- External-signer lifecycle ----------------------------------------
+  // External-signer lifecycle
   initWithNativeExternalSigner(signer: NativeExternalSigner): void
-  unlockWithNativeExternalSigner(signer: NativeExternalSigner, requestJson: string): void
-  initWithExternalSigner(requestJson: string): void
   attachNativeExternalSigner(signer: NativeExternalSigner): void
-  unlockWithAttachedExternalSigner(requestJson: string): void
+  unlockWithNativeExternalSigner(signer: NativeExternalSigner, request: JsonRequest): void
+  initWithExternalSigner(bootstrap: JsonRequest): void
   detachExternalSigner(): void
+  unlockWithAttachedExternalSigner(request: JsonRequest): void
   shutdown(): void
 
-  /** Forces takeover of a stale VSS ownership fence. JSON `{"password":"..."}`. */
-  vssClearFence(requestJson: string): void
+  // VSS / APay
+  vssClearFence(request: JsonRequest): void
+  vssBackup(): JsonObject
+  apayNew(hostNodeId: string): JsonObject
 
-  /** Force an immediate VSS backup flush. Returns JSON `{ version: i64 }` of the snapshot just persisted. */
-  vssBackup(): string
+  // Node info / network / sync
+  nodeInfo(): JsonObject
+  networkInfo(): JsonObject
+  sync(): JsonValue
+  getAddress(): JsonObject
+  address(): JsonObject
+  rotateAddress(): JsonObject
 
-  /** APay receiver-side registration with an LSP. Returns AsyncOrderNewResponse JSON. */
-  apayNew(hostNodeId: string): string
+  // Peers / channels
+  connectPeer(peerPubkeyAndAddr: string): JsonValue
+  disconnectPeer(request: JsonRequest): JsonValue
+  listPeers(): JsonValue
+  openChannel(request: JsonRequest): JsonValue
+  closeChannel(request: JsonRequest): JsonValue
+  listChannels(): JsonValue
+  getChannelId(temporaryChannelIdHex: string): JsonValue
 
-  // -- Node info / sync --------------------------------------------------
-  nodeInfo(): string
-  networkInfo(): string
-  sync(): string
+  // BTC / UTXOs
+  btcBalance(skipSync?: boolean): JsonObject
+  listUnspents(skipSync?: boolean): JsonValue
+  listTransactions(skipSync?: boolean): JsonValue
+  listTransactionsByTxid(txid: string, skipSync?: boolean): JsonValue
+  sendBtc(request: JsonRequest): JsonValue
+  createUtxos(request: JsonRequest): JsonValue
+  estimateFee(blocks: number): JsonObject
 
-  // -- Peers / channels --------------------------------------------------
-  connectPeer(requestJson: string): string
-  disconnectPeer(requestJson: string): string
-  listPeers(): string
-  openChannel(requestJson: string): string
-  closeChannel(requestJson: string): string
-  listChannels(): string
+  // Lightning invoices / payments
+  lnInvoice(request: JsonRequest): JsonObject
+  decodeLnInvoice(invoice: string): JsonObject
+  invoiceStatus(invoice: string): JsonObject
+  cancelHodlInvoice(request: JsonRequest): JsonValue
+  claimHodlInvoice(request: JsonRequest): JsonValue
+  sendPayment(request: JsonRequest): JsonValue
+  keysend(request: JsonRequest): JsonValue
+  listPayments(): JsonValue
+  getPayment(paymentHashHex: string, paymentType: string): JsonValue
 
-  // -- BTC + UTXOs ------------------------------------------------------
-  getAddress(): string
-  getBtcBalance(skipSync: boolean): string
-  listUnspents(skipSync: boolean): string
-  sendBtc(requestJson: string): string
-  createUtxos(requestJson: string): string
+  // Atomic swaps
+  makerInit(request: JsonRequest): JsonValue
+  makerExecute(request: JsonRequest): JsonValue
+  taker(request: JsonRequest): JsonValue
+  listSwaps(): JsonValue
+  getSwap(paymentHash: string, taker: boolean): JsonValue
 
-  // -- Lightning invoices / payments ------------------------------------
-  lnInvoice(requestJson: string): string
-  decodeLnInvoice(requestJson: string): string
-  sendPayment(requestJson: string): string
-  keysend(requestJson: string): string
-  listPayments(): string
+  // RGB issuance / assets
+  issueAssetNia(request: JsonRequest): JsonValue
+  issueAssetUda(request: JsonRequest): JsonValue
+  issueAssetCfa(request: JsonRequest): JsonValue
+  issueAssetIfa(request: JsonRequest): JsonValue
+  listAssets(filterAssetSchemas?: string[]): JsonValue
+  assetBalance(assetId: string): JsonObject
+  assetMetadata(assetId: string): JsonObject
 
-  // -- RGB assets -------------------------------------------------------
-  issueAssetNia(requestJson: string): string
-  listAssets(filterAssetSchemasJson: string): string
-  getAssetBalance(assetId: string): string
-  rgbInvoice(requestJson: string): string
-  sendRgb(requestJson: string): string
-  refreshTransfers(requestJson: string): void
-  listTransfers(assetId: string): string
+  // RGB invoices / transfers
+  rgbInvoice(request: JsonRequest): JsonObject
+  decodeRgbInvoice(invoice: string): JsonObject
+  sendRgb(request: JsonRequest): JsonValue
+  refreshTransfers(request: JsonRequest): { ok: true }
+  failTransfers(request: JsonRequest): JsonValue
+  inflate(request: JsonRequest): JsonValue
+  listTransfers(assetId: string): JsonValue
+  listTransfersByTxid(txid: string): JsonValue
+
+  // RGB asset media
+  getAssetMedia(digest: string): JsonValue
+  postAssetMedia(request: JsonRequest): JsonValue
+
+  // Signing / onion / diagnostics
+  signMessage(message: string): JsonObject
+  verifyMessage(message: string, signature: string): { valid: boolean }
+  sendOnionMessage(request: JsonRequest): JsonValue
+  checkIndexerUrl(indexerUrl: string): JsonObject
+  checkProxyEndpoint(proxyEndpoint: string): JsonValue
 }
+
+export function uniffiHealthcheck(): string
+export function uniffiIsInitialized(): boolean
+export function sdkInitialize(request?: JsonRequest): void
+export function sdkShutdown(): void

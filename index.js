@@ -106,7 +106,7 @@ class SdkNode {
   nodeInfo () { return JSON.parse(this._inner.nodeInfo()) }
   networkInfo () { return JSON.parse(this._inner.networkInfo()) }
   sync () { return JSON.parse(this._inner.sync()) }
-  address () { return JSON.parse(this._inner.getAddress()) }
+  rotateAddress () { return JSON.parse(this._inner.rotateAddress()) }
 
   // Peers / channels
   // C-FFI's `rln_connect_peer` takes the raw pubkey@addr string (not a
@@ -141,6 +141,9 @@ class SdkNode {
   }
   listTransactions (skipSync = false) {
     return JSON.parse(this._inner.listTransactions(!!skipSync))
+  }
+  listTransactionsByTxid (txid, skipSync = false) {
+    return JSON.parse(this._inner.listTransactionsByTxid(txid, !!skipSync))
   }
   sendBtc (request) {
     return JSON.parse(this._inner.sendBtc(JSON.stringify(request)))
@@ -244,6 +247,9 @@ class SdkNode {
   listTransfers (assetId) {
     return JSON.parse(this._inner.listTransfers(assetId))
   }
+  listTransfersByTxid (txid) {
+    return JSON.parse(this._inner.listTransfersByTxid(txid))
+  }
 
   // RGB asset media
   getAssetMedia (digest) {
@@ -256,6 +262,9 @@ class SdkNode {
   // Signing / onion / diagnostics
   signMessage (message) {
     return JSON.parse(this._inner.signMessage(message))
+  }
+  verifyMessage (message, signature) {
+    return JSON.parse(this._inner.verifyMessage(message, signature))
   }
   sendOnionMessage (request) {
     return JSON.parse(this._inner.sendOnionMessage(JSON.stringify(request)))
