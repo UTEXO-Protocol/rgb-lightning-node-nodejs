@@ -38,7 +38,7 @@ export interface WalletSnapshotRequest {
 }
 
 export interface WalletSnapshotNetwork {
-  network: string
+  network: 'mainnet' | 'testnet' | 'regtest' | 'signet'
   height: number
 }
 
