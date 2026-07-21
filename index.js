@@ -106,6 +106,12 @@ class SdkNode {
   nodeInfo () { return JSON.parse(this._inner.nodeInfo()) }
   networkInfo () { return JSON.parse(this._inner.networkInfo()) }
   sync () { return JSON.parse(this._inner.sync()) }
+  syncWallet (request) {
+    return JSON.parse(this._inner.syncWallet(JSON.stringify(request)))
+  }
+  walletSnapshot (request = {}) {
+    return JSON.parse(this._inner.walletSnapshot(JSON.stringify(request)))
+  }
   rotateAddress () { return JSON.parse(this._inner.rotateAddress()) }
 
   // Peers / channels

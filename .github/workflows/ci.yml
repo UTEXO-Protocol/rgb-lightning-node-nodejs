@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  RLN_VERSION: v0.9.0-beta.3
+  RUST_TOOLCHAIN: '1.88.0'
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Clone pinned rgb-lightning-node source
+        run: |
+          set -euo pipefail
+          RLN_DIR="$(cd "$GITHUB_WORKSPACE/../.." && pwd)/rgb-lightning-node"
+          git clone --recurse-submodules --shallow-submodules --depth 1 \
+            --branch "$RLN_VERSION" \
+            https://github.com/UTEXO-Protocol/rgb-lightning-node.git "$RLN_DIR"
+          git -C "$RLN_DIR" apply --check \
+            "$GITHUB_WORKSPACE/patches/c-ffi-utexo-patches-$RLN_VERSION.patch"
+          git -C "$RLN_DIR" apply \
+            "$GITHUB_WORKSPACE/patches/c-ffi-utexo-patches-$RLN_VERSION.patch"
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: rustfmt
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install JavaScript dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Pin signer revision expected by the RLN tag
+        run: |
+          cargo update -p signer-external --precise 59e2932eb5d3d40ac5ded2b8951a43ecdb7ad865
+          cargo update \
+            --manifest-path ../../rgb-lightning-node/bindings/c-ffi/Cargo.toml \
+            -p signer-external \
+            --precise 59e2932eb5d3d40ac5ded2b8951a43ecdb7ad865
+
+      - name: Verify native patch integrity and contract tests
+        run: |
+          git -C ../../rgb-lightning-node diff --check
+          cargo test --manifest-path ../../rgb-lightning-node/bindings/c-ffi/Cargo.toml wallet_snapshot
+          cargo test --manifest-path ../../rgb-lightning-node/Cargo.toml wallet_sync_mode
+
+      - name: Verify types, build the addon, and run the canary
+        run: |
+          npm run check:types
+          npm run build:debug
+          npm test

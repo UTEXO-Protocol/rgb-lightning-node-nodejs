@@ -49,8 +49,8 @@ use rlncffi::{
     rln_sdk_node_unlock_with_attached_external_signer,
     rln_sdk_node_unlock_with_native_external_signer, rln_send_btc,
     rln_send_onion_message, rln_send_payment, rln_send_rgb, rln_sign_message,
-    rln_verify_message,
-    rln_sync, rln_taker, COpaqueStruct, CResultString, CResultValue,
+    rln_sync, rln_sync_wallet, rln_taker, rln_verify_message,
+    rln_wallet_snapshot, COpaqueStruct, CResultString, CResultValue,
 };
 
 // ---------------------------------------------------------------------------
@@ -328,6 +328,20 @@ impl SdkNode {
     pub fn network_info(&self) -> Result<String> { fwd_noarg!(self, rln_network_info) }
     #[napi]
     pub fn sync(&self) -> Result<String> { fwd_noarg!(self, rln_sync) }
+
+    /// Synchronize both Vanilla BTC and Colored RGB keychains. Routine mode
+    /// uses FullSync; recovery mode uses FullScan for address discovery.
+    #[napi]
+    pub fn sync_wallet(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_sync_wallet, request_json)
+    }
+
+    /// Capture a versioned, bounded, decimal-safe wallet snapshot from the
+    /// native runtime without triggering an implicit synchronization.
+    #[napi]
+    pub fn wallet_snapshot(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_wallet_snapshot, request_json)
+    }
 
     // -- Peers / channels --------------------------------------------------
 

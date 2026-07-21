@@ -163,7 +163,7 @@ throw `napi::Error` on the C-FFI `Err` branch).
 
 | Group | Methods |
 |-------|---------|
-| Info / sync | `nodeInfo`, `networkInfo`, `sync`, `address` / `getAddress`, `rotateAddress` |
+| Info / sync | `nodeInfo`, `networkInfo`, `sync` (legacy), `syncWallet`, `walletSnapshot`, `address` / `getAddress`, `rotateAddress` |
 | Peers | `connectPeer`, `disconnectPeer`, `listPeers` |
 | Channels | `openChannel`, `closeChannel`, `listChannels`, `getChannelId` |
 | Invoices | `lnInvoice`, `decodeLnInvoice`, `invoiceStatus`, `rgbInvoice`, `decodeRgbInvoice`, `cancelHodlInvoice`, `claimHodlInvoice` |
@@ -181,6 +181,14 @@ throw `napi::Error` on the C-FFI `Err` branch).
 bare addon (which uses them to manage a process-global tokio runtime). In
 the Node binding the runtime is per-`SdkNode`, so these are stubs/no-ops;
 they're safe to call.
+
+`syncWallet({ mode })` is the production synchronization contract. `routine`
+updates every revealed Vanilla and Colored script with `FullSync`; `recovery`
+discovers both keychains with `FullScan`. It reports each keychain separately
+instead of hiding a partial failure. `walletSnapshot(request)` then reads a
+versioned, bounded snapshot without another implicit sync. Every monetary
+amount is base-10 text, and Lightning claimable balances remain distinct from
+inbound/outbound routing capacities.
 
 See [`index.js`](./index.js) for the authoritative method list and
 [`index.d.ts`](./index.d.ts) for type signatures.

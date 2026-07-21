@@ -14,6 +14,14 @@ matching file are built directly from upstream.
 
 [bare]: https://github.com/UTEXO-Protocol/rgb-lightning-node-bare
 
+## c-ffi-utexo-patches-v0.9.0-beta.3.patch
+
+Adds the versioned wallet synchronization and exact snapshot contract used by
+WDK portfolio refreshes. Routine synchronization FullSyncs both Vanilla and
+Colored keychains, recovery synchronization FullScans both keychains, and the
+snapshot serializes all monetary values as bounded decimal strings. Keep this
+file byte-identical to the bare binding's overlay.
+
 ## c-ffi-utexo-patches-v0.6.0-beta.1.patch
 
 Intentionally empty. The apay_new / vss_clear_fence / vss_backup / hodl
