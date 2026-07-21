@@ -10,6 +10,11 @@ while pre-`1.0`.
 ## [Unreleased]
 
 ### Added
+- `SdkNode.syncWallet()` and `SdkNode.walletSnapshot()` with a shared
+  v0.9.0-beta.3 native overlay: dual-keychain FullSync/FullScan modes,
+  bounded activity, coherent tip evidence, and decimal-string amounts.
+- Pull-request CI that applies the pinned native overlay, runs its contract
+  tests, builds the host addon, and executes the package canary.
 - `SdkNode.verifyMessage(message, signature)` with canonical Lightning
   zbase32 verification, including locked external-signer nodes.
 - `rotateAddress()`, `listTransactionsByTxid()`, and

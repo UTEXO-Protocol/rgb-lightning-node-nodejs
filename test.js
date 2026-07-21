@@ -21,11 +21,33 @@ const node = SdkNode.create({
 try {
   for (const method of [
     'rotateAddress',
+    'syncWallet',
+    'walletSnapshot',
     'listTransactionsByTxid',
     'listTransfersByTxid',
     'verifyMessage'
   ]) {
     if (typeof node[method] !== 'function') throw new Error(`SdkNode.${method} is missing`)
+  }
+
+  let invalidSyncRequest
+  try {
+    node.syncWallet({ mode: 'routine', typo: true })
+  } catch (error) {
+    invalidSyncRequest = error
+  }
+  if (!String(invalidSyncRequest?.message ?? invalidSyncRequest).includes('unknown field')) {
+    throw new Error(`syncWallet accepted an unknown request field: ${invalidSyncRequest}`)
+  }
+
+  let invalidSnapshotLimit
+  try {
+    node.walletSnapshot({ max_assets: 0 })
+  } catch (error) {
+    invalidSnapshotLimit = error
+  }
+  if (!String(invalidSnapshotLimit?.message ?? invalidSnapshotLimit).includes('max_assets')) {
+    throw new Error(`walletSnapshot accepted max_assets=0: ${invalidSnapshotLimit}`)
   }
 
   node.initWithNativeExternalSigner(signer)
