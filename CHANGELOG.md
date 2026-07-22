@@ -35,6 +35,11 @@ while pre-`1.0`.
   directory, preserving the committed object-based facade and its types.
 
 ### Fixed
+- C-FFI network information now emits canonical lowercase network names,
+  matching the public TypeScript contract and wallet snapshot contract v1.
+- The local native-build lock graph now pins `rln-external-signer` to the
+  revision required by the patched C-FFI source, restoring reproducible
+  release builds for contributors and CI.
 - Release version commits now include `package-lock.json`.
 
 ## [0.1.0-beta.8] — 2026-06-01
