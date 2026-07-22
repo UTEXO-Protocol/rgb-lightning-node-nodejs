@@ -271,7 +271,7 @@ index edb35ed..464ee46 100644
 +    }
 +}
 diff --git a/bindings/c-ffi/src/json_types.rs b/bindings/c-ffi/src/json_types.rs
-index fc570e0..b1d314e 100644
+index fc570e0..26bb161 100644
 --- a/bindings/c-ffi/src/json_types.rs
 +++ b/bindings/c-ffi/src/json_types.rs
 @@ -33,7 +33,7 @@ use rgb_lightning_node::{
@@ -283,7 +283,16 @@ index fc570e0..b1d314e 100644
  };
  use serde::{Deserialize, Serialize};
  
-@@ -1581,6 +1581,440 @@ impl From<BtcBalanceInfo> for JsonBtcBalanceInfo {
+@@ -1532,7 +1532,7 @@ pub(crate) struct JsonNetworkInfo {
+ impl From<NetworkInfo> for JsonNetworkInfo {
+     fn from(n: NetworkInfo) -> Self {
+         JsonNetworkInfo {
+-            network: n.network,
++            network: n.network.to_ascii_lowercase(),
+             height: n.height,
+         }
+     }
+@@ -1581,6 +1581,452 @@ impl From<BtcBalanceInfo> for JsonBtcBalanceInfo {
      }
  }
  
@@ -676,6 +685,18 @@ index fc570e0..b1d314e 100644
 +#[cfg(test)]
 +mod wallet_snapshot_contract_tests {
 +    use super::*;
++
++    #[test]
++    fn network_info_uses_canonical_lowercase_names() {
++        let value = JsonNetworkInfo::from(NetworkInfo {
++            network: "Regtest".to_string(),
++            height: 42,
++        });
++        let json = serde_json::to_value(value).expect("serialize network info");
++
++        assert_eq!(json["network"], "regtest");
++        assert_eq!(json["height"], 42);
++    }
 +
 +    #[test]
 +    fn sync_request_rejects_unknown_fields() {
