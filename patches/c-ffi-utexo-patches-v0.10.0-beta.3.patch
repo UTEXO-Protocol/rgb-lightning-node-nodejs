@@ -353,7 +353,7 @@ index 64266ecd582ccf2bc6b254f2a32cc25e47a6848b..5a18f53577baa0c2efd2f39b89d0520f
 +
  }  // extern "C"
 diff --git a/bindings/c-ffi/src/api.rs b/bindings/c-ffi/src/api.rs
-index edb35eddf1b5a15b8965bb012b227357c2bf3635..58d96272a5f8d9e1839ae58b8c4db3afdc72c510 100644
+index edb35eddf1b5a15b8965bb012b227357c2bf3635..70b4bfb9c956331a52f6bf4d1b064282b0f89f5f 100644
 --- a/bindings/c-ffi/src/api.rs
 +++ b/bindings/c-ffi/src/api.rs
 @@ -3,9 +3,12 @@
@@ -460,6 +460,15 @@ index edb35eddf1b5a15b8965bb012b227357c2bf3635..58d96272a5f8d9e1839ae58b8c4db3af
      let node = require_handle(node)?;
      let req: JsonKeysendRequest = parse_req(request_json)?;
      let resp = node.keysend(req.try_into()?)?;
+@@ -286,7 +324,7 @@ pub(crate) fn decode_rgb_invoice(
+ ) -> Result<String, Error> {
+     let node = require_handle(node)?;
+     let resp = node.decode_rgb_invoice(ptr_to_string(invoice))?;
+-    json(JsonDecodeRgbInvoiceResponse::from(resp))
++    json(JsonDecodeRgbInvoiceResponse::try_from(resp)?)
+ }
+
+ pub(crate) fn get_payment(
 @@ -307,7 +345,12 @@ pub(crate) fn get_payment(
  pub(crate) fn list_payments(node: &COpaqueStruct) -> Result<String, Error> {
      let node = require_handle(node)?;
@@ -909,7 +918,7 @@ index edb35eddf1b5a15b8965bb012b227357c2bf3635..58d96272a5f8d9e1839ae58b8c4db3af
 +    }
 +}
 diff --git a/bindings/c-ffi/src/json_types.rs b/bindings/c-ffi/src/json_types.rs
-index fc570e0696a2053aac7f7230473b2e51f37abe05..b5ae49ad91f89b0ac94fd1767ac59d0c9669b5c5 100644
+index fc570e0696a2053aac7f7230473b2e51f37abe05..0381292feca24125fb4f5528ed24c8ea717d94a3 100644
 --- a/bindings/c-ffi/src/json_types.rs
 +++ b/bindings/c-ffi/src/json_types.rs
 @@ -15,25 +15,27 @@ use hex::DisplayHex;
@@ -1015,7 +1024,7 @@ index fc570e0696a2053aac7f7230473b2e51f37abe05..b5ae49ad91f89b0ac94fd1767ac59d0c
      pub network: String,
  }
 
-@@ -776,6 +792,7 @@ impl From<DecodeLnInvoiceResponse> for JsonDecodeLnInvoiceResponse {
+@@ -776,35 +792,82 @@ impl From<DecodeLnInvoiceResponse> for JsonDecodeLnInvoiceResponse {
              payment_hash: fmt_payment_hash(&r.payment_hash),
              payment_secret: r.payment_secret,
              payee_pubkey: r.payee_pubkey.as_ref().map(fmt_pubkey),
@@ -1023,7 +1032,88 @@ index fc570e0696a2053aac7f7230473b2e51f37abe05..b5ae49ad91f89b0ac94fd1767ac59d0c
              network: r.network,
          }
      }
-@@ -1532,7 +1549,7 @@ pub(crate) struct JsonNetworkInfo {
+ }
+
++#[derive(Debug, Serialize)]
++#[serde(tag = "type", content = "value")]
++pub(crate) enum JsonDecodedRgbAssignment {
++    Fungible(u64),
++    NonFungible,
++    InflationRight(u64),
++    Any,
++}
++
++fn parse_decoded_rgb_assignment(value: &str) -> Result<JsonDecodedRgbAssignment, Error> {
++    if value == "Any" {
++        return Ok(JsonDecodedRgbAssignment::Any);
++    }
++    if value == "NonFungible" {
++        return Ok(JsonDecodedRgbAssignment::NonFungible);
++    }
++
++    for (prefix, constructor) in [
++        (
++            "Fungible(",
++            JsonDecodedRgbAssignment::Fungible as fn(u64) -> JsonDecodedRgbAssignment,
++        ),
++        (
++            "InflationRight(",
++            JsonDecodedRgbAssignment::InflationRight as fn(u64) -> JsonDecodedRgbAssignment,
++        ),
++    ] {
++        if let Some(amount) = value
++            .strip_prefix(prefix)
++            .and_then(|remaining| remaining.strip_suffix(')'))
++        {
++            return amount.parse::<u64>().map(constructor).map_err(|error| {
++                Error::StringParse(format!(
++                    "invalid decoded RGB assignment amount in {value}: {error}"
++                ))
++            });
++        }
++    }
++
++    Err(Error::StringParse(format!(
++        "invalid decoded RGB assignment: {value}"
++    )))
++}
++
+ #[derive(Debug, Serialize)]
+ pub(crate) struct JsonDecodeRgbInvoiceResponse {
+     pub recipient_id: String,
+     pub recipient_type: String,
+     pub asset_schema: Option<String>,
+     pub asset_id: Option<String>,
+-    pub assignment: String,
++    pub assignment: JsonDecodedRgbAssignment,
+     pub network: String,
+     pub expiration_timestamp: Option<i64>,
+     pub transport_endpoints: Vec<String>,
+ }
+
+-impl From<DecodeRgbInvoiceResponse> for JsonDecodeRgbInvoiceResponse {
+-    fn from(r: DecodeRgbInvoiceResponse) -> Self {
+-        JsonDecodeRgbInvoiceResponse {
++impl TryFrom<DecodeRgbInvoiceResponse> for JsonDecodeRgbInvoiceResponse {
++    type Error = Error;
++
++    fn try_from(r: DecodeRgbInvoiceResponse) -> Result<Self, Self::Error> {
++        Ok(JsonDecodeRgbInvoiceResponse {
+             recipient_id: r.recipient_id,
+             recipient_type: r.recipient_type,
+             asset_schema: r.asset_schema,
+             asset_id: r.asset_id.as_ref().map(fmt_contract_id),
+-            assignment: r.assignment,
++            assignment: parse_decoded_rgb_assignment(&r.assignment)?,
+             network: r.network,
+             expiration_timestamp: r.expiration_timestamp,
+             transport_endpoints: r.transport_endpoints,
+-        }
++        })
+     }
+ }
+
+@@ -1532,7 +1595,7 @@ pub(crate) struct JsonNetworkInfo {
  impl From<NetworkInfo> for JsonNetworkInfo {
      fn from(n: NetworkInfo) -> Self {
          JsonNetworkInfo {
@@ -1032,7 +1122,7 @@ index fc570e0696a2053aac7f7230473b2e51f37abe05..b5ae49ad91f89b0ac94fd1767ac59d0c
              height: n.height,
          }
      }
-@@ -1581,6 +1598,545 @@ impl From<BtcBalanceInfo> for JsonBtcBalanceInfo {
+@@ -1581,6 +1644,577 @@ impl From<BtcBalanceInfo> for JsonBtcBalanceInfo {
      }
  }
 
@@ -1533,6 +1623,38 @@ index fc570e0696a2053aac7f7230473b2e51f37abe05..b5ae49ad91f89b0ac94fd1767ac59d0c
 +    }
 +
 +    #[test]
++    fn decoded_rgb_invoice_uses_a_stable_tagged_assignment() {
++        let response = DecodeRgbInvoiceResponse {
++            recipient_id: "bcrt:utxob:test".to_string(),
++            recipient_type: "Blind".to_string(),
++            asset_schema: Some("Nia".to_string()),
++            asset_id: None,
++            assignment: "Fungible(0)".to_string(),
++            network: "Regtest".to_string(),
++            expiration_timestamp: Some(1_700_003_600),
++            transport_endpoints: vec!["rpc://127.0.0.1:3000/json-rpc".to_string()],
++        };
++        let value =
++            JsonDecodeRgbInvoiceResponse::try_from(response).expect("map decoded RGB invoice");
++        let json = serde_json::to_value(value).expect("serialize decoded RGB invoice");
++
++        assert_eq!(
++            json["assignment"],
++            serde_json::json!({ "type": "Fungible", "value": 0 })
++        );
++        assert_eq!(json["recipient_type"], "Blind");
++        assert_eq!(json["expiration_timestamp"], 1_700_003_600_i64);
++    }
++
++    #[test]
++    fn decoded_rgb_invoice_rejects_unknown_debug_assignments() {
++        let error = parse_decoded_rgb_assignment("Unknown(1)")
++            .expect_err("unknown assignment must fail closed");
++
++        assert!(error.to_string().contains("invalid decoded RGB assignment"));
++    }
++
++    #[test]
 +    fn sync_request_rejects_unknown_fields() {
 +        let error =
 +            serde_json::from_str::<JsonSyncWalletRequest>(r#"{"mode":"routine","typo":true}"#)
@@ -1578,7 +1700,7 @@ index fc570e0696a2053aac7f7230473b2e51f37abe05..b5ae49ad91f89b0ac94fd1767ac59d0c
  #[derive(Debug, Serialize)]
  pub(crate) struct JsonSignMessageResponse {
      pub signed_message: String,
-@@ -1669,6 +2225,144 @@ impl From<SdkSendBtcResponse> for JsonSendBtcResponse {
+@@ -1669,6 +2303,144 @@ impl From<SdkSendBtcResponse> for JsonSendBtcResponse {
      }
  }
 

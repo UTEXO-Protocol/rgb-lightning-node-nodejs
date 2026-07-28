@@ -19,9 +19,9 @@ matching file are built directly from upstream.
 Adds versioned dual-keychain synchronization, bounded decimal-safe wallet
 snapshots, explicit Lightning routing-fee caps, and persisted actual routing
 fees to the pinned v0.10 native source. It preserves complete Lightning
-invoice decode metadata across C-FFI and also adds deterministic BTC/RGB
-prepare-and-commit plans, BTC plan cancellation, and pending vanilla
-transaction inspection.
+invoice decode metadata and stable tagged RGB assignments across C-FFI, and
+also adds deterministic BTC/RGB prepare-and-commit plans, BTC plan
+cancellation, and pending vanilla transaction inspection.
 
 Adds the versioned wallet synchronization and exact snapshot contract used by
 WDK portfolio refreshes. Routine synchronization FullSyncs both Vanilla and

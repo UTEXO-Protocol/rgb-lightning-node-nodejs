@@ -47,6 +47,9 @@ while pre-`1.0`.
   directory, preserving the committed object-based facade and its types.
 
 ### Fixed
+- `decodeRgbInvoice()` now returns a stable tagged assignment object instead
+  of an implementation-defined Rust `Debug` string. The exact blind/witness
+  recipient type and nullable expiration remain preserved.
 - `decodeLnInvoice()` now preserves `min_final_cltv_expiry_delta` across the
   C-FFI JSON boundary. A native contract test guards the complete NodeJS
   response shape against future DTO drift.
