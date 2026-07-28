@@ -10,6 +10,14 @@ while pre-`1.0`.
 ## [Unreleased]
 
 ### Added
+- Deterministic BTC and RGB on-chain send plans. `prepareBtcSend()` and
+  `prepareRgbSend()` return the exact unsigned PSBT, transaction id, fee,
+  input/output totals, and virtual size that the wallet reviewed;
+  `commitPreparedBtcSend()` and `commitPreparedRgbSend()` validate and submit
+  that exact plan.
+- BTC plan cancellation and bounded pending-vanilla-transaction inspection,
+  allowing consumers to clean up abandoned `SendBtc` reservations without
+  touching channel or UTXO-management operations.
 - `SdkNode.syncWallet()` and `SdkNode.walletSnapshot()` with a shared
   v0.9.0-beta.3 native overlay: dual-keychain FullSync/FullScan modes,
   bounded activity, coherent tip evidence, and decimal-string amounts.

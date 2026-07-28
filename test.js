@@ -23,6 +23,12 @@ try {
     'rotateAddress',
     'syncWallet',
     'walletSnapshot',
+    'prepareBtcSend',
+    'commitPreparedBtcSend',
+    'cancelBtcSendPlan',
+    'listPendingVanillaTransactions',
+    'prepareRgbSend',
+    'commitPreparedRgbSend',
     'listTransactionsByTxid',
     'listTransfersByTxid',
     'verifyMessage'

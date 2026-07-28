@@ -154,6 +154,22 @@ class SdkNode {
   sendBtc (request) {
     return JSON.parse(this._inner.sendBtc(JSON.stringify(request)))
   }
+
+  prepareBtcSend (request) {
+    return JSON.parse(this._inner.prepareBtcSend(JSON.stringify(request)))
+  }
+
+  commitPreparedBtcSend (request) {
+    return JSON.parse(this._inner.commitPreparedBtcSend(JSON.stringify(request)))
+  }
+
+  cancelBtcSendPlan (request) {
+    return JSON.parse(this._inner.cancelBtcSendPlan(JSON.stringify(request)))
+  }
+
+  listPendingVanillaTransactions () {
+    return JSON.parse(this._inner.listPendingVanillaTransactions())
+  }
   createUtxos (request) {
     return JSON.parse(this._inner.createUtxos(JSON.stringify(request)))
   }
@@ -239,6 +255,14 @@ class SdkNode {
   }
   sendRgb (request) {
     return JSON.parse(this._inner.sendRgb(JSON.stringify(request)))
+  }
+
+  prepareRgbSend (request) {
+    return JSON.parse(this._inner.prepareRgbSend(JSON.stringify(request)))
+  }
+
+  commitPreparedRgbSend (request) {
+    return JSON.parse(this._inner.commitPreparedRgbSend(JSON.stringify(request)))
   }
   refreshTransfers (request) {
     this._inner.refreshTransfers(JSON.stringify(request))

@@ -195,10 +195,55 @@ index 5886c2d..c06e100 100644
  
  [[package]]
 diff --git a/bindings/c-ffi/rln.h b/bindings/c-ffi/rln.h
-index eb7e572..17acb5f 100644
+index eb7e572..d436ee6 100644
 --- a/bindings/c-ffi/rln.h
 +++ b/bindings/c-ffi/rln.h
-@@ -237,6 +237,8 @@ struct CResultString rln_sign_message(const struct COpaqueStruct *node, const ch
+@@ -41,6 +41,9 @@ struct CResultString rln_asset_metadata(const struct COpaqueStruct *node, const
+ 
+ struct CResultString rln_btc_balance(const struct COpaqueStruct *node, bool skip_sync);
+ 
++struct CResultString rln_cancel_btc_send_plan(const struct COpaqueStruct *node,
++                                              const char *request_json);
++
+ struct CResultString rln_cancel_hodl_invoice(const struct COpaqueStruct *node,
+                                              const char *request_json);
+ 
+@@ -55,6 +58,12 @@ struct CResultString rln_claim_hodl_invoice(const struct COpaqueStruct *node,
+ 
+ struct CResultString rln_close_channel(const struct COpaqueStruct *node, const char *request_json);
+ 
++struct CResultString rln_commit_prepared_btc_send(const struct COpaqueStruct *node,
++                                                  const char *request_json);
++
++struct CResultString rln_commit_prepared_rgb_send(const struct COpaqueStruct *node,
++                                                  const char *request_json);
++
+ struct CResultString rln_connect_peer(const struct COpaqueStruct *node,
+                                       const char *peer_pubkey_and_addr);
+ 
+@@ -116,6 +125,8 @@ struct CResultString rln_list_payments(const struct COpaqueStruct *node);
+ 
+ struct CResultString rln_list_peers(const struct COpaqueStruct *node);
+ 
++struct CResultString rln_list_pending_vanilla_transactions(const struct COpaqueStruct *node);
++
+ struct CResultString rln_list_swaps(const struct COpaqueStruct *node);
+ 
+ struct CResultString rln_list_transactions(const struct COpaqueStruct *node, bool skip_sync);
+@@ -151,6 +162,12 @@ struct CResultString rln_open_channel(const struct COpaqueStruct *node, const ch
+ struct CResultString rln_post_asset_media(const struct COpaqueStruct *node,
+                                           const char *request_json);
+ 
++struct CResultString rln_prepare_btc_send(const struct COpaqueStruct *node,
++                                          const char *request_json);
++
++struct CResultString rln_prepare_rgb_send(const struct COpaqueStruct *node,
++                                          const char *request_json);
++
+ struct CResultString rln_refresh_transfers(const struct COpaqueStruct *node,
+                                            const char *request_json);
+ 
+@@ -237,6 +254,8 @@ struct CResultString rln_sign_message(const struct COpaqueStruct *node, const ch
  
  struct CResultString rln_sync(const struct COpaqueStruct *node);
  
@@ -207,7 +252,7 @@ index eb7e572..17acb5f 100644
  struct CResultString rln_taker(const struct COpaqueStruct *node, const char *request_json);
  
  struct CResultString rln_uniffi_healthcheck(void);
-@@ -246,3 +248,6 @@ struct CResultString rln_uniffi_is_initialized(void);
+@@ -246,3 +265,6 @@ struct CResultString rln_uniffi_is_initialized(void);
  struct CResultString rln_verify_message(const struct COpaqueStruct *node,
                                          const char *message,
                                          const char *signature);
@@ -215,10 +260,50 @@ index eb7e572..17acb5f 100644
 +struct CResultString rln_wallet_snapshot(const struct COpaqueStruct *node,
 +                                         const char *request_json);
 diff --git a/bindings/c-ffi/rln.hpp b/bindings/c-ffi/rln.hpp
-index 64266ec..82c1bd9 100644
+index 64266ec..8bfbbe8 100644
 --- a/bindings/c-ffi/rln.hpp
 +++ b/bindings/c-ffi/rln.hpp
-@@ -211,6 +211,8 @@ CResultString rln_sign_message(const COpaqueStruct *node, const char *message);
+@@ -43,6 +43,8 @@ CResultString rln_asset_metadata(const COpaqueStruct *node, const char *asset_id
+ 
+ CResultString rln_btc_balance(const COpaqueStruct *node, bool skip_sync);
+ 
++CResultString rln_cancel_btc_send_plan(const COpaqueStruct *node, const char *request_json);
++
+ CResultString rln_cancel_hodl_invoice(const COpaqueStruct *node, const char *request_json);
+ 
+ CResultString rln_check_indexer_url(const COpaqueStruct *node, const char *indexer_url);
+@@ -53,6 +55,10 @@ CResultString rln_claim_hodl_invoice(const COpaqueStruct *node, const char *requ
+ 
+ CResultString rln_close_channel(const COpaqueStruct *node, const char *request_json);
+ 
++CResultString rln_commit_prepared_btc_send(const COpaqueStruct *node, const char *request_json);
++
++CResultString rln_commit_prepared_rgb_send(const COpaqueStruct *node, const char *request_json);
++
+ CResultString rln_connect_peer(const COpaqueStruct *node, const char *peer_pubkey_and_addr);
+ 
+ CResultString rln_create_utxos(const COpaqueStruct *node, const char *request_json);
+@@ -102,6 +108,8 @@ CResultString rln_list_payments(const COpaqueStruct *node);
+ 
+ CResultString rln_list_peers(const COpaqueStruct *node);
+ 
++CResultString rln_list_pending_vanilla_transactions(const COpaqueStruct *node);
++
+ CResultString rln_list_swaps(const COpaqueStruct *node);
+ 
+ CResultString rln_list_transactions(const COpaqueStruct *node, bool skip_sync);
+@@ -136,6 +144,10 @@ CResultString rln_open_channel(const COpaqueStruct *node, const char *request_js
+ 
+ CResultString rln_post_asset_media(const COpaqueStruct *node, const char *request_json);
+ 
++CResultString rln_prepare_btc_send(const COpaqueStruct *node, const char *request_json);
++
++CResultString rln_prepare_rgb_send(const COpaqueStruct *node, const char *request_json);
++
+ CResultString rln_refresh_transfers(const COpaqueStruct *node, const char *request_json);
+ 
+ CResultString rln_rgb_invoice(const COpaqueStruct *node, const char *request_json);
+@@ -211,6 +223,8 @@ CResultString rln_sign_message(const COpaqueStruct *node, const char *message);
  
  CResultString rln_sync(const COpaqueStruct *node);
  
@@ -227,7 +312,7 @@ index 64266ec..82c1bd9 100644
  CResultString rln_taker(const COpaqueStruct *node, const char *request_json);
  
  CResultString rln_uniffi_healthcheck();
-@@ -221,4 +223,6 @@ CResultString rln_verify_message(const COpaqueStruct *node,
+@@ -221,4 +235,6 @@ CResultString rln_verify_message(const COpaqueStruct *node,
                                   const char *message,
                                   const char *signature);
  
@@ -235,7 +320,7 @@ index 64266ec..82c1bd9 100644
 +
  }  // extern "C"
 diff --git a/bindings/c-ffi/src/api.rs b/bindings/c-ffi/src/api.rs
-index edb35ed..464ee46 100644
+index edb35ed..c5111be 100644
 --- a/bindings/c-ffi/src/api.rs
 +++ b/bindings/c-ffi/src/api.rs
 @@ -3,9 +3,12 @@
@@ -302,7 +387,84 @@ index edb35ed..464ee46 100644
  // ---------------------------------------------------------------------------
  // Lifecycle
  // ---------------------------------------------------------------------------
-@@ -610,6 +650,139 @@ pub(crate) fn sync(node: &COpaqueStruct) -> Result<String, Error> {
+@@ -334,6 +374,26 @@ pub(crate) fn send_rgb(
+     json(JsonSendRgbResponse::from(resp))
+ }
+ 
++pub(crate) fn prepare_rgb_send(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> Result<String, Error> {
++    let node = require_handle(node)?;
++    let req: JsonSendRgbRequest = parse_req(request_json)?;
++    let resp = node.prepare_rgb_send(req.try_into()?)?;
++    json(JsonPreparedSendResponse::from(resp))
++}
++
++pub(crate) fn commit_prepared_rgb_send(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> Result<String, Error> {
++    let node = require_handle(node)?;
++    let req: JsonCommitPreparedSendRequest = parse_req(request_json)?;
++    let resp = node.commit_prepared_rgb_send(req.try_into()?)?;
++    json(JsonSendRgbResponse::from(resp))
++}
++
+ pub(crate) fn refresh_transfers(
+     node: &COpaqueStruct,
+     request_json: *const c_char,
+@@ -575,6 +635,49 @@ pub(crate) fn send_btc(
+     json(JsonSendBtcResponse::from(resp))
+ }
+ 
++pub(crate) fn prepare_btc_send(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> Result<String, Error> {
++    let node = require_handle(node)?;
++    let req: JsonSendBtcRequest = parse_req(request_json)?;
++    let resp = node.prepare_btc_send(req.into())?;
++    json(JsonPreparedSendResponse::from(resp))
++}
++
++pub(crate) fn commit_prepared_btc_send(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> Result<String, Error> {
++    let node = require_handle(node)?;
++    let req: JsonCommitPreparedSendRequest = parse_req(request_json)?;
++    let resp = node.commit_prepared_btc_send(req.try_into()?)?;
++    json(JsonSendBtcResponse::from(resp))
++}
++
++pub(crate) fn cancel_btc_send_plan(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> Result<String, Error> {
++    let node = require_handle(node)?;
++    let req: JsonCancelBtcSendPlanRequest = parse_req(request_json)?;
++    let resp = node.cancel_btc_send_plan(req.try_into()?)?;
++    json(JsonCancelBtcSendPlanResponse::from(resp))
++}
++
++pub(crate) fn list_pending_vanilla_transactions(
++    node: &COpaqueStruct,
++) -> Result<String, Error> {
++    let node = require_handle(node)?;
++    let transactions = node.list_pending_vanilla_transactions()?;
++    json(
++        transactions
++            .into_iter()
++            .map(JsonPendingVanillaTransaction::from)
++            .collect::<Vec<_>>(),
++    )
++}
++
+ pub(crate) fn create_utxos(
+     node: &COpaqueStruct,
+     request_json: *const c_char,
+@@ -610,6 +713,139 @@ pub(crate) fn sync(node: &COpaqueStruct) -> Result<String, Error> {
      ok_void()
  }
  
@@ -442,7 +604,7 @@ index edb35ed..464ee46 100644
  // ---------------------------------------------------------------------------
  // Swaps / onion
  // ---------------------------------------------------------------------------
-@@ -804,3 +977,23 @@ pub(crate) fn sdk_node_unlock_with_attached_external_signer(
+@@ -804,3 +1040,23 @@ pub(crate) fn sdk_node_unlock_with_attached_external_signer(
      )?;
      ok_void()
  }
@@ -467,11 +629,21 @@ index edb35ed..464ee46 100644
 +    }
 +}
 diff --git a/bindings/c-ffi/src/json_types.rs b/bindings/c-ffi/src/json_types.rs
-index fc570e0..0c0f3f3 100644
+index fc570e0..fdb63e3 100644
 --- a/bindings/c-ffi/src/json_types.rs
 +++ b/bindings/c-ffi/src/json_types.rs
-@@ -33,7 +33,7 @@ use rgb_lightning_node::{
-     AssetRecipients, RgbRecipient,
+@@ -28,12 +28,14 @@ use rgb_lightning_node::{
+     SdkMakerInitRequest, SdkMakerInitResponse, SdkOpenChannelRequest, SdkOpenChannelResponse,
+     SdkPostAssetMediaRequest, SdkPostAssetMediaResponse, SdkRefreshTransfersRequest,
+     SdkRgbInvoiceRequest, SdkRgbInvoiceResponse, SdkSendBtcRequest, SdkSendBtcResponse,
+-    SdkExternalSignerBootstrap, SdkSendOnionMessageRequest, SdkSendPaymentRequest,
+-    SdkSendPaymentResponse, SdkTakerRequest, SdkUnlockRequest, SdkVssClearFenceRequest, SendRgbRequest, SendRgbResponse,
+-    AssetRecipients, RgbRecipient,
++    SdkCancelBtcSendPlanRequest, SdkCancelBtcSendPlanResponse, SdkCommitPreparedSendRequest,
++    SdkExternalSignerBootstrap, SdkPendingVanillaTransaction, SdkPreparedSendResponse,
++    SdkSendOnionMessageRequest, SdkSendPaymentRequest, SdkSendPaymentResponse, SdkTakerRequest,
++    SdkUnlockRequest, SdkVssClearFenceRequest, SendRgbRequest, SendRgbResponse, AssetRecipients,
++    RgbRecipient,
      SignMessageResponse, Swap, SwapList, SwapStatus, Token, TokenLight, Transaction,
      TransactionType, Transfer, TransferTransportEndpoint, TransportEndpoint, Txid, Unspent, Utxo,
 -    VerifyMessageResponse, WitnessData,
@@ -479,7 +651,18 @@ index fc570e0..0c0f3f3 100644
  };
  use serde::{Deserialize, Serialize};
  
-@@ -469,6 +469,8 @@ pub(crate) struct JsonSendPaymentRequest {
+@@ -51,6 +53,10 @@ fn parse_contract_id(s: &str) -> Result<ContractId, Error> {
+     ContractId::from_str(s).map_err(|e| Error::StringParse(format!("invalid contract id: {e}")))
+ }
+ 
++fn parse_txid(s: &str) -> Result<Txid, Error> {
++    Txid::from_str(s).map_err(|e| Error::StringParse(format!("invalid transaction id: {e}")))
++}
++
+ fn parse_32_hex(s: &str) -> Result<[u8; 32], Error> {
+     let bytes =
+         Vec::<u8>::from_hex(s).map_err(|e| Error::HexConversion(format!("not hex: {e}")))?;
+@@ -469,6 +475,8 @@ pub(crate) struct JsonSendPaymentRequest {
      pub asset_id: Option<String>,
      #[serde(default)]
      pub asset_amount: Option<u64>,
@@ -488,7 +671,7 @@ index fc570e0..0c0f3f3 100644
  }
  
  impl TryFrom<JsonSendPaymentRequest> for SdkSendPaymentRequest {
-@@ -479,6 +481,7 @@ impl TryFrom<JsonSendPaymentRequest> for SdkSendPaymentRequest {
+@@ -479,6 +487,7 @@ impl TryFrom<JsonSendPaymentRequest> for SdkSendPaymentRequest {
              amt_msat: j.amt_msat,
              asset_id: j.asset_id.map(|s| parse_contract_id(&s)).transpose()?,
              asset_amount: j.asset_amount,
@@ -496,7 +679,7 @@ index fc570e0..0c0f3f3 100644
          })
      }
  }
-@@ -604,6 +607,7 @@ pub(crate) struct JsonPayment {
+@@ -604,6 +613,7 @@ pub(crate) struct JsonPayment {
      pub payee_pubkey: String,
      pub preimage: Option<String>,
      pub description_hash: Option<String>,
@@ -504,7 +687,7 @@ index fc570e0..0c0f3f3 100644
  }
  
  impl From<Payment> for JsonPayment {
-@@ -620,6 +624,7 @@ impl From<Payment> for JsonPayment {
+@@ -620,6 +630,7 @@ impl From<Payment> for JsonPayment {
              payee_pubkey: fmt_pubkey(&p.payee_pubkey),
              preimage: p.preimage,
              description_hash: p.description_hash,
@@ -512,7 +695,7 @@ index fc570e0..0c0f3f3 100644
          }
      }
  }
-@@ -1532,7 +1537,7 @@ pub(crate) struct JsonNetworkInfo {
+@@ -1532,7 +1543,7 @@ pub(crate) struct JsonNetworkInfo {
  impl From<NetworkInfo> for JsonNetworkInfo {
      fn from(n: NetworkInfo) -> Self {
          JsonNetworkInfo {
@@ -521,7 +704,7 @@ index fc570e0..0c0f3f3 100644
              height: n.height,
          }
      }
-@@ -1581,6 +1586,470 @@ impl From<BtcBalanceInfo> for JsonBtcBalanceInfo {
+@@ -1581,6 +1592,491 @@ impl From<BtcBalanceInfo> for JsonBtcBalanceInfo {
      }
  }
  
@@ -934,6 +1117,27 @@ index fc570e0..0c0f3f3 100644
 +    }
 +
 +    #[test]
++    fn prepared_send_response_serializes_all_u64_values_losslessly() {
++        let response = JsonPreparedSendResponse::from(SdkPreparedSendResponse {
++            plan_id: Txid::from_str(
++                "0000000000000000000000000000000000000000000000000000000000000000",
++            )
++            .expect("valid txid"),
++            unsigned_psbt: "cHNidP8BAAoCAAAAAQ".to_string(),
++            fee_sat: u64::MAX,
++            total_input_sat: u64::MAX - 1,
++            total_output_sat: u64::MAX - 2,
++            size_vbytes: u64::MAX - 3,
++        });
++        let json = serde_json::to_value(response).expect("serialize prepared send");
++
++        assert_eq!(json["fee_sat"], u64::MAX.to_string());
++        assert_eq!(json["total_input_sat"], (u64::MAX - 1).to_string());
++        assert_eq!(json["total_output_sat"], (u64::MAX - 2).to_string());
++        assert_eq!(json["size_vbytes"], (u64::MAX - 3).to_string());
++    }
++
++    #[test]
 +    fn network_info_uses_canonical_lowercase_names() {
 +        let value = JsonNetworkInfo::from(NetworkInfo {
 +            network: "Regtest".to_string(),
@@ -992,11 +1196,174 @@ index fc570e0..0c0f3f3 100644
  #[derive(Debug, Serialize)]
  pub(crate) struct JsonSignMessageResponse {
      pub signed_message: String,
+@@ -1669,6 +2165,89 @@ impl From<SdkSendBtcResponse> for JsonSendBtcResponse {
+     }
+ }
+ 
++#[derive(Debug, Serialize)]
++pub(crate) struct JsonPreparedSendResponse {
++    pub plan_id: String,
++    pub unsigned_psbt: String,
++    pub fee_sat: String,
++    pub total_input_sat: String,
++    pub total_output_sat: String,
++    pub size_vbytes: String,
++}
++
++impl From<SdkPreparedSendResponse> for JsonPreparedSendResponse {
++    fn from(r: SdkPreparedSendResponse) -> Self {
++        JsonPreparedSendResponse {
++            plan_id: fmt_txid(&r.plan_id),
++            unsigned_psbt: r.unsigned_psbt,
++            fee_sat: r.fee_sat.to_string(),
++            total_input_sat: r.total_input_sat.to_string(),
++            total_output_sat: r.total_output_sat.to_string(),
++            size_vbytes: r.size_vbytes.to_string(),
++        }
++    }
++}
++
++#[derive(Debug, Deserialize)]
++pub(crate) struct JsonCommitPreparedSendRequest {
++    pub plan_id: String,
++    pub unsigned_psbt: String,
++}
++
++impl TryFrom<JsonCommitPreparedSendRequest> for SdkCommitPreparedSendRequest {
++    type Error = Error;
++
++    fn try_from(j: JsonCommitPreparedSendRequest) -> Result<Self, Self::Error> {
++        Ok(SdkCommitPreparedSendRequest {
++            plan_id: parse_txid(&j.plan_id)?,
++            unsigned_psbt: j.unsigned_psbt,
++        })
++    }
++}
++
++#[derive(Debug, Deserialize)]
++pub(crate) struct JsonCancelBtcSendPlanRequest {
++    pub plan_id: String,
++}
++
++impl TryFrom<JsonCancelBtcSendPlanRequest> for SdkCancelBtcSendPlanRequest {
++    type Error = Error;
++
++    fn try_from(j: JsonCancelBtcSendPlanRequest) -> Result<Self, Self::Error> {
++        Ok(SdkCancelBtcSendPlanRequest {
++            plan_id: parse_txid(&j.plan_id)?,
++        })
++    }
++}
++
++#[derive(Debug, Serialize)]
++pub(crate) struct JsonCancelBtcSendPlanResponse {
++    pub cancelled: bool,
++}
++
++impl From<SdkCancelBtcSendPlanResponse> for JsonCancelBtcSendPlanResponse {
++    fn from(r: SdkCancelBtcSendPlanResponse) -> Self {
++        JsonCancelBtcSendPlanResponse {
++            cancelled: r.cancelled,
++        }
++    }
++}
++
++#[derive(Debug, Serialize)]
++pub(crate) struct JsonPendingVanillaTransaction {
++    pub txid: String,
++    pub operation_type: String,
++}
++
++impl From<SdkPendingVanillaTransaction> for JsonPendingVanillaTransaction {
++    fn from(transaction: SdkPendingVanillaTransaction) -> Self {
++        JsonPendingVanillaTransaction {
++            txid: fmt_txid(&transaction.txid),
++            operation_type: transaction.operation_type,
++        }
++    }
++}
++
+ #[derive(Debug, Deserialize)]
+ pub(crate) struct JsonCreateUtxosRequest {
+     pub up_to: bool,
 diff --git a/bindings/c-ffi/src/lib.rs b/bindings/c-ffi/src/lib.rs
-index 24c3371..8c9441d 100644
+index 24c3371..af09c90 100644
 --- a/bindings/c-ffi/src/lib.rs
 +++ b/bindings/c-ffi/src/lib.rs
-@@ -547,6 +547,28 @@ pub extern "C" fn rln_sync(node: &COpaqueStruct) -> CResultString {
+@@ -312,6 +312,25 @@ pub extern "C" fn rln_send_rgb(
+     ffi_call!("rln_send_rgb", api::send_rgb(node, request_json))
+ }
+ 
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_prepare_rgb_send(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> CResultString {
++    ffi_call!("rln_prepare_rgb_send", api::prepare_rgb_send(node, request_json))
++}
++
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_commit_prepared_rgb_send(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> CResultString {
++    ffi_call!(
++        "rln_commit_prepared_rgb_send",
++        api::commit_prepared_rgb_send(node, request_json)
++    )
++}
++
+ #[unsafe(no_mangle)]
+ pub extern "C" fn rln_refresh_transfers(
+     node: &COpaqueStruct,
+@@ -514,6 +533,46 @@ pub extern "C" fn rln_send_btc(
+     ffi_call!("rln_send_btc", api::send_btc(node, request_json))
+ }
+ 
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_prepare_btc_send(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> CResultString {
++    ffi_call!("rln_prepare_btc_send", api::prepare_btc_send(node, request_json))
++}
++
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_commit_prepared_btc_send(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> CResultString {
++    ffi_call!(
++        "rln_commit_prepared_btc_send",
++        api::commit_prepared_btc_send(node, request_json)
++    )
++}
++
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_cancel_btc_send_plan(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> CResultString {
++    ffi_call!(
++        "rln_cancel_btc_send_plan",
++        api::cancel_btc_send_plan(node, request_json)
++    )
++}
++
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_list_pending_vanilla_transactions(
++    node: &COpaqueStruct,
++) -> CResultString {
++    ffi_call!(
++        "rln_list_pending_vanilla_transactions",
++        api::list_pending_vanilla_transactions(node)
++    )
++}
++
+ #[unsafe(no_mangle)]
+ pub extern "C" fn rln_create_utxos(
+     node: &COpaqueStruct,
+@@ -547,6 +606,28 @@ pub extern "C" fn rln_sync(node: &COpaqueStruct) -> CResultString {
      ffi_call!("rln_sync", api::sync(node))
  }
  
@@ -1026,10 +1393,36 @@ index 24c3371..8c9441d 100644
  // Swaps / onion
  // ---------------------------------------------------------------------------
 diff --git a/bindings/rgb_lightning_node.udl b/bindings/rgb_lightning_node.udl
-index 286134a..6916976 100644
+index 286134a..e8fa0aa 100644
 --- a/bindings/rgb_lightning_node.udl
 +++ b/bindings/rgb_lightning_node.udl
-@@ -225,6 +225,7 @@ dictionary Payment {
+@@ -73,6 +73,14 @@ interface SdkNode {
+     [Throws=RlnError]
+     SdkSendBtcResponse sendbtc(SdkSendBtcRequest request);
+     [Throws=RlnError]
++    SdkPreparedSendResponse prepare_btc_send(SdkSendBtcRequest request);
++    [Throws=RlnError]
++    SdkSendBtcResponse commit_prepared_btc_send(SdkCommitPreparedSendRequest request);
++    [Throws=RlnError]
++    SdkCancelBtcSendPlanResponse cancel_btc_send_plan(SdkCancelBtcSendPlanRequest request);
++    [Throws=RlnError]
++    sequence<SdkPendingVanillaTransaction> list_pending_vanilla_transactions();
++    [Throws=RlnError]
+     SdkMakerInitResponse makerinit(SdkMakerInitRequest request);
+     [Throws=RlnError]
+     void makerexecute(SdkMakerExecuteRequest request);
+@@ -127,6 +135,10 @@ interface SdkNode {
+     [Throws=RlnError]
+     SendRgbResponse send_rgb(SendRgbRequest request);
+     [Throws=RlnError]
++    SdkPreparedSendResponse prepare_rgb_send(SendRgbRequest request);
++    [Throws=RlnError]
++    SendRgbResponse commit_prepared_rgb_send(SdkCommitPreparedSendRequest request);
++    [Throws=RlnError]
+     AsyncOrderNewResponse apay_new(string host_node_id);
+     [Throws=RlnError]
+     AsyncOrderNewResponse apay_new_with_address(string host_node_id, string username, string domain);
+@@ -225,6 +237,7 @@ dictionary Payment {
      PublicKey payee_pubkey;
      string? preimage;
      string? description_hash;
@@ -1037,7 +1430,41 @@ index 286134a..6916976 100644
  };
  
  enum PaymentType {
-@@ -771,6 +772,7 @@ dictionary SdkSendPaymentRequest {
+@@ -712,6 +725,33 @@ dictionary SdkSendBtcResponse {
+     Txid txid;
+ };
+ 
++dictionary SdkPreparedSendResponse {
++    Txid plan_id;
++    string unsigned_psbt;
++    u64 fee_sat;
++    u64 total_input_sat;
++    u64 total_output_sat;
++    u64 size_vbytes;
++};
++
++dictionary SdkCommitPreparedSendRequest {
++    Txid plan_id;
++    string unsigned_psbt;
++};
++
++dictionary SdkCancelBtcSendPlanRequest {
++    Txid plan_id;
++};
++
++dictionary SdkCancelBtcSendPlanResponse {
++    boolean cancelled;
++};
++
++dictionary SdkPendingVanillaTransaction {
++    Txid txid;
++    string operation_type;
++};
++
+ dictionary SdkMakerInitRequest {
+     u64 qty_from;
+     u64 qty_to;
+@@ -771,6 +811,7 @@ dictionary SdkSendPaymentRequest {
      u64? amt_msat;
      ContractId? asset_id;
      u64? asset_amount;
@@ -1103,6 +1530,90 @@ index e4abdac..f6f0a20 100644
                  );
                  unlocked_state
                      .async_order_handler
+diff --git a/src/rgb.rs b/src/rgb.rs
+index 80df750..10328b5 100644
+--- a/src/rgb.rs
++++ b/src/rgb.rs
+@@ -19,9 +19,9 @@ use rgb_lib::{
+     wallet::{
+         rust_only::{check_proxy_url, ColoringInfo},
+         AssetCFA, AssetIFA, AssetNIA, AssetUDA, Assets, Balance, BtcBalance, Metadata, Online,
+-        OperationResult, ReceiveData, Recipient, RefreshFilter, RefreshResult, RgbWalletOpsOffline,
+-        RgbWalletOpsOnline, SendBeginResult, SinglesigKeys, SyncOptions,
+-        Transaction as RgbLibTransaction, Transfer, TransportEndpoint, Unspent,
++        OperationResult, PendingVanillaTx, PsbtInspection, ReceiveData, Recipient, RefreshFilter,
++        RefreshResult, RgbWalletOpsOffline, RgbWalletOpsOnline, SendBeginResult, SinglesigKeys,
++        SyncOptions, Transaction as RgbLibTransaction, Transfer, TransportEndpoint, Unspent,
+         Wallet as RgbLibWallet,
+     },
+     AssetSchema, Assignment, BitcoinNetwork, ContractId, Error as RgbLibError, Fascia, RgbTransfer,
+@@ -449,6 +449,30 @@ impl UnlockedAppState {
+             .send_btc_begin(address, amount, fee_rate, false)
+     }
+ 
++    pub(crate) fn rgb_prepare_send_btc(
++        &self,
++        address: String,
++        amount: u64,
++        fee_rate: u64,
++        skip_sync: bool,
++    ) -> Result<String, RgbLibError> {
++        self.rgb_wallet_wrapper
++            .prepare_send_btc(address, amount, fee_rate, skip_sync)
++    }
++
++    pub(crate) fn rgb_inspect_psbt(
++        &self,
++        unsigned_psbt: String,
++    ) -> Result<PsbtInspection, RgbLibError> {
++        self.rgb_wallet_wrapper.inspect_psbt(unsigned_psbt)
++    }
++
++    pub(crate) fn rgb_list_pending_vanilla_txs(
++        &self,
++    ) -> Result<Vec<PendingVanillaTx>, RgbLibError> {
++        self.rgb_wallet_wrapper.list_pending_vanilla_txs()
++    }
++
+     pub(crate) fn rgb_send_btc_end(&self, signed_psbt: String) -> Result<String, RgbLibError> {
+         self.rgb_wallet_wrapper.send_btc_end(signed_psbt)
+     }
+@@ -932,6 +956,35 @@ impl RgbLibWalletWrapper {
+         )
+     }
+ 
++    pub(crate) fn prepare_send_btc(
++        &self,
++        address: String,
++        amount: u64,
++        fee_rate: u64,
++        skip_sync: bool,
++    ) -> Result<String, RgbLibError> {
++        self.get_rgb_wallet().send_btc_begin(
++            self.online,
++            address,
++            amount,
++            fee_rate,
++            skip_sync,
++            false,
++            None,
++        )
++    }
++
++    pub(crate) fn inspect_psbt(
++        &self,
++        unsigned_psbt: String,
++    ) -> Result<PsbtInspection, RgbLibError> {
++        self.get_rgb_wallet().inspect_psbt(unsigned_psbt)
++    }
++
++    pub(crate) fn list_pending_vanilla_txs(&self) -> Result<Vec<PendingVanillaTx>, RgbLibError> {
++        self.get_rgb_wallet().list_pending_vanilla_txs()
++    }
++
+     pub(crate) fn send_btc_end(&self, signed_psbt: String) -> Result<String, RgbLibError> {
+         self.get_rgb_wallet().send_btc_end(self.online, signed_psbt)
+     }
 diff --git a/src/routes.rs b/src/routes.rs
 index 975a67d..30958de 100644
 --- a/src/routes.rs
@@ -1140,10 +1651,31 @@ index 975a67d..30958de 100644
              )?;
              let payment_hash = PaymentHash(invoice.payment_hash().to_byte_array());
 diff --git a/src/sdk/mod.rs b/src/sdk/mod.rs
-index 3ef5ebc..f992a41 100644
+index 3ef5ebc..87b8014 100644
 --- a/src/sdk/mod.rs
 +++ b/src/sdk/mod.rs
-@@ -410,6 +410,7 @@ pub(crate) struct SendPaymentRequestData {
+@@ -295,6 +295,20 @@ pub(crate) struct SendRgbData {
+     pub(crate) batch_transfer_idx: i32,
+ }
+ 
++pub(crate) struct PreparedSendData {
++    pub(crate) plan_id: String,
++    pub(crate) unsigned_psbt: String,
++    pub(crate) fee_sat: u64,
++    pub(crate) total_input_sat: u64,
++    pub(crate) total_output_sat: u64,
++    pub(crate) size_vbytes: u64,
++}
++
++pub(crate) struct PendingVanillaTransactionData {
++    pub(crate) txid: String,
++    pub(crate) operation_type: String,
++}
++
+ pub(crate) enum AssignmentKindData {
+     Fungible,
+     NonFungible,
+@@ -410,6 +424,7 @@ pub(crate) struct SendPaymentRequestData {
      pub(crate) amt_msat: Option<u64>,
      pub(crate) asset_id: Option<String>,
      pub(crate) asset_amount: Option<u64>,
@@ -1151,7 +1683,27 @@ index 3ef5ebc..f992a41 100644
  }
  
  pub(crate) struct SendPaymentData {
-@@ -571,6 +572,7 @@ pub(crate) struct PaymentData {
+@@ -498,6 +513,19 @@ pub(crate) struct SendBtcData {
+     pub(crate) txid: String,
+ }
+ 
++pub(crate) struct CommitPreparedSendRequestData {
++    pub(crate) plan_id: String,
++    pub(crate) unsigned_psbt: String,
++}
++
++pub(crate) struct CancelBtcSendPlanRequestData {
++    pub(crate) plan_id: String,
++}
++
++pub(crate) struct CancelBtcSendPlanData {
++    pub(crate) cancelled: bool,
++}
++
+ pub(crate) struct MakerInitRequestData {
+     pub(crate) qty_from: u64,
+     pub(crate) qty_to: u64,
+@@ -571,6 +599,7 @@ pub(crate) struct PaymentData {
      pub(crate) payee_pubkey: String,
      pub(crate) preimage: Option<String>,
      pub(crate) description_hash: Option<String>,
@@ -1159,7 +1711,136 @@ index 3ef5ebc..f992a41 100644
  }
  
  pub(crate) struct CancelHodlInvoiceRequestData {
-@@ -2581,6 +2583,7 @@ pub(crate) async fn keysend(
+@@ -1751,18 +1780,10 @@ pub(crate) async fn send_rgb(
+     })
+ }
+ 
+-pub(crate) async fn send_rgb_from_groups(
+-    state: Arc<AppState>,
+-    request: SendRgbRequestData,
+-) -> Result<SendRgbData, APIError> {
+-    if request.recipient_groups.is_empty() {
+-        return Err(APIError::InvalidAmount(
+-            "recipient_groups cannot be empty".to_string(),
+-        ));
+-    }
+-
+-    let recipient_map = request
+-        .recipient_groups
++fn rgb_recipient_map_from_groups(
++    recipient_groups: Vec<AssetRecipientsInput>,
++) -> Result<HashMap<String, Vec<rgb_lib::wallet::Recipient>>, APIError> {
++    recipient_groups
+         .into_iter()
+         .map(|group| {
+             let recipients = group
+@@ -1785,7 +1806,20 @@ pub(crate) async fn send_rgb_from_groups(
+                 .collect::<Result<Vec<_>, APIError>>()?;
+             Ok((group.asset_id, recipients))
+         })
+-        .collect::<Result<HashMap<_, _>, APIError>>()?;
++        .collect::<Result<HashMap<_, _>, APIError>>()
++}
++
++pub(crate) async fn send_rgb_from_groups(
++    state: Arc<AppState>,
++    request: SendRgbRequestData,
++) -> Result<SendRgbData, APIError> {
++    if request.recipient_groups.is_empty() {
++        return Err(APIError::InvalidAmount(
++            "recipient_groups cannot be empty".to_string(),
++        ));
++    }
++
++    let recipient_map = rgb_recipient_map_from_groups(request.recipient_groups)?;
+ 
+     send_rgb(
+         state,
+@@ -1797,6 +1831,83 @@ pub(crate) async fn send_rgb_from_groups(
+     .await
+ }
+ 
++pub(crate) async fn prepare_rgb_send_from_groups(
++    state: Arc<AppState>,
++    request: SendRgbRequestData,
++) -> Result<PreparedSendData, APIError> {
++    if request.recipient_groups.is_empty() {
++        return Err(APIError::InvalidAmount(
++            "recipient_groups cannot be empty".to_string(),
++        ));
++    }
++
++    let recipient_map = rgb_recipient_map_from_groups(request.recipient_groups)?;
++    let guard = check_unlocked(&state).await?;
++    let unlocked_state = guard.as_ref().unwrap();
++    let unlocked_state_copy = unlocked_state.clone();
++    let begin_result = tokio::task::spawn_blocking(move || {
++        unlocked_state_copy.rgb_send_begin(
++            recipient_map,
++            request.donation,
++            request.fee_rate,
++            request.min_confirmations,
++            None,
++            true,
++            None,
++        )
++    })
++    .await
++    .map_err(|e| APIError::InvalidRequest(format!("RGB send planning task failed: {e}")))??;
++
++    let inspection = unlocked_state.rgb_inspect_psbt(begin_result.psbt.clone())?;
++    Ok(PreparedSendData {
++        plan_id: inspection.txid,
++        unsigned_psbt: begin_result.psbt,
++        fee_sat: inspection.fee_sat,
++        total_input_sat: inspection.total_input_sat,
++        total_output_sat: inspection.total_output_sat,
++        size_vbytes: inspection.size_vbytes,
++    })
++}
++
++pub(crate) async fn commit_prepared_rgb_send(
++    state: Arc<AppState>,
++    request: CommitPreparedSendRequestData,
++) -> Result<SendRgbData, APIError> {
++    let guard = check_unlocked(&state).await?;
++    let unlocked_state = guard.as_ref().unwrap();
++    let inspection = unlocked_state.rgb_inspect_psbt(request.unsigned_psbt.clone())?;
++    if inspection.txid != request.plan_id {
++        return Err(APIError::InvalidRequest(
++            "prepared RGB send plan does not match its PSBT".to_string(),
++        ));
++    }
++
++    let signed_psbt = unlocked_state
++        .rgb_sign_psbt(request.unsigned_psbt)
++        .map_err(|e| {
++            tracing::error!("rgb_sign_psbt failed during prepared RGB send: {e}");
++            APIError::from(e)
++        })?;
++    let signed_inspection = unlocked_state.rgb_inspect_psbt(signed_psbt.clone())?;
++    if signed_inspection.txid != request.plan_id {
++        return Err(APIError::InvalidRequest(
++            "signing changed the prepared RGB send transaction".to_string(),
++        ));
++    }
++
++    let result = unlocked_state.rgb_send_end(signed_psbt)?;
++    if result.txid != request.plan_id {
++        return Err(APIError::InvalidRequest(
++            "broadcast RGB transaction does not match the prepared plan".to_string(),
++        ));
++    }
++    Ok(SendRgbData {
++        txid: result.txid,
++        batch_transfer_idx: result.batch_transfer_idx,
++    })
++}
++
+ pub(crate) async fn init(
+     state: Arc<AppState>,
+     password: String,
+@@ -2581,6 +2692,7 @@ pub(crate) async fn keysend(
              payment_idx: None,
              async_hash_index: None,
              async_host_node_id: None,
@@ -1167,7 +1848,102 @@ index 3ef5ebc..f992a41 100644
          },
      )?;
      if let Some((contract_id, rgb_amount)) = rgb_payment {
-@@ -3120,10 +3123,15 @@ pub(crate) async fn send_payment(
+@@ -2651,6 +2763,94 @@ pub(crate) async fn send_btc(
+     Ok(SendBtcData { txid })
+ }
+ 
++pub(crate) async fn prepare_btc_send(
++    state: Arc<AppState>,
++    request: SendBtcRequestData,
++) -> Result<PreparedSendData, APIError> {
++    let guard = check_unlocked(&state).await?;
++    let unlocked_state = guard.as_ref().unwrap();
++    let unsigned_psbt = unlocked_state.rgb_prepare_send_btc(
++        request.address,
++        request.amount,
++        request.fee_rate,
++        request.skip_sync,
++    )?;
++    let inspection = unlocked_state.rgb_inspect_psbt(unsigned_psbt.clone())?;
++
++    Ok(PreparedSendData {
++        plan_id: inspection.txid,
++        unsigned_psbt,
++        fee_sat: inspection.fee_sat,
++        total_input_sat: inspection.total_input_sat,
++        total_output_sat: inspection.total_output_sat,
++        size_vbytes: inspection.size_vbytes,
++    })
++}
++
++pub(crate) async fn commit_prepared_btc_send(
++    state: Arc<AppState>,
++    request: CommitPreparedSendRequestData,
++) -> Result<SendBtcData, APIError> {
++    let guard = check_unlocked(&state).await?;
++    let unlocked_state = guard.as_ref().unwrap();
++    let inspection = unlocked_state.rgb_inspect_psbt(request.unsigned_psbt.clone())?;
++    if inspection.txid != request.plan_id {
++        return Err(APIError::InvalidRequest(
++            "prepared BTC send plan does not match its PSBT".to_string(),
++        ));
++    }
++
++    let signed_psbt = unlocked_state
++        .rgb_sign_psbt(request.unsigned_psbt)
++        .map_err(|e| {
++            tracing::error!("rgb_sign_psbt failed during prepared BTC send: {e}");
++            APIError::from(e)
++        })?;
++    let signed_inspection = unlocked_state.rgb_inspect_psbt(signed_psbt.clone())?;
++    if signed_inspection.txid != request.plan_id {
++        return Err(APIError::InvalidRequest(
++            "signing changed the prepared BTC send transaction".to_string(),
++        ));
++    }
++
++    let txid = unlocked_state.rgb_send_btc_end(signed_psbt)?;
++    if txid != request.plan_id {
++        return Err(APIError::InvalidRequest(
++            "broadcast BTC transaction does not match the prepared plan".to_string(),
++        ));
++    }
++    Ok(SendBtcData { txid })
++}
++
++pub(crate) async fn cancel_btc_send_plan(
++    state: Arc<AppState>,
++    request: CancelBtcSendPlanRequestData,
++) -> Result<CancelBtcSendPlanData, APIError> {
++    let guard = check_unlocked(&state).await?;
++    let unlocked_state = guard.as_ref().unwrap();
++    unlocked_state.rgb_abort_pending_vanilla_tx(request.plan_id)?;
++    Ok(CancelBtcSendPlanData { cancelled: true })
++}
++
++pub(crate) async fn list_pending_vanilla_transactions(
++    state: Arc<AppState>,
++) -> Result<Vec<PendingVanillaTransactionData>, APIError> {
++    let guard = check_unlocked(&state).await?;
++    let unlocked_state = guard.as_ref().unwrap();
++    Ok(unlocked_state
++        .rgb_list_pending_vanilla_txs()?
++        .into_iter()
++        .map(|transaction| PendingVanillaTransactionData {
++            txid: transaction.txid,
++            operation_type: match transaction.r#type {
++                rgb_lib::WalletTransactionType::CreateUtxos => "CreateUtxos".to_string(),
++                rgb_lib::WalletTransactionType::SendBtc => "SendBtc".to_string(),
++                rgb_lib::WalletTransactionType::Drain => "Drain".to_string(),
++            },
++        })
++        .collect())
++}
++
+ pub(crate) async fn post_asset_media(
+     state: Arc<AppState>,
+     file_bytes: Vec<u8>,
+@@ -3120,10 +3320,15 @@ pub(crate) async fn send_payment(
                  payment_idx: None,
                  async_hash_index: None,
                  async_host_node_id: None,
@@ -1183,7 +1959,7 @@ index 3ef5ebc..f992a41 100644
              retry_strategy: Retry::Timeout(Duration::from_secs(10)),
              ..Default::default()
          };
-@@ -3222,6 +3230,7 @@ pub(crate) async fn send_payment(
+@@ -3222,6 +3427,7 @@ pub(crate) async fn send_payment(
                  payment_idx: None,
                  async_hash_index: None,
                  async_host_node_id: None,
@@ -1191,7 +1967,7 @@ index 3ef5ebc..f992a41 100644
              },
          )?;
          let payment_hash = PaymentHash(invoice.payment_hash().to_byte_array());
-@@ -3245,7 +3254,10 @@ pub(crate) async fn send_payment(
+@@ -3245,7 +3451,10 @@ pub(crate) async fn send_payment(
              &invoice,
              payment_id,
              Some(amt_msat),
@@ -1203,7 +1979,7 @@ index 3ef5ebc..f992a41 100644
              bolt11_retry,
          ) {
              Ok(_) => {
-@@ -3663,6 +3675,102 @@ pub(crate) async fn sync(state: Arc<AppState>) -> Result<(), APIError> {
+@@ -3663,6 +3872,102 @@ pub(crate) async fn sync(state: Arc<AppState>) -> Result<(), APIError> {
      Ok(())
  }
  
@@ -1306,7 +2082,7 @@ index 3ef5ebc..f992a41 100644
  pub(crate) async fn decode_ln_invoice(
      state: Arc<AppState>,
      invoice: String,
-@@ -3844,6 +3952,7 @@ pub(crate) async fn create_ln_invoice(
+@@ -3844,6 +4149,7 @@ pub(crate) async fn create_ln_invoice(
              payment_idx: None,
              async_hash_index: None,
              async_host_node_id: None,
@@ -1314,7 +2090,7 @@ index 3ef5ebc..f992a41 100644
          },
      );
  
-@@ -3888,6 +3997,7 @@ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentDat
+@@ -3888,6 +4194,7 @@ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentDat
              payee_pubkey: payment_info.payee_pubkey.to_string(),
              preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
              description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
@@ -1322,7 +2098,7 @@ index 3ef5ebc..f992a41 100644
          });
      }
  
-@@ -3913,6 +4023,7 @@ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentDat
+@@ -3913,6 +4220,7 @@ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentDat
              payee_pubkey: payment_info.payee_pubkey.to_string(),
              preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
              description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
@@ -1330,7 +2106,7 @@ index 3ef5ebc..f992a41 100644
          });
      }
  
-@@ -3959,6 +4070,7 @@ pub(crate) async fn get_payment(
+@@ -3959,6 +4267,7 @@ pub(crate) async fn get_payment(
                          payee_pubkey: payment_info.payee_pubkey.to_string(),
                          preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
                          description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
@@ -1338,7 +2114,7 @@ index 3ef5ebc..f992a41 100644
                      });
                  }
              }
-@@ -3987,6 +4099,7 @@ pub(crate) async fn get_payment(
+@@ -3987,6 +4296,7 @@ pub(crate) async fn get_payment(
                          payee_pubkey: payment_info.payee_pubkey.to_string(),
                          preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
                          description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
@@ -1347,10 +2123,44 @@ index 3ef5ebc..f992a41 100644
                  }
              }
 diff --git a/src/uniffi_api/mod.rs b/src/uniffi_api/mod.rs
-index c6173a3..3b1d31c 100644
+index c6173a3..0664a29 100644
 --- a/src/uniffi_api/mod.rs
 +++ b/src/uniffi_api/mod.rs
-@@ -200,6 +200,7 @@ fn map_payment_data(data: crate::sdk::PaymentData) -> Result<Payment, RlnError>
+@@ -115,11 +115,8 @@ fn handle_from_request(request: SdkInitRequest) -> Result<NodeHandle, RlnError>
+     block_on_app(NodeHandle::new(config))
+ }
+ 
+-fn send_rgb_from_state(
+-    state: std::sync::Arc<crate::utils::AppState>,
+-    request: SendRgbRequest,
+-) -> Result<SendRgbResponse, RlnError> {
+-    let sdk_request = sdk::SendRgbRequestData {
++fn into_sdk_send_rgb_request(request: SendRgbRequest) -> sdk::SendRgbRequestData {
++    sdk::SendRgbRequestData {
+         donation: request.donation,
+         fee_rate: request.fee_rate,
+         min_confirmations: request.min_confirmations,
+@@ -156,9 +153,17 @@ fn send_rgb_from_state(
+                     .collect(),
+             })
+             .collect(),
+-    };
++    }
++}
+ 
+-    let data = block_on_sdk(sdk::send_rgb_from_groups(state, sdk_request))?;
++fn send_rgb_from_state(
++    state: std::sync::Arc<crate::utils::AppState>,
++    request: SendRgbRequest,
++) -> Result<SendRgbResponse, RlnError> {
++    let data = block_on_sdk(sdk::send_rgb_from_groups(
++        state,
++        into_sdk_send_rgb_request(request),
++    ))?;
+     let txid = Txid::from_str(&data.txid).map_err(RlnError::internal)?;
+     Ok(SendRgbResponse {
+         txid,
+@@ -200,6 +205,7 @@ fn map_payment_data(data: crate::sdk::PaymentData) -> Result<Payment, RlnError>
          payee_pubkey,
          preimage: data.preimage,
          description_hash: data.description_hash,
@@ -1358,7 +2168,84 @@ index c6173a3..3b1d31c 100644
      })
  }
  
-@@ -787,6 +788,7 @@ impl SdkNode {
+@@ -673,6 +679,76 @@ impl SdkNode {
+         Ok(SdkSendBtcResponse { txid })
+     }
+ 
++    pub fn prepare_btc_send(
++        &self,
++        request: SdkSendBtcRequest,
++    ) -> Result<SdkPreparedSendResponse, RlnError> {
++        let response = block_on_sdk(sdk::prepare_btc_send(
++            self.handle.app_state(),
++            sdk::SendBtcRequestData {
++                amount: request.amount,
++                address: request.address,
++                fee_rate: request.fee_rate,
++                skip_sync: request.skip_sync,
++            },
++        ))?;
++        Ok(SdkPreparedSendResponse {
++            plan_id: Txid::from_str(&response.plan_id).map_err(RlnError::internal)?,
++            unsigned_psbt: response.unsigned_psbt,
++            fee_sat: response.fee_sat,
++            total_input_sat: response.total_input_sat,
++            total_output_sat: response.total_output_sat,
++            size_vbytes: response.size_vbytes,
++        })
++    }
++
++    pub fn commit_prepared_btc_send(
++        &self,
++        request: SdkCommitPreparedSendRequest,
++    ) -> Result<SdkSendBtcResponse, RlnError> {
++        let response = block_on_sdk(sdk::commit_prepared_btc_send(
++            self.handle.app_state(),
++            sdk::CommitPreparedSendRequestData {
++                plan_id: request.plan_id.to_string(),
++                unsigned_psbt: request.unsigned_psbt,
++            },
++        ))?;
++        Ok(SdkSendBtcResponse {
++            txid: Txid::from_str(&response.txid).map_err(RlnError::internal)?,
++        })
++    }
++
++    pub fn cancel_btc_send_plan(
++        &self,
++        request: SdkCancelBtcSendPlanRequest,
++    ) -> Result<SdkCancelBtcSendPlanResponse, RlnError> {
++        let response = block_on_sdk(sdk::cancel_btc_send_plan(
++            self.handle.app_state(),
++            sdk::CancelBtcSendPlanRequestData {
++                plan_id: request.plan_id.to_string(),
++            },
++        ))?;
++        Ok(SdkCancelBtcSendPlanResponse {
++            cancelled: response.cancelled,
++        })
++    }
++
++    pub fn list_pending_vanilla_transactions(
++        &self,
++    ) -> Result<Vec<SdkPendingVanillaTransaction>, RlnError> {
++        block_on_sdk(sdk::list_pending_vanilla_transactions(
++            self.handle.app_state(),
++        ))?
++        .into_iter()
++        .map(|transaction| {
++            Ok(SdkPendingVanillaTransaction {
++                txid: Txid::from_str(&transaction.txid).map_err(RlnError::internal)?,
++                operation_type: transaction.operation_type,
++            })
++        })
++        .collect()
++    }
++
+     pub fn makerinit(
+         &self,
+         request: SdkMakerInitRequest,
+@@ -787,6 +863,7 @@ impl SdkNode {
                  amt_msat: request.amt_msat,
                  asset_id: request.asset_id.map(|id| id.to_string()),
                  asset_amount: request.asset_amount,
@@ -1366,7 +2253,7 @@ index c6173a3..3b1d31c 100644
              },
          ))?;
          let status = match response.status {
-@@ -847,6 +849,30 @@ impl SdkNode {
+@@ -847,6 +924,30 @@ impl SdkNode {
          Ok(())
      }
  
@@ -1397,6 +2284,48 @@ index c6173a3..3b1d31c 100644
      pub fn node_info(&self) -> Result<NodeInfo, RlnError> {
          let state = self.handle.app_state();
          let data = block_on_sdk(sdk::node_info(state))?;
+@@ -1441,6 +1542,41 @@ impl SdkNode {
+         send_rgb_from_state(self.handle.app_state(), request)
+     }
+ 
++    pub fn prepare_rgb_send(
++        &self,
++        request: SendRgbRequest,
++    ) -> Result<SdkPreparedSendResponse, RlnError> {
++        let response = block_on_sdk(sdk::prepare_rgb_send_from_groups(
++            self.handle.app_state(),
++            into_sdk_send_rgb_request(request),
++        ))?;
++        Ok(SdkPreparedSendResponse {
++            plan_id: Txid::from_str(&response.plan_id).map_err(RlnError::internal)?,
++            unsigned_psbt: response.unsigned_psbt,
++            fee_sat: response.fee_sat,
++            total_input_sat: response.total_input_sat,
++            total_output_sat: response.total_output_sat,
++            size_vbytes: response.size_vbytes,
++        })
++    }
++
++    pub fn commit_prepared_rgb_send(
++        &self,
++        request: SdkCommitPreparedSendRequest,
++    ) -> Result<SendRgbResponse, RlnError> {
++        let response = block_on_sdk(sdk::commit_prepared_rgb_send(
++            self.handle.app_state(),
++            sdk::CommitPreparedSendRequestData {
++                plan_id: request.plan_id.to_string(),
++                unsigned_psbt: request.unsigned_psbt,
++            },
++        ))?;
++        Ok(SendRgbResponse {
++            txid: Txid::from_str(&response.txid).map_err(RlnError::internal)?,
++            batch_transfer_idx: response.batch_transfer_idx,
++        })
++    }
++
+     pub fn apay_new(&self, host_node_id: String) -> Result<AsyncOrderNewResponse, RlnError> {
+         let state = self.handle.app_state();
+         let response = block_on_sdk(sdk::async_order_new(
 diff --git a/src/uniffi_api/tests.rs b/src/uniffi_api/tests.rs
 index 4f37a95..ae411f3 100644
 --- a/src/uniffi_api/tests.rs
@@ -1416,7 +2345,7 @@ index 4f37a95..ae411f3 100644
      }
  
 diff --git a/src/uniffi_api/types.rs b/src/uniffi_api/types.rs
-index beeaf62..d705f63 100644
+index beeaf62..84e12e4 100644
 --- a/src/uniffi_api/types.rs
 +++ b/src/uniffi_api/types.rs
 @@ -112,6 +112,23 @@ pub struct BtcBalanceInfo {
@@ -1459,3 +2388,37 @@ index beeaf62..d705f63 100644
  }
  
  pub struct SdkSendPaymentResponse {
+@@ -622,6 +641,33 @@ pub struct SdkSendBtcResponse {
+     pub txid: Txid,
+ }
+ 
++pub struct SdkPreparedSendResponse {
++    pub plan_id: Txid,
++    pub unsigned_psbt: String,
++    pub fee_sat: u64,
++    pub total_input_sat: u64,
++    pub total_output_sat: u64,
++    pub size_vbytes: u64,
++}
++
++pub struct SdkCommitPreparedSendRequest {
++    pub plan_id: Txid,
++    pub unsigned_psbt: String,
++}
++
++pub struct SdkCancelBtcSendPlanRequest {
++    pub plan_id: Txid,
++}
++
++pub struct SdkCancelBtcSendPlanResponse {
++    pub cancelled: bool,
++}
++
++pub struct SdkPendingVanillaTransaction {
++    pub txid: Txid,
++    pub operation_type: String,
++}
++
+ pub struct SdkMakerInitRequest {
+     pub qty_from: u64,
+     pub qty_to: u64,

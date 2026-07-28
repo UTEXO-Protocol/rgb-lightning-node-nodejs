@@ -171,6 +171,40 @@ export interface WalletSnapshotResponse {
   transfers?: WalletSnapshotAssetTransfers[]
 }
 
+export interface BtcSendRequest {
+  amount: number
+  address: string
+  fee_rate: number
+  skip_sync: boolean
+}
+
+export interface PreparedSendResponse {
+  plan_id: string
+  unsigned_psbt: string
+  fee_sat: DecimalString
+  total_input_sat: DecimalString
+  total_output_sat: DecimalString
+  size_vbytes: DecimalString
+}
+
+export interface CommitPreparedSendRequest {
+  plan_id: string
+  unsigned_psbt: string
+}
+
+export interface SendBtcResponse {
+  txid: string
+}
+
+export interface CancelBtcSendPlanResponse {
+  cancelled: boolean
+}
+
+export interface PendingVanillaTransaction {
+  txid: string
+  operation_type: 'CreateUtxos' | 'Drain' | 'SendBtc'
+}
+
 export class NativeExternalSigner {
   static create(
     seedHex: string,
@@ -223,7 +257,11 @@ export class SdkNode {
   listUnspents(skipSync?: boolean): JsonValue
   listTransactions(skipSync?: boolean): JsonValue
   listTransactionsByTxid(txid: string, skipSync?: boolean): JsonValue
-  sendBtc(request: JsonRequest): JsonValue
+  sendBtc(request: BtcSendRequest): SendBtcResponse
+  prepareBtcSend(request: BtcSendRequest): PreparedSendResponse
+  commitPreparedBtcSend(request: CommitPreparedSendRequest): SendBtcResponse
+  cancelBtcSendPlan(request: { plan_id: string }): CancelBtcSendPlanResponse
+  listPendingVanillaTransactions(): PendingVanillaTransaction[]
   createUtxos(request: JsonRequest): JsonValue
   estimateFee(blocks: number): JsonObject
 
@@ -258,6 +296,8 @@ export class SdkNode {
   rgbInvoice(request: JsonRequest): JsonObject
   decodeRgbInvoice(invoice: string): JsonObject
   sendRgb(request: JsonRequest): JsonValue
+  prepareRgbSend(request: JsonRequest): PreparedSendResponse
+  commitPreparedRgbSend(request: CommitPreparedSendRequest): JsonValue
   refreshTransfers(request: JsonRequest): { ok: true }
   failTransfers(request: JsonRequest): JsonValue
   inflate(request: JsonRequest): JsonValue
