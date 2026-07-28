@@ -10,14 +10,18 @@ while pre-`1.0`.
 ## [Unreleased]
 
 ### Added
+- Authoritative `listAddressReceipts(address)` settlement evidence backed by
+  the configured Electrum or Esplora indexer, including exact received
+  satoshis, transaction IDs, block heights, and confirmation counts.
 - Deterministic BTC and RGB on-chain send plans. `prepareBtcSend()` and
-  `prepareRgbSend()` return the exact unsigned PSBT, transaction id, fee,
-  input/output totals, and virtual size that the wallet reviewed;
-  `commitPreparedBtcSend()` and `commitPreparedRgbSend()` validate and submit
-  that exact plan.
-- BTC plan cancellation and bounded pending-vanilla-transaction inspection,
-  allowing consumers to clean up abandoned `SendBtc` reservations without
-  touching channel or UTXO-management operations.
+  `prepareRgbSend()` reserve the exact unsigned plan inside the native wallet
+  and return only its opaque transaction identity, fee, input/output totals,
+  virtual size, and RGB batch identity. `commitPreparedBtcSend()` and
+  `commitPreparedRgbSend()` idempotently validate and submit that exact
+  native plan without exposing PSBT material to JavaScript.
+- Idempotent BTC and RGB plan cancellation plus bounded pending-plan
+  inspection, allowing consumers to release abandoned send reservations
+  without touching channel or UTXO-management operations.
 - `SdkNode.syncWallet()` and `SdkNode.walletSnapshot()` with a shared
   v0.9.0-beta.3 native overlay: dual-keychain FullSync/FullScan modes,
   bounded activity, coherent tip evidence, and decimal-string amounts.

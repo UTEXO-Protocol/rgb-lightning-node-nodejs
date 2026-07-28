@@ -23,14 +23,15 @@ use napi_derive::napi;
 
 use rlncffi::{
     free_native_external_signer, free_sdk_node, rln_address, rln_asset_balance, rln_asset_metadata,
-    rln_btc_balance, rln_cancel_btc_send_plan, rln_cancel_hodl_invoice, rln_check_indexer_url,
-    rln_check_proxy_endpoint, rln_claim_hodl_invoice, rln_close_channel,
+    rln_btc_balance, rln_cancel_btc_send_plan, rln_cancel_hodl_invoice, rln_cancel_rgb_send_plan,
+    rln_check_indexer_url, rln_check_proxy_endpoint, rln_claim_hodl_invoice, rln_close_channel,
     rln_commit_prepared_btc_send, rln_commit_prepared_rgb_send, rln_connect_peer, rln_create_utxos,
     rln_decode_ln_invoice, rln_decode_rgb_invoice, rln_disconnect_peer, rln_estimate_fee,
     rln_fail_transfers, rln_free_string, rln_get_asset_media, rln_get_channel_id, rln_get_payment,
     rln_get_swap, rln_inflate, rln_invoice_status, rln_issue_asset_cfa, rln_issue_asset_ifa,
-    rln_issue_asset_nia, rln_issue_asset_uda, rln_keysend, rln_list_assets, rln_list_channels,
-    rln_list_payments, rln_list_peers, rln_list_pending_vanilla_transactions, rln_list_swaps,
+    rln_issue_asset_nia, rln_issue_asset_uda, rln_keysend, rln_list_address_receipts,
+    rln_list_assets, rln_list_channels, rln_list_payments, rln_list_peers,
+    rln_list_pending_rgb_send_plans, rln_list_pending_vanilla_transactions, rln_list_swaps,
     rln_list_transactions, rln_list_transactions_by_txid, rln_list_transfers,
     rln_list_transfers_by_txid, rln_list_unspents, rln_ln_invoice, rln_maker_execute,
     rln_maker_init, rln_native_external_signer_bootstrap, rln_native_external_signer_new,
@@ -409,6 +410,14 @@ impl SdkNode {
     pub fn list_pending_vanilla_transactions(&self) -> Result<String> {
         fwd_noarg!(self, rln_list_pending_vanilla_transactions)
     }
+
+    #[napi]
+    pub fn list_address_receipts(&self, address: String) -> Result<String> {
+        let address_c = cstring(&address)?;
+        let res = rln_list_address_receipts(&self.handle, address_c.as_ptr());
+        take_cresult_string(res)
+    }
+
     #[napi]
     pub fn create_utxos(&self, request_json: String) -> Result<String> {
         fwd_json_req!(self, rln_create_utxos, request_json)
@@ -534,6 +543,16 @@ impl SdkNode {
     #[napi]
     pub fn commit_prepared_rgb_send(&self, request_json: String) -> Result<String> {
         fwd_json_req!(self, rln_commit_prepared_rgb_send, request_json)
+    }
+
+    #[napi]
+    pub fn cancel_rgb_send_plan(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_cancel_rgb_send_plan, request_json)
+    }
+
+    #[napi]
+    pub fn list_pending_rgb_send_plans(&self) -> Result<String> {
+        fwd_noarg!(self, rln_list_pending_rgb_send_plans)
     }
     /// Forces an electrum re-scan + rgb-lib reconciliation. Returns
     /// nothing — callers re-poll `get_asset_balance` afterwards.

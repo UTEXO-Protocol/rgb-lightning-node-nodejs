@@ -170,6 +170,11 @@ class SdkNode {
   listPendingVanillaTransactions () {
     return JSON.parse(this._inner.listPendingVanillaTransactions())
   }
+
+  listAddressReceipts (address) {
+    return JSON.parse(this._inner.listAddressReceipts(address))
+  }
+
   createUtxos (request) {
     return JSON.parse(this._inner.createUtxos(JSON.stringify(request)))
   }
@@ -263,6 +268,12 @@ class SdkNode {
 
   commitPreparedRgbSend (request) {
     return JSON.parse(this._inner.commitPreparedRgbSend(JSON.stringify(request)))
+  }
+  cancelRgbSendPlan (request) {
+    return JSON.parse(this._inner.cancelRgbSendPlan(JSON.stringify(request)))
+  }
+  listPendingRgbSendPlans () {
+    return JSON.parse(this._inner.listPendingRgbSendPlans())
   }
   refreshTransfers (request) {
     this._inner.refreshTransfers(JSON.stringify(request))

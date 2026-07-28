@@ -180,16 +180,18 @@ export interface BtcSendRequest {
 
 export interface PreparedSendResponse {
   plan_id: string
-  unsigned_psbt: string
   fee_sat: DecimalString
   total_input_sat: DecimalString
   total_output_sat: DecimalString
   size_vbytes: DecimalString
 }
 
+export interface PreparedRgbSendResponse extends PreparedSendResponse {
+  batch_transfer_idx: number
+}
+
 export interface CommitPreparedSendRequest {
   plan_id: string
-  unsigned_psbt: string
 }
 
 export interface SendBtcResponse {
@@ -203,6 +205,18 @@ export interface CancelBtcSendPlanResponse {
 export interface PendingVanillaTransaction {
   txid: string
   operation_type: 'CreateUtxos' | 'Drain' | 'SendBtc'
+}
+
+export interface PendingRgbSendPlan {
+  plan_id: string
+  batch_transfer_idx: number
+}
+
+export interface AddressReceipt {
+  txid: string
+  amount_sat: DecimalString
+  confirmations: number
+  block_height: number | null
 }
 
 export class NativeExternalSigner {
@@ -262,6 +276,7 @@ export class SdkNode {
   commitPreparedBtcSend(request: CommitPreparedSendRequest): SendBtcResponse
   cancelBtcSendPlan(request: { plan_id: string }): CancelBtcSendPlanResponse
   listPendingVanillaTransactions(): PendingVanillaTransaction[]
+  listAddressReceipts(address: string): AddressReceipt[]
   createUtxos(request: JsonRequest): JsonValue
   estimateFee(blocks: number): JsonObject
 
@@ -296,8 +311,10 @@ export class SdkNode {
   rgbInvoice(request: JsonRequest): JsonObject
   decodeRgbInvoice(invoice: string): JsonObject
   sendRgb(request: JsonRequest): JsonValue
-  prepareRgbSend(request: JsonRequest): PreparedSendResponse
+  prepareRgbSend(request: JsonRequest): PreparedRgbSendResponse
   commitPreparedRgbSend(request: CommitPreparedSendRequest): JsonValue
+  cancelRgbSendPlan(request: { plan_id: string }): CancelBtcSendPlanResponse
+  listPendingRgbSendPlans(): PendingRgbSendPlan[]
   refreshTransfers(request: JsonRequest): { ok: true }
   failTransfers(request: JsonRequest): JsonValue
   inflate(request: JsonRequest): JsonValue
