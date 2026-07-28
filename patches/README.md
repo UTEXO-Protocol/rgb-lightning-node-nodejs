@@ -18,7 +18,8 @@ matching file are built directly from upstream.
 
 Adds versioned dual-keychain synchronization, bounded decimal-safe wallet
 snapshots, explicit Lightning routing-fee caps, and persisted actual routing
-fees to the pinned v0.10 native source. It also adds deterministic BTC/RGB
+fees to the pinned v0.10 native source. It preserves complete Lightning
+invoice decode metadata across C-FFI and also adds deterministic BTC/RGB
 prepare-and-commit plans, BTC plan cancellation, and pending vanilla
 transaction inspection.
 

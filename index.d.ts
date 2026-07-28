@@ -127,6 +127,19 @@ export interface WalletSnapshotPayment {
   payee_pubkey: string
 }
 
+export interface DecodedLnInvoice {
+  amt_msat: number | null
+  expiry_sec: number
+  timestamp: number
+  asset_id: string | null
+  asset_amount: number | null
+  payment_hash: string
+  payment_secret: string
+  payee_pubkey: string | null
+  min_final_cltv_expiry_delta: number
+  network: string
+}
+
 export interface WalletSnapshotTransferEndpoint {
   endpoint: string
   transport_type: string
@@ -282,7 +295,7 @@ export class SdkNode {
 
   // Lightning invoices / payments
   lnInvoice(request: JsonRequest): JsonObject
-  decodeLnInvoice(invoice: string): JsonObject
+  decodeLnInvoice(invoice: string): DecodedLnInvoice
   invoiceStatus(invoice: string): JsonObject
   cancelHodlInvoice(request: JsonRequest): JsonValue
   claimHodlInvoice(request: JsonRequest): JsonValue

@@ -47,6 +47,9 @@ while pre-`1.0`.
   directory, preserving the committed object-based facade and its types.
 
 ### Fixed
+- `decodeLnInvoice()` now preserves `min_final_cltv_expiry_delta` across the
+  C-FFI JSON boundary. A native contract test guards the complete NodeJS
+  response shape against future DTO drift.
 - C-FFI network information now emits canonical lowercase network names,
   matching the public TypeScript contract and wallet snapshot contract v1.
 - The local native-build lock graph now pins `rln-external-signer` to the
