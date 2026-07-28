@@ -47,6 +47,9 @@ while pre-`1.0`.
   directory, preserving the committed object-based facade and its types.
 
 ### Fixed
+- Reopening a trusted virtual channel no longer fails after the previous
+  channel was safely abandoned. Active and abandon-pending sessions still
+  block duplicate opens; only the terminal abandoned state is reusable.
 - `decodeRgbInvoice()` now returns a stable tagged assignment object instead
   of an implementation-defined Rust `Debug` string. The exact blind/witness
   recipient type and nullable expiration remain preserved.

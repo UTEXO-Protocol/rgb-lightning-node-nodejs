@@ -22,6 +22,8 @@ fees to the pinned v0.10 native source. It preserves complete Lightning
 invoice decode metadata and stable tagged RGB assignments across C-FFI, and
 also adds deterministic BTC/RGB prepare-and-commit plans, BTC plan
 cancellation, and pending vanilla transaction inspection.
+The same overlay permits a replacement trusted virtual channel only after the
+previous native session reaches its terminal abandoned state.
 
 Adds the versioned wallet synchronization and exact snapshot contract used by
 WDK portfolio refreshes. Routine synchronization FullSyncs both Vanilla and

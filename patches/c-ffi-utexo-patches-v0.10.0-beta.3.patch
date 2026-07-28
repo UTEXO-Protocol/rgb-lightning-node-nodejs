@@ -1,5 +1,5 @@
 diff --git a/bindings/c-ffi/Cargo.lock b/bindings/c-ffi/Cargo.lock
-index 5886c2dad3ab839a54a67db6f8852e9a064cce31..c06e1007be05bac0064eeaa31cafb1038a230e2c 100644
+index 5886c2d..c06e100 100644
 --- a/bindings/c-ffi/Cargo.lock
 +++ b/bindings/c-ffi/Cargo.lock
 @@ -177,7 +177,7 @@ version = "1.1.5"
@@ -195,7 +195,7 @@ index 5886c2dad3ab839a54a67db6f8852e9a064cce31..c06e1007be05bac0064eeaa31cafb103
 
  [[package]]
 diff --git a/bindings/c-ffi/rln.h b/bindings/c-ffi/rln.h
-index eb7e5720fb56a391d66a6a2bcaeb8951cb94915b..5293a55b0455437505cb7051b86d6a40f662e54f 100644
+index eb7e572..5293a55 100644
 --- a/bindings/c-ffi/rln.h
 +++ b/bindings/c-ffi/rln.h
 @@ -41,9 +41,15 @@ struct CResultString rln_asset_metadata(const struct COpaqueStruct *node, const
@@ -278,7 +278,7 @@ index eb7e5720fb56a391d66a6a2bcaeb8951cb94915b..5293a55b0455437505cb7051b86d6a40
 +struct CResultString rln_wallet_snapshot(const struct COpaqueStruct *node,
 +                                         const char *request_json);
 diff --git a/bindings/c-ffi/rln.hpp b/bindings/c-ffi/rln.hpp
-index 64266ecd582ccf2bc6b254f2a32cc25e47a6848b..5a18f53577baa0c2efd2f39b89d0520f2438d698 100644
+index 64266ec..5a18f53 100644
 --- a/bindings/c-ffi/rln.hpp
 +++ b/bindings/c-ffi/rln.hpp
 @@ -43,8 +43,12 @@ CResultString rln_asset_metadata(const COpaqueStruct *node, const char *asset_id
@@ -353,7 +353,7 @@ index 64266ecd582ccf2bc6b254f2a32cc25e47a6848b..5a18f53577baa0c2efd2f39b89d0520f
 +
  }  // extern "C"
 diff --git a/bindings/c-ffi/src/api.rs b/bindings/c-ffi/src/api.rs
-index edb35eddf1b5a15b8965bb012b227357c2bf3635..70b4bfb9c956331a52f6bf4d1b064282b0f89f5f 100644
+index edb35ed..70b4bfb 100644
 --- a/bindings/c-ffi/src/api.rs
 +++ b/bindings/c-ffi/src/api.rs
 @@ -3,9 +3,12 @@
@@ -918,7 +918,7 @@ index edb35eddf1b5a15b8965bb012b227357c2bf3635..70b4bfb9c956331a52f6bf4d1b064282
 +    }
 +}
 diff --git a/bindings/c-ffi/src/json_types.rs b/bindings/c-ffi/src/json_types.rs
-index fc570e0696a2053aac7f7230473b2e51f37abe05..0381292feca24125fb4f5528ed24c8ea717d94a3 100644
+index fc570e0..0381292 100644
 --- a/bindings/c-ffi/src/json_types.rs
 +++ b/bindings/c-ffi/src/json_types.rs
 @@ -15,25 +15,27 @@ use hex::DisplayHex;
@@ -1846,7 +1846,7 @@ index fc570e0696a2053aac7f7230473b2e51f37abe05..0381292feca24125fb4f5528ed24c8ea
  pub(crate) struct JsonCreateUtxosRequest {
      pub up_to: bool,
 diff --git a/bindings/c-ffi/src/lib.rs b/bindings/c-ffi/src/lib.rs
-index 24c3371d26d8a79fb3d7307095235f4c99fb373e..391db1a61d993c4ff1d8b45ec508f464c8a69bb8 100644
+index 24c3371..391db1a 100644
 --- a/bindings/c-ffi/src/lib.rs
 +++ b/bindings/c-ffi/src/lib.rs
 @@ -100,7 +100,10 @@ pub extern "C" fn rln_sdk_node_init(
@@ -2445,7 +2445,7 @@ index 24c3371d26d8a79fb3d7307095235f4c99fb373e..391db1a61d993c4ff1d8b45ec508f464
 +    )
  }
 diff --git a/bindings/rgb_lightning_node.udl b/bindings/rgb_lightning_node.udl
-index 286134a1b2aa50ba6264e09b4e523adba0e3a1cd..40957dae7dda1dd753300d30c0ef8c138cb4d980 100644
+index 286134a..40957da 100644
 --- a/bindings/rgb_lightning_node.udl
 +++ b/bindings/rgb_lightning_node.udl
 @@ -73,6 +73,16 @@ interface SdkNode {
@@ -2550,7 +2550,7 @@ index 286134a1b2aa50ba6264e09b4e523adba0e3a1cd..40957dae7dda1dd753300d30c0ef8c13
 
  dictionary SdkSendPaymentResponse {
 diff --git a/src/indexer.rs b/src/indexer.rs
-index a7602997ada5a6de96e4b8d777a5d5563fbb6db2..58d210cc2f9ccb2e4ec5ecbd8f2f365abe770cc2 100644
+index a760299..58d210c 100644
 --- a/src/indexer.rs
 +++ b/src/indexer.rs
 @@ -1,4 +1,4 @@
@@ -2840,7 +2840,7 @@ index a7602997ada5a6de96e4b8d777a5d5563fbb6db2..58d210cc2f9ccb2e4ec5ecbd8f2f365a
      client: &ElectrumClient,
      height: usize,
 diff --git a/src/ldk.rs b/src/ldk.rs
-index e4abdac82dcc400f2d3723a185678a7cc4a64edd..8e5e6b636cb986432c74f43bb06fb2b3b25d599c 100644
+index e4abdac..7021bae 100644
 --- a/src/ldk.rs
 +++ b/src/ldk.rs
 @@ -124,7 +124,7 @@ use crate::core_types::{HTLCStatus, NodeKeySource, SwapStatus, UnlockRequest};
@@ -2868,7 +2868,22 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..8e5e6b636cb986432c74f43bb06fb2b3
  });
 
  pub(crate) struct InboundPaymentInfoStorage {
-@@ -698,6 +700,7 @@ impl UnlockedAppState {
+@@ -381,6 +383,14 @@ pub(crate) struct VirtualChannelSessionStore {
+     pub(crate) entries: LdkHashMap<ChannelId, VirtualChannelSession>,
+ }
+
++fn virtual_channel_session_blocks_reopen(
++    session: &VirtualChannelSession,
++    peer_id: &PublicKey,
++) -> bool {
++    session.peer_id == *peer_id
++        && !matches!(session.status, VirtualChannelSessionStatus::Abandoned)
++}
++
+ impl_writeable_tlv_based!(VirtualChannelSessionStore, {
+     (0, entries, required),
+ });
+@@ -698,6 +708,7 @@ impl UnlockedAppState {
                      payment_idx: None,
                      async_hash_index: None,
                      async_host_node_id: None,
@@ -2876,7 +2891,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..8e5e6b636cb986432c74f43bb06fb2b3
                  };
                  self.stamp_payment_idx(&mut payment_info);
                  e.insert(payment_info);
-@@ -711,11 +714,13 @@ impl UnlockedAppState {
+@@ -711,11 +722,13 @@ impl UnlockedAppState {
          payment_id: PaymentId,
          status: HTLCStatus,
          preimage: Option<PaymentPreimage>,
@@ -2890,7 +2905,16 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..8e5e6b636cb986432c74f43bb06fb2b3
          payment_info.updated_at = get_current_timestamp();
          let payment = (*payment_info).clone();
          self.save_outbound_payments(outbound);
-@@ -1363,6 +1368,7 @@ impl AsyncOrderInvoiceProvider for AsyncOrderRecipientInvoiceProvider {
+@@ -794,7 +807,7 @@ impl UnlockedAppState {
+             .get_virtual_channel_session_store()
+             .entries
+             .values()
+-            .any(|session| session.peer_id == peer_id);
++            .any(|session| virtual_channel_session_blocks_reopen(session, &peer_id));
+         if duplicate_virtual_session {
+             return Err(APIError::InvalidRequest(
+                 "virtual channel session already exists for this peer pair".to_string(),
+@@ -1363,6 +1376,7 @@ impl AsyncOrderInvoiceProvider for AsyncOrderRecipientInvoiceProvider {
                  payment_idx: None,
                  async_hash_index: self.external_signer_mode.then_some(hash_index),
                  async_host_node_id: self.external_signer_mode.then_some(sender_node_id),
@@ -2898,7 +2922,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..8e5e6b636cb986432c74f43bb06fb2b3
              },
          )?;
 
-@@ -2537,6 +2543,7 @@ async fn handle_ldk_events(
+@@ -2537,6 +2551,7 @@ async fn handle_ldk_events(
                      payment_id.unwrap(),
                      HTLCStatus::Succeeded,
                      Some(payment_preimage),
@@ -2906,7 +2930,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..8e5e6b636cb986432c74f43bb06fb2b3
                  );
                  unlocked_state
                      .async_order_handler
-@@ -4218,16 +4225,16 @@ pub(crate) async fn start_ldk(
+@@ -4218,16 +4233,16 @@ pub(crate) async fn start_ldk(
      }
 
      // RGB setup
@@ -2926,7 +2950,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..8e5e6b636cb986432c74f43bb06fb2b3
              BitcoinNetwork::Regtest => ELECTRUM_URL_REGTEST,
              BitcoinNetwork::Signet => ELECTRUM_URL_SIGNET,
              BitcoinNetwork::Testnet => ELECTRUM_URL_TESTNET,
-@@ -4238,7 +4245,28 @@ pub(crate) async fn start_ldk(
+@@ -4238,7 +4253,28 @@ pub(crate) async fn start_ldk(
                      "with custom signet indexer must be provided"
                  )))
              }
@@ -2955,7 +2979,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..8e5e6b636cb986432c74f43bb06fb2b3
      };
      let proxy_endpoint = if let Some(proxy_endpoint) = &unlock_request.proxy_endpoint {
          check_rgb_proxy_endpoint(proxy_endpoint).await?;
-@@ -5263,6 +5291,7 @@ pub(crate) async fn start_ldk(
+@@ -5263,6 +5299,7 @@ pub(crate) async fn start_ldk(
 
      let unlocked_state = Arc::new(UnlockedAppState {
          config: static_state.config.clone(),
@@ -2963,8 +2987,62 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..8e5e6b636cb986432c74f43bb06fb2b3
          channel_manager: Arc::clone(&channel_manager),
          gossip_source: Arc::clone(&gossip_source),
          inbound_payments,
+@@ -5859,6 +5896,53 @@ mod tests {
+         assert!(!access.allows_peer(&peer));
+     }
+
++    #[test]
++    fn abandoned_virtual_session_does_not_block_reopen_for_same_peer() {
++        let peer = test_peer_pubkey(4);
++        let local = test_peer_pubkey(6);
++        let session = VirtualChannelSession {
++            channel_id: ChannelId::from_bytes([4; 32]),
++            former_temporary_channel_id: ChannelId::from_bytes([6; 32]),
++            peer_id: peer,
++            created_at: 1,
++            updated_at: 2,
++            status: VirtualChannelSessionStatus::Abandoned,
++            virtual_funding_txo: virtual_channel_synthetic_outpoint(
++                BitcoinNetwork::Regtest,
++                &local,
++                &peer,
++            ),
++        };
++
++        assert!(!virtual_channel_session_blocks_reopen(&session, &peer));
++    }
++
++    #[test]
++    fn non_terminal_virtual_session_blocks_reopen_for_same_peer() {
++        let peer = test_peer_pubkey(5);
++        let local = test_peer_pubkey(6);
++
++        for status in [
++            VirtualChannelSessionStatus::Active,
++            VirtualChannelSessionStatus::AbandonPending,
++        ] {
++            let session = VirtualChannelSession {
++                channel_id: ChannelId::from_bytes([5; 32]),
++                former_temporary_channel_id: ChannelId::from_bytes([6; 32]),
++                peer_id: peer,
++                created_at: 1,
++                updated_at: 2,
++                status,
++                virtual_funding_txo: virtual_channel_synthetic_outpoint(
++                    BitcoinNetwork::Regtest,
++                    &local,
++                    &peer,
++                ),
++            };
++            assert!(virtual_channel_session_blocks_reopen(&session, &peer));
++        }
++    }
++
+     fn build_kv_store() -> Arc<dyn KVStoreSync + Send + Sync> {
+         let db_path = std::env::temp_dir().join(format!("rln-ldk-unit-{}", uuid::Uuid::new_v4()));
+         let connection_string = format!("sqlite:{}?mode=rwc", db_path.display());
 diff --git a/src/rgb.rs b/src/rgb.rs
-index 80df75096abf0e9c42e7909d8418311bbcba4f73..a2d824da180eddc62883ee01babf35de00c19406 100644
+index 80df750..a2d824d 100644
 --- a/src/rgb.rs
 +++ b/src/rgb.rs
 @@ -19,15 +19,16 @@ use rgb_lib::{
@@ -3166,7 +3244,7 @@ index 80df75096abf0e9c42e7909d8418311bbcba4f73..a2d824da180eddc62883ee01babf35de
          self.get_rgb_wallet().send_btc_end(self.online, signed_psbt)
      }
 diff --git a/src/routes.rs b/src/routes.rs
-index 975a67dd870148848f72bbb32403c6a522b8d8be..30958deb0d0b00138157a104d43c35efadfb5555 100644
+index 975a67d..30958de 100644
 --- a/src/routes.rs
 +++ b/src/routes.rs
 @@ -2978,6 +2978,7 @@ pub(crate) async fn keysend(
@@ -3202,7 +3280,7 @@ index 975a67dd870148848f72bbb32403c6a522b8d8be..30958deb0d0b00138157a104d43c35ef
              )?;
              let payment_hash = PaymentHash(invoice.payment_hash().to_byte_array());
 diff --git a/src/sdk/mod.rs b/src/sdk/mod.rs
-index 3ef5ebc0456f476bbb9f42d4312d6618ba1443cb..abdf6069e9277590a92c6217dc292065d93f623b 100644
+index 3ef5ebc..abdf606 100644
 --- a/src/sdk/mod.rs
 +++ b/src/sdk/mod.rs
 @@ -34,6 +34,7 @@ use amplify::{map, s};
@@ -4149,7 +4227,7 @@ index 3ef5ebc0456f476bbb9f42d4312d6618ba1443cb..abdf6069e9277590a92c6217dc292065
          std::fs::create_dir_all(&storage_dir).expect("create temp storage dir");
          let db_path = storage_dir.join("rln_db");
 diff --git a/src/uniffi_api/mod.rs b/src/uniffi_api/mod.rs
-index c6173a390f180ab7664a6b883464961f9c855925..5342f9f6f3137e5f6150614f127e5aae7d411951 100644
+index c6173a3..5342f9f 100644
 --- a/src/uniffi_api/mod.rs
 +++ b/src/uniffi_api/mod.rs
 @@ -115,11 +115,8 @@ fn handle_from_request(request: SdkInitRequest) -> Result<NodeHandle, RlnError>
@@ -4394,7 +4472,7 @@ index c6173a390f180ab7664a6b883464961f9c855925..5342f9f6f3137e5f6150614f127e5aae
          let state = self.handle.app_state();
          let response = block_on_sdk(sdk::async_order_new(
 diff --git a/src/uniffi_api/tests.rs b/src/uniffi_api/tests.rs
-index 4f37a9564b5801e7ef5f84a55fe4cd0409fe26e9..ae411f319eb0888f124e15a467a772bff437e333 100644
+index 4f37a95..ae411f3 100644
 --- a/src/uniffi_api/tests.rs
 +++ b/src/uniffi_api/tests.rs
 @@ -412,11 +412,13 @@ mod uniffi_smoke_tests {
@@ -4412,7 +4490,7 @@ index 4f37a9564b5801e7ef5f84a55fe4cd0409fe26e9..ae411f319eb0888f124e15a467a772bf
      }
 
 diff --git a/src/uniffi_api/types.rs b/src/uniffi_api/types.rs
-index beeaf62ea3e2ece39fcb5a1ec8cccf3476d4e063..bbf7e48db9ad43c276381cc6e5dd67da56521dfa 100644
+index beeaf62..bbf7e48 100644
 --- a/src/uniffi_api/types.rs
 +++ b/src/uniffi_api/types.rs
 @@ -112,6 +112,23 @@ pub struct BtcBalanceInfo {
@@ -4509,7 +4587,7 @@ index beeaf62ea3e2ece39fcb5a1ec8cccf3476d4e063..bbf7e48db9ad43c276381cc6e5dd67da
      pub qty_from: u64,
      pub qty_to: u64,
 diff --git a/src/utils.rs b/src/utils.rs
-index 33cfc42dffa59d1254392941bbb1e377b6ee9177..f8a6e340de47fdeab0394122e06c4aa1cf960d1b 100644
+index 33cfc42..f8a6e34 100644
 --- a/src/utils.rs
 +++ b/src/utils.rs
 @@ -164,6 +164,7 @@ impl StaticState {
