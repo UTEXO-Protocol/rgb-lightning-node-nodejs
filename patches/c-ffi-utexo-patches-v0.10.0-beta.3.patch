@@ -1002,7 +1002,7 @@ index edb35ed..9137ec7 100644
 +    }
 +}
 diff --git a/bindings/c-ffi/src/json_types.rs b/bindings/c-ffi/src/json_types.rs
-index fc570e0..98d9e93 100644
+index fc570e0..fe45e08 100644
 --- a/bindings/c-ffi/src/json_types.rs
 +++ b/bindings/c-ffi/src/json_types.rs
 @@ -15,25 +15,28 @@ use hex::DisplayHex;
@@ -1207,7 +1207,7 @@ index fc570e0..98d9e93 100644
              height: n.height,
          }
      }
-@@ -1581,6 +1645,600 @@ impl From<BtcBalanceInfo> for JsonBtcBalanceInfo {
+@@ -1581,6 +1645,618 @@ impl From<BtcBalanceInfo> for JsonBtcBalanceInfo {
      }
  }
  
@@ -1684,6 +1684,24 @@ index fc570e0..98d9e93 100644
 +    }
 +
 +    #[test]
++    fn unspent_response_preserves_pending_blind_reservations() {
++        let response = JsonUnspent::from(Unspent {
++            utxo: Utxo {
++                outpoint:
++                    "0000000000000000000000000000000000000000000000000000000000000000:0"
++                        .to_string(),
++                btc_amount: 20_000,
++                colorable: true,
++            },
++            rgb_allocations: Vec::new(),
++            pending_blinded: 2,
++        });
++        let json = serde_json::to_value(response).expect("serialize unspent");
++
++        assert_eq!(json["pending_blinded"], 2);
++    }
++
++    #[test]
 +    fn prepared_send_commit_accepts_only_a_plan_identity() {
 +        let request = serde_json::from_value::<JsonCommitPreparedSendRequest>(
 +            serde_json::json!({ "plan_id": "0".repeat(64) }),
@@ -1808,7 +1826,7 @@ index fc570e0..98d9e93 100644
  #[derive(Debug, Serialize)]
  pub(crate) struct JsonSignMessageResponse {
      pub signed_message: String,
-@@ -1669,6 +2327,169 @@ impl From<SdkSendBtcResponse> for JsonSendBtcResponse {
+@@ -1669,6 +2345,169 @@ impl From<SdkSendBtcResponse> for JsonSendBtcResponse {
      }
  }
  
@@ -1978,6 +1996,22 @@ index fc570e0..98d9e93 100644
  #[derive(Debug, Deserialize)]
  pub(crate) struct JsonCreateUtxosRequest {
      pub up_to: bool,
+@@ -1847,6 +2686,7 @@ impl From<Utxo> for JsonUtxo {
+ pub(crate) struct JsonUnspent {
+     pub utxo: JsonUtxo,
+     pub rgb_allocations: Vec<JsonRgbAllocation>,
++    pub pending_blinded: u32,
+ }
+ 
+ impl From<Unspent> for JsonUnspent {
+@@ -1854,6 +2694,7 @@ impl From<Unspent> for JsonUnspent {
+         JsonUnspent {
+             utxo: u.utxo.into(),
+             rgb_allocations: u.rgb_allocations.into_iter().map(Into::into).collect(),
++            pending_blinded: u.pending_blinded,
+         }
+     }
+ }
 diff --git a/bindings/c-ffi/src/lib.rs b/bindings/c-ffi/src/lib.rs
 index 24c3371..9b1c47b 100644
 --- a/bindings/c-ffi/src/lib.rs

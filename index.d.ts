@@ -255,6 +255,22 @@ export interface PendingRgbSendPlan {
   batch_transfer_idx: number
 }
 
+export interface RgbAllocation {
+  asset_id: string | null
+  assignment: string
+  settled: boolean
+}
+
+export interface RgbUnspent {
+  utxo: {
+    outpoint: string
+    btc_amount: number
+    colorable: boolean
+  }
+  rgb_allocations: RgbAllocation[]
+  pending_blinded: number
+}
+
 export interface AddressReceipt {
   txid: string
   amount_sat: DecimalString
@@ -318,7 +334,7 @@ export class SdkNode {
 
   // BTC / UTXOs
   btcBalance(skipSync?: boolean): JsonObject
-  listUnspents(skipSync?: boolean): JsonValue
+  listUnspents(skipSync?: boolean): RgbUnspent[]
   listTransactions(skipSync?: boolean): JsonValue
   listTransactionsByTxid(txid: string, skipSync?: boolean): JsonValue
   sendBtc(request: BtcSendRequest): SendBtcResponse

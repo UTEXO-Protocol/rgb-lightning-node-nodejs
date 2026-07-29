@@ -31,6 +31,9 @@ while pre-`1.0`.
   virtual-size, target-count, and output-size data.
   `commitPreparedCreateUtxos()` signs and broadcasts that exact plan, while
   `cancelCreateUtxosPlan()` releases only a matching setup reservation.
+- Preserve `pending_blinded` in every `listUnspents()` item so callers can
+  distinguish a genuinely free RGB allocation slot from a receive-reserved
+  colorable UTXO.
 - Include `Cargo.lock` in the npm package so Git-branch installs can honor the
   native installer's `cargo build --locked` reproducibility contract.
 - Idempotent BTC and RGB plan cancellation plus bounded pending-plan
