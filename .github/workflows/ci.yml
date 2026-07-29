@@ -22,7 +22,7 @@ jobs:
       - name: Clone pinned rgb-lightning-node source
         run: |
           set -euo pipefail
-          RLN_DIR="$(cd "$GITHUB_WORKSPACE/../.." && pwd)/rgb-lightning-node"
+          RLN_DIR="$GITHUB_WORKSPACE/.native-source"
           git clone --recurse-submodules --shallow-submodules --depth 1 \
             --branch "$RLN_VERSION" \
             https://github.com/UTEXO-Protocol/rgb-lightning-node.git "$RLN_DIR"
@@ -44,19 +44,11 @@ jobs:
       - name: Install JavaScript dependencies
         run: npm ci --ignore-scripts
 
-      - name: Pin signer revision expected by the RLN tag
-        run: |
-          cargo update -p signer-external --precise 59e2932eb5d3d40ac5ded2b8951a43ecdb7ad865
-          cargo update \
-            --manifest-path ../../rgb-lightning-node/bindings/c-ffi/Cargo.toml \
-            -p signer-external \
-            --precise 59e2932eb5d3d40ac5ded2b8951a43ecdb7ad865
-
       - name: Verify native patch integrity and contract tests
         run: |
-          git -C ../../rgb-lightning-node diff --check
-          cargo test --manifest-path ../../rgb-lightning-node/bindings/c-ffi/Cargo.toml wallet_snapshot
-          cargo test --manifest-path ../../rgb-lightning-node/Cargo.toml wallet_sync_mode
+          git -C .native-source diff --check
+          cargo test --manifest-path .native-source/bindings/c-ffi/Cargo.toml wallet_snapshot
+          cargo test --manifest-path .native-source/Cargo.toml wallet_sync_mode
 
       - name: Verify types, build the addon, and run the canary
         run: |

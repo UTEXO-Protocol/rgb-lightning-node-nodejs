@@ -256,6 +256,13 @@ export class NativeExternalSigner {
     permissiveSignerPolicy?: boolean
   ): NativeExternalSigner
 
+  static createWithStorage(
+    seedHex: string,
+    network: 'mainnet' | 'testnet' | 'testnet4' | 'regtest' | 'signet',
+    storageDirPath: string,
+    permissiveSignerPolicy?: boolean
+  ): NativeExternalSigner
+
   bootstrap(): JsonObject
   destroy(): void
 }

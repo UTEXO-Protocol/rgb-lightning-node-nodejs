@@ -35,8 +35,9 @@ use rlncffi::{
     rln_list_transactions, rln_list_transactions_by_txid, rln_list_transfers,
     rln_list_transfers_by_txid, rln_list_unspents, rln_ln_invoice, rln_maker_execute,
     rln_maker_init, rln_native_external_signer_bootstrap, rln_native_external_signer_new,
-    rln_network_info, rln_node_info, rln_open_channel, rln_post_asset_media, rln_prepare_btc_send,
-    rln_prepare_rgb_send, rln_refresh_transfers, rln_rgb_invoice, rln_rotate_address,
+    rln_native_external_signer_new_with_storage, rln_network_info, rln_node_info,
+    rln_open_channel, rln_post_asset_media, rln_prepare_btc_send, rln_prepare_rgb_send,
+    rln_refresh_transfers, rln_rgb_invoice, rln_rotate_address,
     rln_sdk_node_apay_new, rln_sdk_node_attach_native_external_signer,
     rln_sdk_node_detach_external_signer, rln_sdk_node_init_with_external_signer,
     rln_sdk_node_init_with_native_external_signer, rln_sdk_node_new, rln_sdk_node_shutdown,
@@ -114,6 +115,39 @@ impl NativeExternalSigner {
             CResultValue::Ok => Ok(Self { handle: res.inner }),
             CResultValue::Err => {
                 // Err branch: `inner.ptr` is a *mut c_char with the message.
+                let msg = unsafe {
+                    let p = res.inner.as_err_string_ptr();
+                    let s = CStr::from_ptr(p).to_string_lossy().into_owned();
+                    rln_free_string(p);
+                    s
+                };
+                Err(NapiError::from_reason(msg))
+            }
+        }
+    }
+
+    /// Production constructor for a disk-backed VLS signer. The storage
+    /// directory must be stable for the wallet identity so commitment state
+    /// survives process restarts.
+    #[napi(factory)]
+    pub fn create_with_storage(
+        seed_hex: String,
+        network: String,
+        storage_dir_path: String,
+        permissive_signer_policy: bool,
+    ) -> Result<Self> {
+        let seed_c = cstring(&seed_hex)?;
+        let net_c = cstring(&network)?;
+        let storage_c = cstring(&storage_dir_path)?;
+        let res = rln_native_external_signer_new_with_storage(
+            seed_c.as_ptr(),
+            net_c.as_ptr(),
+            permissive_signer_policy,
+            storage_c.as_ptr(),
+        );
+        match res.result {
+            CResultValue::Ok => Ok(Self { handle: res.inner }),
+            CResultValue::Err => {
                 let msg = unsafe {
                     let p = res.inner.as_err_string_ptr();
                     let s = CStr::from_ptr(p).to_string_lossy().into_owned();

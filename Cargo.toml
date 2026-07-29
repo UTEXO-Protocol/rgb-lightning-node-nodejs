@@ -17,7 +17,7 @@ napi-derive = "2.16"
 # Path dep for local builds; release prebuilds ship the compiled `.node`
 # via GitHub Releases (see scripts/download-libs.sh) so consumers don't
 # need this sibling checkout.
-rln-c-ffi = { path = "../../rgb-lightning-node/bindings/c-ffi" }
+rln-c-ffi = { path = ".native-source/bindings/c-ffi" }
 
 [build-dependencies]
 napi-build = "2"
@@ -41,14 +41,13 @@ codegen-units = 1
 # that only exist at the submodule commit; a separate `rmn-boiko` branch tip
 # drifts behind and fails to compile the parent source.
 [patch.crates-io]
-lightning                      = { path = "../../rgb-lightning-node/rust-lightning/lightning" }
-lightning-background-processor = { path = "../../rgb-lightning-node/rust-lightning/lightning-background-processor" }
-lightning-block-sync           = { path = "../../rgb-lightning-node/rust-lightning/lightning-block-sync" }
-lightning-dns-resolver         = { path = "../../rgb-lightning-node/rust-lightning/lightning-dns-resolver" }
-lightning-invoice              = { path = "../../rgb-lightning-node/rust-lightning/lightning-invoice" }
-lightning-net-tokio            = { path = "../../rgb-lightning-node/rust-lightning/lightning-net-tokio" }
-lightning-persister            = { path = "../../rgb-lightning-node/rust-lightning/lightning-persister" }
-lightning-rapid-gossip-sync    = { path = "../../rgb-lightning-node/rust-lightning/lightning-rapid-gossip-sync" }
+lightning                      = { path = ".native-source/rust-lightning/lightning" }
+lightning-background-processor = { path = ".native-source/rust-lightning/lightning-background-processor" }
+lightning-block-sync           = { path = ".native-source/rust-lightning/lightning-block-sync" }
+lightning-dns-resolver         = { path = ".native-source/rust-lightning/lightning-dns-resolver" }
+lightning-invoice              = { path = ".native-source/rust-lightning/lightning-invoice" }
+lightning-net-tokio            = { path = ".native-source/rust-lightning/lightning-net-tokio" }
+lightning-persister            = { path = ".native-source/rust-lightning/lightning-persister" }
+lightning-rapid-gossip-sync    = { path = ".native-source/rust-lightning/lightning-rapid-gossip-sync" }
 vls-core                       = { git = "https://github.com/UTEXO-Protocol/vls-core.git", branch = "feat/rgb-compatibility" }
 vls-protocol-signer            = { git = "https://github.com/UTEXO-Protocol/vls-protocol-signer.git", branch = "feat/rgb-compatibility" }
-

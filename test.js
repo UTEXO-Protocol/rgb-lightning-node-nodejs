@@ -7,7 +7,13 @@ const path = require('path')
 const { NativeExternalSigner, SdkNode } = require('./index')
 
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rln-node-canary-'))
-const signer = NativeExternalSigner.create('01'.repeat(32), 'regtest')
+const signerDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rln-node-vls-canary-'))
+const signer = NativeExternalSigner.createWithStorage(
+  '01'.repeat(32),
+  'regtest',
+  signerDataDir,
+  true
+)
 const node = SdkNode.create({
   storage_dir_path: dataDir,
   daemon_listening_port: 0,
@@ -89,6 +95,7 @@ try {
   node.shutdown()
   signer.destroy()
   fs.rmSync(dataDir, { recursive: true, force: true })
+  fs.rmSync(signerDataDir, { recursive: true, force: true })
 }
 
 console.log('Node binding canary passed')

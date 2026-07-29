@@ -201,8 +201,11 @@ key-source file written by `initWithNativeExternalSigner` records only
 public identifying data (xpubs, node id, master fingerprint). Re-deriving
 from the same mnemonic on a later launch reproduces the same `seedHex`,
 which matches the on-disk key-source — so the LDK node identity stays
-stable across restarts. All channel-state cryptography runs in-process via
-the VLS signer.
+stable across restarts. Production channel wallets use
+`NativeExternalSigner.createWithStorage`, which persists VLS commitment
+validation state in a private caller-provided directory while keeping the
+seed host-owned. All channel-state cryptography runs in-process via the VLS
+signer.
 
 ## Architecture
 

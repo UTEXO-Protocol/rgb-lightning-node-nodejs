@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.0-beta.15
+
+- Expose the disk-backed native VLS signer needed for channel operation after
+  process restarts.
+- Build branch installs from the exact checksum-pinned native overlay instead
+  of downloading a stale release addon.
+
 All notable changes to `@utexo/rgb-lightning-node-nodejs` are
 documented here.
 

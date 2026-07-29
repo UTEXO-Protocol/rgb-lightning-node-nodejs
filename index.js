@@ -335,6 +335,23 @@ class NativeExternalSigner {
     )
   }
 
+  static createWithStorage (seedHex, network, storageDirPath, permissivePolicy = false) {
+    if (typeof seedHex !== 'string' || seedHex.length !== 64) {
+      throw new Error('NativeExternalSigner.createWithStorage: seedHex must be a 64-char hex string')
+    }
+    if (typeof storageDirPath !== 'string' || storageDirPath.length === 0) {
+      throw new Error('NativeExternalSigner.createWithStorage: storageDirPath is required')
+    }
+    return new NativeExternalSigner(
+      napi.NativeExternalSigner.createWithStorage(
+        seedHex,
+        network,
+        storageDirPath,
+        !!permissivePolicy
+      )
+    )
+  }
+
   bootstrap () {
     if (this._destroyed) throw new Error('NativeExternalSigner already destroyed')
     return JSON.parse(this._inner.bootstrap())

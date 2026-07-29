@@ -1,5 +1,5 @@
 diff --git a/bindings/c-ffi/Cargo.lock b/bindings/c-ffi/Cargo.lock
-index 5886c2d..c06e100 100644
+index 5886c2dad3ab839a54a67db6f8852e9a064cce31..c06e1007be05bac0064eeaa31cafb1038a230e2c 100644
 --- a/bindings/c-ffi/Cargo.lock
 +++ b/bindings/c-ffi/Cargo.lock
 @@ -177,7 +177,7 @@ version = "1.1.5"
@@ -9,7 +9,7 @@ index 5886c2d..c06e100 100644
 - "windows-sys 0.61.2",
 + "windows-sys 0.60.2",
  ]
-
+ 
  [[package]]
 @@ -188,7 +188,7 @@ checksum = "291e6a250ff86cd4a820112fb8898808a366d8f9f58ce16d1f538353ad55747d"
  dependencies = [
@@ -18,7 +18,7 @@ index 5886c2d..c06e100 100644
 - "windows-sys 0.61.2",
 + "windows-sys 0.60.2",
  ]
-
+ 
  [[package]]
 @@ -1705,7 +1705,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
  checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
@@ -27,7 +27,7 @@ index 5886c2d..c06e100 100644
 - "windows-sys 0.61.2",
 + "windows-sys 0.52.0",
  ]
-
+ 
  [[package]]
 @@ -2522,7 +2522,7 @@ checksum = "3640c1c38b8e4e43584d8df18be5fc6b0aa314ce6ebf51b53313d4306cca8e46"
  dependencies = [
@@ -36,7 +36,7 @@ index 5886c2d..c06e100 100644
 - "windows-sys 0.61.2",
 + "windows-sys 0.52.0",
  ]
-
+ 
  [[package]]
 @@ -3136,7 +3136,7 @@ version = "0.50.3"
  source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -45,12 +45,12 @@ index 5886c2d..c06e100 100644
 - "windows-sys 0.61.2",
 + "windows-sys 0.60.2",
  ]
-
+ 
  [[package]]
 @@ -3887,6 +3887,24 @@ version = "0.10.1"
  source = "registry+https://github.com/rust-lang/crates.io-index"
  checksum = "63b8176103e19a2643978565ca18b50549f6101881c443590420e4dc998a3c69"
-
+ 
 +[[package]]
 +name = "redb"
 +version = "1.5.2"
@@ -103,7 +103,7 @@ index 5886c2d..c06e100 100644
 - "windows-sys 0.61.2",
 + "windows-sys 0.52.0",
  ]
-
+ 
  [[package]]
 @@ -4550,7 +4571,7 @@ dependencies = [
   "security-framework",
@@ -112,7 +112,7 @@ index 5886c2d..c06e100 100644
 - "windows-sys 0.61.2",
 + "windows-sys 0.52.0",
  ]
-
+ 
  [[package]]
 @@ -5124,7 +5145,7 @@ dependencies = [
  [[package]]
@@ -130,7 +130,7 @@ index 5886c2d..c06e100 100644
 - "windows-sys 0.61.2",
 + "windows-sys 0.60.2",
  ]
-
+ 
  [[package]]
 @@ -5575,7 +5596,7 @@ dependencies = [
   "getrandom 0.4.2",
@@ -139,7 +139,7 @@ index 5886c2d..c06e100 100644
 - "windows-sys 0.61.2",
 + "windows-sys 0.52.0",
  ]
-
+ 
  [[package]]
 @@ -5584,7 +5605,7 @@ version = "1.2.1"
  source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -148,7 +148,7 @@ index 5886c2d..c06e100 100644
 - "windows-sys 0.61.2",
 + "windows-sys 0.60.2",
  ]
-
+ 
  [[package]]
 @@ -6244,7 +6265,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
  checksum = "ddd74a9687298c6858e9b88ec8935ec45d22e8fd5e6394fa1bd4e99a87789c76"
@@ -158,12 +158,12 @@ index 5886c2d..c06e100 100644
   "serde_core",
 + "wasm-bindgen",
  ]
-
+ 
  [[package]]
 @@ -6305,6 +6328,24 @@ dependencies = [
   "vls-policy-derive",
  ]
-
+ 
 +[[package]]
 +name = "vls-persist"
 +version = "0.14.0"
@@ -192,32 +192,32 @@ index 5886c2d..c06e100 100644
 - "windows-sys 0.61.2",
 + "windows-sys 0.48.0",
  ]
-
+ 
  [[package]]
 diff --git a/bindings/c-ffi/rln.h b/bindings/c-ffi/rln.h
-index eb7e572..5293a55 100644
+index eb7e5720fb56a391d66a6a2bcaeb8951cb94915b..77115f639cc1c4f3e36f8dffab95e763886ac8f7 100644
 --- a/bindings/c-ffi/rln.h
 +++ b/bindings/c-ffi/rln.h
 @@ -41,9 +41,15 @@ struct CResultString rln_asset_metadata(const struct COpaqueStruct *node, const
-
+ 
  struct CResultString rln_btc_balance(const struct COpaqueStruct *node, bool skip_sync);
-
+ 
 +struct CResultString rln_cancel_btc_send_plan(const struct COpaqueStruct *node,
 +                                              const char *request_json);
 +
  struct CResultString rln_cancel_hodl_invoice(const struct COpaqueStruct *node,
                                               const char *request_json);
-
+ 
 +struct CResultString rln_cancel_rgb_send_plan(const struct COpaqueStruct *node,
 +                                              const char *request_json);
 +
  struct CResultString rln_check_indexer_url(const struct COpaqueStruct *node,
                                             const char *indexer_url);
-
+ 
 @@ -55,6 +61,12 @@ struct CResultString rln_claim_hodl_invoice(const struct COpaqueStruct *node,
-
+ 
  struct CResultString rln_close_channel(const struct COpaqueStruct *node, const char *request_json);
-
+ 
 +struct CResultString rln_commit_prepared_btc_send(const struct COpaqueStruct *node,
 +                                                  const char *request_json);
 +
@@ -226,32 +226,44 @@ index eb7e572..5293a55 100644
 +
  struct CResultString rln_connect_peer(const struct COpaqueStruct *node,
                                        const char *peer_pubkey_and_addr);
-
+ 
 @@ -107,6 +119,9 @@ struct CResultString rln_issue_asset_uda(const struct COpaqueStruct *node,
-
+ 
  struct CResultString rln_keysend(const struct COpaqueStruct *node, const char *request_json);
-
+ 
 +struct CResultString rln_list_address_receipts(const struct COpaqueStruct *node,
 +                                               const char *address);
 +
  struct CResultString rln_list_assets(const struct COpaqueStruct *node,
                                       const char *filter_asset_schemas_json);
-
+ 
 @@ -116,6 +131,10 @@ struct CResultString rln_list_payments(const struct COpaqueStruct *node);
-
+ 
  struct CResultString rln_list_peers(const struct COpaqueStruct *node);
-
+ 
 +struct CResultString rln_list_pending_rgb_send_plans(const struct COpaqueStruct *node);
 +
 +struct CResultString rln_list_pending_vanilla_transactions(const struct COpaqueStruct *node);
 +
  struct CResultString rln_list_swaps(const struct COpaqueStruct *node);
-
+ 
  struct CResultString rln_list_transactions(const struct COpaqueStruct *node, bool skip_sync);
-@@ -151,6 +170,12 @@ struct CResultString rln_open_channel(const struct COpaqueStruct *node, const ch
+@@ -142,6 +161,11 @@ struct CResult rln_native_external_signer_new(const char *seed_hex,
+                                               const char *network,
+                                               bool permissive_policy);
+ 
++struct CResult rln_native_external_signer_new_with_storage(const char *seed_hex,
++                                                           const char *network,
++                                                           bool permissive_policy,
++                                                           const char *storage_dir_path);
++
+ struct CResultString rln_network_info(const struct COpaqueStruct *node);
+ 
+ struct CResultString rln_node_info(const struct COpaqueStruct *node);
+@@ -151,6 +175,12 @@ struct CResultString rln_open_channel(const struct COpaqueStruct *node, const ch
  struct CResultString rln_post_asset_media(const struct COpaqueStruct *node,
                                            const char *request_json);
-
+ 
 +struct CResultString rln_prepare_btc_send(const struct COpaqueStruct *node,
 +                                          const char *request_json);
 +
@@ -260,17 +272,17 @@ index eb7e572..5293a55 100644
 +
  struct CResultString rln_refresh_transfers(const struct COpaqueStruct *node,
                                             const char *request_json);
-
-@@ -237,6 +262,8 @@ struct CResultString rln_sign_message(const struct COpaqueStruct *node, const ch
-
+ 
+@@ -237,6 +267,8 @@ struct CResultString rln_sign_message(const struct COpaqueStruct *node, const ch
+ 
  struct CResultString rln_sync(const struct COpaqueStruct *node);
-
+ 
 +struct CResultString rln_sync_wallet(const struct COpaqueStruct *node, const char *request_json);
 +
  struct CResultString rln_taker(const struct COpaqueStruct *node, const char *request_json);
-
+ 
  struct CResultString rln_uniffi_healthcheck(void);
-@@ -246,3 +273,6 @@ struct CResultString rln_uniffi_is_initialized(void);
+@@ -246,3 +278,6 @@ struct CResultString rln_uniffi_is_initialized(void);
  struct CResultString rln_verify_message(const struct COpaqueStruct *node,
                                          const char *message,
                                          const char *signature);
@@ -278,101 +290,113 @@ index eb7e572..5293a55 100644
 +struct CResultString rln_wallet_snapshot(const struct COpaqueStruct *node,
 +                                         const char *request_json);
 diff --git a/bindings/c-ffi/rln.hpp b/bindings/c-ffi/rln.hpp
-index 64266ec..5a18f53 100644
+index 64266ecd582ccf2bc6b254f2a32cc25e47a6848b..1a46ffc3336835e5cdc853d179dffadaacfba9f9 100644
 --- a/bindings/c-ffi/rln.hpp
 +++ b/bindings/c-ffi/rln.hpp
 @@ -43,8 +43,12 @@ CResultString rln_asset_metadata(const COpaqueStruct *node, const char *asset_id
-
+ 
  CResultString rln_btc_balance(const COpaqueStruct *node, bool skip_sync);
-
+ 
 +CResultString rln_cancel_btc_send_plan(const COpaqueStruct *node, const char *request_json);
 +
  CResultString rln_cancel_hodl_invoice(const COpaqueStruct *node, const char *request_json);
-
+ 
 +CResultString rln_cancel_rgb_send_plan(const COpaqueStruct *node, const char *request_json);
 +
  CResultString rln_check_indexer_url(const COpaqueStruct *node, const char *indexer_url);
-
+ 
  CResultString rln_check_proxy_endpoint(const COpaqueStruct *node, const char *proxy_endpoint);
 @@ -53,6 +57,10 @@ CResultString rln_claim_hodl_invoice(const COpaqueStruct *node, const char *requ
-
+ 
  CResultString rln_close_channel(const COpaqueStruct *node, const char *request_json);
-
+ 
 +CResultString rln_commit_prepared_btc_send(const COpaqueStruct *node, const char *request_json);
 +
 +CResultString rln_commit_prepared_rgb_send(const COpaqueStruct *node, const char *request_json);
 +
  CResultString rln_connect_peer(const COpaqueStruct *node, const char *peer_pubkey_and_addr);
-
+ 
  CResultString rln_create_utxos(const COpaqueStruct *node, const char *request_json);
 @@ -94,6 +102,8 @@ CResultString rln_issue_asset_uda(const COpaqueStruct *node, const char *request
-
+ 
  CResultString rln_keysend(const COpaqueStruct *node, const char *request_json);
-
+ 
 +CResultString rln_list_address_receipts(const COpaqueStruct *node, const char *address);
 +
  CResultString rln_list_assets(const COpaqueStruct *node, const char *filter_asset_schemas_json);
-
+ 
  CResultString rln_list_channels(const COpaqueStruct *node);
 @@ -102,6 +112,10 @@ CResultString rln_list_payments(const COpaqueStruct *node);
-
+ 
  CResultString rln_list_peers(const COpaqueStruct *node);
-
+ 
 +CResultString rln_list_pending_rgb_send_plans(const COpaqueStruct *node);
 +
 +CResultString rln_list_pending_vanilla_transactions(const COpaqueStruct *node);
 +
  CResultString rln_list_swaps(const COpaqueStruct *node);
-
+ 
  CResultString rln_list_transactions(const COpaqueStruct *node, bool skip_sync);
-@@ -136,6 +150,10 @@ CResultString rln_open_channel(const COpaqueStruct *node, const char *request_js
-
+@@ -128,6 +142,11 @@ CResult rln_native_external_signer_new(const char *seed_hex,
+                                        const char *network,
+                                        bool permissive_policy);
+ 
++CResult rln_native_external_signer_new_with_storage(const char *seed_hex,
++                                                    const char *network,
++                                                    bool permissive_policy,
++                                                    const char *storage_dir_path);
++
+ CResultString rln_network_info(const COpaqueStruct *node);
+ 
+ CResultString rln_node_info(const COpaqueStruct *node);
+@@ -136,6 +155,10 @@ CResultString rln_open_channel(const COpaqueStruct *node, const char *request_js
+ 
  CResultString rln_post_asset_media(const COpaqueStruct *node, const char *request_json);
-
+ 
 +CResultString rln_prepare_btc_send(const COpaqueStruct *node, const char *request_json);
 +
 +CResultString rln_prepare_rgb_send(const COpaqueStruct *node, const char *request_json);
 +
  CResultString rln_refresh_transfers(const COpaqueStruct *node, const char *request_json);
-
+ 
  CResultString rln_rgb_invoice(const COpaqueStruct *node, const char *request_json);
-@@ -211,6 +229,8 @@ CResultString rln_sign_message(const COpaqueStruct *node, const char *message);
-
+@@ -211,6 +234,8 @@ CResultString rln_sign_message(const COpaqueStruct *node, const char *message);
+ 
  CResultString rln_sync(const COpaqueStruct *node);
-
+ 
 +CResultString rln_sync_wallet(const COpaqueStruct *node, const char *request_json);
 +
  CResultString rln_taker(const COpaqueStruct *node, const char *request_json);
-
+ 
  CResultString rln_uniffi_healthcheck();
-@@ -221,4 +241,6 @@ CResultString rln_verify_message(const COpaqueStruct *node,
+@@ -221,4 +246,6 @@ CResultString rln_verify_message(const COpaqueStruct *node,
                                   const char *message,
                                   const char *signature);
-
+ 
 +CResultString rln_wallet_snapshot(const COpaqueStruct *node, const char *request_json);
 +
  }  // extern "C"
 diff --git a/bindings/c-ffi/src/api.rs b/bindings/c-ffi/src/api.rs
-index edb35ed..70b4bfb 100644
+index edb35eddf1b5a15b8965bb012b227357c2bf3635..ec8928d53148c8b8b30a4810816e0826843e941b 100644
 --- a/bindings/c-ffi/src/api.rs
 +++ b/bindings/c-ffi/src/api.rs
 @@ -3,9 +3,12 @@
  //! zero or more JSON request strings, do the conversion to UniFFI types,
  //! dispatch to [`SdkNode`], and serialize the response back to JSON.
-
+ 
 +use std::collections::HashSet;
  use std::ffi::c_char;
  use std::str::FromStr;
 +use std::sync::atomic::{AtomicU64, Ordering};
  use std::sync::Arc;
 +use std::time::{SystemTime, UNIX_EPOCH};
-
+ 
  use hex::DisplayHex;
  use hex::FromHex;
 @@ -16,13 +19,17 @@ use crate::json_types::*;
  use crate::utils::{convert_optional_string, ptr_to_string, require_handle, require_signer, Error};
  use crate::COpaqueStruct;
-
+ 
 +const MAX_WALLET_SNAPSHOT_ASSETS: usize = 128;
 +const MAX_WALLET_SNAPSHOT_CHANNELS: usize = 512;
 +const MAX_WALLET_SNAPSHOT_ACTIVITY_ITEMS: usize = 5_000;
@@ -381,18 +405,18 @@ index edb35ed..70b4bfb 100644
  // ---------------------------------------------------------------------------
  // String-parse helpers
  // ---------------------------------------------------------------------------
-
+ 
  fn parse_bolt11(s: &str) -> Result<rln::Bolt11Invoice, Error> {
 -    rln::Bolt11Invoice::from_str(s)
 -        .map_err(|e| Error::StringParse(format!("invalid bolt11: {e}")))
 +    rln::Bolt11Invoice::from_str(s).map_err(|e| Error::StringParse(format!("invalid bolt11: {e}")))
  }
-
+ 
  fn parse_payment_hash(s: &str) -> Result<rln::PaymentHash, Error> {
 @@ -60,6 +67,34 @@ fn json<T: serde::Serialize>(t: T) -> Result<String, Error> {
      Ok(serde_json::to_string(&t)?)
  }
-
+ 
 +fn unix_time_ms() -> Result<u64, Error> {
 +    let millis = SystemTime::now()
 +        .duration_since(UNIX_EPOCH)
@@ -436,7 +460,7 @@ index edb35ed..70b4bfb 100644
 +            .collect::<Vec<_>>(),
 +    )
  }
-
+ 
  pub(crate) fn list_peers(node: &COpaqueStruct) -> Result<String, Error> {
 @@ -199,7 +239,8 @@ pub(crate) fn get_channel_id(
      temporary_channel_id_hex: *const c_char,
@@ -451,7 +475,7 @@ index edb35ed..70b4bfb 100644
 @@ -220,10 +261,7 @@ pub(crate) fn send_payment(
      json(JsonSendPaymentResponse::from(resp))
  }
-
+ 
 -pub(crate) fn keysend(
 -    node: &COpaqueStruct,
 -    request_json: *const c_char,
@@ -467,7 +491,7 @@ index edb35ed..70b4bfb 100644
 -    json(JsonDecodeRgbInvoiceResponse::from(resp))
 +    json(JsonDecodeRgbInvoiceResponse::try_from(resp)?)
  }
-
+ 
  pub(crate) fn get_payment(
 @@ -307,7 +345,12 @@ pub(crate) fn get_payment(
  pub(crate) fn list_payments(node: &COpaqueStruct) -> Result<String, Error> {
@@ -481,12 +505,12 @@ index edb35ed..70b4bfb 100644
 +            .collect::<Vec<_>>(),
 +    )
  }
-
+ 
  // ---------------------------------------------------------------------------
 @@ -324,16 +367,54 @@ pub(crate) fn rgb_invoice(
      json(JsonRgbInvoiceResponse::from(resp))
  }
-
+ 
 -pub(crate) fn send_rgb(
 +pub(crate) fn send_rgb(node: &COpaqueStruct, request_json: *const c_char) -> Result<String, Error> {
 +    let node = require_handle(node)?;
@@ -515,7 +539,7 @@ index edb35ed..70b4bfb 100644
 +    let resp = node.commit_prepared_rgb_send(req.try_into()?)?;
      json(JsonSendRgbResponse::from(resp))
  }
-
+ 
 +pub(crate) fn cancel_rgb_send_plan(
 +    node: &COpaqueStruct,
 +    request_json: *const c_char,
@@ -543,7 +567,7 @@ index edb35ed..70b4bfb 100644
 @@ -354,10 +435,7 @@ pub(crate) fn fail_transfers(
      json(JsonFailTransfersResponse::from(resp))
  }
-
+ 
 -pub(crate) fn inflate(
 -    node: &COpaqueStruct,
 -    request_json: *const c_char,
@@ -564,7 +588,7 @@ index edb35ed..70b4bfb 100644
 +            .collect::<Vec<_>>(),
 +    )
  }
-
+ 
  pub(crate) fn list_transfers_by_txid(
 @@ -380,16 +463,23 @@ pub(crate) fn list_transfers_by_txid(
  ) -> Result<String, Error> {
@@ -578,7 +602,7 @@ index edb35ed..70b4bfb 100644
 +            .collect::<Vec<_>>(),
 +    )
  }
-
+ 
 -pub(crate) fn list_unspents(
 -    node: &COpaqueStruct,
 -    skip_sync: bool,
@@ -594,12 +618,12 @@ index edb35ed..70b4bfb 100644
 +            .collect::<Vec<_>>(),
 +    )
  }
-
+ 
  pub(crate) fn post_asset_media(
 @@ -513,19 +603,13 @@ pub(crate) fn rotate_address(node: &COpaqueStruct) -> Result<String, Error> {
      json(JsonAddressInfo::from(resp))
  }
-
+ 
 -pub(crate) fn btc_balance(
 -    node: &COpaqueStruct,
 -    skip_sync: bool,
@@ -609,7 +633,7 @@ index edb35ed..70b4bfb 100644
      let resp = node.btc_balance(skip_sync)?;
      json(JsonBtcBalanceInfo::from(resp))
  }
-
+ 
 -pub(crate) fn sign_message(
 -    node: &COpaqueStruct,
 -    message: *const c_char,
@@ -621,7 +645,7 @@ index edb35ed..70b4bfb 100644
 @@ -565,16 +649,68 @@ pub(crate) fn check_proxy_endpoint(
      ok_void()
  }
-
+ 
 -pub(crate) fn send_btc(
 +pub(crate) fn send_btc(node: &COpaqueStruct, request_json: *const c_char) -> Result<String, Error> {
 +    let node = require_handle(node)?;
@@ -650,7 +674,7 @@ index edb35ed..70b4bfb 100644
 +    let resp = node.commit_prepared_btc_send(req.try_into()?)?;
      json(JsonSendBtcResponse::from(resp))
  }
-
+ 
 +pub(crate) fn cancel_btc_send_plan(
 +    node: &COpaqueStruct,
 +    request_json: *const c_char,
@@ -692,7 +716,7 @@ index edb35ed..70b4bfb 100644
 @@ -585,13 +721,14 @@ pub(crate) fn create_utxos(
      ok_void()
  }
-
+ 
 -pub(crate) fn list_transactions(
 -    node: &COpaqueStruct,
 -    skip_sync: bool,
@@ -707,7 +731,7 @@ index edb35ed..70b4bfb 100644
 +            .collect::<Vec<_>>(),
 +    )
  }
-
+ 
  pub(crate) fn list_transactions_by_txid(
 @@ -601,7 +738,11 @@ pub(crate) fn list_transactions_by_txid(
  ) -> Result<String, Error> {
@@ -720,12 +744,12 @@ index edb35ed..70b4bfb 100644
 +            .collect::<Vec<_>>(),
 +    )
  }
-
+ 
  pub(crate) fn sync(node: &COpaqueStruct) -> Result<String, Error> {
 @@ -610,6 +751,136 @@ pub(crate) fn sync(node: &COpaqueStruct) -> Result<String, Error> {
      ok_void()
  }
-
+ 
 +pub(crate) fn sync_wallet(
 +    node: &COpaqueStruct,
 +    request_json: *const c_char,
@@ -862,7 +886,7 @@ index edb35ed..70b4bfb 100644
 @@ -634,10 +905,7 @@ pub(crate) fn maker_execute(
      ok_void()
  }
-
+ 
 -pub(crate) fn taker(
 -    node: &COpaqueStruct,
 -    request_json: *const c_char,
@@ -871,21 +895,38 @@ index edb35ed..70b4bfb 100644
      let node = require_handle(node)?;
      let req: JsonTakerRequest = parse_req(request_json)?;
      node.taker(req.into())?;
-@@ -718,9 +986,7 @@ pub(crate) fn native_external_signer_new(
+@@ -718,9 +986,24 @@ pub(crate) fn native_external_signer_new(
      )?)
  }
-
+ 
 -pub(crate) fn native_external_signer_bootstrap(
 -    signer: &COpaqueStruct,
 -) -> Result<String, Error> {
++pub(crate) fn native_external_signer_new_with_storage(
++    seed_hex: *const c_char,
++    network: *const c_char,
++    permissive_policy: bool,
++    storage_dir_path: *const c_char,
++) -> Result<Arc<NativeExternalSigner>, Error> {
++    let seed_hex = ptr_to_string(seed_hex);
++    let network = ptr_to_string(network);
++    let storage_dir_path = ptr_to_string(storage_dir_path);
++    Ok(NativeExternalSigner::new_with_storage(
++        seed_hex,
++        network,
++        Some(permissive_policy),
++        storage_dir_path,
++    )?)
++}
++
 +pub(crate) fn native_external_signer_bootstrap(signer: &COpaqueStruct) -> Result<String, Error> {
      let signer = require_signer(signer)?;
      let bootstrap = signer.bootstrap()?;
      json(JsonSdkExternalSignerBootstrap::from(bootstrap))
-@@ -778,9 +1044,7 @@ pub(crate) fn sdk_node_init_with_external_signer(
+@@ -778,9 +1061,7 @@ pub(crate) fn sdk_node_init_with_external_signer(
      ok_void()
  }
-
+ 
 -pub(crate) fn sdk_node_detach_external_signer(
 -    node: &COpaqueStruct,
 -) -> Result<String, Error> {
@@ -893,7 +934,7 @@ index edb35ed..70b4bfb 100644
      let node = require_handle(node)?;
      node.detach_external_signer();
      ok_void()
-@@ -804,3 +1068,23 @@ pub(crate) fn sdk_node_unlock_with_attached_external_signer(
+@@ -804,3 +1085,23 @@ pub(crate) fn sdk_node_unlock_with_attached_external_signer(
      )?;
      ok_void()
  }
@@ -918,7 +959,7 @@ index edb35ed..70b4bfb 100644
 +    }
 +}
 diff --git a/bindings/c-ffi/src/json_types.rs b/bindings/c-ffi/src/json_types.rs
-index fc570e0..0381292 100644
+index fc570e0696a2053aac7f7230473b2e51f37abe05..0381292feca24125fb4f5528ed24c8ea717d94a3 100644
 --- a/bindings/c-ffi/src/json_types.rs
 +++ b/bindings/c-ffi/src/json_types.rs
 @@ -15,25 +15,27 @@ use hex::DisplayHex;
@@ -958,11 +999,11 @@ index fc570e0..0381292 100644
 +    VerifyMessageResponse, WalletSyncKeychainResult, WalletSyncMode, WalletSyncResult, WitnessData,
  };
  use serde::{Deserialize, Serialize};
-
+ 
 @@ -51,6 +53,10 @@ fn parse_contract_id(s: &str) -> Result<ContractId, Error> {
      ContractId::from_str(s).map_err(|e| Error::StringParse(format!("invalid contract id: {e}")))
  }
-
+ 
 +fn parse_txid(s: &str) -> Result<Txid, Error> {
 +    Txid::from_str(s).map_err(|e| Error::StringParse(format!("invalid transaction id: {e}")))
 +}
@@ -990,7 +1031,7 @@ index fc570e0..0381292 100644
 +    #[serde(default)]
 +    pub max_total_routing_fee_msat: Option<u64>,
  }
-
+ 
  impl TryFrom<JsonSendPaymentRequest> for SdkSendPaymentRequest {
 @@ -479,6 +491,7 @@ impl TryFrom<JsonSendPaymentRequest> for SdkSendPaymentRequest {
              amt_msat: j.amt_msat,
@@ -1006,7 +1047,7 @@ index fc570e0..0381292 100644
      pub description_hash: Option<String>,
 +    pub fee_paid_msat: Option<u64>,
  }
-
+ 
  impl From<Payment> for JsonPayment {
 @@ -620,6 +634,7 @@ impl From<Payment> for JsonPayment {
              payee_pubkey: fmt_pubkey(&p.payee_pubkey),
@@ -1023,7 +1064,7 @@ index fc570e0..0381292 100644
 +    pub min_final_cltv_expiry_delta: u64,
      pub network: String,
  }
-
+ 
 @@ -776,35 +792,82 @@ impl From<DecodeLnInvoiceResponse> for JsonDecodeLnInvoiceResponse {
              payment_hash: fmt_payment_hash(&r.payment_hash),
              payment_secret: r.payment_secret,
@@ -1033,7 +1074,7 @@ index fc570e0..0381292 100644
          }
      }
  }
-
+ 
 +#[derive(Debug, Serialize)]
 +#[serde(tag = "type", content = "value")]
 +pub(crate) enum JsonDecodedRgbAssignment {
@@ -1090,7 +1131,7 @@ index fc570e0..0381292 100644
      pub expiration_timestamp: Option<i64>,
      pub transport_endpoints: Vec<String>,
  }
-
+ 
 -impl From<DecodeRgbInvoiceResponse> for JsonDecodeRgbInvoiceResponse {
 -    fn from(r: DecodeRgbInvoiceResponse) -> Self {
 -        JsonDecodeRgbInvoiceResponse {
@@ -1112,7 +1153,7 @@ index fc570e0..0381292 100644
 +        })
      }
  }
-
+ 
 @@ -1532,7 +1595,7 @@ pub(crate) struct JsonNetworkInfo {
  impl From<NetworkInfo> for JsonNetworkInfo {
      fn from(n: NetworkInfo) -> Self {
@@ -1125,7 +1166,7 @@ index fc570e0..0381292 100644
 @@ -1581,6 +1644,577 @@ impl From<BtcBalanceInfo> for JsonBtcBalanceInfo {
      }
  }
-
+ 
 +// ---------------------------------------------------------------------------
 +// Versioned wallet synchronization + exact wallet snapshot
 +// ---------------------------------------------------------------------------
@@ -1703,7 +1744,7 @@ index fc570e0..0381292 100644
 @@ -1669,6 +2303,144 @@ impl From<SdkSendBtcResponse> for JsonSendBtcResponse {
      }
  }
-
+ 
 +#[derive(Debug, Serialize)]
 +pub(crate) struct JsonPreparedSendResponse {
 +    pub plan_id: String,
@@ -1846,7 +1887,7 @@ index fc570e0..0381292 100644
  pub(crate) struct JsonCreateUtxosRequest {
      pub up_to: bool,
 diff --git a/bindings/c-ffi/src/lib.rs b/bindings/c-ffi/src/lib.rs
-index 24c3371..391db1a 100644
+index 24c3371d26d8a79fb3d7307095235f4c99fb373e..3b7972856c877f6a545b6cda101f9a50dc3026f6 100644
 --- a/bindings/c-ffi/src/lib.rs
 +++ b/bindings/c-ffi/src/lib.rs
 @@ -100,7 +100,10 @@ pub extern "C" fn rln_sdk_node_init(
@@ -1859,7 +1900,7 @@ index 24c3371..391db1a 100644
 +        api::sdk_node_init(node, password, mnemonic_opt)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 @@ -108,7 +111,10 @@ pub extern "C" fn rln_sdk_node_unlock(
      node: &COpaqueStruct,
@@ -1871,7 +1912,7 @@ index 24c3371..391db1a 100644
 +        api::sdk_node_unlock(node, request_json)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 @@ -126,7 +132,10 @@ pub extern "C" fn rln_sdk_node_vss_clear_fence(
      node: &COpaqueStruct,
@@ -1883,7 +1924,7 @@ index 24c3371..391db1a 100644
 +        api::sdk_node_vss_clear_fence(node, request_json)
 +    )
  }
-
+ 
  /// Force an immediate VSS backup flush. Returns `{"version": i64}` JSON
 @@ -153,7 +162,10 @@ pub extern "C" fn rln_sdk_node_apay_new(
      node: &COpaqueStruct,
@@ -1895,7 +1936,7 @@ index 24c3371..391db1a 100644
 +        api::sdk_node_apay_new(node, host_node_id)
 +    )
  }
-
+ 
  // ---------------------------------------------------------------------------
 @@ -165,7 +177,10 @@ pub extern "C" fn rln_connect_peer(
      node: &COpaqueStruct,
@@ -1907,7 +1948,7 @@ index 24c3371..391db1a 100644
 +        api::connect_peer(node, peer_pubkey_and_addr)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 @@ -173,7 +188,10 @@ pub extern "C" fn rln_disconnect_peer(
      node: &COpaqueStruct,
@@ -1919,7 +1960,7 @@ index 24c3371..391db1a 100644
 +        api::disconnect_peer(node, request_json)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 @@ -207,7 +225,10 @@ pub extern "C" fn rln_get_channel_id(
      node: &COpaqueStruct,
@@ -1931,11 +1972,11 @@ index 24c3371..391db1a 100644
 +        api::get_channel_id(node, temporary_channel_id_hex)
 +    )
  }
-
+ 
  // ---------------------------------------------------------------------------
 @@ -223,10 +244,7 @@ pub extern "C" fn rln_send_payment(
  }
-
+ 
  #[unsafe(no_mangle)]
 -pub extern "C" fn rln_keysend(
 -    node: &COpaqueStruct,
@@ -1944,7 +1985,7 @@ index 24c3371..391db1a 100644
 +pub extern "C" fn rln_keysend(node: &COpaqueStruct, request_json: *const c_char) -> CResultString {
      ffi_call!("rln_keysend", api::keysend(node, request_json))
  }
-
+ 
 @@ -243,7 +261,10 @@ pub extern "C" fn rln_cancel_hodl_invoice(
      node: &COpaqueStruct,
      request_json: *const c_char,
@@ -1955,7 +1996,7 @@ index 24c3371..391db1a 100644
 +        api::cancel_hodl_invoice(node, request_json)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 @@ -251,7 +272,10 @@ pub extern "C" fn rln_claim_hodl_invoice(
      node: &COpaqueStruct,
@@ -1967,7 +2008,7 @@ index 24c3371..391db1a 100644
 +        api::claim_hodl_invoice(node, request_json)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 @@ -267,7 +291,10 @@ pub extern "C" fn rln_decode_ln_invoice(
      node: &COpaqueStruct,
@@ -1979,7 +2020,7 @@ index 24c3371..391db1a 100644
 +        api::decode_ln_invoice(node, invoice)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 @@ -275,7 +302,10 @@ pub extern "C" fn rln_decode_rgb_invoice(
      node: &COpaqueStruct,
@@ -1991,7 +2032,7 @@ index 24c3371..391db1a 100644
 +        api::decode_rgb_invoice(node, invoice)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 @@ -284,7 +314,10 @@ pub extern "C" fn rln_get_payment(
      payment_hash_hex: *const c_char,
@@ -2003,11 +2044,11 @@ index 24c3371..391db1a 100644
 +        api::get_payment(node, payment_hash_hex, payment_type)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 @@ -305,34 +338,75 @@ pub extern "C" fn rln_rgb_invoice(
  }
-
+ 
  #[unsafe(no_mangle)]
 -pub extern "C" fn rln_send_rgb(
 +pub extern "C" fn rln_send_rgb(node: &COpaqueStruct, request_json: *const c_char) -> CResultString {
@@ -2025,7 +2066,7 @@ index 24c3371..391db1a 100644
 +        api::prepare_rgb_send(node, request_json)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 -pub extern "C" fn rln_refresh_transfers(
 +pub extern "C" fn rln_commit_prepared_rgb_send(
@@ -2038,22 +2079,20 @@ index 24c3371..391db1a 100644
 +        api::commit_prepared_rgb_send(node, request_json)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 -pub extern "C" fn rln_fail_transfers(
 +pub extern "C" fn rln_cancel_rgb_send_plan(
-     node: &COpaqueStruct,
-     request_json: *const c_char,
- ) -> CResultString {
--    ffi_call!("rln_fail_transfers", api::fail_transfers(node, request_json))
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> CResultString {
 +    ffi_call!(
 +        "rln_cancel_rgb_send_plan",
 +        api::cancel_rgb_send_plan(node, request_json)
 +    )
- }
-
- #[unsafe(no_mangle)]
--pub extern "C" fn rln_inflate(
++}
++
++#[unsafe(no_mangle)]
 +pub extern "C" fn rln_list_pending_rgb_send_plans(node: &COpaqueStruct) -> CResultString {
 +    ffi_call!(
 +        "rln_list_pending_rgb_send_plans",
@@ -2063,16 +2102,18 @@ index 24c3371..391db1a 100644
 +
 +#[unsafe(no_mangle)]
 +pub extern "C" fn rln_refresh_transfers(
-+    node: &COpaqueStruct,
-+    request_json: *const c_char,
-+) -> CResultString {
+     node: &COpaqueStruct,
+     request_json: *const c_char,
+ ) -> CResultString {
+-    ffi_call!("rln_fail_transfers", api::fail_transfers(node, request_json))
 +    ffi_call!(
 +        "rln_refresh_transfers",
 +        api::refresh_transfers(node, request_json)
 +    )
-+}
-+
-+#[unsafe(no_mangle)]
+ }
+ 
+ #[unsafe(no_mangle)]
+-pub extern "C" fn rln_inflate(
 +pub extern "C" fn rln_fail_transfers(
      node: &COpaqueStruct,
      request_json: *const c_char,
@@ -2087,7 +2128,7 @@ index 24c3371..391db1a 100644
 +pub extern "C" fn rln_inflate(node: &COpaqueStruct, request_json: *const c_char) -> CResultString {
      ffi_call!("rln_inflate", api::inflate(node, request_json))
  }
-
+ 
 @@ -365,7 +439,10 @@ pub extern "C" fn rln_post_asset_media(
      node: &COpaqueStruct,
      request_json: *const c_char,
@@ -2098,7 +2139,7 @@ index 24c3371..391db1a 100644
 +        api::post_asset_media(node, request_json)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 @@ -385,7 +462,10 @@ pub extern "C" fn rln_issue_asset_nia(
      node: &COpaqueStruct,
@@ -2110,7 +2151,7 @@ index 24c3371..391db1a 100644
 +        api::issue_asset_nia(node, request_json)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 @@ -393,7 +473,10 @@ pub extern "C" fn rln_issue_asset_cfa(
      node: &COpaqueStruct,
@@ -2122,7 +2163,7 @@ index 24c3371..391db1a 100644
 +        api::issue_asset_cfa(node, request_json)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 @@ -401,7 +484,10 @@ pub extern "C" fn rln_issue_asset_ifa(
      node: &COpaqueStruct,
@@ -2134,7 +2175,7 @@ index 24c3371..391db1a 100644
 +        api::issue_asset_ifa(node, request_json)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 @@ -409,7 +495,10 @@ pub extern "C" fn rln_issue_asset_uda(
      node: &COpaqueStruct,
@@ -2146,7 +2187,7 @@ index 24c3371..391db1a 100644
 +        api::issue_asset_uda(node, request_json)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 @@ -417,7 +506,10 @@ pub extern "C" fn rln_list_assets(
      node: &COpaqueStruct,
@@ -2158,11 +2199,11 @@ index 24c3371..391db1a 100644
 +        api::list_assets(node, filter_asset_schemas_json)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 @@ -466,10 +558,7 @@ pub extern "C" fn rln_btc_balance(node: &COpaqueStruct, skip_sync: bool) -> CRes
  }
-
+ 
  #[unsafe(no_mangle)]
 -pub extern "C" fn rln_sign_message(
 -    node: &COpaqueStruct,
@@ -2171,7 +2212,7 @@ index 24c3371..391db1a 100644
 +pub extern "C" fn rln_sign_message(node: &COpaqueStruct, message: *const c_char) -> CResultString {
      ffi_call!("rln_sign_message", api::sign_message(node, message))
  }
-
+ 
 @@ -495,7 +584,10 @@ pub extern "C" fn rln_check_indexer_url(
      node: &COpaqueStruct,
      indexer_url: *const c_char,
@@ -2182,7 +2223,7 @@ index 24c3371..391db1a 100644
 +        api::check_indexer_url(node, indexer_url)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 @@ -503,31 +595,83 @@ pub extern "C" fn rln_check_proxy_endpoint(
      node: &COpaqueStruct,
@@ -2198,47 +2239,48 @@ index 24c3371..391db1a 100644
 +#[unsafe(no_mangle)]
 +pub extern "C" fn rln_send_btc(node: &COpaqueStruct, request_json: *const c_char) -> CResultString {
 +    ffi_call!("rln_send_btc", api::send_btc(node, request_json))
-+}
-+
-+#[unsafe(no_mangle)]
-+pub extern "C" fn rln_prepare_btc_send(
-+    node: &COpaqueStruct,
-+    request_json: *const c_char,
-+) -> CResultString {
-+    ffi_call!(
-+        "rln_prepare_btc_send",
-+        api::prepare_btc_send(node, request_json)
-+    )
  }
-
+ 
  #[unsafe(no_mangle)]
 -pub extern "C" fn rln_send_btc(
-+pub extern "C" fn rln_commit_prepared_btc_send(
++pub extern "C" fn rln_prepare_btc_send(
      node: &COpaqueStruct,
      request_json: *const c_char,
  ) -> CResultString {
 -    ffi_call!("rln_send_btc", api::send_btc(node, request_json))
 +    ffi_call!(
-+        "rln_commit_prepared_btc_send",
-+        api::commit_prepared_btc_send(node, request_json)
++        "rln_prepare_btc_send",
++        api::prepare_btc_send(node, request_json)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 -pub extern "C" fn rln_create_utxos(
-+pub extern "C" fn rln_cancel_btc_send_plan(
++pub extern "C" fn rln_commit_prepared_btc_send(
      node: &COpaqueStruct,
      request_json: *const c_char,
  ) -> CResultString {
 -    ffi_call!("rln_create_utxos", api::create_utxos(node, request_json))
 +    ffi_call!(
++        "rln_commit_prepared_btc_send",
++        api::commit_prepared_btc_send(node, request_json)
++    )
+ }
+ 
+ #[unsafe(no_mangle)]
+-pub extern "C" fn rln_list_transactions(
++pub extern "C" fn rln_cancel_btc_send_plan(
+     node: &COpaqueStruct,
+-    skip_sync: bool,
++    request_json: *const c_char,
++) -> CResultString {
++    ffi_call!(
 +        "rln_cancel_btc_send_plan",
 +        api::cancel_btc_send_plan(node, request_json)
 +    )
- }
-
- #[unsafe(no_mangle)]
--pub extern "C" fn rln_list_transactions(
++}
++
++#[unsafe(no_mangle)]
 +pub extern "C" fn rln_list_pending_vanilla_transactions(node: &COpaqueStruct) -> CResultString {
 +    ffi_call!(
 +        "rln_list_pending_vanilla_transactions",
@@ -2248,10 +2290,10 @@ index 24c3371..391db1a 100644
 +
 +#[unsafe(no_mangle)]
 +pub extern "C" fn rln_list_address_receipts(
-     node: &COpaqueStruct,
--    skip_sync: bool,
++    node: &COpaqueStruct,
 +    address: *const c_char,
-+) -> CResultString {
+ ) -> CResultString {
+-    ffi_call!("rln_list_transactions", api::list_transactions(node, skip_sync))
 +    ffi_call!(
 +        "rln_list_address_receipts",
 +        api::list_address_receipts(node, address)
@@ -2262,8 +2304,7 @@ index 24c3371..391db1a 100644
 +pub extern "C" fn rln_create_utxos(
 +    node: &COpaqueStruct,
 +    request_json: *const c_char,
- ) -> CResultString {
--    ffi_call!("rln_list_transactions", api::list_transactions(node, skip_sync))
++) -> CResultString {
 +    ffi_call!("rln_create_utxos", api::create_utxos(node, request_json))
 +}
 +
@@ -2274,12 +2315,12 @@ index 24c3371..391db1a 100644
 +        api::list_transactions(node, skip_sync)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 @@ -547,6 +691,25 @@ pub extern "C" fn rln_sync(node: &COpaqueStruct) -> CResultString {
      ffi_call!("rln_sync", api::sync(node))
  }
-
+ 
 +#[unsafe(no_mangle)]
 +pub extern "C" fn rln_sync_wallet(
 +    node: &COpaqueStruct,
@@ -2304,7 +2345,7 @@ index 24c3371..391db1a 100644
  // ---------------------------------------------------------------------------
 @@ -568,10 +731,7 @@ pub extern "C" fn rln_maker_execute(
  }
-
+ 
  #[unsafe(no_mangle)]
 -pub extern "C" fn rln_taker(
 -    node: &COpaqueStruct,
@@ -2313,7 +2354,7 @@ index 24c3371..391db1a 100644
 +pub extern "C" fn rln_taker(node: &COpaqueStruct, request_json: *const c_char) -> CResultString {
      ffi_call!("rln_taker", api::taker(node, request_json))
  }
-
+ 
 @@ -580,7 +740,10 @@ pub extern "C" fn rln_send_onion_message(
      node: &COpaqueStruct,
      request_json: *const c_char,
@@ -2324,7 +2365,7 @@ index 24c3371..391db1a 100644
 +        api::send_onion_message(node, request_json)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 @@ -589,7 +752,10 @@ pub extern "C" fn rln_get_swap(
      payment_hash: *const c_char,
@@ -2336,10 +2377,10 @@ index 24c3371..391db1a 100644
 +        api::get_swap(node, payment_hash, taker_flag)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 @@ -613,7 +779,10 @@ pub extern "C" fn rln_uniffi_is_initialized() -> CResultString {
-
+ 
  #[unsafe(no_mangle)]
  pub extern "C" fn rln_sdk_initialize(request_json: *const c_char) -> CResultString {
 -    ffi_call!("rln_sdk_initialize", api::sdk_global_initialize(request_json))
@@ -2348,9 +2389,9 @@ index 24c3371..391db1a 100644
 +        api::sdk_global_initialize(request_json)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
-@@ -654,14 +823,18 @@ pub extern "C" fn rln_native_external_signer_new(
+@@ -654,14 +823,36 @@ pub extern "C" fn rln_native_external_signer_new(
      network: *const c_char,
      permissive_policy: bool,
  ) -> CResult {
@@ -2360,21 +2401,39 @@ index 24c3371..391db1a 100644
 +        api::native_external_signer_new(seed_hex, network, permissive_policy)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 -pub extern "C" fn rln_native_external_signer_bootstrap(
 -    signer: &COpaqueStruct,
 -) -> CResultString {
 -    ffi_call!("rln_native_external_signer_bootstrap", api::native_external_signer_bootstrap(signer))
++pub extern "C" fn rln_native_external_signer_new_with_storage(
++    seed_hex: *const c_char,
++    network: *const c_char,
++    permissive_policy: bool,
++    storage_dir_path: *const c_char,
++) -> CResult {
++    ffi_call!(
++        "rln_native_external_signer_new_with_storage",
++        api::native_external_signer_new_with_storage(
++            seed_hex,
++            network,
++            permissive_policy,
++            storage_dir_path
++        )
++    )
++}
++
++#[unsafe(no_mangle)]
 +pub extern "C" fn rln_native_external_signer_bootstrap(signer: &COpaqueStruct) -> CResultString {
 +    ffi_call!(
 +        "rln_native_external_signer_bootstrap",
 +        api::native_external_signer_bootstrap(signer)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
-@@ -669,7 +842,10 @@ pub extern "C" fn rln_sdk_node_init_with_native_external_signer(
+@@ -669,7 +860,10 @@ pub extern "C" fn rln_sdk_node_init_with_native_external_signer(
      node: &COpaqueStruct,
      signer: &COpaqueStruct,
  ) -> CResultString {
@@ -2384,9 +2443,9 @@ index 24c3371..391db1a 100644
 +        api::sdk_node_init_with_native_external_signer(node, signer)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
-@@ -677,7 +853,10 @@ pub extern "C" fn rln_sdk_node_attach_native_external_signer(
+@@ -677,7 +871,10 @@ pub extern "C" fn rln_sdk_node_attach_native_external_signer(
      node: &COpaqueStruct,
      signer: &COpaqueStruct,
  ) -> CResultString {
@@ -2396,9 +2455,9 @@ index 24c3371..391db1a 100644
 +        api::sdk_node_attach_native_external_signer(node, signer)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
-@@ -686,7 +865,10 @@ pub extern "C" fn rln_sdk_node_unlock_with_native_external_signer(
+@@ -686,7 +883,10 @@ pub extern "C" fn rln_sdk_node_unlock_with_native_external_signer(
      signer: &COpaqueStruct,
      request_json: *const c_char,
  ) -> CResultString {
@@ -2408,9 +2467,9 @@ index 24c3371..391db1a 100644
 +        api::sdk_node_unlock_with_native_external_signer(node, signer, request_json)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
-@@ -694,14 +876,18 @@ pub extern "C" fn rln_sdk_node_init_with_external_signer(
+@@ -694,14 +894,18 @@ pub extern "C" fn rln_sdk_node_init_with_external_signer(
      node: &COpaqueStruct,
      bootstrap_json: *const c_char,
  ) -> CResultString {
@@ -2420,7 +2479,7 @@ index 24c3371..391db1a 100644
 +        api::sdk_node_init_with_external_signer(node, bootstrap_json)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
 -pub extern "C" fn rln_sdk_node_detach_external_signer(
 -    node: &COpaqueStruct,
@@ -2432,9 +2491,9 @@ index 24c3371..391db1a 100644
 +        api::sdk_node_detach_external_signer(node)
 +    )
  }
-
+ 
  #[unsafe(no_mangle)]
-@@ -709,5 +895,8 @@ pub extern "C" fn rln_sdk_node_unlock_with_attached_external_signer(
+@@ -709,5 +913,8 @@ pub extern "C" fn rln_sdk_node_unlock_with_attached_external_signer(
      node: &COpaqueStruct,
      request_json: *const c_char,
  ) -> CResultString {
@@ -2445,7 +2504,7 @@ index 24c3371..391db1a 100644
 +    )
  }
 diff --git a/bindings/rgb_lightning_node.udl b/bindings/rgb_lightning_node.udl
-index 286134a..40957da 100644
+index 286134a1b2aa50ba6264e09b4e523adba0e3a1cd..40957dae7dda1dd753300d30c0ef8c138cb4d980 100644
 --- a/bindings/rgb_lightning_node.udl
 +++ b/bindings/rgb_lightning_node.udl
 @@ -73,6 +73,16 @@ interface SdkNode {
@@ -2486,12 +2545,12 @@ index 286134a..40957da 100644
      string? description_hash;
 +    u64? fee_paid_msat;
  };
-
+ 
  enum PaymentType {
 @@ -712,6 +731,52 @@ dictionary SdkSendBtcResponse {
      Txid txid;
  };
-
+ 
 +dictionary SdkPreparedSendResponse {
 +    Txid plan_id;
 +    u64 fee_sat;
@@ -2547,10 +2606,10 @@ index 286134a..40957da 100644
      u64? asset_amount;
 +    u64? max_total_routing_fee_msat;
  };
-
+ 
  dictionary SdkSendPaymentResponse {
 diff --git a/src/indexer.rs b/src/indexer.rs
-index a760299..58d210c 100644
+index a7602997ada5a6de96e4b8d777a5d5563fbb6db2..58d210cc2f9ccb2e4ec5ecbd8f2f365abe770cc2 100644
 --- a/src/indexer.rs
 +++ b/src/indexer.rs
 @@ -1,4 +1,4 @@
@@ -2570,7 +2629,7 @@ index a760299..58d210c 100644
  use esplora_client::Builder as EsploraBuilder;
 @@ -22,6 +22,221 @@ use crate::disk::FilesystemLogger;
  use crate::fee_mock::mock_fee;
-
+ 
  pub(crate) const MIN_FEERATE: u32 = 253;
 +const MAX_ADDRESS_HISTORY_TRANSACTIONS: usize = 1_000;
 +
@@ -2787,13 +2846,13 @@ index a760299..58d210c 100644
 +    receipts.sort_by_key(|receipt| receipt.txid);
 +    Ok(receipts)
 +}
-
+ 
  pub(crate) fn default_fee_buckets() -> HashMap<ConfirmationTarget, AtomicU32> {
      let mut fees = HashMap::new();
 @@ -378,6 +593,48 @@ impl UtxoLookup for ElectrumIndexerClient {
      }
  }
-
+ 
 +#[cfg(test)]
 +mod address_receipt_tests {
 +    use super::*;
@@ -2840,7 +2899,7 @@ index a760299..58d210c 100644
      client: &ElectrumClient,
      height: usize,
 diff --git a/src/ldk.rs b/src/ldk.rs
-index e4abdac..7021bae 100644
+index e4abdac82dcc400f2d3723a185678a7cc4a64edd..5bbbc6062e49a2d086a75217b7024d7a6351e943 100644
 --- a/src/ldk.rs
 +++ b/src/ldk.rs
 @@ -124,7 +124,7 @@ use crate::core_types::{HTLCStatus, NodeKeySource, SwapStatus, UnlockRequest};
@@ -2849,7 +2908,7 @@ index e4abdac..7021bae 100644
  use crate::gossip::{GossipSource, GossipSourceConfig};
 -use crate::indexer::{ElectrumIndexerClient, EsploraIndexerClient};
 +use crate::indexer::{AddressIndexerClient, ElectrumIndexerClient, EsploraIndexerClient};
-
+ 
  pub(crate) const INBOUND_PAYMENTS_KEY: &str = "inbound_payments";
  const OUTBOUND_PAYMENTS_KEY: &str = "outbound_payments";
 @@ -271,6 +271,7 @@ pub(crate) struct PaymentInfo {
@@ -2858,7 +2917,7 @@ index e4abdac..7021bae 100644
      pub(crate) async_host_node_id: Option<PublicKey>,
 +    pub(crate) fee_paid_msat: Option<u64>,
  }
-
+ 
  impl_writeable_tlv_based!(PaymentInfo, {
 @@ -288,6 +289,7 @@ impl_writeable_tlv_based!(PaymentInfo, {
      (22, payment_idx, option),
@@ -2866,24 +2925,23 @@ index e4abdac..7021bae 100644
      (26, async_host_node_id, option),
 +    (28, fee_paid_msat, option),
  });
-
+ 
  pub(crate) struct InboundPaymentInfoStorage {
-@@ -381,6 +383,14 @@ pub(crate) struct VirtualChannelSessionStore {
+@@ -381,6 +383,13 @@ pub(crate) struct VirtualChannelSessionStore {
      pub(crate) entries: LdkHashMap<ChannelId, VirtualChannelSession>,
  }
-
+ 
 +fn virtual_channel_session_blocks_reopen(
 +    session: &VirtualChannelSession,
 +    peer_id: &PublicKey,
 +) -> bool {
-+    session.peer_id == *peer_id
-+        && !matches!(session.status, VirtualChannelSessionStatus::Abandoned)
++    session.peer_id == *peer_id && !matches!(session.status, VirtualChannelSessionStatus::Abandoned)
 +}
 +
  impl_writeable_tlv_based!(VirtualChannelSessionStore, {
      (0, entries, required),
  });
-@@ -698,6 +708,7 @@ impl UnlockedAppState {
+@@ -698,6 +707,7 @@ impl UnlockedAppState {
                      payment_idx: None,
                      async_hash_index: None,
                      async_host_node_id: None,
@@ -2891,7 +2949,7 @@ index e4abdac..7021bae 100644
                  };
                  self.stamp_payment_idx(&mut payment_info);
                  e.insert(payment_info);
-@@ -711,11 +722,13 @@ impl UnlockedAppState {
+@@ -711,11 +721,13 @@ impl UnlockedAppState {
          payment_id: PaymentId,
          status: HTLCStatus,
          preimage: Option<PaymentPreimage>,
@@ -2905,7 +2963,7 @@ index e4abdac..7021bae 100644
          payment_info.updated_at = get_current_timestamp();
          let payment = (*payment_info).clone();
          self.save_outbound_payments(outbound);
-@@ -794,7 +807,7 @@ impl UnlockedAppState {
+@@ -794,7 +806,7 @@ impl UnlockedAppState {
              .get_virtual_channel_session_store()
              .entries
              .values()
@@ -2914,15 +2972,15 @@ index e4abdac..7021bae 100644
          if duplicate_virtual_session {
              return Err(APIError::InvalidRequest(
                  "virtual channel session already exists for this peer pair".to_string(),
-@@ -1363,6 +1376,7 @@ impl AsyncOrderInvoiceProvider for AsyncOrderRecipientInvoiceProvider {
+@@ -1363,6 +1375,7 @@ impl AsyncOrderInvoiceProvider for AsyncOrderRecipientInvoiceProvider {
                  payment_idx: None,
                  async_hash_index: self.external_signer_mode.then_some(hash_index),
                  async_host_node_id: self.external_signer_mode.then_some(sender_node_id),
 +                fee_paid_msat: None,
              },
          )?;
-
-@@ -2537,6 +2551,7 @@ async fn handle_ldk_events(
+ 
+@@ -2537,6 +2550,7 @@ async fn handle_ldk_events(
                      payment_id.unwrap(),
                      HTLCStatus::Succeeded,
                      Some(payment_preimage),
@@ -2930,9 +2988,9 @@ index e4abdac..7021bae 100644
                  );
                  unlocked_state
                      .async_order_handler
-@@ -4218,16 +4233,16 @@ pub(crate) async fn start_ldk(
+@@ -4218,16 +4232,16 @@ pub(crate) async fn start_ldk(
      }
-
+ 
      // RGB setup
 -    let indexer_url = if let Some(indexer_url) = &unlock_request.indexer_url {
 +    let (indexer_url, indexer_protocol) = if let Some(indexer_url) = &unlock_request.indexer_url {
@@ -2950,7 +3008,7 @@ index e4abdac..7021bae 100644
              BitcoinNetwork::Regtest => ELECTRUM_URL_REGTEST,
              BitcoinNetwork::Signet => ELECTRUM_URL_SIGNET,
              BitcoinNetwork::Testnet => ELECTRUM_URL_TESTNET,
-@@ -4238,7 +4253,28 @@ pub(crate) async fn start_ldk(
+@@ -4238,7 +4252,28 @@ pub(crate) async fn start_ldk(
                      "with custom signet indexer must be provided"
                  )))
              }
@@ -2979,18 +3037,18 @@ index e4abdac..7021bae 100644
      };
      let proxy_endpoint = if let Some(proxy_endpoint) = &unlock_request.proxy_endpoint {
          check_rgb_proxy_endpoint(proxy_endpoint).await?;
-@@ -5263,6 +5299,7 @@ pub(crate) async fn start_ldk(
-
+@@ -5263,6 +5298,7 @@ pub(crate) async fn start_ldk(
+ 
      let unlocked_state = Arc::new(UnlockedAppState {
          config: static_state.config.clone(),
 +        address_indexer: Arc::new(address_indexer),
          channel_manager: Arc::clone(&channel_manager),
          gossip_source: Arc::clone(&gossip_source),
          inbound_payments,
-@@ -5859,6 +5896,53 @@ mod tests {
+@@ -5859,6 +5895,53 @@ mod tests {
          assert!(!access.allows_peer(&peer));
      }
-
+ 
 +    #[test]
 +    fn abandoned_virtual_session_does_not_block_reopen_for_same_peer() {
 +        let peer = test_peer_pubkey(4);
@@ -3042,7 +3100,7 @@ index e4abdac..7021bae 100644
          let db_path = std::env::temp_dir().join(format!("rln-ldk-unit-{}", uuid::Uuid::new_v4()));
          let connection_string = format!("sqlite:{}?mode=rwc", db_path.display());
 diff --git a/src/rgb.rs b/src/rgb.rs
-index 80df750..a2d824d 100644
+index 80df75096abf0e9c42e7909d8418311bbcba4f73..a2d824da180eddc62883ee01babf35de00c19406 100644
 --- a/src/rgb.rs
 +++ b/src/rgb.rs
 @@ -19,15 +19,16 @@ use rgb_lib::{
@@ -3069,7 +3127,7 @@ index 80df750..a2d824d 100644
 @@ -197,6 +198,15 @@ impl UnlockedAppState {
              .fail_transfers(batch_transfer_idx, no_asset_only, skip_sync)
      }
-
+ 
 +    pub(crate) fn rgb_cancel_send_plan(
 +        &self,
 +        plan_id: String,
@@ -3085,7 +3143,7 @@ index 80df750..a2d824d 100644
 @@ -449,6 +459,30 @@ impl UnlockedAppState {
              .send_btc_begin(address, amount, fee_rate, false)
      }
-
+ 
 +    pub(crate) fn rgb_prepare_send_btc(
 +        &self,
 +        address: String,
@@ -3116,7 +3174,7 @@ index 80df750..a2d824d 100644
 @@ -658,6 +692,93 @@ impl RgbLibWalletWrapper {
          )
      }
-
+ 
 +    pub(crate) fn cancel_send_plan(
 +        &self,
 +        plan_id: String,
@@ -3210,7 +3268,7 @@ index 80df750..a2d824d 100644
 @@ -932,6 +1053,35 @@ impl RgbLibWalletWrapper {
          )
      }
-
+ 
 +    pub(crate) fn prepare_send_btc(
 +        &self,
 +        address: String,
@@ -3244,7 +3302,7 @@ index 80df750..a2d824d 100644
          self.get_rgb_wallet().send_btc_end(self.online, signed_psbt)
      }
 diff --git a/src/routes.rs b/src/routes.rs
-index 975a67d..30958de 100644
+index 975a67dd870148848f72bbb32403c6a522b8d8be..30958deb0d0b00138157a104d43c35efadfb5555 100644
 --- a/src/routes.rs
 +++ b/src/routes.rs
 @@ -2978,6 +2978,7 @@ pub(crate) async fn keysend(
@@ -3252,7 +3310,7 @@ index 975a67d..30958de 100644
                  async_hash_index: None,
                  async_host_node_id: None,
 +                fee_paid_msat: None,
-
+ 
                  updated_at: created_at,
              },
 @@ -3657,6 +3658,7 @@ pub(crate) async fn ln_invoice(
@@ -3262,7 +3320,7 @@ index 975a67d..30958de 100644
 +                fee_paid_msat: None,
              },
          );
-
+ 
 @@ -4786,6 +4788,7 @@ pub(crate) async fn send_payment(
                      payment_idx: None,
                      async_hash_index: None,
@@ -3270,7 +3328,7 @@ index 975a67d..30958de 100644
 +                    fee_paid_msat: None,
                  },
              )?;
-
+ 
 @@ -4902,6 +4905,7 @@ pub(crate) async fn send_payment(
                      payment_idx: None,
                      async_hash_index: None,
@@ -3280,7 +3338,7 @@ index 975a67d..30958de 100644
              )?;
              let payment_hash = PaymentHash(invoice.payment_hash().to_byte_array());
 diff --git a/src/sdk/mod.rs b/src/sdk/mod.rs
-index 3ef5ebc..abdf606 100644
+index 3ef5ebc0456f476bbb9f42d4312d6618ba1443cb..abdf6069e9277590a92c6217dc292065d93f623b 100644
 --- a/src/sdk/mod.rs
 +++ b/src/sdk/mod.rs
 @@ -34,6 +34,7 @@ use amplify::{map, s};
@@ -3316,7 +3374,7 @@ index 3ef5ebc..abdf606 100644
  use std::sync::Arc;
 @@ -96,6 +101,126 @@ use rgb_lib::{AssetSchema as RgbLibAssetSchema, Assignment as RgbLibAssignment};
  use serde_json::Value;
-
+ 
  const SDK_VIRTUAL_OPEN_MODE_TRUSTED_NO_BROADCAST: &str = "trusted_no_broadcast";
 +const PREPARED_SEND_PRIMARY_NAMESPACE: &str = "utexo";
 +const PREPARED_SEND_SECONDARY_NAMESPACE: &str = "prepared_send_v1";
@@ -3438,13 +3496,13 @@ index 3ef5ebc..abdf606 100644
 +        )
 +        .map_err(|error| prepared_send_storage_error("removal", error))
 +}
-
+ 
  struct OpenChannelVirtualIntentGuard {
      unlocked_state: Arc<crate::utils::UnlockedAppState>,
 @@ -295,6 +420,36 @@ pub(crate) struct SendRgbData {
      pub(crate) batch_transfer_idx: i32,
  }
-
+ 
 +pub(crate) struct PreparedSendData {
 +    pub(crate) plan_id: String,
 +    pub(crate) fee_sat: u64,
@@ -3484,12 +3542,12 @@ index 3ef5ebc..abdf606 100644
      pub(crate) asset_amount: Option<u64>,
 +    pub(crate) max_total_routing_fee_msat: Option<u64>,
  }
-
+ 
  pub(crate) struct SendPaymentData {
 @@ -498,6 +654,18 @@ pub(crate) struct SendBtcData {
      pub(crate) txid: String,
  }
-
+ 
 +pub(crate) struct CommitPreparedSendRequestData {
 +    pub(crate) plan_id: String,
 +}
@@ -3511,12 +3569,12 @@ index 3ef5ebc..abdf606 100644
      pub(crate) description_hash: Option<String>,
 +    pub(crate) fee_paid_msat: Option<u64>,
  }
-
+ 
  pub(crate) struct CancelHodlInvoiceRequestData {
 @@ -1751,18 +1920,10 @@ pub(crate) async fn send_rgb(
      })
  }
-
+ 
 -pub(crate) async fn send_rgb_from_groups(
 -    state: Arc<AppState>,
 -    request: SendRgbRequestData,
@@ -3555,13 +3613,13 @@ index 3ef5ebc..abdf606 100644
 +    }
 +
 +    let recipient_map = rgb_recipient_map_from_groups(request.recipient_groups)?;
-
+ 
      send_rgb(
          state,
 @@ -1797,6 +1971,292 @@ pub(crate) async fn send_rgb_from_groups(
      .await
  }
-
+ 
 +pub(crate) async fn prepare_rgb_send_from_groups(
 +    state: Arc<AppState>,
 +    request: SendRgbRequestData,
@@ -3862,7 +3920,7 @@ index 3ef5ebc..abdf606 100644
 @@ -2651,6 +3112,172 @@ pub(crate) async fn send_btc(
      Ok(SendBtcData { txid })
  }
-
+ 
 +pub(crate) async fn prepare_btc_send(
 +    state: Arc<AppState>,
 +    request: SendBtcRequestData,
@@ -4039,7 +4097,7 @@ index 3ef5ebc..abdf606 100644
 +                fee_paid_msat: None,
              },
          )?;
-
+ 
          let params = OptionalOfferPaymentParams {
 +            route_params_config: RouteParametersConfig {
 +                max_total_routing_fee_msat: request.max_total_routing_fee_msat,
@@ -4071,7 +4129,7 @@ index 3ef5ebc..abdf606 100644
 @@ -3663,6 +4299,102 @@ pub(crate) async fn sync(state: Arc<AppState>) -> Result<(), APIError> {
      Ok(())
  }
-
+ 
 +#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 +pub(crate) enum WalletSyncModeData {
 +    Routine,
@@ -4178,7 +4236,7 @@ index 3ef5ebc..abdf606 100644
 +            fee_paid_msat: None,
          },
      );
-
+ 
 @@ -3888,6 +4621,7 @@ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentDat
              payee_pubkey: payment_info.payee_pubkey.to_string(),
              preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
@@ -4186,7 +4244,7 @@ index 3ef5ebc..abdf606 100644
 +            fee_paid_msat: payment_info.fee_paid_msat,
          });
      }
-
+ 
 @@ -3913,6 +4647,7 @@ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentDat
              payee_pubkey: payment_info.payee_pubkey.to_string(),
              preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
@@ -4194,7 +4252,7 @@ index 3ef5ebc..abdf606 100644
 +            fee_paid_msat: payment_info.fee_paid_msat,
          });
      }
-
+ 
 @@ -3959,6 +4694,7 @@ pub(crate) async fn get_payment(
                          payee_pubkey: payment_info.payee_pubkey.to_string(),
                          preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
@@ -4213,7 +4271,7 @@ index 3ef5ebc..abdf606 100644
              }
 @@ -4451,13 +5188,7 @@ mod tests {
      }
-
+ 
      fn mock_locked_state() -> Arc<AppState> {
 -        let unique = format!(
 -            "rln-sdk-external-tests-{}",
@@ -4226,14 +4284,377 @@ index 3ef5ebc..abdf606 100644
          let storage_dir = std::env::temp_dir().join(unique);
          std::fs::create_dir_all(&storage_dir).expect("create temp storage dir");
          let db_path = storage_dir.join("rln_db");
+diff --git a/src/signer/channel_signer.rs b/src/signer/channel_signer.rs
+index 6e24decc5614e140f7428fe63e06a106b8367a71..c38c65a971005f22d09ca50f5e50b600e338d787 100644
+--- a/src/signer/channel_signer.rs
++++ b/src/signer/channel_signer.rs
+@@ -410,15 +410,58 @@ impl ChannelSigner for ExternalChannelSigner {
+         idx: u64,
+         _secp_ctx: &Secp256k1<bitcoin::secp256k1::All>,
+     ) -> Result<PublicKey, ()> {
+-        let point_hex = self.get_per_commitment_point(idx).map_err(|_| ())?;
+-        let point = Vec::<u8>::from_hex(&point_hex).map_err(|_| ())?;
+-        PublicKey::from_slice(&point).map_err(|_| ())
++        let point_hex = self.get_per_commitment_point(idx).map_err(|err| {
++            tracing::error!(
++                channel_keys_id = %self.channel_keys_id_hex,
++                idx,
++                error = %err,
++                "external signer get_per_commitment_point failed"
++            );
++        })?;
++        let point = Vec::<u8>::from_hex(&point_hex).map_err(|err| {
++            tracing::error!(
++                channel_keys_id = %self.channel_keys_id_hex,
++                idx,
++                error = %err,
++                "external signer returned an invalid per-commitment point encoding"
++            );
++        })?;
++        PublicKey::from_slice(&point).map_err(|err| {
++            tracing::error!(
++                channel_keys_id = %self.channel_keys_id_hex,
++                idx,
++                error = %err,
++                "external signer returned an invalid per-commitment point"
++            );
++        })
+     }
+ 
+     fn release_commitment_secret(&self, idx: u64) -> Result<[u8; 32], ()> {
+-        let secret_hex = self.release_commitment_secret(idx).map_err(|_| ())?;
+-        let secret = Vec::<u8>::from_hex(&secret_hex).map_err(|_| ())?;
+-        secret.try_into().map_err(|_| ())
++        let secret_hex = self.release_commitment_secret(idx).map_err(|err| {
++            tracing::error!(
++                channel_keys_id = %self.channel_keys_id_hex,
++                idx,
++                error = %err,
++                "external signer release_commitment_secret failed"
++            );
++        })?;
++        let secret = Vec::<u8>::from_hex(&secret_hex).map_err(|err| {
++            tracing::error!(
++                channel_keys_id = %self.channel_keys_id_hex,
++                idx,
++                error = %err,
++                "external signer returned an invalid commitment-secret encoding"
++            );
++        })?;
++        let decoded_length = secret.len();
++        secret.try_into().map_err(|_| {
++            tracing::error!(
++                channel_keys_id = %self.channel_keys_id_hex,
++                idx,
++                decoded_length,
++                "external signer returned a commitment secret with the wrong length"
++            );
++        })
+     }
+ 
+     fn validate_holder_commitment(
+diff --git a/src/test/lib_sdk/close_coop_vanilla.rs b/src/test/lib_sdk/close_coop_vanilla.rs
+index 99dfc4de1727df3db4e955fc4214023ee4a51799..1a89d81785726b5ae393c1b84995bdf06cff5073 100644
+--- a/src/test/lib_sdk/close_coop_vanilla.rs
++++ b/src/test/lib_sdk/close_coop_vanilla.rs
+@@ -206,6 +206,7 @@ fn run_close_coop_vanilla(name: &str, port_offset: u16, with_anchors: bool) {
+                 amt_msat: None,
+                 asset_id: None,
+                 asset_amount: None,
++                max_total_routing_fee_msat: None,
+             })
+             .expect("node B sendpayment");
+         let payment_hash = send_payment.payment_hash.expect("vanilla payment hash");
+diff --git a/src/test/lib_sdk/external_signer.rs b/src/test/lib_sdk/external_signer.rs
+index 8a52af35b01ed9b299b8be41a7e0568f3c4d97cd..0a2dbbc91fb74e9b6f1c078739403ae03337012b 100644
+--- a/src/test/lib_sdk/external_signer.rs
++++ b/src/test/lib_sdk/external_signer.rs
+@@ -682,6 +682,7 @@ fn rgb_native_external_signer_mixed_one_hop_payment_quick() {
+                 amt_msat: None,
+                 asset_id: None,
+                 asset_amount: None,
++                max_total_routing_fee_msat: None,
+             })
+             .expect("sendpayment");
+         let payment_hash = send.payment_hash.expect("payment_hash");
+@@ -699,6 +700,185 @@ fn rgb_native_external_signer_mixed_one_hop_payment_quick() {
+     }
+ }
+ 
++/// Production-shaped RGB virtual-channel regression: an internal-signer LSP opens a
++/// `trusted_no_broadcast` channel to a persistent native external-signer wallet, keeps the
++/// colored balance on the LSP side, and pays the first asset-bound invoice created by the wallet.
++///
++/// Regtest: `./regtest.sh start`, then:
++/// `cargo test -p rgb-lightning-node --features uniffi,test-utils,vls --test lib_sdk rgb_native_external_signer_accepts_virtual_channel_payment -- --nocapture`
++#[test]
++#[serial]
++fn rgb_native_external_signer_accepts_virtual_channel_payment() {
++    ensure_regtest_available();
++    let _guard = env_lock().lock().unwrap_or_else(|e| e.into_inner());
++
++    const PORT_OFF: u16 = 450;
++    const CHANNEL_ASSET_AMOUNT: u64 = 1_000;
++    const PAYMENT_ASSET_AMOUNT: u64 = 100;
++    let lsp_daemon_port = NODE_A_DAEMON_PORT + PORT_OFF;
++    let lsp_peer_port = NODE_A_PEER_PORT + PORT_OFF;
++    let wallet_daemon_port = NODE_B_DAEMON_PORT + PORT_OFF;
++    let wallet_peer_port = NODE_B_PEER_PORT + PORT_OFF;
++
++    let test_dir = test_dir("sdk_rgb_native_external_virtual_receive");
++    if test_dir.exists() {
++        fs::remove_dir_all(&test_dir).expect("remove previous lib_sdk test dir");
++    }
++    fs::create_dir_all(&test_dir).expect("create lib_sdk test dir");
++    let lsp_dir = test_dir.join("lsp");
++    let wallet_dir = test_dir.join("wallet");
++    let signer_dir = test_dir.join("wallet_signer");
++
++    let signer = make_native_signer_with_storage(&signer_dir, None);
++    let wallet_pubkey = signer
++        .bootstrap()
++        .expect("signer bootstrap")
++        .node_id
++        .parse::<bitcoin::secp256k1::PublicKey>()
++        .expect("wallet pubkey");
++
++    let lsp = make_node_with_virtual(&lsp_dir, lsp_daemon_port, lsp_peer_port, None);
++    lsp.init("lspPassword".to_string(), None).expect("LSP init");
++    lsp.unlock(unlock_request("lspPassword"))
++        .expect("LSP unlock");
++    let lsp_pubkey = lsp.node_info().expect("LSP node info").pubkey;
++    let wallet = make_node_with_virtual(
++        &wallet_dir,
++        wallet_daemon_port,
++        wallet_peer_port,
++        Some(vec![lsp_pubkey]),
++    );
++
++    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
++        wallet
++            .init_with_native_external_signer(signer.clone())
++            .expect("wallet init with native external signer");
++
++        wallet
++            .unlock_with_native_external_signer(
++                signer.clone(),
++                Some("user".to_string()),
++                Some("password".to_string()),
++                Some("localhost".to_string()),
++                Some(18443),
++                Some("127.0.0.1:50001".to_string()),
++                Some(PROXY_ENDPOINT_LOCAL.to_string()),
++                vec![],
++                Some("RLN_rgb_native_virtual_wallet".to_string()),
++            )
++            .expect("wallet unlock with native external signer");
++
++        fund_and_create_utxos(&lsp, "LSP");
++        lsp.createutxos(SdkCreateUtxosRequest {
++            up_to: false,
++            num: Some(25),
++            size: Some(32_000),
++            fee_rate: CREATE_UTXOS_FEE_RATE,
++            skip_sync: false,
++        })
++        .expect("LSP createutxos for RGB allocation headroom");
++
++        let asset_id = lsp
++            .issueassetnia(SdkIssueAssetNiaRequest {
++                amounts: vec![10_000],
++                ticker: "VIRT".to_string(),
++                name: "VirtualRgb".to_string(),
++                precision: 0,
++            })
++            .expect("issue virtual-channel asset")
++            .asset_id;
++
++        let wallet_uri = format!("{wallet_pubkey}@127.0.0.1:{wallet_peer_port}");
++        lsp.connectpeer(wallet_uri.clone()).expect("connect wallet");
++        lsp.openchannel(SdkOpenChannelRequest {
++            peer_pubkey_and_opt_addr: wallet_uri,
++            capacity_sat: 200_000,
++            push_msat: 0,
++            public: false,
++            with_anchors: true,
++            fee_base_msat: None,
++            fee_proportional_millionths: None,
++            temporary_channel_id: None,
++            asset_id: Some(asset_id.clone()),
++            asset_amount: Some(CHANNEL_ASSET_AMOUNT),
++            push_asset_amount: None,
++            virtual_open_mode: Some("trusted_no_broadcast".to_string()),
++        })
++        .expect("LSP opens RGB trusted virtual channel");
++
++        let wait_usable = |node: &SdkNode, peer: &str, label: &str| {
++            let deadline = std::time::Instant::now() + Duration::from_secs(60);
++            loop {
++                if node
++                    .list_channels()
++                    .unwrap_or_default()
++                    .iter()
++                    .any(|channel| {
++                        channel.peer_pubkey.to_string() == peer
++                            && channel.ready
++                            && channel.is_usable
++                            && channel.asset_id.as_ref() == Some(&asset_id)
++                    })
++                {
++                    break;
++                }
++                assert!(
++                    std::time::Instant::now() < deadline,
++                    "{label} RGB virtual channel did not become usable"
++                );
++                thread::sleep(Duration::from_millis(500));
++            }
++        };
++
++        let lsp_pubkey = lsp_pubkey.to_string();
++        wait_usable(&lsp, &wallet_pubkey.to_string(), "LSP");
++        wait_usable(&wallet, &lsp_pubkey, "wallet");
++
++        let invoice = wallet
++            .ln_invoice(LnInvoiceRequest {
++                amt_msat: Some(PAYMENT_MSAT),
++                expiry_sec: 900,
++                asset_id: Some(asset_id.clone()),
++                asset_amount: Some(PAYMENT_ASSET_AMOUNT),
++                payment_hash: None,
++                description_hash: None,
++                min_final_cltv_expiry_delta: None,
++            })
++            .expect("wallet creates RGB Lightning invoice")
++            .invoice;
++
++        let payment_hash = lsp
++            .sendpayment(SdkSendPaymentRequest {
++                invoice: invoice.to_string(),
++                amt_msat: None,
++                asset_id: None,
++                asset_amount: None,
++                max_total_routing_fee_msat: None,
++            })
++            .expect("LSP sends RGB virtual-channel payment")
++            .payment_hash
++            .expect("payment hash");
++
++        wait_for_payment_status(&lsp, &payment_hash, Duration::from_secs(120));
++        wait_for_payment_status(&wallet, &payment_hash, Duration::from_secs(120));
++        wait_for_ln_balance(
++            &wallet,
++            &asset_id,
++            PAYMENT_ASSET_AMOUNT,
++            Duration::from_secs(120),
++        );
++
++        lsp.shutdown();
++        wallet.shutdown();
++        thread::sleep(Duration::from_millis(300));
++    }));
++
++    if result.is_err() {
++        lsp.shutdown();
++        panic!("rgb_native_external_signer_accepts_virtual_channel_payment failed");
++    }
++}
++
+ /// Mixed internal/external RGB channel: after receiving RGB, the external-signer node must be able
+ /// to send RGB back over the same channel.
+ #[test]
+@@ -992,6 +1172,7 @@ fn rgb_native_external_signer_mixed_one_hop_payment_coop_close_settles_to_chain(
+                 amt_msat: None,
+                 asset_id: None,
+                 asset_amount: None,
++                max_total_routing_fee_msat: None,
+             })
+             .expect("sendpayment");
+         let payment_hash = send.payment_hash.expect("payment_hash");
+@@ -1128,6 +1309,7 @@ fn external_signer_virtual_channel_survives_restart() {
+                 amt_msat: None,
+                 asset_id: None,
+                 asset_amount: None,
++                max_total_routing_fee_msat: None,
+             })
+             .unwrap_or_else(|e| panic!("{label}: sendpayment: {e:?}"));
+         let payment_hash = send.payment_hash.expect("payment_hash");
+diff --git a/src/test/lib_sdk/helpers.rs b/src/test/lib_sdk/helpers.rs
+index a20ac6d050e0f1bae2ae6fc69bcc5c85147a4f0f..9ac210dcb91cb25679ed7892b46c1a657a1d266b 100644
+--- a/src/test/lib_sdk/helpers.rs
++++ b/src/test/lib_sdk/helpers.rs
+@@ -826,6 +826,7 @@ pub(crate) fn send_payment_with_ln_balance(
+             amt_msat: None,
+             asset_id: None,
+             asset_amount: None,
++            max_total_routing_fee_msat: None,
+         })
+         .expect("sendpayment with ln balance checks");
+ 
+diff --git a/src/test/lib_sdk/multi_hop.rs b/src/test/lib_sdk/multi_hop.rs
+index acb4fd2cab3b2d9b22591fe78b1263a8a4668f91..34bce6c3f6b19b795d62d6a84c130242f2ddd4c6 100644
+--- a/src/test/lib_sdk/multi_hop.rs
++++ b/src/test/lib_sdk/multi_hop.rs
+@@ -253,6 +253,7 @@ fn multi_hop() {
+                 amt_msat: None,
+                 asset_id: None,
+                 asset_amount: None,
++                max_total_routing_fee_msat: None,
+             })
+             .expect("node A sendpayment");
+         let payment_hash = send_payment
+diff --git a/src/test/lib_sdk/payment.rs b/src/test/lib_sdk/payment.rs
+index 574fd5df1474c2d313b8ba8108e929f525f5b7c5..22440e5a55bbc9739d6a16993596334ef51e9398 100644
+--- a/src/test/lib_sdk/payment.rs
++++ b/src/test/lib_sdk/payment.rs
+@@ -285,6 +285,7 @@ fn success() {
+                 amt_msat: None,
+                 asset_id: None,
+                 asset_amount: None,
++                max_total_routing_fee_msat: None,
+             })
+             .expect("node A sendpayment third");
+         let decoded = node_a
+@@ -319,6 +320,7 @@ fn success() {
+                 amt_msat: None,
+                 asset_id: None,
+                 asset_amount: None,
++                max_total_routing_fee_msat: None,
+             })
+             .expect("node B sendpayment fourth");
+         let decoded = node_a
+diff --git a/src/test/lib_sdk/restart.rs b/src/test/lib_sdk/restart.rs
+index 89331d42494c11557fd30c08761279f3af36d684..5770b445a0846effd37791e53c80dc21fd697f9b 100644
+--- a/src/test/lib_sdk/restart.rs
++++ b/src/test/lib_sdk/restart.rs
+@@ -169,6 +169,7 @@ fn restart() {
+                 amt_msat: None,
+                 asset_id: None,
+                 asset_amount: None,
++                max_total_routing_fee_msat: None,
+             })
+             .expect("node A sendpayment");
+         let payment_hash = send_payment.payment_hash.expect("payment hash");
+diff --git a/src/test/lib_sdk/vanilla_payment_on_rgb_channel.rs b/src/test/lib_sdk/vanilla_payment_on_rgb_channel.rs
+index 862f288297d6272ffdf75a1f37cec83a88189041..0108a52669d0fa5807782846a61c0064e9f0fd22 100644
+--- a/src/test/lib_sdk/vanilla_payment_on_rgb_channel.rs
++++ b/src/test/lib_sdk/vanilla_payment_on_rgb_channel.rs
+@@ -114,6 +114,7 @@ fn vanilla_payment_on_rgb_channel() {
+                 amt_msat: None,
+                 asset_id: None,
+                 asset_amount: None,
++                max_total_routing_fee_msat: None,
+             })
+             .expect("node A sendpayment");
+         let payment_hash = send_payment
 diff --git a/src/uniffi_api/mod.rs b/src/uniffi_api/mod.rs
-index c6173a3..5342f9f 100644
+index c6173a390f180ab7664a6b883464961f9c855925..5342f9f6f3137e5f6150614f127e5aae7d411951 100644
 --- a/src/uniffi_api/mod.rs
 +++ b/src/uniffi_api/mod.rs
 @@ -115,11 +115,8 @@ fn handle_from_request(request: SdkInitRequest) -> Result<NodeHandle, RlnError>
      block_on_app(NodeHandle::new(config))
  }
-
+ 
 -fn send_rgb_from_state(
 -    state: std::sync::Arc<crate::utils::AppState>,
 -    request: SendRgbRequest,
@@ -4251,7 +4672,7 @@ index c6173a3..5342f9f 100644
 -    };
 +    }
 +}
-
+ 
 -    let data = block_on_sdk(sdk::send_rgb_from_groups(state, sdk_request))?;
 +fn send_rgb_from_state(
 +    state: std::sync::Arc<crate::utils::AppState>,
@@ -4271,11 +4692,11 @@ index c6173a3..5342f9f 100644
 +        fee_paid_msat: data.fee_paid_msat,
      })
  }
-
+ 
 @@ -673,6 +679,91 @@ impl SdkNode {
          Ok(SdkSendBtcResponse { txid })
      }
-
+ 
 +    pub fn prepare_btc_send(
 +        &self,
 +        request: SdkSendBtcRequest,
@@ -4375,7 +4796,7 @@ index c6173a3..5342f9f 100644
 @@ -847,6 +939,30 @@ impl SdkNode {
          Ok(())
      }
-
+ 
 +    pub fn sync_wallet(&self, mode: WalletSyncMode) -> Result<WalletSyncResult, RlnError> {
 +        let state = self.handle.app_state();
 +        let data = block_on_sdk(sdk::sync_wallet(
@@ -4406,7 +4827,7 @@ index c6173a3..5342f9f 100644
 @@ -1441,6 +1557,67 @@ impl SdkNode {
          send_rgb_from_state(self.handle.app_state(), request)
      }
-
+ 
 +    pub fn prepare_rgb_send(
 +        &self,
 +        request: SendRgbRequest,
@@ -4472,7 +4893,7 @@ index c6173a3..5342f9f 100644
          let state = self.handle.app_state();
          let response = block_on_sdk(sdk::async_order_new(
 diff --git a/src/uniffi_api/tests.rs b/src/uniffi_api/tests.rs
-index 4f37a95..ae411f3 100644
+index 4f37a9564b5801e7ef5f84a55fe4cd0409fe26e9..ae411f319eb0888f124e15a467a772bff437e333 100644
 --- a/src/uniffi_api/tests.rs
 +++ b/src/uniffi_api/tests.rs
 @@ -412,11 +412,13 @@ mod uniffi_smoke_tests {
@@ -4481,22 +4902,22 @@ index 4f37a95..ae411f3 100644
              description_hash: None,
 +            fee_paid_msat: Some(25),
          };
-
+ 
          let mapped = map_payment_data(data).expect("payment mapping should succeed");
          assert_eq!(mapped.payment_hash.0, [7u8; 32]);
          assert_eq!(mapped.preimage, expected_preimage);
 +        assert_eq!(mapped.fee_paid_msat, Some(25));
          assert!(matches!(mapped.payment_type, PaymentType::InboundHodl));
      }
-
+ 
 diff --git a/src/uniffi_api/types.rs b/src/uniffi_api/types.rs
-index beeaf62..bbf7e48 100644
+index beeaf62ea3e2ece39fcb5a1ec8cccf3476d4e063..bbf7e48db9ad43c276381cc6e5dd67da56521dfa 100644
 --- a/src/uniffi_api/types.rs
 +++ b/src/uniffi_api/types.rs
 @@ -112,6 +112,23 @@ pub struct BtcBalanceInfo {
      pub colored: BtcBalance,
  }
-
+ 
 +#[derive(Clone, Copy)]
 +pub enum WalletSyncMode {
 +    Routine,
@@ -4523,7 +4944,7 @@ index beeaf62..bbf7e48 100644
      pub description_hash: Option<String>,
 +    pub fee_paid_msat: Option<u64>,
  }
-
+ 
  pub enum PaymentType {
 @@ -534,6 +552,7 @@ pub struct SdkSendPaymentRequest {
      pub amt_msat: Option<u64>,
@@ -4531,12 +4952,12 @@ index beeaf62..bbf7e48 100644
      pub asset_amount: Option<u64>,
 +    pub max_total_routing_fee_msat: Option<u64>,
  }
-
+ 
  pub struct SdkSendPaymentResponse {
 @@ -622,6 +641,52 @@ pub struct SdkSendBtcResponse {
      pub txid: Txid,
  }
-
+ 
 +pub struct SdkPreparedSendResponse {
 +    pub plan_id: Txid,
 +    pub fee_sat: u64,
@@ -4587,11 +5008,11 @@ index beeaf62..bbf7e48 100644
      pub qty_from: u64,
      pub qty_to: u64,
 diff --git a/src/utils.rs b/src/utils.rs
-index 33cfc42..f8a6e34 100644
+index 33cfc42dffa59d1254392941bbb1e377b6ee9177..f8a6e340de47fdeab0394122e06c4aa1cf960d1b 100644
 --- a/src/utils.rs
 +++ b/src/utils.rs
 @@ -164,6 +164,7 @@ impl StaticState {
-
+ 
  pub(crate) struct UnlockedAppState {
      pub(crate) config: Arc<crate::config::Config>,
 +    pub(crate) address_indexer: Arc<crate::indexer::AddressIndexerClient>,

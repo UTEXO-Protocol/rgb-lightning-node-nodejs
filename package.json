@@ -1,6 +1,6 @@
 {
   "name": "@utexo/rgb-lightning-node-nodejs",
-  "version": "0.1.0-beta.14",
+  "version": "0.1.0-beta.15",
   "description": "Node.js (napi-rs) bindings for rgb-lightning-node",
   "keywords": [
     "rgb",
@@ -22,11 +22,12 @@
     "README.md"
   ],
   "scripts": {
-    "postinstall": "bash scripts/download-libs.sh",
+    "postinstall": "node scripts/install-overlay-addon.js",
     "build": "mkdir -p .napi-generated && napi build --platform --release --no-js --dts .napi-generated/index.d.ts && node scripts/stage-local-addon.js",
     "build:debug": "mkdir -p .napi-generated && napi build --platform --no-js --dts .napi-generated/index.d.ts && node scripts/stage-local-addon.js",
     "check:types": "tsc --noEmit --strict --skipLibCheck index.d.ts",
-    "test": "node test.js"
+    "test:installer": "node --test scripts/install-overlay-addon.test.js",
+    "test": "npm run test:installer && node test.js"
   },
   "engines": {
     "node": ">=18"
@@ -40,5 +41,13 @@
     "url": "https://github.com/UTEXO-Protocol/rgb-lightning-node-nodejs.git"
   },
   "license": "Apache-2.0",
-  "author": "UTEXO"
+  "author": "UTEXO",
+  "utexoNativeOverlay": {
+    "repository": "https://github.com/UTEXO-Protocol/rgb-lightning-node.git",
+    "ref": "v0.10.0-beta.3",
+    "commit": "0bfa66fa256a6c36f3737d5b6402eacea40c68fc",
+    "patch": "patches/c-ffi-utexo-patches-v0.10.0-beta.3.patch",
+    "patchSha256": "14d92a75067fd44436c2895266a5762ecbcd782f6fb29696a6f21c171b57de0a",
+    "rustToolchain": "1.88.0"
+  }
 }
