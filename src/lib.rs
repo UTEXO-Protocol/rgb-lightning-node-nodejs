@@ -293,9 +293,11 @@ impl SdkNode {
     }
 
     #[napi]
-    pub fn shutdown(&self) -> Result<()> {
+    pub fn shutdown(&mut self) -> Result<()> {
         let res = rln_sdk_node_shutdown(&self.handle);
-        take_cresult_string(res).map(|_| ())
+        let result = take_cresult_string(res).map(|_| ());
+        free_sdk_node(std::mem::replace(&mut self.handle, COpaqueStruct::null()));
+        result
     }
 
     /// Take over a stale VSS ownership fence after the previous node died

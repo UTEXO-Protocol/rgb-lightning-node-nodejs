@@ -97,6 +97,13 @@ try {
 } finally {
   node.shutdown()
   signer.destroy()
+  const reopenedSigner = NativeExternalSigner.createWithStorage(
+    '01'.repeat(32),
+    'regtest',
+    signerDataDir,
+    true
+  )
+  reopenedSigner.destroy()
   fs.rmSync(dataDir, { recursive: true, force: true })
   fs.rmSync(signerDataDir, { recursive: true, force: true })
 }

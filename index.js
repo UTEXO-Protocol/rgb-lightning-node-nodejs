@@ -80,8 +80,12 @@ class SdkNode {
 
   shutdown () {
     if (this._closed) return
-    this._inner.shutdown()
-    this._closed = true
+    try {
+      this._inner.shutdown()
+    } finally {
+      this._inner = null
+      this._closed = true
+    }
   }
 
   // Forces takeover of a stale VSS ownership fence after a previous node

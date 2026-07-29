@@ -1,5 +1,5 @@
 diff --git a/bindings/c-ffi/Cargo.lock b/bindings/c-ffi/Cargo.lock
-index 5886c2d..c06e100 100644
+index 5886c2dad3ab839a54a67db6f8852e9a064cce31..c06e1007be05bac0064eeaa31cafb1038a230e2c 100644
 --- a/bindings/c-ffi/Cargo.lock
 +++ b/bindings/c-ffi/Cargo.lock
 @@ -177,7 +177,7 @@ version = "1.1.5"
@@ -195,7 +195,7 @@ index 5886c2d..c06e100 100644
  
  [[package]]
 diff --git a/bindings/c-ffi/rln.h b/bindings/c-ffi/rln.h
-index eb7e572..315b3bc 100644
+index eb7e5720fb56a391d66a6a2bcaeb8951cb94915b..315b3bc9e76d7574a90844e69d2cf1320c6f3c14 100644
 --- a/bindings/c-ffi/rln.h
 +++ b/bindings/c-ffi/rln.h
 @@ -41,9 +41,18 @@ struct CResultString rln_asset_metadata(const struct COpaqueStruct *node, const
@@ -299,7 +299,7 @@ index eb7e572..315b3bc 100644
 +struct CResultString rln_wallet_snapshot(const struct COpaqueStruct *node,
 +                                         const char *request_json);
 diff --git a/bindings/c-ffi/rln.hpp b/bindings/c-ffi/rln.hpp
-index 64266ec..9dbde57 100644
+index 64266ecd582ccf2bc6b254f2a32cc25e47a6848b..9dbde572b7049e894efa3717b36d8efb6d2a4d8e 100644
 --- a/bindings/c-ffi/rln.hpp
 +++ b/bindings/c-ffi/rln.hpp
 @@ -43,8 +43,14 @@ CResultString rln_asset_metadata(const COpaqueStruct *node, const char *asset_id
@@ -392,7 +392,7 @@ index 64266ec..9dbde57 100644
 +
  }  // extern "C"
 diff --git a/bindings/c-ffi/src/api.rs b/bindings/c-ffi/src/api.rs
-index edb35ed..9137ec7 100644
+index edb35eddf1b5a15b8965bb012b227357c2bf3635..9137ec710df44df0a27d27582db0a5fb4c665395 100644
 --- a/bindings/c-ffi/src/api.rs
 +++ b/bindings/c-ffi/src/api.rs
 @@ -3,9 +3,12 @@
@@ -1002,7 +1002,7 @@ index edb35ed..9137ec7 100644
 +    }
 +}
 diff --git a/bindings/c-ffi/src/json_types.rs b/bindings/c-ffi/src/json_types.rs
-index fc570e0..fe45e08 100644
+index fc570e0696a2053aac7f7230473b2e51f37abe05..fe45e085f4e209e9dc5b58dd51503937816389a1 100644
 --- a/bindings/c-ffi/src/json_types.rs
 +++ b/bindings/c-ffi/src/json_types.rs
 @@ -15,25 +15,28 @@ use hex::DisplayHex;
@@ -2013,7 +2013,7 @@ index fc570e0..fe45e08 100644
      }
  }
 diff --git a/bindings/c-ffi/src/lib.rs b/bindings/c-ffi/src/lib.rs
-index 24c3371..9b1c47b 100644
+index 24c3371d26d8a79fb3d7307095235f4c99fb373e..9b1c47bbcd815bf2ff5a8ba8001618f30ca6964b 100644
 --- a/bindings/c-ffi/src/lib.rs
 +++ b/bindings/c-ffi/src/lib.rs
 @@ -100,7 +100,10 @@ pub extern "C" fn rln_sdk_node_init(
@@ -2657,7 +2657,7 @@ index 24c3371..9b1c47b 100644
 +    )
  }
 diff --git a/bindings/rgb_lightning_node.udl b/bindings/rgb_lightning_node.udl
-index 286134a..40957da 100644
+index 286134a1b2aa50ba6264e09b4e523adba0e3a1cd..40957dae7dda1dd753300d30c0ef8c138cb4d980 100644
 --- a/bindings/rgb_lightning_node.udl
 +++ b/bindings/rgb_lightning_node.udl
 @@ -73,6 +73,16 @@ interface SdkNode {
@@ -2762,7 +2762,7 @@ index 286134a..40957da 100644
  
  dictionary SdkSendPaymentResponse {
 diff --git a/src/indexer.rs b/src/indexer.rs
-index a760299..58d210c 100644
+index a7602997ada5a6de96e4b8d777a5d5563fbb6db2..58d210cc2f9ccb2e4ec5ecbd8f2f365abe770cc2 100644
 --- a/src/indexer.rs
 +++ b/src/indexer.rs
 @@ -1,4 +1,4 @@
@@ -3052,7 +3052,7 @@ index a760299..58d210c 100644
      client: &ElectrumClient,
      height: usize,
 diff --git a/src/ldk.rs b/src/ldk.rs
-index e4abdac..5bbbc60 100644
+index e4abdac82dcc400f2d3723a185678a7cc4a64edd..5bbbc6062e49a2d086a75217b7024d7a6351e943 100644
 --- a/src/ldk.rs
 +++ b/src/ldk.rs
 @@ -124,7 +124,7 @@ use crate::core_types::{HTLCStatus, NodeKeySource, SwapStatus, UnlockRequest};
@@ -3253,10 +3253,10 @@ index e4abdac..5bbbc60 100644
          let db_path = std::env::temp_dir().join(format!("rln-ldk-unit-{}", uuid::Uuid::new_v4()));
          let connection_string = format!("sqlite:{}?mode=rwc", db_path.display());
 diff --git a/src/rgb.rs b/src/rgb.rs
-index 80df750..e910134 100644
+index 80df75096abf0e9c42e7909d8418311bbcba4f73..16b82f08129fd3c0675a6b25002858d7a94cb8a4 100644
 --- a/src/rgb.rs
 +++ b/src/rgb.rs
-@@ -19,15 +19,16 @@ use rgb_lib::{
+@@ -19,21 +19,37 @@ use rgb_lib::{
      wallet::{
          rust_only::{check_proxy_url, ColoringInfo},
          AssetCFA, AssetIFA, AssetNIA, AssetUDA, Assets, Balance, BtcBalance, Metadata, Online,
@@ -3273,11 +3273,51 @@ index 80df750..e910134 100644
 +    RgbTransport, RgbTxid, TransferStatus, UpdateRes, WitnessOrd,
  };
  use std::collections::HashMap;
++use std::fmt::Display;
 +use std::fs;
  use std::path::{Path, PathBuf};
  use std::str::FromStr;
  use std::sync::{Arc, Mutex, MutexGuard};
-@@ -197,6 +198,15 @@ impl UnlockedAppState {
+ 
+ use crate::{error::APIError, utils::UnlockedAppState};
+ 
++fn rgb_utxo_isolation_error(
++    context: &str,
++    cause: impl Display,
++    rollback: Result<(), RgbLibError>,
++) -> RgbLibError {
++    let rollback_context = match rollback {
++        Ok(()) => "reserved transaction rolled back".to_string(),
++        Err(error) => format!("reserved transaction rollback also failed: {error}"),
++    };
++    RgbLibError::Internal {
++        details: format!("{context}: {cause}; {rollback_context}"),
++    }
++}
++
+ /// When `sign_rgb_psbt` fails, internal mode falls back to the local RGB wallet; external mode does not.
+ fn resolve_rgb_psbt_signer_failure(
+     external_signer_mode: bool,
+@@ -178,6 +194,18 @@ impl UnlockedAppState {
+             .create_utxos_begin(up_to, num, size, fee_rate, skip_sync)
+     }
+ 
++    pub(crate) fn rgb_prepare_isolated_create_utxos(
++        &self,
++        up_to: bool,
++        num: u8,
++        size: u32,
++        fee_rate: u64,
++        skip_sync: bool,
++    ) -> Result<String, RgbLibError> {
++        self.rgb_wallet_wrapper
++            .prepare_isolated_create_utxos(up_to, num, size, fee_rate, skip_sync)
++    }
++
+     pub(crate) fn rgb_create_utxos_end(
+         &self,
+         signed_psbt: String,
+@@ -197,6 +225,15 @@ impl UnlockedAppState {
              .fail_transfers(batch_transfer_idx, no_asset_only, skip_sync)
      }
  
@@ -3293,19 +3333,7 @@ index 80df750..e910134 100644
      pub(crate) fn rgb_get_address(&self) -> Result<String, RgbLibError> {
          self.rgb_wallet_wrapper.get_address()
      }
-@@ -205,6 +215,10 @@ impl UnlockedAppState {
-         self.rgb_wallet_wrapper.rotate_address()
-     }
--
-+
-+    pub(crate) fn rgb_rotate_colored_address(&self) -> Result<String, RgbLibError> {
-+        self.rgb_wallet_wrapper.rotate_colored_address()
-+    }
-+
-     pub(crate) fn rgb_get_asset_balance(
-         &self,
-         contract_id: ContractId,
-@@ -449,6 +463,30 @@ impl UnlockedAppState {
+@@ -449,6 +486,30 @@ impl UnlockedAppState {
              .send_btc_begin(address, amount, fee_rate, false)
      }
  
@@ -3336,7 +3364,106 @@ index 80df750..e910134 100644
      pub(crate) fn rgb_send_btc_end(&self, signed_psbt: String) -> Result<String, RgbLibError> {
          self.rgb_wallet_wrapper.send_btc_end(signed_psbt)
      }
-@@ -658,6 +696,93 @@ impl RgbLibWalletWrapper {
+@@ -635,6 +696,98 @@ impl RgbLibWalletWrapper {
+         )
+     }
+ 
++    pub(crate) fn prepare_isolated_create_utxos(
++        &self,
++        up_to: bool,
++        num: u8,
++        size: u32,
++        fee_rate: u64,
++        skip_sync: bool,
++    ) -> Result<String, RgbLibError> {
++        let mut wallet = self.get_rgb_wallet();
++        let reuse_addresses = wallet.get_wallet_data().reuse_addresses;
++        let setup_address = if reuse_addresses {
++            Some(wallet.rotate_address(KeychainKind::External)?)
++        } else {
++            None
++        };
++
++        let unsigned_psbt = wallet.create_utxos_begin(
++            self.online,
++            up_to,
++            Some(num),
++            Some(size),
++            fee_rate,
++            skip_sync,
++            false,
++        )?;
++
++        let Some(setup_address) = setup_address else {
++            return Ok(unsigned_psbt);
++        };
++
++        let psbt = Psbt::from_str(&unsigned_psbt).map_err(|error| RgbLibError::Internal {
++            details: format!("RGB UTXO setup isolation produced an invalid reserved PSBT: {error}"),
++        })?;
++        let plan_txid = psbt.unsigned_tx.compute_txid().to_string();
++        let setup_script = match Address::from_str(&setup_address) {
++            Ok(address) => address.assume_checked().script_pubkey(),
++            Err(error) => {
++                let rollback = wallet.abort_pending_vanilla_tx(plan_txid.clone());
++                return Err(rgb_utxo_isolation_error(
++                    "RGB UTXO setup isolation produced an invalid setup address",
++                    error,
++                    rollback,
++                ));
++            }
++        };
++        let isolated_output_count = psbt
++            .unsigned_tx
++            .output
++            .iter()
++            .filter(|output| {
++                output.script_pubkey == setup_script && output.value.to_sat() == size as u64
++            })
++            .count();
++        if isolated_output_count == 0 {
++            let rollback = wallet.abort_pending_vanilla_tx(plan_txid.clone());
++            return Err(rgb_utxo_isolation_error(
++                "RGB UTXO setup isolation did not place an allocation output on the isolated \
++                 colored address",
++                "no matching transaction output",
++                rollback,
++            ));
++        }
++
++        let next_receive_address = match wallet.rotate_address(KeychainKind::External) {
++            Ok(address) => address,
++            Err(error) => {
++                let rollback = wallet.abort_pending_vanilla_tx(plan_txid.clone());
++                return Err(rgb_utxo_isolation_error(
++                    "RGB UTXO setup isolation could not advance the future witness receive address",
++                    error,
++                    rollback,
++                ));
++            }
++        };
++        if next_receive_address == setup_address {
++            let rollback = wallet.abort_pending_vanilla_tx(plan_txid);
++            return Err(rgb_utxo_isolation_error(
++                "RGB UTXO setup isolation reused the setup address for future witness receives",
++                "address rotation returned the same address",
++                rollback,
++            ));
++        }
++
++        tracing::info!(
++            setup_address,
++            next_receive_address,
++            isolated_output_count,
++            "prepared RGB UTXO setup on an isolated colored address"
++        );
++        Ok(unsigned_psbt)
++    }
++
+     pub(crate) fn create_utxos_end(
+         &self,
+         signed_psbt: String,
+@@ -658,6 +811,93 @@ impl RgbLibWalletWrapper {
          )
      }
  
@@ -3430,19 +3557,7 @@ index 80df750..e910134 100644
      pub(crate) fn get_address(&self) -> Result<String, RgbLibError> {
          self.get_rgb_wallet().get_address()
      }
-@@ -666,6 +791,10 @@ impl RgbLibWalletWrapper {
-         self.get_rgb_wallet().rotate_address(KeychainKind::Internal)
-     }
--
-+
-+    pub(crate) fn rotate_colored_address(&self) -> Result<String, RgbLibError> {
-+        self.get_rgb_wallet().rotate_address(KeychainKind::External)
-+    }
-+
-     pub(crate) fn get_asset_balance(
-         &self,
-         contract_id: ContractId,
-@@ -932,6 +1061,35 @@ impl RgbLibWalletWrapper {
+@@ -932,6 +1172,35 @@ impl RgbLibWalletWrapper {
          )
      }
  
@@ -3479,7 +3594,7 @@ index 80df750..e910134 100644
          self.get_rgb_wallet().send_btc_end(self.online, signed_psbt)
      }
 diff --git a/src/routes.rs b/src/routes.rs
-index 975a67d..30958de 100644
+index 975a67dd870148848f72bbb32403c6a522b8d8be..30958deb0d0b00138157a104d43c35efadfb5555 100644
 --- a/src/routes.rs
 +++ b/src/routes.rs
 @@ -2978,6 +2978,7 @@ pub(crate) async fn keysend(
@@ -3515,7 +3630,7 @@ index 975a67d..30958de 100644
              )?;
              let payment_hash = PaymentHash(invoice.payment_hash().to_byte_array());
 diff --git a/src/sdk/mod.rs b/src/sdk/mod.rs
-index 3ef5ebc..5c03db2 100644
+index 3ef5ebc0456f476bbb9f42d4312d6618ba1443cb..7d9386df8f4deb89820654f73f0bf99acb769ff6 100644
 --- a/src/sdk/mod.rs
 +++ b/src/sdk/mod.rs
 @@ -34,6 +34,7 @@ use amplify::{map, s};
@@ -4123,7 +4238,7 @@ index 3ef5ebc..5c03db2 100644
  pub(crate) async fn init(
      state: Arc<AppState>,
      password: String,
-@@ -2402,6 +2892,151 @@ pub(crate) async fn create_utxos(
+@@ -2402,6 +2892,144 @@ pub(crate) async fn create_utxos(
      Ok(())
  }
  
@@ -4133,18 +4248,11 @@ index 3ef5ebc..5c03db2 100644
 +) -> Result<PreparedCreateUtxosData, APIError> {
 +    let guard = check_unlocked(&state).await?;
 +    let unlocked_state = guard.as_ref().unwrap();
-+    if state.static_state.reuse_addresses {
-+        // Witness invoices intentionally pin the colored keychain when address
-+        // reuse is enabled. Advance that pin before creating allocation
-+        // outputs so an active receive script cannot quarantine every output
-+        // in the setup transaction as `pending_witness`.
-+        unlocked_state.rgb_rotate_colored_address()?;
-+    }
 +    let target_count = request.num.unwrap_or(unlocked_state.config.rgb.utxo_num);
 +    let output_size_sat = request
 +        .size
 +        .unwrap_or(unlocked_state.config.rgb.utxo_size_sat);
-+    let unsigned_psbt = unlocked_state.rgb_create_utxos_begin(
++    let unsigned_psbt = unlocked_state.rgb_prepare_isolated_create_utxos(
 +        request.up_to,
 +        target_count,
 +        output_size_sat,
@@ -4275,7 +4383,7 @@ index 3ef5ebc..5c03db2 100644
  pub(crate) async fn issue_asset_nia(
      state: Arc<AppState>,
      request: IssueAssetNiaRequestData,
-@@ -2581,6 +3216,7 @@ pub(crate) async fn keysend(
+@@ -2581,6 +3209,7 @@ pub(crate) async fn keysend(
              payment_idx: None,
              async_hash_index: None,
              async_host_node_id: None,
@@ -4283,7 +4391,7 @@ index 3ef5ebc..5c03db2 100644
          },
      )?;
      if let Some((contract_id, rgb_amount)) = rgb_payment {
-@@ -2651,6 +3287,181 @@ pub(crate) async fn send_btc(
+@@ -2651,6 +3280,181 @@ pub(crate) async fn send_btc(
      Ok(SendBtcData { txid })
  }
  
@@ -4465,7 +4573,7 @@ index 3ef5ebc..5c03db2 100644
  pub(crate) async fn post_asset_media(
      state: Arc<AppState>,
      file_bytes: Vec<u8>,
-@@ -3120,10 +3931,15 @@ pub(crate) async fn send_payment(
+@@ -3120,10 +3924,15 @@ pub(crate) async fn send_payment(
                  payment_idx: None,
                  async_hash_index: None,
                  async_host_node_id: None,
@@ -4481,7 +4589,7 @@ index 3ef5ebc..5c03db2 100644
              retry_strategy: Retry::Timeout(Duration::from_secs(10)),
              ..Default::default()
          };
-@@ -3222,6 +4038,7 @@ pub(crate) async fn send_payment(
+@@ -3222,6 +4031,7 @@ pub(crate) async fn send_payment(
                  payment_idx: None,
                  async_hash_index: None,
                  async_host_node_id: None,
@@ -4489,7 +4597,7 @@ index 3ef5ebc..5c03db2 100644
              },
          )?;
          let payment_hash = PaymentHash(invoice.payment_hash().to_byte_array());
-@@ -3245,7 +4062,10 @@ pub(crate) async fn send_payment(
+@@ -3245,7 +4055,10 @@ pub(crate) async fn send_payment(
              &invoice,
              payment_id,
              Some(amt_msat),
@@ -4501,7 +4609,7 @@ index 3ef5ebc..5c03db2 100644
              bolt11_retry,
          ) {
              Ok(_) => {
-@@ -3663,6 +4483,102 @@ pub(crate) async fn sync(state: Arc<AppState>) -> Result<(), APIError> {
+@@ -3663,6 +4476,102 @@ pub(crate) async fn sync(state: Arc<AppState>) -> Result<(), APIError> {
      Ok(())
  }
  
@@ -4604,7 +4712,7 @@ index 3ef5ebc..5c03db2 100644
  pub(crate) async fn decode_ln_invoice(
      state: Arc<AppState>,
      invoice: String,
-@@ -3844,6 +4760,7 @@ pub(crate) async fn create_ln_invoice(
+@@ -3844,6 +4753,7 @@ pub(crate) async fn create_ln_invoice(
              payment_idx: None,
              async_hash_index: None,
              async_host_node_id: None,
@@ -4612,7 +4720,7 @@ index 3ef5ebc..5c03db2 100644
          },
      );
  
-@@ -3888,6 +4805,7 @@ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentDat
+@@ -3888,6 +4798,7 @@ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentDat
              payee_pubkey: payment_info.payee_pubkey.to_string(),
              preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
              description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
@@ -4620,7 +4728,7 @@ index 3ef5ebc..5c03db2 100644
          });
      }
  
-@@ -3913,6 +4831,7 @@ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentDat
+@@ -3913,6 +4824,7 @@ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentDat
              payee_pubkey: payment_info.payee_pubkey.to_string(),
              preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
              description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
@@ -4628,7 +4736,7 @@ index 3ef5ebc..5c03db2 100644
          });
      }
  
-@@ -3959,6 +4878,7 @@ pub(crate) async fn get_payment(
+@@ -3959,6 +4871,7 @@ pub(crate) async fn get_payment(
                          payee_pubkey: payment_info.payee_pubkey.to_string(),
                          preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
                          description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
@@ -4636,7 +4744,7 @@ index 3ef5ebc..5c03db2 100644
                      });
                  }
              }
-@@ -3987,6 +4907,7 @@ pub(crate) async fn get_payment(
+@@ -3987,6 +4900,7 @@ pub(crate) async fn get_payment(
                          payee_pubkey: payment_info.payee_pubkey.to_string(),
                          preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
                          description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
@@ -4644,7 +4752,7 @@ index 3ef5ebc..5c03db2 100644
                      });
                  }
              }
-@@ -4451,13 +5372,7 @@ mod tests {
+@@ -4451,13 +5365,7 @@ mod tests {
      }
  
      fn mock_locked_state() -> Arc<AppState> {
@@ -4660,7 +4768,7 @@ index 3ef5ebc..5c03db2 100644
          std::fs::create_dir_all(&storage_dir).expect("create temp storage dir");
          let db_path = storage_dir.join("rln_db");
 diff --git a/src/signer/channel_signer.rs b/src/signer/channel_signer.rs
-index 6e24dec..c38c65a 100644
+index 6e24decc5614e140f7428fe63e06a106b8367a71..c38c65a971005f22d09ca50f5e50b600e338d787 100644
 --- a/src/signer/channel_signer.rs
 +++ b/src/signer/channel_signer.rs
 @@ -410,15 +410,58 @@ impl ChannelSigner for ExternalChannelSigner {
@@ -4729,7 +4837,7 @@ index 6e24dec..c38c65a 100644
  
      fn validate_holder_commitment(
 diff --git a/src/test/lib_sdk/close_coop_vanilla.rs b/src/test/lib_sdk/close_coop_vanilla.rs
-index 99dfc4d..1a89d81 100644
+index 99dfc4de1727df3db4e955fc4214023ee4a51799..1a89d81785726b5ae393c1b84995bdf06cff5073 100644
 --- a/src/test/lib_sdk/close_coop_vanilla.rs
 +++ b/src/test/lib_sdk/close_coop_vanilla.rs
 @@ -206,6 +206,7 @@ fn run_close_coop_vanilla(name: &str, port_offset: u16, with_anchors: bool) {
@@ -4741,7 +4849,7 @@ index 99dfc4d..1a89d81 100644
              .expect("node B sendpayment");
          let payment_hash = send_payment.payment_hash.expect("vanilla payment hash");
 diff --git a/src/test/lib_sdk/external_signer.rs b/src/test/lib_sdk/external_signer.rs
-index 8a52af3..0a2dbbc 100644
+index 8a52af35b01ed9b299b8be41a7e0568f3c4d97cd..0a2dbbc91fb74e9b6f1c078739403ae03337012b 100644
 --- a/src/test/lib_sdk/external_signer.rs
 +++ b/src/test/lib_sdk/external_signer.rs
 @@ -682,6 +682,7 @@ fn rgb_native_external_signer_mixed_one_hop_payment_quick() {
@@ -4955,10 +5063,58 @@ index 8a52af3..0a2dbbc 100644
              .unwrap_or_else(|e| panic!("{label}: sendpayment: {e:?}"));
          let payment_hash = send.payment_hash.expect("payment_hash");
 diff --git a/src/test/lib_sdk/helpers.rs b/src/test/lib_sdk/helpers.rs
-index a20ac6d..9ac210d 100644
+index a20ac6d050e0f1bae2ae6fc69bcc5c85147a4f0f..095b12ccf4d707381140ff5106b9c397b59420e1 100644
 --- a/src/test/lib_sdk/helpers.rs
 +++ b/src/test/lib_sdk/helpers.rs
-@@ -826,6 +826,7 @@ pub(crate) fn send_payment_with_ln_balance(
+@@ -3,11 +3,11 @@ use once_cell::sync::Lazy;
+ pub(crate) use rgb_lightning_node::{
+     AssetBalanceInfo, AssetRecipients, AssignmentKind, Channel, ContractId, HtlcStatus,
+     InvoiceStatus, LnInvoiceRequest, Payment, PaymentHash, RecipientId, RgbRecipient,
+-    SdkCloseChannelRequest, SdkCreateUtxosRequest, SdkExternalSignerBootstrap, SdkInitRequest,
+-    SdkIssueAssetCfaRequest, SdkIssueAssetNiaRequest, SdkKeysendRequest, SdkNode,
+-    SdkOpenChannelRequest, SdkRefreshTransfersRequest, SdkRgbInvoiceRequest, SdkSendBtcRequest,
+-    SdkSendPaymentRequest, SdkUnlockRequest, SdkVssClearFenceRequest, SendRgbRequest,
+-    TransactionType, TransportEndpoint, WitnessData,
++    SdkCloseChannelRequest, SdkCommitPreparedSendRequest, SdkCreateUtxosRequest,
++    SdkExternalSignerBootstrap, SdkInitRequest, SdkIssueAssetCfaRequest, SdkIssueAssetNiaRequest,
++    SdkKeysendRequest, SdkNode, SdkOpenChannelRequest, SdkRefreshTransfersRequest,
++    SdkRgbInvoiceRequest, SdkSendBtcRequest, SdkSendPaymentRequest, SdkUnlockRequest,
++    SdkVssClearFenceRequest, SendRgbRequest, TransactionType, TransportEndpoint, WitnessData,
+ };
+ use std::fs;
+ use std::path::{Path, PathBuf};
+@@ -232,6 +232,30 @@ pub(crate) fn make_node(
+     )
+ }
+ 
++pub(crate) fn make_node_with_reuse_addresses(
++    storage_dir_path: &Path,
++    daemon_listening_port: u16,
++    ldk_peer_listening_port: u16,
++) -> SdkNode {
++    fs::create_dir_all(storage_dir_path).expect("create storage dir");
++    SdkNode::create(SdkInitRequest {
++        storage_dir_path: storage_dir_path.display().to_string(),
++        daemon_listening_port,
++        ldk_peer_listening_port,
++        network: "regtest".to_string(),
++        max_media_upload_size_mb: 20,
++        enable_virtual_channels_v0: Some(false),
++        virtual_peer_pubkeys: None,
++        lsp_base_url: None,
++        lsp_bearer_token: None,
++        vss_url: None,
++        vss_allow_http: true,
++        vss_allow_empty_restore: false,
++        reuse_addresses: true,
++    })
++    .expect("create SDK node with address reuse")
++}
++
+ #[allow(dead_code)] // used by VSS-only tests
+ pub(crate) fn make_node_with_vss(
+     storage_dir_path: &Path,
+@@ -826,6 +850,7 @@ pub(crate) fn send_payment_with_ln_balance(
              amt_msat: None,
              asset_id: None,
              asset_amount: None,
@@ -4966,8 +5122,20 @@ index a20ac6d..9ac210d 100644
          })
          .expect("sendpayment with ln balance checks");
  
+diff --git a/src/test/lib_sdk/mod.rs b/src/test/lib_sdk/mod.rs
+index 586ebd846fb9d12ddcf1e791b435793d926d92b9..d57e712b44c377d0be88433cb425e25c1cb4d1a7 100644
+--- a/src/test/lib_sdk/mod.rs
++++ b/src/test/lib_sdk/mod.rs
+@@ -13,6 +13,7 @@ mod multi_hop;
+ mod openchannel_push_asset_amount;
+ mod payment;
+ mod restart;
++mod rgb_utxo_isolation;
+ mod send_receive;
+ mod swap_roundtrip_buy;
+ mod vanilla_payment_on_rgb_channel;
 diff --git a/src/test/lib_sdk/multi_hop.rs b/src/test/lib_sdk/multi_hop.rs
-index acb4fd2..34bce6c 100644
+index acb4fd2cab3b2d9b22591fe78b1263a8a4668f91..34bce6c3f6b19b795d62d6a84c130242f2ddd4c6 100644
 --- a/src/test/lib_sdk/multi_hop.rs
 +++ b/src/test/lib_sdk/multi_hop.rs
 @@ -253,6 +253,7 @@ fn multi_hop() {
@@ -4979,7 +5147,7 @@ index acb4fd2..34bce6c 100644
              .expect("node A sendpayment");
          let payment_hash = send_payment
 diff --git a/src/test/lib_sdk/payment.rs b/src/test/lib_sdk/payment.rs
-index 574fd5d..22440e5 100644
+index 574fd5df1474c2d313b8ba8108e929f525f5b7c5..22440e5a55bbc9739d6a16993596334ef51e9398 100644
 --- a/src/test/lib_sdk/payment.rs
 +++ b/src/test/lib_sdk/payment.rs
 @@ -285,6 +285,7 @@ fn success() {
@@ -4999,7 +5167,7 @@ index 574fd5d..22440e5 100644
              .expect("node B sendpayment fourth");
          let decoded = node_a
 diff --git a/src/test/lib_sdk/restart.rs b/src/test/lib_sdk/restart.rs
-index 89331d4..5770b44 100644
+index 89331d42494c11557fd30c08761279f3af36d684..5770b445a0846effd37791e53c80dc21fd697f9b 100644
 --- a/src/test/lib_sdk/restart.rs
 +++ b/src/test/lib_sdk/restart.rs
 @@ -169,6 +169,7 @@ fn restart() {
@@ -5010,8 +5178,154 @@ index 89331d4..5770b44 100644
              })
              .expect("node A sendpayment");
          let payment_hash = send_payment.payment_hash.expect("payment hash");
+diff --git a/src/test/lib_sdk/rgb_utxo_isolation.rs b/src/test/lib_sdk/rgb_utxo_isolation.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..eb3dd0f05d3dba4f64851d87b20229e664d1d6a7
+--- /dev/null
++++ b/src/test/lib_sdk/rgb_utxo_isolation.rs
+@@ -0,0 +1,140 @@
++use crate::helpers::*;
++use sea_orm::{ConnectionTrait, Database, DbBackend, Statement};
++use serial_test::serial;
++use std::fs;
++use std::path::Path;
++
++const SETUP_OUTPUT_COUNT: u8 = 4;
++const SETUP_OUTPUT_SIZE_SAT: u32 = 20_000;
++
++fn sqlite_scalar(database: &Path, query: &str) -> i64 {
++    let runtime = tokio::runtime::Runtime::new().expect("create SQLite test runtime");
++    let connection = runtime
++        .block_on(Database::connect(format!(
++            "sqlite:{}?mode=ro",
++            database.display()
++        )))
++        .expect("open RGB wallet database");
++    let row = runtime
++        .block_on(connection.query_one(Statement::from_string(DbBackend::Sqlite, query.to_owned())))
++        .expect("query RGB wallet database")
++        .expect("SQLite scalar row");
++    row.try_get_by_index(0).expect("SQLite scalar value")
++}
++
++fn rgb_database(node_dir: &Path) -> std::path::PathBuf {
++    let mut databases = fs::read_dir(node_dir)
++        .expect("read node storage directory")
++        .filter_map(Result::ok)
++        .map(|entry| entry.path().join("rgb_lib_db"))
++        .filter(|path| path.is_file())
++        .collect::<Vec<_>>();
++    assert_eq!(
++        databases.len(),
++        1,
++        "expected one initialized RGB wallet database under node storage"
++    );
++    databases.pop().expect("RGB wallet database")
++}
++
++fn assert_setup_outputs_are_available(database: &Path, txid: &str) {
++    let output_count = sqlite_scalar(
++        database,
++        &format!("select count(*) from txo where txid = '{txid}';"),
++    );
++    assert_eq!(output_count, i64::from(SETUP_OUTPUT_COUNT));
++    let pending_count = sqlite_scalar(
++        database,
++        &format!("select count(*) from txo where txid = '{txid}' and pending_witness = 1;"),
++    );
++    assert_eq!(
++        pending_count, 0,
++        "isolated RGB setup outputs must remain available for sends"
++    );
++}
++
++#[test]
++#[serial]
++fn prepared_rgb_utxos_are_isolated_from_existing_and_future_witness_invoices() {
++    ensure_regtest_available();
++
++    let test_dir = test_dir("sdk_rgb_utxo_isolation");
++    if test_dir.exists() {
++        fs::remove_dir_all(&test_dir).expect("remove previous isolation test dir");
++    }
++    fs::create_dir_all(&test_dir).expect("create isolation test dir");
++    let node_dir = test_dir.join("node");
++    let node =
++        make_node_with_reuse_addresses(&node_dir, NODE_A_DAEMON_PORT + 750, NODE_A_PEER_PORT + 750);
++
++    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
++        node.init("isolation-pass".to_string(), None)
++            .expect("initialize isolation wallet");
++        node.unlock(unlock_request("isolation-pass"))
++            .expect("unlock isolation wallet");
++        ensure_funded(&node, 100_000, "isolation wallet");
++        let database = rgb_database(&node_dir);
++
++        let existing_invoice = node
++            .rgbinvoice(SdkRgbInvoiceRequest {
++                asset_id: None,
++                assignment_kind: Some(AssignmentKind::Fungible),
++                assignment_amount: Some(1),
++                duration_seconds: Some(3_600),
++                min_confirmations: 1,
++                witness: true,
++            })
++            .expect("create existing witness invoice");
++
++        let plan = node
++            .prepare_create_utxos(SdkCreateUtxosRequest {
++                up_to: false,
++                num: Some(SETUP_OUTPUT_COUNT),
++                size: Some(SETUP_OUTPUT_SIZE_SAT),
++                fee_rate: CREATE_UTXOS_FEE_RATE,
++                skip_sync: false,
++            })
++            .expect("prepare isolated RGB UTXO setup");
++
++        assert_eq!(
++            sqlite_scalar(
++                &database,
++                "select derivation_index from reuse_address_index where keychain = 0;"
++            ),
++            2,
++            "setup preparation must use one colored address and reserve the next for receives"
++        );
++
++        node.commit_prepared_create_utxos(SdkCommitPreparedSendRequest {
++            plan_id: plan.plan_id,
++        })
++        .expect("commit isolated RGB UTXO setup");
++        mine(1);
++        node.sync().expect("sync committed RGB UTXO setup");
++        let setup_txid = plan.plan_id.to_string();
++        assert_setup_outputs_are_available(&database, &setup_txid);
++
++        let future_invoice = node
++            .rgbinvoice(SdkRgbInvoiceRequest {
++                asset_id: None,
++                assignment_kind: Some(AssignmentKind::Fungible),
++                assignment_amount: Some(1),
++                duration_seconds: Some(3_600),
++                min_confirmations: 1,
++                witness: true,
++            })
++            .expect("create future witness invoice");
++        assert_ne!(
++            future_invoice.recipient_id.0, existing_invoice.recipient_id.0,
++            "future witness invoices must not reuse the pre-setup receive script"
++        );
++
++        node.sync().expect("sync after future witness invoice");
++        assert_setup_outputs_are_available(&database, &setup_txid);
++    }));
++
++    node.shutdown();
++    if let Err(panic) = result {
++        std::panic::resume_unwind(panic);
++    }
++}
 diff --git a/src/test/lib_sdk/vanilla_payment_on_rgb_channel.rs b/src/test/lib_sdk/vanilla_payment_on_rgb_channel.rs
-index 862f288..0108a52 100644
+index 862f288297d6272ffdf75a1f37cec83a88189041..0108a52669d0fa5807782846a61c0064e9f0fd22 100644
 --- a/src/test/lib_sdk/vanilla_payment_on_rgb_channel.rs
 +++ b/src/test/lib_sdk/vanilla_payment_on_rgb_channel.rs
 @@ -114,6 +114,7 @@ fn vanilla_payment_on_rgb_channel() {
@@ -5023,7 +5337,7 @@ index 862f288..0108a52 100644
              .expect("node A sendpayment");
          let payment_hash = send_payment
 diff --git a/src/uniffi_api/mod.rs b/src/uniffi_api/mod.rs
-index c6173a3..9f44666 100644
+index c6173a390f180ab7664a6b883464961f9c855925..9f44666b5b9553339a000a9bc25e75b6a5264ac4 100644
 --- a/src/uniffi_api/mod.rs
 +++ b/src/uniffi_api/mod.rs
 @@ -115,11 +115,8 @@ fn handle_from_request(request: SdkInitRequest) -> Result<NodeHandle, RlnError>
@@ -5330,7 +5644,7 @@ index c6173a3..9f44666 100644
          let state = self.handle.app_state();
          let response = block_on_sdk(sdk::async_order_new(
 diff --git a/src/uniffi_api/tests.rs b/src/uniffi_api/tests.rs
-index 4f37a95..ae411f3 100644
+index 4f37a9564b5801e7ef5f84a55fe4cd0409fe26e9..ae411f319eb0888f124e15a467a772bff437e333 100644
 --- a/src/uniffi_api/tests.rs
 +++ b/src/uniffi_api/tests.rs
 @@ -412,11 +412,13 @@ mod uniffi_smoke_tests {
@@ -5348,7 +5662,7 @@ index 4f37a95..ae411f3 100644
      }
  
 diff --git a/src/uniffi_api/types.rs b/src/uniffi_api/types.rs
-index beeaf62..cd379c0 100644
+index beeaf62ea3e2ece39fcb5a1ec8cccf3476d4e063..cd379c00ad795bd29a09a830d290b0655d7445d6 100644
 --- a/src/uniffi_api/types.rs
 +++ b/src/uniffi_api/types.rs
 @@ -112,6 +112,23 @@ pub struct BtcBalanceInfo {
@@ -5462,7 +5776,7 @@ index beeaf62..cd379c0 100644
      pub qty_from: u64,
      pub qty_to: u64,
 diff --git a/src/utils.rs b/src/utils.rs
-index 33cfc42..f8a6e34 100644
+index 33cfc42dffa59d1254392941bbb1e377b6ee9177..f8a6e340de47fdeab0394122e06c4aa1cf960d1b 100644
 --- a/src/utils.rs
 +++ b/src/utils.rs
 @@ -164,6 +164,7 @@ impl StaticState {

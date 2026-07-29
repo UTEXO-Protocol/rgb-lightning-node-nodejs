@@ -21,7 +21,8 @@ snapshots, explicit Lightning routing-fee caps, and persisted actual routing
 fees to the pinned v0.10 native source. It preserves complete Lightning
 invoice decode metadata and stable tagged RGB assignments across C-FFI, and
 also adds deterministic BTC/RGB prepare-and-commit plans, BTC plan
-cancellation, and pending vanilla transaction inspection.
+cancellation, pending vanilla transaction inspection, and RGB UTXO setup
+isolation from existing and future witness invoices.
 The same overlay permits a replacement trusted virtual channel only after the
 previous native session reaches its terminal abandoned state.
 
