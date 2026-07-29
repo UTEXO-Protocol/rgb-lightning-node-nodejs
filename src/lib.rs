@@ -42,9 +42,13 @@ use rlncffi::{
     rln_refresh_transfers, rln_rgb_invoice, rln_rotate_address, rln_sdk_node_apay_new,
     rln_sdk_node_attach_native_external_signer, rln_sdk_node_detach_external_signer,
     rln_sdk_node_init_with_external_signer, rln_sdk_node_init_with_native_external_signer,
-    rln_sdk_node_new, rln_sdk_node_shutdown, rln_sdk_node_unlock_with_attached_external_signer,
+    rln_sdk_node_adopt_native_operation, rln_sdk_node_cancel_native_operation,
+    rln_sdk_node_native_operation_status, rln_sdk_node_new, rln_sdk_node_shutdown,
+    rln_sdk_node_start_unlock_with_native_external_signer,
+    rln_sdk_node_unlock_with_attached_external_signer,
     rln_sdk_node_unlock_with_native_external_signer, rln_sdk_node_vss_backup,
-    rln_sdk_node_vss_clear_fence, rln_send_btc, rln_send_onion_message, rln_send_payment,
+    rln_sdk_node_vss_clear_fence, rln_sdk_node_vss_delete_all, rln_send_btc,
+    rln_send_onion_message, rln_send_payment,
     rln_send_rgb, rln_sign_message, rln_sync, rln_sync_wallet, rln_taker, rln_verify_message,
     rln_wallet_snapshot, COpaqueStruct, CResultString, CResultValue,
 };
@@ -267,6 +271,47 @@ impl SdkNode {
     }
 
     #[napi]
+    pub fn start_unlock_with_native_external_signer(
+        &self,
+        signer: &NativeExternalSigner,
+        request_json: String,
+    ) -> Result<String> {
+        let req_c = cstring(&request_json)?;
+        take_cresult_string(rln_sdk_node_start_unlock_with_native_external_signer(
+            &self.handle,
+            &signer.handle,
+            req_c.as_ptr(),
+        ))
+    }
+
+    #[napi]
+    pub fn native_operation_status(&self, operation_id: String) -> Result<String> {
+        let operation_id = cstring(&operation_id)?;
+        take_cresult_string(rln_sdk_node_native_operation_status(
+            &self.handle,
+            operation_id.as_ptr(),
+        ))
+    }
+
+    #[napi]
+    pub fn adopt_native_operation(&self, operation_id: String) -> Result<String> {
+        let operation_id = cstring(&operation_id)?;
+        take_cresult_string(rln_sdk_node_adopt_native_operation(
+            &self.handle,
+            operation_id.as_ptr(),
+        ))
+    }
+
+    #[napi]
+    pub fn cancel_native_operation(&self, operation_id: String) -> Result<String> {
+        let operation_id = cstring(&operation_id)?;
+        take_cresult_string(rln_sdk_node_cancel_native_operation(
+            &self.handle,
+            operation_id.as_ptr(),
+        ))
+    }
+
+    #[napi]
     pub fn init_with_external_signer(&self, request_json: String) -> Result<()> {
         let req_c = cstring(&request_json)?;
         let res = rln_sdk_node_init_with_external_signer(&self.handle, req_c.as_ptr());
@@ -320,6 +365,14 @@ impl SdkNode {
     pub fn vss_backup(&self) -> Result<String> {
         let res = rln_sdk_node_vss_backup(&self.handle);
         take_cresult_string(res)
+    }
+
+    #[napi]
+    pub fn vss_delete_all(&self, request_json: String) -> Result<String> {
+        let request = std::ffi::CString::new(request_json)
+            .map_err(|_| napi::Error::from_reason("request contains null byte"))?;
+        let result = rln_sdk_node_vss_delete_all(&self.handle, request.as_ptr());
+        take_cresult_string(result)
     }
 
     /// APay receiver-side registration with an LSP. Pass the LSP's node_id

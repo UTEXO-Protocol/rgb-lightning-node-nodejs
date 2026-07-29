@@ -14,16 +14,43 @@ export type DecimalString = `${bigint}`
 
 export type WalletSyncMode = 'routine' | 'recovery'
 
+export type NativeOperationState =
+  | 'queued'
+  | 'running'
+  | 'cancel_requested'
+  | 'succeeded'
+  | 'failed'
+  | 'cancelled'
+
+export interface NativeOperationStatus {
+  contract_version: 1
+  operation_id: string
+  kind: 'unlock_with_native_external_signer'
+  state: NativeOperationState
+  created_at_ms: DecimalString
+  started_at_ms?: DecimalString
+  finished_at_ms?: DecimalString
+  updated_at_ms: DecimalString
+  cancellation_requested: boolean
+  can_cancel_immediately: boolean
+  adoption_count: number
+  error?: string
+}
+
+export interface StartNativeOperationResponse extends NativeOperationStatus {
+  adopted_existing: boolean
+}
+
 export interface WalletSyncRequest {
   mode: WalletSyncMode
 }
 
 export type WalletSyncKeychainResult =
-  | { status: 'succeeded' }
+  | { status: 'succeeded'; checkpoint: WalletSnapshotNetwork }
   | { status: 'failed'; error_code: string }
 
 export interface WalletSyncResponse {
-  contract_version: 1
+  contract_version: 2
   mode: WalletSyncMode
   vanilla: WalletSyncKeychainResult
   colored: WalletSyncKeychainResult
@@ -40,6 +67,7 @@ export interface WalletSnapshotRequest {
 export interface WalletSnapshotNetwork {
   network: 'mainnet' | 'testnet' | 'regtest' | 'signet'
   height: number
+  block_hash: string
 }
 
 export interface WalletSnapshotBalance {
@@ -108,10 +136,18 @@ export interface WalletSnapshotBlockTime {
 
 export interface WalletSnapshotTransaction {
   transaction_type: 'RgbSend' | 'Drain' | 'CreateUtxos' | 'SendBtc' | 'Incoming'
+  purpose:
+    | 'incoming_bitcoin'
+    | 'outgoing_bitcoin'
+    | 'rgb_anchor'
+    | 'wallet_drain'
+    | 'rgb_utxo_maintenance'
+  direction: 'incoming' | 'outgoing' | 'internal'
   txid: string
   received: DecimalString
   sent: DecimalString
   fee: DecimalString
+  external_value: DecimalString | null
   confirmation_time: WalletSnapshotBlockTime | null
 }
 
@@ -168,8 +204,8 @@ export interface WalletSnapshotTransfer {
   created_at: DecimalString
   updated_at: DecimalString
   status: string
-  requested_assignment: string | null
-  assignments: string[]
+  requested_assignment: WalletSnapshotRgbAssignment | null
+  assignments: WalletSnapshotRgbAssignment[]
   kind: string
   txid: string | null
   recipient_id: string | null
@@ -179,15 +215,22 @@ export interface WalletSnapshotTransfer {
   transport_endpoints: WalletSnapshotTransferEndpoint[]
 }
 
+export interface WalletSnapshotRgbAssignment {
+  kind: 'Fungible' | 'NonFungible' | 'InflationRight' | 'Any'
+  amount?: DecimalString
+}
+
 export interface WalletSnapshotAssetTransfers {
   asset_id: string
   transfers: WalletSnapshotTransfer[]
 }
 
 export interface WalletSnapshotResponse {
-  contract_version: 1
-  native_source: 'rgb-lightning-node-v0.9.0-beta.3+utexo-wallet-v1'
+  contract_version: 2
+  native_source: 'rgb-lightning-node-v0.10.0-beta.3+utexo-wallet-v2'
   capture_sequence: DecimalString
+  capture_attempts: 2 | 3
+  stable_capture_count: 2
   started_at_ms: DecimalString
   completed_at_ms: DecimalString
   network_before: WalletSnapshotNetwork
@@ -303,6 +346,13 @@ export class SdkNode {
   initWithNativeExternalSigner(signer: NativeExternalSigner): void
   attachNativeExternalSigner(signer: NativeExternalSigner): void
   unlockWithNativeExternalSigner(signer: NativeExternalSigner, request: JsonRequest): void
+  startUnlockWithNativeExternalSigner(
+    signer: NativeExternalSigner,
+    request: JsonRequest
+  ): StartNativeOperationResponse
+  nativeOperationStatus(operationId: string): NativeOperationStatus
+  adoptNativeOperation(operationId: string): NativeOperationStatus
+  cancelNativeOperation(operationId: string): NativeOperationStatus
   initWithExternalSigner(bootstrap: JsonRequest): void
   detachExternalSigner(): void
   unlockWithAttachedExternalSigner(request: JsonRequest): void
@@ -311,6 +361,7 @@ export class SdkNode {
   // VSS / APay
   vssClearFence(request: JsonRequest): void
   vssBackup(): JsonObject
+  vssDeleteAll(request: { password: string }): { deleted_keys: number }
   apayNew(hostNodeId: string): JsonObject
 
   // Node info / network / sync

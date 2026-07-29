@@ -70,6 +70,20 @@ class SdkNode {
   unlockWithNativeExternalSigner (signer, request) {
     this._inner.unlockWithNativeExternalSigner(signer._inner, JSON.stringify(request))
   }
+  startUnlockWithNativeExternalSigner (signer, request) {
+    return JSON.parse(
+      this._inner.startUnlockWithNativeExternalSigner(signer._inner, JSON.stringify(request))
+    )
+  }
+  nativeOperationStatus (operationId) {
+    return JSON.parse(this._inner.nativeOperationStatus(operationId))
+  }
+  adoptNativeOperation (operationId) {
+    return JSON.parse(this._inner.adoptNativeOperation(operationId))
+  }
+  cancelNativeOperation (operationId) {
+    return JSON.parse(this._inner.cancelNativeOperation(operationId))
+  }
   initWithExternalSigner (bootstrap) {
     this._inner.initWithExternalSigner(JSON.stringify(bootstrap))
   }
@@ -98,6 +112,10 @@ class SdkNode {
   // version is the snapshot index just persisted. Throws if VSS isn't
   // configured / the flush fails. Backed by upstream vss_backup() PR.
   vssBackup () { return JSON.parse(this._inner.vssBackup()) }
+
+  vssDeleteAll (request) {
+    return JSON.parse(this._inner.vssDeleteAll(JSON.stringify(request)))
+  }
 
   // APay receiver-side: register this node with an LSP as an async-order
   // recipient. Pass the LSP's node_id (hex). Returns the parsed
