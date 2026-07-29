@@ -3253,7 +3253,7 @@ index e4abdac..5bbbc60 100644
          let db_path = std::env::temp_dir().join(format!("rln-ldk-unit-{}", uuid::Uuid::new_v4()));
          let connection_string = format!("sqlite:{}?mode=rwc", db_path.display());
 diff --git a/src/rgb.rs b/src/rgb.rs
-index 80df750..a2d824d 100644
+index 80df750..e910134 100644
 --- a/src/rgb.rs
 +++ b/src/rgb.rs
 @@ -19,15 +19,16 @@ use rgb_lib::{
@@ -3293,7 +3293,19 @@ index 80df750..a2d824d 100644
      pub(crate) fn rgb_get_address(&self) -> Result<String, RgbLibError> {
          self.rgb_wallet_wrapper.get_address()
      }
-@@ -449,6 +459,30 @@ impl UnlockedAppState {
+@@ -205,6 +215,10 @@ impl UnlockedAppState {
+         self.rgb_wallet_wrapper.rotate_address()
+     }
+-
++
++    pub(crate) fn rgb_rotate_colored_address(&self) -> Result<String, RgbLibError> {
++        self.rgb_wallet_wrapper.rotate_colored_address()
++    }
++
+     pub(crate) fn rgb_get_asset_balance(
+         &self,
+         contract_id: ContractId,
+@@ -449,6 +463,30 @@ impl UnlockedAppState {
              .send_btc_begin(address, amount, fee_rate, false)
      }
  
@@ -3324,7 +3336,7 @@ index 80df750..a2d824d 100644
      pub(crate) fn rgb_send_btc_end(&self, signed_psbt: String) -> Result<String, RgbLibError> {
          self.rgb_wallet_wrapper.send_btc_end(signed_psbt)
      }
-@@ -658,6 +692,93 @@ impl RgbLibWalletWrapper {
+@@ -658,6 +696,93 @@ impl RgbLibWalletWrapper {
          )
      }
  
@@ -3418,7 +3430,19 @@ index 80df750..a2d824d 100644
      pub(crate) fn get_address(&self) -> Result<String, RgbLibError> {
          self.get_rgb_wallet().get_address()
      }
-@@ -932,6 +1053,35 @@ impl RgbLibWalletWrapper {
+@@ -666,6 +791,10 @@ impl RgbLibWalletWrapper {
+         self.get_rgb_wallet().rotate_address(KeychainKind::Internal)
+     }
+-
++
++    pub(crate) fn rotate_colored_address(&self) -> Result<String, RgbLibError> {
++        self.get_rgb_wallet().rotate_address(KeychainKind::External)
++    }
++
+     pub(crate) fn get_asset_balance(
+         &self,
+         contract_id: ContractId,
+@@ -932,6 +1061,35 @@ impl RgbLibWalletWrapper {
          )
      }
  
@@ -3491,7 +3515,7 @@ index 975a67d..30958de 100644
              )?;
              let payment_hash = PaymentHash(invoice.payment_hash().to_byte_array());
 diff --git a/src/sdk/mod.rs b/src/sdk/mod.rs
-index 3ef5ebc..0ed91c2 100644
+index 3ef5ebc..5c03db2 100644
 --- a/src/sdk/mod.rs
 +++ b/src/sdk/mod.rs
 @@ -34,6 +34,7 @@ use amplify::{map, s};
@@ -4099,7 +4123,7 @@ index 3ef5ebc..0ed91c2 100644
  pub(crate) async fn init(
      state: Arc<AppState>,
      password: String,
-@@ -2402,6 +2892,144 @@ pub(crate) async fn create_utxos(
+@@ -2402,6 +2892,151 @@ pub(crate) async fn create_utxos(
      Ok(())
  }
  
@@ -4109,6 +4133,13 @@ index 3ef5ebc..0ed91c2 100644
 +) -> Result<PreparedCreateUtxosData, APIError> {
 +    let guard = check_unlocked(&state).await?;
 +    let unlocked_state = guard.as_ref().unwrap();
++    if state.static_state.reuse_addresses {
++        // Witness invoices intentionally pin the colored keychain when address
++        // reuse is enabled. Advance that pin before creating allocation
++        // outputs so an active receive script cannot quarantine every output
++        // in the setup transaction as `pending_witness`.
++        unlocked_state.rgb_rotate_colored_address()?;
++    }
 +    let target_count = request.num.unwrap_or(unlocked_state.config.rgb.utxo_num);
 +    let output_size_sat = request
 +        .size
@@ -4244,7 +4275,7 @@ index 3ef5ebc..0ed91c2 100644
  pub(crate) async fn issue_asset_nia(
      state: Arc<AppState>,
      request: IssueAssetNiaRequestData,
-@@ -2581,6 +3209,7 @@ pub(crate) async fn keysend(
+@@ -2581,6 +3216,7 @@ pub(crate) async fn keysend(
              payment_idx: None,
              async_hash_index: None,
              async_host_node_id: None,
@@ -4252,7 +4283,7 @@ index 3ef5ebc..0ed91c2 100644
          },
      )?;
      if let Some((contract_id, rgb_amount)) = rgb_payment {
-@@ -2651,6 +3280,181 @@ pub(crate) async fn send_btc(
+@@ -2651,6 +3287,181 @@ pub(crate) async fn send_btc(
      Ok(SendBtcData { txid })
  }
  
@@ -4434,7 +4465,7 @@ index 3ef5ebc..0ed91c2 100644
  pub(crate) async fn post_asset_media(
      state: Arc<AppState>,
      file_bytes: Vec<u8>,
-@@ -3120,10 +3924,15 @@ pub(crate) async fn send_payment(
+@@ -3120,10 +3931,15 @@ pub(crate) async fn send_payment(
                  payment_idx: None,
                  async_hash_index: None,
                  async_host_node_id: None,
@@ -4450,7 +4481,7 @@ index 3ef5ebc..0ed91c2 100644
              retry_strategy: Retry::Timeout(Duration::from_secs(10)),
              ..Default::default()
          };
-@@ -3222,6 +4031,7 @@ pub(crate) async fn send_payment(
+@@ -3222,6 +4038,7 @@ pub(crate) async fn send_payment(
                  payment_idx: None,
                  async_hash_index: None,
                  async_host_node_id: None,
@@ -4458,7 +4489,7 @@ index 3ef5ebc..0ed91c2 100644
              },
          )?;
          let payment_hash = PaymentHash(invoice.payment_hash().to_byte_array());
-@@ -3245,7 +4055,10 @@ pub(crate) async fn send_payment(
+@@ -3245,7 +4062,10 @@ pub(crate) async fn send_payment(
              &invoice,
              payment_id,
              Some(amt_msat),
@@ -4470,7 +4501,7 @@ index 3ef5ebc..0ed91c2 100644
              bolt11_retry,
          ) {
              Ok(_) => {
-@@ -3663,6 +4476,102 @@ pub(crate) async fn sync(state: Arc<AppState>) -> Result<(), APIError> {
+@@ -3663,6 +4483,102 @@ pub(crate) async fn sync(state: Arc<AppState>) -> Result<(), APIError> {
      Ok(())
  }
  
@@ -4573,7 +4604,7 @@ index 3ef5ebc..0ed91c2 100644
  pub(crate) async fn decode_ln_invoice(
      state: Arc<AppState>,
      invoice: String,
-@@ -3844,6 +4753,7 @@ pub(crate) async fn create_ln_invoice(
+@@ -3844,6 +4760,7 @@ pub(crate) async fn create_ln_invoice(
              payment_idx: None,
              async_hash_index: None,
              async_host_node_id: None,
@@ -4581,7 +4612,7 @@ index 3ef5ebc..0ed91c2 100644
          },
      );
  
-@@ -3888,6 +4798,7 @@ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentDat
+@@ -3888,6 +4805,7 @@ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentDat
              payee_pubkey: payment_info.payee_pubkey.to_string(),
              preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
              description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
@@ -4589,7 +4620,7 @@ index 3ef5ebc..0ed91c2 100644
          });
      }
  
-@@ -3913,6 +4824,7 @@ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentDat
+@@ -3913,6 +4831,7 @@ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentDat
              payee_pubkey: payment_info.payee_pubkey.to_string(),
              preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
              description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
@@ -4597,7 +4628,7 @@ index 3ef5ebc..0ed91c2 100644
          });
      }
  
-@@ -3959,6 +4871,7 @@ pub(crate) async fn get_payment(
+@@ -3959,6 +4878,7 @@ pub(crate) async fn get_payment(
                          payee_pubkey: payment_info.payee_pubkey.to_string(),
                          preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
                          description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
@@ -4605,7 +4636,7 @@ index 3ef5ebc..0ed91c2 100644
                      });
                  }
              }
-@@ -3987,6 +4900,7 @@ pub(crate) async fn get_payment(
+@@ -3987,6 +4907,7 @@ pub(crate) async fn get_payment(
                          payee_pubkey: payment_info.payee_pubkey.to_string(),
                          preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
                          description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
@@ -4613,7 +4644,7 @@ index 3ef5ebc..0ed91c2 100644
                      });
                  }
              }
-@@ -4451,13 +5365,7 @@ mod tests {
+@@ -4451,13 +5372,7 @@ mod tests {
      }
  
      fn mock_locked_state() -> Arc<AppState> {
