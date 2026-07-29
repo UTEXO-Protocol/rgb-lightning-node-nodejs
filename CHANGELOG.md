@@ -26,6 +26,11 @@ while pre-`1.0`.
   virtual size, and RGB batch identity. `commitPreparedBtcSend()` and
   `commitPreparedRgbSend()` idempotently validate and submit that exact
   native plan without exposing PSBT material to JavaScript.
+- Explicit RGB wallet UTXO setup plans. `prepareCreateUtxos()` reserves an
+  exact native transaction and returns only review-safe fee, input, output,
+  virtual-size, target-count, and output-size data.
+  `commitPreparedCreateUtxos()` signs and broadcasts that exact plan, while
+  `cancelCreateUtxosPlan()` releases only a matching setup reservation.
 - Idempotent BTC and RGB plan cancellation plus bounded pending-plan
   inspection, allowing consumers to release abandoned send reservations
   without touching channel or UTXO-management operations.

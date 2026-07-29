@@ -47,7 +47,7 @@
     "ref": "v0.10.0-beta.3",
     "commit": "0bfa66fa256a6c36f3737d5b6402eacea40c68fc",
     "patch": "patches/c-ffi-utexo-patches-v0.10.0-beta.3.patch",
-    "patchSha256": "14d92a75067fd44436c2895266a5762ecbcd782f6fb29696a6f21c171b57de0a",
+    "patchSha256": "b31b2c13345c156db84e57e14783a44cb902e1512cc7d699bf47974eab8034ef",
     "rustToolchain": "1.88.0"
   }
 }

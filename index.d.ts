@@ -220,6 +220,19 @@ export interface PreparedRgbSendResponse extends PreparedSendResponse {
   batch_transfer_idx: number
 }
 
+export interface CreateUtxosRequest {
+  up_to: boolean
+  num?: number
+  size?: number
+  fee_rate: number
+  skip_sync: boolean
+}
+
+export interface PreparedCreateUtxosResponse extends PreparedSendResponse {
+  target_count: number
+  output_size_sat: number
+}
+
 export interface CommitPreparedSendRequest {
   plan_id: string
 }
@@ -312,6 +325,9 @@ export class SdkNode {
   prepareBtcSend(request: BtcSendRequest): PreparedSendResponse
   commitPreparedBtcSend(request: CommitPreparedSendRequest): SendBtcResponse
   cancelBtcSendPlan(request: { plan_id: string }): CancelBtcSendPlanResponse
+  prepareCreateUtxos(request: CreateUtxosRequest): PreparedCreateUtxosResponse
+  commitPreparedCreateUtxos(request: CommitPreparedSendRequest): SendBtcResponse
+  cancelCreateUtxosPlan(request: { plan_id: string }): CancelBtcSendPlanResponse
   listPendingVanillaTransactions(): PendingVanillaTransaction[]
   listAddressReceipts(address: string): AddressReceipt[]
   createUtxos(request: JsonRequest): JsonValue

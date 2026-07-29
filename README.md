@@ -171,7 +171,7 @@ throw `napi::Error` on the C-FFI `Err` branch).
 | Swaps | `makerInit`, `makerExecute`, `taker`, `listSwaps`, `getSwap` |
 | RGB issuance | `issueAssetNia`, `issueAssetUda`, `issueAssetCfa`, `issueAssetIfa` |
 | RGB assets | `listAssets`, `assetBalance`, `assetMetadata`, `sendRgb`, `inflate`, `listTransfers`, `listTransfersByTxid`, `refreshTransfers`, `failTransfers`, `getAssetMedia`, `postAssetMedia` |
-| BTC | `btcBalance`, `sendBtc`, `listTransactions`, `listTransactionsByTxid`, `listUnspents`, `createUtxos`, `estimateFee` |
+| BTC | `btcBalance`, `sendBtc`, `prepareBtcSend`, `commitPreparedBtcSend`, `cancelBtcSendPlan`, `listTransactions`, `listTransactionsByTxid`, `listUnspents`, `createUtxos`, `prepareCreateUtxos`, `commitPreparedCreateUtxos`, `cancelCreateUtxosPlan`, `estimateFee` |
 | VSS | `vssClearFence`, `vssBackup` |
 | APay | `apayNew` |
 | Signing / onion / diagnostics | `signMessage`, `verifyMessage`, `sendOnionMessage`, `checkIndexerUrl`, `checkProxyEndpoint` |

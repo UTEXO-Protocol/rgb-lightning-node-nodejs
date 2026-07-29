@@ -167,6 +167,18 @@ class SdkNode {
     return JSON.parse(this._inner.cancelBtcSendPlan(JSON.stringify(request)))
   }
 
+  prepareCreateUtxos (request) {
+    return JSON.parse(this._inner.prepareCreateUtxos(JSON.stringify(request)))
+  }
+
+  commitPreparedCreateUtxos (request) {
+    return JSON.parse(this._inner.commitPreparedCreateUtxos(JSON.stringify(request)))
+  }
+
+  cancelCreateUtxosPlan (request) {
+    return JSON.parse(this._inner.cancelCreateUtxosPlan(JSON.stringify(request)))
+  }
+
   listPendingVanillaTransactions () {
     return JSON.parse(this._inner.listPendingVanillaTransactions())
   }
