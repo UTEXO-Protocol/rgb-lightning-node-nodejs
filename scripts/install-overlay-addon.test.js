@@ -1,6 +1,8 @@
 'use strict'
 
 const assert = require('node:assert/strict')
+const fs = require('node:fs')
+const path = require('node:path')
 const test = require('node:test')
 const {
   existingAddonMatches,
@@ -15,9 +17,24 @@ test('package overlay metadata is exact and checksum-pinned', () => {
   assert.equal(config.commit, '0bfa66fa256a6c36f3737d5b6402eacea40c68fc')
   assert.equal(
     config.patchSha256,
-    '5f18ae0b24ae0bf9d15be9592a152f5e8504ef6e368969a9a514f078bb60b305'
+    'b024039de512358fecbb64773b587b11bb626364bd41a165cd797641a0e999e2'
   )
   assert.equal(config.rustToolchain, '1.88.0')
+})
+
+test('overlay contains the complete native operation registry source', () => {
+  const config = readConfig()
+  const patch = fs.readFileSync(path.resolve(config.patchPath), 'utf8')
+
+  assert.match(
+    patch,
+    /diff --git a\/bindings\/c-ffi\/src\/native_operations\.rs b\/bindings\/c-ffi\/src\/native_operations\.rs/
+  )
+  assert.match(patch, /new file mode 100644/)
+  assert.match(patch, /pub\(crate\) fn start_unlock\(/)
+  assert.match(patch, /pub\(crate\) fn status\(/)
+  assert.match(patch, /pub\(crate\) fn adopt\(/)
+  assert.match(patch, /pub\(crate\) fn cancel\(/)
 })
 
 test('addon provenance rejects stale patch and tampered artifact identities', () => {

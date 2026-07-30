@@ -3078,6 +3078,390 @@ index 24c3371..18aecfe 100644
 +        api::sdk_node_unlock_with_attached_external_signer(node, request_json)
 +    )
  }
+diff --git a/bindings/c-ffi/src/native_operations.rs b/bindings/c-ffi/src/native_operations.rs
+new file mode 100644
+index 0000000..856f7d3
+--- /dev/null
++++ b/bindings/c-ffi/src/native_operations.rs
+@@ -0,0 +1,378 @@
++use std::collections::HashMap;
++use std::sync::{Arc, Mutex, MutexGuard, OnceLock};
++use std::thread;
++use std::time::{SystemTime, UNIX_EPOCH};
++
++use rgb_lightning_node::{NativeExternalSigner, SdkNode};
++use serde::Serialize;
++use uuid::Uuid;
++
++use crate::json_types::JsonSdkExternalUnlockRequest;
++use crate::utils::{format_error_for_ffi, Error};
++
++const CONTRACT_VERSION: u8 = 1;
++const OPERATION_KIND: &str = "unlock_with_native_external_signer";
++const MAX_TERMINAL_OPERATIONS: usize = 128;
++
++#[derive(Clone, Copy, Debug, Eq, PartialEq)]
++enum OperationState {
++    Queued,
++    Running,
++    CancelRequested,
++    Succeeded,
++    Failed,
++    Cancelled,
++}
++
++impl OperationState {
++    fn as_str(self) -> &'static str {
++        match self {
++            Self::Queued => "queued",
++            Self::Running => "running",
++            Self::CancelRequested => "cancel_requested",
++            Self::Succeeded => "succeeded",
++            Self::Failed => "failed",
++            Self::Cancelled => "cancelled",
++        }
++    }
++
++    fn is_terminal(self) -> bool {
++        matches!(self, Self::Succeeded | Self::Failed | Self::Cancelled)
++    }
++}
++
++#[derive(Debug)]
++struct NativeOperation {
++    operation_id: String,
++    node_identity: usize,
++    state: OperationState,
++    created_at_ms: u64,
++    started_at_ms: Option<u64>,
++    finished_at_ms: Option<u64>,
++    updated_at_ms: u64,
++    cancellation_requested: bool,
++    adoption_count: u32,
++    error: Option<String>,
++}
++
++#[derive(Debug, Serialize)]
++struct NativeOperationStatus {
++    contract_version: u8,
++    operation_id: String,
++    kind: &'static str,
++    state: &'static str,
++    created_at_ms: String,
++    #[serde(skip_serializing_if = "Option::is_none")]
++    started_at_ms: Option<String>,
++    #[serde(skip_serializing_if = "Option::is_none")]
++    finished_at_ms: Option<String>,
++    updated_at_ms: String,
++    cancellation_requested: bool,
++    can_cancel_immediately: bool,
++    adoption_count: u32,
++    #[serde(skip_serializing_if = "Option::is_none")]
++    error: Option<String>,
++    #[serde(skip_serializing_if = "Option::is_none")]
++    adopted_existing: Option<bool>,
++}
++
++impl NativeOperation {
++    fn status(&self, adopted_existing: Option<bool>) -> NativeOperationStatus {
++        NativeOperationStatus {
++            contract_version: CONTRACT_VERSION,
++            operation_id: self.operation_id.clone(),
++            kind: OPERATION_KIND,
++            state: self.state.as_str(),
++            created_at_ms: self.created_at_ms.to_string(),
++            started_at_ms: self.started_at_ms.map(|value| value.to_string()),
++            finished_at_ms: self.finished_at_ms.map(|value| value.to_string()),
++            updated_at_ms: self.updated_at_ms.to_string(),
++            cancellation_requested: self.cancellation_requested,
++            can_cancel_immediately: self.state == OperationState::Queued,
++            adoption_count: self.adoption_count,
++            error: self.error.clone(),
++            adopted_existing,
++        }
++    }
++}
++
++type Registry = HashMap<String, NativeOperation>;
++
++fn registry() -> &'static Mutex<Registry> {
++    static REGISTRY: OnceLock<Mutex<Registry>> = OnceLock::new();
++    REGISTRY.get_or_init(|| Mutex::new(HashMap::new()))
++}
++
++fn lock_registry() -> Result<MutexGuard<'static, Registry>, Error> {
++    registry()
++        .lock()
++        .map_err(|_| Error::StringParse("native operation registry is poisoned".to_string()))
++}
++
++fn now_ms() -> Result<u64, Error> {
++    let milliseconds = SystemTime::now()
++        .duration_since(UNIX_EPOCH)
++        .map_err(|_| Error::StringParse("system clock is before Unix epoch".to_string()))?
++        .as_millis();
++    u64::try_from(milliseconds)
++        .map_err(|_| Error::StringParse("system clock exceeds u64 milliseconds".to_string()))
++}
++
++fn operation_for_node<'a>(
++    registry: &'a mut Registry,
++    node_identity: usize,
++    operation_id: &str,
++) -> Result<&'a mut NativeOperation, Error> {
++    let operation = registry
++        .get_mut(operation_id)
++        .ok_or_else(|| Error::StringParse("native operation was not found".to_string()))?;
++    if operation.node_identity != node_identity {
++        return Err(Error::StringParse(
++            "native operation belongs to a different node".to_string(),
++        ));
++    }
++    Ok(operation)
++}
++
++fn prune_terminal_operations(registry: &mut Registry) {
++    let mut terminal = registry
++        .values()
++        .filter(|operation| operation.state.is_terminal())
++        .map(|operation| {
++            (
++                operation.finished_at_ms.unwrap_or(operation.updated_at_ms),
++                operation.operation_id.clone(),
++            )
++        })
++        .collect::<Vec<_>>();
++    if terminal.len() <= MAX_TERMINAL_OPERATIONS {
++        return;
++    }
++    terminal.sort_unstable();
++    let excess = terminal.len() - MAX_TERMINAL_OPERATIONS;
++    for (_, operation_id) in terminal.into_iter().take(excess) {
++        registry.remove(&operation_id);
++    }
++}
++
++fn serialize(status: NativeOperationStatus) -> Result<String, Error> {
++    Ok(serde_json::to_string(&status)?)
++}
++
++fn finish_operation(operation_id: &str, result: Result<(), Error>) {
++    let Ok(mut registry) = lock_registry() else {
++        return;
++    };
++    let Some(operation) = registry.get_mut(operation_id) else {
++        return;
++    };
++    let finished_at_ms = now_ms().unwrap_or(operation.updated_at_ms);
++    operation.finished_at_ms = Some(finished_at_ms);
++    operation.updated_at_ms = finished_at_ms;
++    match result {
++        Ok(()) => {
++            operation.state = OperationState::Succeeded;
++            operation.error = None;
++        }
++        Err(error) => {
++            operation.state = OperationState::Failed;
++            operation.error = Some(format_error_for_ffi(&error));
++        }
++    }
++}
++
++fn run_unlock(
++    operation_id: String,
++    node: SdkNode,
++    signer: Arc<NativeExternalSigner>,
++    request: JsonSdkExternalUnlockRequest,
++) {
++    {
++        let Ok(mut registry) = lock_registry() else {
++            return;
++        };
++        let Some(operation) = registry.get_mut(&operation_id) else {
++            return;
++        };
++        if operation.state == OperationState::Cancelled {
++            return;
++        }
++        let started_at_ms = now_ms().unwrap_or(operation.updated_at_ms);
++        operation.state = OperationState::Running;
++        operation.started_at_ms = Some(started_at_ms);
++        operation.updated_at_ms = started_at_ms;
++    }
++
++    let result = node
++        .unlock_with_native_external_signer(
++            signer,
++            request.bitcoind_rpc_username,
++            request.bitcoind_rpc_password,
++            request.bitcoind_rpc_host,
++            request.bitcoind_rpc_port,
++            request.indexer_url,
++            request.proxy_endpoint,
++            request.announce_addresses,
++            request.announce_alias,
++        )
++        .map_err(Error::from);
++    finish_operation(&operation_id, result);
++}
++
++pub(crate) fn start_unlock(
++    node_identity: usize,
++    node: SdkNode,
++    signer: Arc<NativeExternalSigner>,
++    request: JsonSdkExternalUnlockRequest,
++) -> Result<String, Error> {
++    let created_at_ms = now_ms()?;
++    let (operation_id, initial_status) = {
++        let mut registry = lock_registry()?;
++        prune_terminal_operations(&mut registry);
++        if let Some(existing) = registry.values_mut().find(|operation| {
++            operation.node_identity == node_identity && !operation.state.is_terminal()
++        }) {
++            existing.adoption_count = existing.adoption_count.saturating_add(1);
++            existing.updated_at_ms = created_at_ms.max(existing.updated_at_ms);
++            return serialize(existing.status(Some(true)));
++        }
++
++        let operation_id = Uuid::new_v4().to_string();
++        let operation = NativeOperation {
++            operation_id: operation_id.clone(),
++            node_identity,
++            state: OperationState::Queued,
++            created_at_ms,
++            started_at_ms: None,
++            finished_at_ms: None,
++            updated_at_ms: created_at_ms,
++            cancellation_requested: false,
++            adoption_count: 0,
++            error: None,
++        };
++        let status = operation.status(Some(false));
++        registry.insert(operation_id.clone(), operation);
++        (operation_id, status)
++    };
++
++    let worker_operation_id = operation_id.clone();
++    if let Err(error) = thread::Builder::new()
++        .name("rln-native-unlock".to_string())
++        .spawn(move || run_unlock(worker_operation_id, node, signer, request))
++    {
++        finish_operation(
++            &operation_id,
++            Err(Error::StringParse(format!(
++                "failed to start native operation worker: {error}"
++            ))),
++        );
++        let mut registry = lock_registry()?;
++        return serialize(
++            operation_for_node(&mut registry, node_identity, &operation_id)?.status(Some(false)),
++        );
++    }
++
++    serialize(initial_status)
++}
++
++pub(crate) fn status(node_identity: usize, operation_id: &str) -> Result<String, Error> {
++    let mut registry = lock_registry()?;
++    serialize(operation_for_node(&mut registry, node_identity, operation_id)?.status(None))
++}
++
++pub(crate) fn adopt(node_identity: usize, operation_id: &str) -> Result<String, Error> {
++    let updated_at_ms = now_ms()?;
++    let mut registry = lock_registry()?;
++    let operation = operation_for_node(&mut registry, node_identity, operation_id)?;
++    operation.adoption_count = operation.adoption_count.saturating_add(1);
++    operation.updated_at_ms = updated_at_ms.max(operation.updated_at_ms);
++    serialize(operation.status(None))
++}
++
++pub(crate) fn cancel(node_identity: usize, operation_id: &str) -> Result<String, Error> {
++    let updated_at_ms = now_ms()?;
++    let mut registry = lock_registry()?;
++    let operation = operation_for_node(&mut registry, node_identity, operation_id)?;
++    match operation.state {
++        OperationState::Queued => {
++            operation.state = OperationState::Cancelled;
++            operation.cancellation_requested = true;
++            operation.finished_at_ms = Some(updated_at_ms);
++            operation.updated_at_ms = updated_at_ms;
++        }
++        OperationState::Running => {
++            operation.state = OperationState::CancelRequested;
++            operation.cancellation_requested = true;
++            operation.updated_at_ms = updated_at_ms;
++        }
++        OperationState::CancelRequested
++        | OperationState::Succeeded
++        | OperationState::Failed
++        | OperationState::Cancelled => {}
++    }
++    serialize(operation.status(None))
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    fn operation(
++        id: &str,
++        node_identity: usize,
++        state: OperationState,
++        finished: u64,
++    ) -> NativeOperation {
++        NativeOperation {
++            operation_id: id.to_string(),
++            node_identity,
++            state,
++            created_at_ms: 1,
++            started_at_ms: Some(2),
++            finished_at_ms: state.is_terminal().then_some(finished),
++            updated_at_ms: finished,
++            cancellation_requested: state == OperationState::Cancelled,
++            adoption_count: 0,
++            error: None,
++        }
++    }
++
++    #[test]
++    fn operation_lookup_enforces_node_ownership() {
++        let mut registry = HashMap::from([(
++            "operation".to_string(),
++            operation("operation", 7, OperationState::Running, 2),
++        )]);
++        assert!(operation_for_node(&mut registry, 8, "operation").is_err());
++        assert!(operation_for_node(&mut registry, 7, "missing").is_err());
++        assert!(operation_for_node(&mut registry, 7, "operation").is_ok());
++    }
++
++    #[test]
++    fn terminal_retention_removes_only_the_oldest_terminal_records() {
++        let mut registry = HashMap::new();
++        for index in 0..=MAX_TERMINAL_OPERATIONS {
++            let id = format!("terminal-{index:03}");
++            registry.insert(
++                id.clone(),
++                operation(&id, 7, OperationState::Succeeded, index as u64),
++            );
++        }
++        registry.insert(
++            "running".to_string(),
++            operation("running", 7, OperationState::Running, 999),
++        );
++
++        prune_terminal_operations(&mut registry);
++
++        assert_eq!(
++            registry
++                .values()
++                .filter(|value| value.state.is_terminal())
++                .count(),
++            MAX_TERMINAL_OPERATIONS
++        );
++        assert!(!registry.contains_key("terminal-000"));
++        assert!(registry.contains_key("running"));
++    }
++}
 diff --git a/bindings/c-ffi/src/utils.rs b/bindings/c-ffi/src/utils.rs
 index 344f6d9..3b4ed42 100644
 --- a/bindings/c-ffi/src/utils.rs
