@@ -176,6 +176,38 @@ export interface DecodedLnInvoice {
   network: string
 }
 
+export type LightningPaymentStatus =
+  | 'Pending'
+  | 'Claimable'
+  | 'Claiming'
+  | 'Succeeded'
+  | 'Cancelled'
+  | 'Failed'
+
+export interface SendPaymentResponse {
+  payment_id: string
+  payment_hash: string | null
+  payment_secret: string | null
+  status: LightningPaymentStatus
+  failure_code: string | null
+}
+
+export interface LightningPayment {
+  amt_msat: number | null
+  asset_amount: number | null
+  asset_id: string | null
+  payment_hash: string
+  payment_type: 'Outbound' | 'InboundAutoClaim' | 'InboundHodl'
+  status: LightningPaymentStatus
+  created_at: number
+  updated_at: number
+  payee_pubkey: string
+  preimage: string | null
+  description_hash: string | null
+  fee_paid_msat: number | null
+  failure_code: string | null
+}
+
 export type DecodedRgbAssignment =
   | { type: 'Fungible'; value: number }
   | { type: 'NonFungible' }
@@ -406,10 +438,10 @@ export class SdkNode {
   invoiceStatus(invoice: string): JsonObject
   cancelHodlInvoice(request: JsonRequest): JsonValue
   claimHodlInvoice(request: JsonRequest): JsonValue
-  sendPayment(request: JsonRequest): JsonValue
+  sendPayment(request: JsonRequest): SendPaymentResponse
   keysend(request: JsonRequest): JsonValue
-  listPayments(): JsonValue
-  getPayment(paymentHashHex: string, paymentType: string): JsonValue
+  listPayments(): LightningPayment[]
+  getPayment(paymentHashHex: string, paymentType: string): LightningPayment
 
   // Atomic swaps
   makerInit(request: JsonRequest): JsonValue

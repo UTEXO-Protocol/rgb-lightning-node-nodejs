@@ -17,7 +17,7 @@ test('package overlay metadata is exact and checksum-pinned', () => {
   assert.equal(config.commit, '0bfa66fa256a6c36f3737d5b6402eacea40c68fc')
   assert.equal(
     config.patchSha256,
-    'b024039de512358fecbb64773b587b11bb626364bd41a165cd797641a0e999e2'
+    '59d5d7c77a6563934d571ff36b0564c7e44b24f68ce07b305fe6c535ab1f50d1'
   )
   assert.equal(config.rustToolchain, '1.88.0')
 })

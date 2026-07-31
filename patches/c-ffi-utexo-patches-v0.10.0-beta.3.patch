@@ -215,10 +215,22 @@ index 2385e9f..eb9ee54 100644
  [build-dependencies]
  cbindgen = "0.29.0"
 diff --git a/bindings/c-ffi/rln.h b/bindings/c-ffi/rln.h
-index eb7e572..de13a58 100644
+index eb7e572..49abfcf 100644
 --- a/bindings/c-ffi/rln.h
 +++ b/bindings/c-ffi/rln.h
-@@ -41,9 +41,18 @@ struct CResultString rln_asset_metadata(const struct COpaqueStruct *node, const
+@@ -26,8 +26,9 @@ typedef struct CResult {
+ } CResult;
+ 
+ /**
+- * Drop a `NativeExternalSigner` handle. Safe to call immediately after
+- * attach / init / unlock succeeds: RLN holds its own `Arc` clone.
++ * Shut down and drop a `NativeExternalSigner` handle. Call only after node
++ * shutdown has completed; shutdown invalidates every outstanding `Arc` clone
++ * so the seed-bearing backend and persistent VLS store are released.
+  */
+ void free_native_external_signer(struct COpaqueStruct obj);
+ 
+@@ -41,9 +42,18 @@ struct CResultString rln_asset_metadata(const struct COpaqueStruct *node, const
  
  struct CResultString rln_btc_balance(const struct COpaqueStruct *node, bool skip_sync);
  
@@ -237,7 +249,7 @@ index eb7e572..de13a58 100644
  struct CResultString rln_check_indexer_url(const struct COpaqueStruct *node,
                                             const char *indexer_url);
  
-@@ -55,6 +64,15 @@ struct CResultString rln_claim_hodl_invoice(const struct COpaqueStruct *node,
+@@ -55,6 +65,15 @@ struct CResultString rln_claim_hodl_invoice(const struct COpaqueStruct *node,
  
  struct CResultString rln_close_channel(const struct COpaqueStruct *node, const char *request_json);
  
@@ -253,7 +265,7 @@ index eb7e572..de13a58 100644
  struct CResultString rln_connect_peer(const struct COpaqueStruct *node,
                                        const char *peer_pubkey_and_addr);
  
-@@ -107,6 +125,9 @@ struct CResultString rln_issue_asset_uda(const struct COpaqueStruct *node,
+@@ -107,6 +126,9 @@ struct CResultString rln_issue_asset_uda(const struct COpaqueStruct *node,
  
  struct CResultString rln_keysend(const struct COpaqueStruct *node, const char *request_json);
  
@@ -263,7 +275,7 @@ index eb7e572..de13a58 100644
  struct CResultString rln_list_assets(const struct COpaqueStruct *node,
                                       const char *filter_asset_schemas_json);
  
-@@ -116,6 +137,10 @@ struct CResultString rln_list_payments(const struct COpaqueStruct *node);
+@@ -116,6 +138,10 @@ struct CResultString rln_list_payments(const struct COpaqueStruct *node);
  
  struct CResultString rln_list_peers(const struct COpaqueStruct *node);
  
@@ -274,7 +286,7 @@ index eb7e572..de13a58 100644
  struct CResultString rln_list_swaps(const struct COpaqueStruct *node);
  
  struct CResultString rln_list_transactions(const struct COpaqueStruct *node, bool skip_sync);
-@@ -142,6 +167,11 @@ struct CResult rln_native_external_signer_new(const char *seed_hex,
+@@ -142,6 +168,11 @@ struct CResult rln_native_external_signer_new(const char *seed_hex,
                                                const char *network,
                                                bool permissive_policy);
  
@@ -286,7 +298,7 @@ index eb7e572..de13a58 100644
  struct CResultString rln_network_info(const struct COpaqueStruct *node);
  
  struct CResultString rln_node_info(const struct COpaqueStruct *node);
-@@ -151,6 +181,15 @@ struct CResultString rln_open_channel(const struct COpaqueStruct *node, const ch
+@@ -151,6 +182,15 @@ struct CResultString rln_open_channel(const struct COpaqueStruct *node, const ch
  struct CResultString rln_post_asset_media(const struct COpaqueStruct *node,
                                            const char *request_json);
  
@@ -302,7 +314,7 @@ index eb7e572..de13a58 100644
  struct CResultString rln_refresh_transfers(const struct COpaqueStruct *node,
                                             const char *request_json);
  
-@@ -160,6 +199,9 @@ struct CResultString rln_rotate_address(const struct COpaqueStruct *node);
+@@ -160,6 +200,9 @@ struct CResultString rln_rotate_address(const struct COpaqueStruct *node);
  
  struct CResultString rln_sdk_initialize(const char *request_json);
  
@@ -312,7 +324,7 @@ index eb7e572..de13a58 100644
  /**
   * APay receiver-side registration with an LSP. Argument is the LSP's
   * node_id as a hex string (compressed secp256k1). Returns JSON of
-@@ -173,6 +215,9 @@ struct CResultString rln_sdk_node_apay_new(const struct COpaqueStruct *node,
+@@ -173,6 +216,9 @@ struct CResultString rln_sdk_node_apay_new(const struct COpaqueStruct *node,
  struct CResultString rln_sdk_node_attach_native_external_signer(const struct COpaqueStruct *node,
                                                                  const struct COpaqueStruct *signer);
  
@@ -322,7 +334,7 @@ index eb7e572..de13a58 100644
  struct CResultString rln_sdk_node_detach_external_signer(const struct COpaqueStruct *node);
  
  struct CResultString rln_sdk_node_init(const struct COpaqueStruct *node,
-@@ -185,10 +230,17 @@ struct CResultString rln_sdk_node_init_with_external_signer(const struct COpaque
+@@ -185,10 +231,17 @@ struct CResultString rln_sdk_node_init_with_external_signer(const struct COpaque
  struct CResultString rln_sdk_node_init_with_native_external_signer(const struct COpaqueStruct *node,
                                                                     const struct COpaqueStruct *signer);
  
@@ -340,7 +352,7 @@ index eb7e572..de13a58 100644
  struct CResultString rln_sdk_node_unlock(const struct COpaqueStruct *node,
                                           const char *request_json);
  
-@@ -222,6 +274,14 @@ struct CResultString rln_sdk_node_vss_backup(const struct COpaqueStruct *node);
+@@ -222,6 +275,14 @@ struct CResultString rln_sdk_node_vss_backup(const struct COpaqueStruct *node);
  struct CResultString rln_sdk_node_vss_clear_fence(const struct COpaqueStruct *node,
                                                    const char *request_json);
  
@@ -355,7 +367,7 @@ index eb7e572..de13a58 100644
  struct CResultString rln_sdk_shutdown(void);
  
  struct CResultString rln_send_btc(const struct COpaqueStruct *node, const char *request_json);
-@@ -237,6 +297,8 @@ struct CResultString rln_sign_message(const struct COpaqueStruct *node, const ch
+@@ -237,6 +298,8 @@ struct CResultString rln_sign_message(const struct COpaqueStruct *node, const ch
  
  struct CResultString rln_sync(const struct COpaqueStruct *node);
  
@@ -364,7 +376,7 @@ index eb7e572..de13a58 100644
  struct CResultString rln_taker(const struct COpaqueStruct *node, const char *request_json);
  
  struct CResultString rln_uniffi_healthcheck(void);
-@@ -246,3 +308,6 @@ struct CResultString rln_uniffi_is_initialized(void);
+@@ -246,3 +309,6 @@ struct CResultString rln_uniffi_is_initialized(void);
  struct CResultString rln_verify_message(const struct COpaqueStruct *node,
                                          const char *message,
                                          const char *signature);
@@ -372,10 +384,22 @@ index eb7e572..de13a58 100644
 +struct CResultString rln_wallet_snapshot(const struct COpaqueStruct *node,
 +                                         const char *request_json);
 diff --git a/bindings/c-ffi/rln.hpp b/bindings/c-ffi/rln.hpp
-index 64266ec..771c2a3 100644
+index 64266ec..023ba91 100644
 --- a/bindings/c-ffi/rln.hpp
 +++ b/bindings/c-ffi/rln.hpp
-@@ -43,8 +43,14 @@ CResultString rln_asset_metadata(const COpaqueStruct *node, const char *asset_id
+@@ -29,8 +29,9 @@ struct CResult {
+ 
+ extern "C" {
+ 
+-/// Drop a `NativeExternalSigner` handle. Safe to call immediately after
+-/// attach / init / unlock succeeds: RLN holds its own `Arc` clone.
++/// Shut down and drop a `NativeExternalSigner` handle. Call only after node
++/// shutdown has completed; shutdown invalidates every outstanding `Arc` clone
++/// so the seed-bearing backend and persistent VLS store are released.
+ void free_native_external_signer(COpaqueStruct obj);
+ 
+ void free_sdk_node(COpaqueStruct obj);
+@@ -43,8 +44,14 @@ CResultString rln_asset_metadata(const COpaqueStruct *node, const char *asset_id
  
  CResultString rln_btc_balance(const COpaqueStruct *node, bool skip_sync);
  
@@ -390,7 +414,7 @@ index 64266ec..771c2a3 100644
  CResultString rln_check_indexer_url(const COpaqueStruct *node, const char *indexer_url);
  
  CResultString rln_check_proxy_endpoint(const COpaqueStruct *node, const char *proxy_endpoint);
-@@ -53,6 +59,12 @@ CResultString rln_claim_hodl_invoice(const COpaqueStruct *node, const char *requ
+@@ -53,6 +60,12 @@ CResultString rln_claim_hodl_invoice(const COpaqueStruct *node, const char *requ
  
  CResultString rln_close_channel(const COpaqueStruct *node, const char *request_json);
  
@@ -403,7 +427,7 @@ index 64266ec..771c2a3 100644
  CResultString rln_connect_peer(const COpaqueStruct *node, const char *peer_pubkey_and_addr);
  
  CResultString rln_create_utxos(const COpaqueStruct *node, const char *request_json);
-@@ -94,6 +106,8 @@ CResultString rln_issue_asset_uda(const COpaqueStruct *node, const char *request
+@@ -94,6 +107,8 @@ CResultString rln_issue_asset_uda(const COpaqueStruct *node, const char *request
  
  CResultString rln_keysend(const COpaqueStruct *node, const char *request_json);
  
@@ -412,7 +436,7 @@ index 64266ec..771c2a3 100644
  CResultString rln_list_assets(const COpaqueStruct *node, const char *filter_asset_schemas_json);
  
  CResultString rln_list_channels(const COpaqueStruct *node);
-@@ -102,6 +116,10 @@ CResultString rln_list_payments(const COpaqueStruct *node);
+@@ -102,6 +117,10 @@ CResultString rln_list_payments(const COpaqueStruct *node);
  
  CResultString rln_list_peers(const COpaqueStruct *node);
  
@@ -423,7 +447,7 @@ index 64266ec..771c2a3 100644
  CResultString rln_list_swaps(const COpaqueStruct *node);
  
  CResultString rln_list_transactions(const COpaqueStruct *node, bool skip_sync);
-@@ -128,6 +146,11 @@ CResult rln_native_external_signer_new(const char *seed_hex,
+@@ -128,6 +147,11 @@ CResult rln_native_external_signer_new(const char *seed_hex,
                                         const char *network,
                                         bool permissive_policy);
  
@@ -435,7 +459,7 @@ index 64266ec..771c2a3 100644
  CResultString rln_network_info(const COpaqueStruct *node);
  
  CResultString rln_node_info(const COpaqueStruct *node);
-@@ -136,6 +159,12 @@ CResultString rln_open_channel(const COpaqueStruct *node, const char *request_js
+@@ -136,6 +160,12 @@ CResultString rln_open_channel(const COpaqueStruct *node, const char *request_js
  
  CResultString rln_post_asset_media(const COpaqueStruct *node, const char *request_json);
  
@@ -448,7 +472,7 @@ index 64266ec..771c2a3 100644
  CResultString rln_refresh_transfers(const COpaqueStruct *node, const char *request_json);
  
  CResultString rln_rgb_invoice(const COpaqueStruct *node, const char *request_json);
-@@ -144,6 +173,9 @@ CResultString rln_rotate_address(const COpaqueStruct *node);
+@@ -144,6 +174,9 @@ CResultString rln_rotate_address(const COpaqueStruct *node);
  
  CResultString rln_sdk_initialize(const char *request_json);
  
@@ -458,7 +482,7 @@ index 64266ec..771c2a3 100644
  /// APay receiver-side registration with an LSP. Argument is the LSP's
  /// node_id as a hex string (compressed secp256k1). Returns JSON of
  /// `AsyncOrderNewResponse` (request_id, host_node_id, protocol_version,
-@@ -154,6 +186,9 @@ CResultString rln_sdk_node_apay_new(const COpaqueStruct *node, const char *host_
+@@ -154,6 +187,9 @@ CResultString rln_sdk_node_apay_new(const COpaqueStruct *node, const char *host_
  CResultString rln_sdk_node_attach_native_external_signer(const COpaqueStruct *node,
                                                           const COpaqueStruct *signer);
  
@@ -468,7 +492,7 @@ index 64266ec..771c2a3 100644
  CResultString rln_sdk_node_detach_external_signer(const COpaqueStruct *node);
  
  CResultString rln_sdk_node_init(const COpaqueStruct *node,
-@@ -166,10 +201,17 @@ CResultString rln_sdk_node_init_with_external_signer(const COpaqueStruct *node,
+@@ -166,10 +202,17 @@ CResultString rln_sdk_node_init_with_external_signer(const COpaqueStruct *node,
  CResultString rln_sdk_node_init_with_native_external_signer(const COpaqueStruct *node,
                                                              const COpaqueStruct *signer);
  
@@ -486,7 +510,7 @@ index 64266ec..771c2a3 100644
  CResultString rln_sdk_node_unlock(const COpaqueStruct *node, const char *request_json);
  
  CResultString rln_sdk_node_unlock_with_attached_external_signer(const COpaqueStruct *node,
-@@ -197,6 +239,11 @@ CResultString rln_sdk_node_vss_backup(const COpaqueStruct *node);
+@@ -197,6 +240,11 @@ CResultString rln_sdk_node_vss_backup(const COpaqueStruct *node);
  /// when you're certain the previous owner is gone.
  CResultString rln_sdk_node_vss_clear_fence(const COpaqueStruct *node, const char *request_json);
  
@@ -498,7 +522,7 @@ index 64266ec..771c2a3 100644
  CResultString rln_sdk_shutdown();
  
  CResultString rln_send_btc(const COpaqueStruct *node, const char *request_json);
-@@ -211,6 +258,8 @@ CResultString rln_sign_message(const COpaqueStruct *node, const char *message);
+@@ -211,6 +259,8 @@ CResultString rln_sign_message(const COpaqueStruct *node, const char *message);
  
  CResultString rln_sync(const COpaqueStruct *node);
  
@@ -507,7 +531,7 @@ index 64266ec..771c2a3 100644
  CResultString rln_taker(const COpaqueStruct *node, const char *request_json);
  
  CResultString rln_uniffi_healthcheck();
-@@ -221,4 +270,6 @@ CResultString rln_verify_message(const COpaqueStruct *node,
+@@ -221,4 +271,6 @@ CResultString rln_verify_message(const COpaqueStruct *node,
                                   const char *message,
                                   const char *signature);
  
@@ -1260,7 +1284,7 @@ index edb35ed..6d42159 100644
 +    }
 +}
 diff --git a/bindings/c-ffi/src/json_types.rs b/bindings/c-ffi/src/json_types.rs
-index fc570e0..14fa502 100644
+index fc570e0..34b0efc 100644
 --- a/bindings/c-ffi/src/json_types.rs
 +++ b/bindings/c-ffi/src/json_types.rs
 @@ -15,25 +15,28 @@ use hex::DisplayHex;
@@ -1354,23 +1378,41 @@ index fc570e0..14fa502 100644
          })
      }
  }
-@@ -604,6 +618,7 @@ pub(crate) struct JsonPayment {
+@@ -489,6 +503,7 @@ pub(crate) struct JsonSendPaymentResponse {
+     pub payment_hash: Option<String>,
+     pub payment_secret: Option<String>,
+     pub status: HtlcStatusStr,
++    pub failure_code: Option<String>,
+ }
+ 
+ impl From<SdkSendPaymentResponse> for JsonSendPaymentResponse {
+@@ -498,6 +513,7 @@ impl From<SdkSendPaymentResponse> for JsonSendPaymentResponse {
+             payment_hash: r.payment_hash.as_ref().map(fmt_payment_hash),
+             payment_secret: r.payment_secret,
+             status: r.status.into(),
++            failure_code: r.failure_code,
+         }
+     }
+ }
+@@ -604,6 +620,8 @@ pub(crate) struct JsonPayment {
      pub payee_pubkey: String,
      pub preimage: Option<String>,
      pub description_hash: Option<String>,
 +    pub fee_paid_msat: Option<u64>,
++    pub failure_code: Option<String>,
  }
  
  impl From<Payment> for JsonPayment {
-@@ -620,6 +635,7 @@ impl From<Payment> for JsonPayment {
+@@ -620,6 +638,8 @@ impl From<Payment> for JsonPayment {
              payee_pubkey: fmt_pubkey(&p.payee_pubkey),
              preimage: p.preimage,
              description_hash: p.description_hash,
 +            fee_paid_msat: p.fee_paid_msat,
++            failure_code: p.failure_code,
          }
      }
  }
-@@ -762,6 +778,7 @@ pub(crate) struct JsonDecodeLnInvoiceResponse {
+@@ -762,6 +782,7 @@ pub(crate) struct JsonDecodeLnInvoiceResponse {
      pub payment_hash: String,
      pub payment_secret: String,
      pub payee_pubkey: Option<String>,
@@ -1378,7 +1420,7 @@ index fc570e0..14fa502 100644
      pub network: String,
  }
  
-@@ -776,35 +793,82 @@ impl From<DecodeLnInvoiceResponse> for JsonDecodeLnInvoiceResponse {
+@@ -776,35 +797,82 @@ impl From<DecodeLnInvoiceResponse> for JsonDecodeLnInvoiceResponse {
              payment_hash: fmt_payment_hash(&r.payment_hash),
              payment_secret: r.payment_secret,
              payee_pubkey: r.payee_pubkey.as_ref().map(fmt_pubkey),
@@ -1467,7 +1509,7 @@ index fc570e0..14fa502 100644
      }
  }
  
-@@ -1527,13 +1591,15 @@ impl From<NodeInfo> for JsonNodeInfo {
+@@ -1527,13 +1595,15 @@ impl From<NodeInfo> for JsonNodeInfo {
  pub(crate) struct JsonNetworkInfo {
      pub network: String,
      pub height: u32,
@@ -1484,7 +1526,7 @@ index fc570e0..14fa502 100644
          }
      }
  }
-@@ -1581,6 +1647,667 @@ impl From<BtcBalanceInfo> for JsonBtcBalanceInfo {
+@@ -1581,6 +1651,667 @@ impl From<BtcBalanceInfo> for JsonBtcBalanceInfo {
      }
  }
  
@@ -2152,7 +2194,7 @@ index fc570e0..14fa502 100644
  #[derive(Debug, Serialize)]
  pub(crate) struct JsonSignMessageResponse {
      pub signed_message: String,
-@@ -1669,6 +2396,169 @@ impl From<SdkSendBtcResponse> for JsonSendBtcResponse {
+@@ -1669,6 +2400,169 @@ impl From<SdkSendBtcResponse> for JsonSendBtcResponse {
      }
  }
  
@@ -2322,7 +2364,7 @@ index fc570e0..14fa502 100644
  #[derive(Debug, Deserialize)]
  pub(crate) struct JsonCreateUtxosRequest {
      pub up_to: bool,
-@@ -1780,6 +2670,8 @@ pub(crate) struct JsonTransfer {
+@@ -1780,6 +2674,8 @@ pub(crate) struct JsonTransfer {
      pub status: String,
      pub requested_assignment: Option<String>,
      pub assignments: Vec<String>,
@@ -2331,7 +2373,7 @@ index fc570e0..14fa502 100644
      pub kind: String,
      pub txid: Option<String>,
      pub recipient_id: Option<String>,
-@@ -1798,6 +2690,12 @@ impl From<Transfer> for JsonTransfer {
+@@ -1798,6 +2694,12 @@ impl From<Transfer> for JsonTransfer {
              status: t.status,
              requested_assignment: t.requested_assignment,
              assignments: t.assignments,
@@ -2344,7 +2386,7 @@ index fc570e0..14fa502 100644
              kind: t.kind,
              txid: t.txid.as_ref().map(fmt_txid),
              recipient_id: t.recipient_id,
-@@ -1847,6 +2745,7 @@ impl From<Utxo> for JsonUtxo {
+@@ -1847,6 +2749,7 @@ impl From<Utxo> for JsonUtxo {
  pub(crate) struct JsonUnspent {
      pub utxo: JsonUtxo,
      pub rgb_allocations: Vec<JsonRgbAllocation>,
@@ -2352,7 +2394,7 @@ index fc570e0..14fa502 100644
  }
  
  impl From<Unspent> for JsonUnspent {
-@@ -1854,6 +2753,7 @@ impl From<Unspent> for JsonUnspent {
+@@ -1854,6 +2757,7 @@ impl From<Unspent> for JsonUnspent {
          JsonUnspent {
              utxo: u.utxo.into(),
              rgb_allocations: u.rgb_allocations.into_iter().map(Into::into).collect(),
@@ -2361,7 +2403,7 @@ index fc570e0..14fa502 100644
      }
  }
 diff --git a/bindings/c-ffi/src/lib.rs b/bindings/c-ffi/src/lib.rs
-index 24c3371..18aecfe 100644
+index 24c3371..10fb3e5 100644
 --- a/bindings/c-ffi/src/lib.rs
 +++ b/bindings/c-ffi/src/lib.rs
 @@ -9,6 +9,7 @@
@@ -2372,7 +2414,19 @@ index 24c3371..18aecfe 100644
  mod utils;
  
  use rgb_lightning_node::{NativeExternalSigner, SdkNode};
-@@ -100,7 +101,10 @@ pub extern "C" fn rln_sdk_node_init(
+@@ -70,7 +71,10 @@ pub extern "C" fn free_sdk_node(obj: COpaqueStruct) {
+         return;
+     }
+     unsafe {
+-        let _ = Box::from_raw(obj.ptr as *mut SdkNode);
++        let node = Box::from_raw(obj.ptr as *mut SdkNode);
++        let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
++            node.shutdown();
++        }));
+     }
+ }
+ 
+@@ -100,7 +104,10 @@ pub extern "C" fn rln_sdk_node_init(
      password: *const c_char,
      mnemonic_opt: *const c_char,
  ) -> CResultString {
@@ -2384,7 +2438,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -108,7 +112,10 @@ pub extern "C" fn rln_sdk_node_unlock(
+@@ -108,7 +115,10 @@ pub extern "C" fn rln_sdk_node_unlock(
      node: &COpaqueStruct,
      request_json: *const c_char,
  ) -> CResultString {
@@ -2396,7 +2450,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -126,7 +133,10 @@ pub extern "C" fn rln_sdk_node_vss_clear_fence(
+@@ -126,7 +136,10 @@ pub extern "C" fn rln_sdk_node_vss_clear_fence(
      node: &COpaqueStruct,
      request_json: *const c_char,
  ) -> CResultString {
@@ -2408,7 +2462,7 @@ index 24c3371..18aecfe 100644
  }
  
  /// Force an immediate VSS backup flush. Returns `{"version": i64}` JSON
-@@ -143,6 +153,20 @@ pub extern "C" fn rln_sdk_node_vss_backup(node: &COpaqueStruct) -> CResultString
+@@ -143,6 +156,20 @@ pub extern "C" fn rln_sdk_node_vss_backup(node: &COpaqueStruct) -> CResultString
      ffi_call!("rln_sdk_node_vss_backup", api::sdk_node_vss_backup(node))
  }
  
@@ -2429,7 +2483,7 @@ index 24c3371..18aecfe 100644
  /// APay receiver-side registration with an LSP. Argument is the LSP's
  /// node_id as a hex string (compressed secp256k1). Returns JSON of
  /// `AsyncOrderNewResponse` (request_id, host_node_id, protocol_version,
-@@ -153,7 +177,10 @@ pub extern "C" fn rln_sdk_node_apay_new(
+@@ -153,7 +180,10 @@ pub extern "C" fn rln_sdk_node_apay_new(
      node: &COpaqueStruct,
      host_node_id: *const c_char,
  ) -> CResultString {
@@ -2441,7 +2495,7 @@ index 24c3371..18aecfe 100644
  }
  
  // ---------------------------------------------------------------------------
-@@ -165,7 +192,10 @@ pub extern "C" fn rln_connect_peer(
+@@ -165,7 +195,10 @@ pub extern "C" fn rln_connect_peer(
      node: &COpaqueStruct,
      peer_pubkey_and_addr: *const c_char,
  ) -> CResultString {
@@ -2453,7 +2507,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -173,7 +203,10 @@ pub extern "C" fn rln_disconnect_peer(
+@@ -173,7 +206,10 @@ pub extern "C" fn rln_disconnect_peer(
      node: &COpaqueStruct,
      request_json: *const c_char,
  ) -> CResultString {
@@ -2465,7 +2519,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -207,7 +240,10 @@ pub extern "C" fn rln_get_channel_id(
+@@ -207,7 +243,10 @@ pub extern "C" fn rln_get_channel_id(
      node: &COpaqueStruct,
      temporary_channel_id_hex: *const c_char,
  ) -> CResultString {
@@ -2477,7 +2531,7 @@ index 24c3371..18aecfe 100644
  }
  
  // ---------------------------------------------------------------------------
-@@ -223,10 +259,7 @@ pub extern "C" fn rln_send_payment(
+@@ -223,10 +262,7 @@ pub extern "C" fn rln_send_payment(
  }
  
  #[unsafe(no_mangle)]
@@ -2489,7 +2543,7 @@ index 24c3371..18aecfe 100644
      ffi_call!("rln_keysend", api::keysend(node, request_json))
  }
  
-@@ -243,7 +276,10 @@ pub extern "C" fn rln_cancel_hodl_invoice(
+@@ -243,7 +279,10 @@ pub extern "C" fn rln_cancel_hodl_invoice(
      node: &COpaqueStruct,
      request_json: *const c_char,
  ) -> CResultString {
@@ -2501,7 +2555,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -251,7 +287,10 @@ pub extern "C" fn rln_claim_hodl_invoice(
+@@ -251,7 +290,10 @@ pub extern "C" fn rln_claim_hodl_invoice(
      node: &COpaqueStruct,
      request_json: *const c_char,
  ) -> CResultString {
@@ -2513,7 +2567,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -267,7 +306,10 @@ pub extern "C" fn rln_decode_ln_invoice(
+@@ -267,7 +309,10 @@ pub extern "C" fn rln_decode_ln_invoice(
      node: &COpaqueStruct,
      invoice: *const c_char,
  ) -> CResultString {
@@ -2525,7 +2579,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -275,7 +317,10 @@ pub extern "C" fn rln_decode_rgb_invoice(
+@@ -275,7 +320,10 @@ pub extern "C" fn rln_decode_rgb_invoice(
      node: &COpaqueStruct,
      invoice: *const c_char,
  ) -> CResultString {
@@ -2537,7 +2591,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -284,7 +329,10 @@ pub extern "C" fn rln_get_payment(
+@@ -284,7 +332,10 @@ pub extern "C" fn rln_get_payment(
      payment_hash_hex: *const c_char,
      payment_type: *const c_char,
  ) -> CResultString {
@@ -2549,7 +2603,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -305,34 +353,75 @@ pub extern "C" fn rln_rgb_invoice(
+@@ -305,34 +356,75 @@ pub extern "C" fn rln_rgb_invoice(
  }
  
  #[unsafe(no_mangle)]
@@ -2632,7 +2686,7 @@ index 24c3371..18aecfe 100644
      ffi_call!("rln_inflate", api::inflate(node, request_json))
  }
  
-@@ -365,7 +454,10 @@ pub extern "C" fn rln_post_asset_media(
+@@ -365,7 +457,10 @@ pub extern "C" fn rln_post_asset_media(
      node: &COpaqueStruct,
      request_json: *const c_char,
  ) -> CResultString {
@@ -2644,7 +2698,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -385,7 +477,10 @@ pub extern "C" fn rln_issue_asset_nia(
+@@ -385,7 +480,10 @@ pub extern "C" fn rln_issue_asset_nia(
      node: &COpaqueStruct,
      request_json: *const c_char,
  ) -> CResultString {
@@ -2656,7 +2710,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -393,7 +488,10 @@ pub extern "C" fn rln_issue_asset_cfa(
+@@ -393,7 +491,10 @@ pub extern "C" fn rln_issue_asset_cfa(
      node: &COpaqueStruct,
      request_json: *const c_char,
  ) -> CResultString {
@@ -2668,7 +2722,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -401,7 +499,10 @@ pub extern "C" fn rln_issue_asset_ifa(
+@@ -401,7 +502,10 @@ pub extern "C" fn rln_issue_asset_ifa(
      node: &COpaqueStruct,
      request_json: *const c_char,
  ) -> CResultString {
@@ -2680,7 +2734,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -409,7 +510,10 @@ pub extern "C" fn rln_issue_asset_uda(
+@@ -409,7 +513,10 @@ pub extern "C" fn rln_issue_asset_uda(
      node: &COpaqueStruct,
      request_json: *const c_char,
  ) -> CResultString {
@@ -2692,7 +2746,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -417,7 +521,10 @@ pub extern "C" fn rln_list_assets(
+@@ -417,7 +524,10 @@ pub extern "C" fn rln_list_assets(
      node: &COpaqueStruct,
      filter_asset_schemas_json: *const c_char,
  ) -> CResultString {
@@ -2704,7 +2758,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -466,10 +573,7 @@ pub extern "C" fn rln_btc_balance(node: &COpaqueStruct, skip_sync: bool) -> CRes
+@@ -466,10 +576,7 @@ pub extern "C" fn rln_btc_balance(node: &COpaqueStruct, skip_sync: bool) -> CRes
  }
  
  #[unsafe(no_mangle)]
@@ -2716,7 +2770,7 @@ index 24c3371..18aecfe 100644
      ffi_call!("rln_sign_message", api::sign_message(node, message))
  }
  
-@@ -495,7 +599,10 @@ pub extern "C" fn rln_check_indexer_url(
+@@ -495,7 +602,10 @@ pub extern "C" fn rln_check_indexer_url(
      node: &COpaqueStruct,
      indexer_url: *const c_char,
  ) -> CResultString {
@@ -2728,7 +2782,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -503,15 +610,67 @@ pub extern "C" fn rln_check_proxy_endpoint(
+@@ -503,15 +613,67 @@ pub extern "C" fn rln_check_proxy_endpoint(
      node: &COpaqueStruct,
      proxy_endpoint: *const c_char,
  ) -> CResultString {
@@ -2799,7 +2853,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -523,11 +682,44 @@ pub extern "C" fn rln_create_utxos(
+@@ -523,11 +685,44 @@ pub extern "C" fn rln_create_utxos(
  }
  
  #[unsafe(no_mangle)]
@@ -2847,7 +2901,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -547,6 +739,25 @@ pub extern "C" fn rln_sync(node: &COpaqueStruct) -> CResultString {
+@@ -547,6 +742,25 @@ pub extern "C" fn rln_sync(node: &COpaqueStruct) -> CResultString {
      ffi_call!("rln_sync", api::sync(node))
  }
  
@@ -2873,7 +2927,7 @@ index 24c3371..18aecfe 100644
  // ---------------------------------------------------------------------------
  // Swaps / onion
  // ---------------------------------------------------------------------------
-@@ -568,10 +779,7 @@ pub extern "C" fn rln_maker_execute(
+@@ -568,10 +782,7 @@ pub extern "C" fn rln_maker_execute(
  }
  
  #[unsafe(no_mangle)]
@@ -2885,7 +2939,7 @@ index 24c3371..18aecfe 100644
      ffi_call!("rln_taker", api::taker(node, request_json))
  }
  
-@@ -580,7 +788,10 @@ pub extern "C" fn rln_send_onion_message(
+@@ -580,7 +791,10 @@ pub extern "C" fn rln_send_onion_message(
      node: &COpaqueStruct,
      request_json: *const c_char,
  ) -> CResultString {
@@ -2897,7 +2951,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -589,7 +800,10 @@ pub extern "C" fn rln_get_swap(
+@@ -589,7 +803,10 @@ pub extern "C" fn rln_get_swap(
      payment_hash: *const c_char,
      taker_flag: bool,
  ) -> CResultString {
@@ -2909,7 +2963,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -613,7 +827,10 @@ pub extern "C" fn rln_uniffi_is_initialized() -> CResultString {
+@@ -613,7 +830,10 @@ pub extern "C" fn rln_uniffi_is_initialized() -> CResultString {
  
  #[unsafe(no_mangle)]
  pub extern "C" fn rln_sdk_initialize(request_json: *const c_char) -> CResultString {
@@ -2921,7 +2975,28 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -654,14 +871,36 @@ pub extern "C" fn rln_native_external_signer_new(
+@@ -625,15 +845,17 @@ pub extern "C" fn rln_sdk_shutdown() -> CResultString {
+ // External-signer surface
+ // ---------------------------------------------------------------------------
+ 
+-/// Drop a `NativeExternalSigner` handle. Safe to call immediately after
+-/// attach / init / unlock succeeds: RLN holds its own `Arc` clone.
++/// Shut down and drop a `NativeExternalSigner` handle. Call only after node
++/// shutdown has completed; shutdown invalidates every outstanding `Arc` clone
++/// so the seed-bearing backend and persistent VLS store are released.
+ #[unsafe(no_mangle)]
+ pub extern "C" fn free_native_external_signer(obj: COpaqueStruct) {
+     if obj.ptr.is_null() {
+         return;
+     }
+     unsafe {
+-        let _ = Box::from_raw(obj.ptr as *mut Arc<NativeExternalSigner>);
++        let signer = Box::from_raw(obj.ptr as *mut Arc<NativeExternalSigner>);
++        signer.shutdown();
+     }
+ }
+ 
+@@ -654,14 +876,36 @@ pub extern "C" fn rln_native_external_signer_new(
      network: *const c_char,
      permissive_policy: bool,
  ) -> CResult {
@@ -2963,7 +3038,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -669,7 +908,10 @@ pub extern "C" fn rln_sdk_node_init_with_native_external_signer(
+@@ -669,7 +913,10 @@ pub extern "C" fn rln_sdk_node_init_with_native_external_signer(
      node: &COpaqueStruct,
      signer: &COpaqueStruct,
  ) -> CResultString {
@@ -2975,7 +3050,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -677,7 +919,10 @@ pub extern "C" fn rln_sdk_node_attach_native_external_signer(
+@@ -677,7 +924,10 @@ pub extern "C" fn rln_sdk_node_attach_native_external_signer(
      node: &COpaqueStruct,
      signer: &COpaqueStruct,
  ) -> CResultString {
@@ -2987,7 +3062,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -686,22 +931,74 @@ pub extern "C" fn rln_sdk_node_unlock_with_native_external_signer(
+@@ -686,22 +936,74 @@ pub extern "C" fn rln_sdk_node_unlock_with_native_external_signer(
      signer: &COpaqueStruct,
      request_json: *const c_char,
  ) -> CResultString {
@@ -3068,7 +3143,7 @@ index 24c3371..18aecfe 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -709,5 +1006,8 @@ pub extern "C" fn rln_sdk_node_unlock_with_attached_external_signer(
+@@ -709,5 +1011,8 @@ pub extern "C" fn rln_sdk_node_unlock_with_attached_external_signer(
      node: &COpaqueStruct,
      request_json: *const c_char,
  ) -> CResultString {
@@ -3490,7 +3565,7 @@ index 344f6d9..3b4ed42 100644
  /// and trigger `panic_cannot_unwind`.
  ///
 diff --git a/bindings/rgb_lightning_node.udl b/bindings/rgb_lightning_node.udl
-index 286134a..94bb87c 100644
+index 286134a..178e5ec 100644
 --- a/bindings/rgb_lightning_node.udl
 +++ b/bindings/rgb_lightning_node.udl
 @@ -73,6 +73,16 @@ interface SdkNode {
@@ -3533,15 +3608,16 @@ index 286134a..94bb87c 100644
  };
  
  dictionary AddressInfo {
-@@ -225,6 +244,7 @@ dictionary Payment {
+@@ -225,6 +244,8 @@ dictionary Payment {
      PublicKey payee_pubkey;
      string? preimage;
      string? description_hash;
 +    u64? fee_paid_msat;
++    string? failure_code;
  };
  
  enum PaymentType {
-@@ -490,6 +510,11 @@ dictionary TransferTransportEndpoint {
+@@ -490,6 +511,11 @@ dictionary TransferTransportEndpoint {
      boolean used;
  };
  
@@ -3553,7 +3629,7 @@ index 286134a..94bb87c 100644
  dictionary Transfer {
      i32 idx;
      i64 created_at;
-@@ -497,6 +522,8 @@ dictionary Transfer {
+@@ -497,6 +523,8 @@ dictionary Transfer {
      string status;
      string? requested_assignment;
      sequence<string> assignments;
@@ -3562,7 +3638,7 @@ index 286134a..94bb87c 100644
      string kind;
      Txid? txid;
      string? recipient_id;
-@@ -712,6 +739,52 @@ dictionary SdkSendBtcResponse {
+@@ -712,6 +740,52 @@ dictionary SdkSendBtcResponse {
      Txid txid;
  };
  
@@ -3615,7 +3691,7 @@ index 286134a..94bb87c 100644
  dictionary SdkMakerInitRequest {
      u64 qty_from;
      u64 qty_to;
-@@ -771,6 +844,7 @@ dictionary SdkSendPaymentRequest {
+@@ -771,6 +845,7 @@ dictionary SdkSendPaymentRequest {
      u64? amt_msat;
      ContractId? asset_id;
      u64? asset_amount;
@@ -3623,6 +3699,28 @@ index 286134a..94bb87c 100644
  };
  
  dictionary SdkSendPaymentResponse {
+@@ -778,6 +853,7 @@ dictionary SdkSendPaymentResponse {
+     PaymentHash? payment_hash;
+     string? payment_secret;
+     HtlcStatus status;
++    string? failure_code;
+ };
+ 
+ dictionary SendRgbRequest {
+diff --git a/src/error.rs b/src/error.rs
+index 95b3602..1eb2e4d 100644
+--- a/src/error.rs
++++ b/src/error.rs
+@@ -661,6 +661,9 @@ impl IntoResponse for APIError {
+ /// The error variants returned by the app
+ #[derive(Debug, thiserror::Error)]
+ pub enum AppError {
++    #[error("A node instance is already active for storage directory: {0}")]
++    NodeInstanceAlreadyActive(String),
++
+     #[error("The provided authentication args are invalid")]
+     InvalidAuthenticationArgs,
+ 
 diff --git a/src/indexer.rs b/src/indexer.rs
 index a760299..6cdcb68 100644
 --- a/src/indexer.rs
@@ -3951,9 +4049,18 @@ index a760299..6cdcb68 100644
      client: &ElectrumClient,
      height: usize,
 diff --git a/src/ldk.rs b/src/ldk.rs
-index e4abdac..5bbbc60 100644
+index e4abdac..7429b0a 100644
 --- a/src/ldk.rs
 +++ b/src/ldk.rs
+@@ -96,7 +96,7 @@ use rgb_lib::{
+         Wallet as RgbLibWallet, WalletData, WitnessData,
+     },
+     AssetSchema, Assignment, BitcoinNetwork, ConsignmentExt, ContractId, Error as RgbLibError,
+-    Fascia, FileContent, RgbTransfer, RgbTxid, WitnessOrd,
++    Fascia, FileContent, RgbTransfer, RgbTxid, TransferStatus as RgbTransferStatus, WitnessOrd,
+ };
+ use std::collections::HashMap;
+ #[cfg(feature = "vss")]
 @@ -124,7 +124,7 @@ use crate::core_types::{HTLCStatus, NodeKeySource, SwapStatus, UnlockRequest};
  use crate::database::RlnDatabase;
  use crate::disk::{self, FilesystemLogger};
@@ -3963,23 +4070,55 @@ index e4abdac..5bbbc60 100644
  
  pub(crate) const INBOUND_PAYMENTS_KEY: &str = "inbound_payments";
  const OUTBOUND_PAYMENTS_KEY: &str = "outbound_payments";
-@@ -271,6 +271,7 @@ pub(crate) struct PaymentInfo {
+@@ -253,6 +253,12 @@ pub(crate) struct LdkBackgroundServices {
+     peer_manager: Arc<PeerManager>,
+     bp_exit: Sender<()>,
+     background_processor: Option<JoinHandle<Result<(), io::Error>>>,
++    service_tasks: Vec<JoinHandle<()>>,
++}
++
++struct LdkShutdownHandles {
++    background_processor: Option<JoinHandle<Result<(), io::Error>>>,
++    service_tasks: Vec<JoinHandle<()>>,
+ }
+ 
+ #[derive(Clone, Debug)]
+@@ -271,6 +277,8 @@ pub(crate) struct PaymentInfo {
      pub(crate) payment_idx: Option<u64>,
      pub(crate) async_hash_index: Option<u64>,
      pub(crate) async_host_node_id: Option<PublicKey>,
 +    pub(crate) fee_paid_msat: Option<u64>,
++    pub(crate) failure_code: Option<String>,
  }
  
  impl_writeable_tlv_based!(PaymentInfo, {
-@@ -288,6 +289,7 @@ impl_writeable_tlv_based!(PaymentInfo, {
+@@ -288,8 +296,25 @@ impl_writeable_tlv_based!(PaymentInfo, {
      (22, payment_idx, option),
      (24, async_hash_index, option),
      (26, async_host_node_id, option),
 +    (28, fee_paid_msat, option),
++    (30, failure_code, option),
  });
  
++fn payment_failure_code(reason: PaymentFailureReason) -> &'static str {
++    match reason {
++        PaymentFailureReason::RecipientRejected => "RECIPIENT_REJECTED",
++        PaymentFailureReason::UserAbandoned => "USER_ABANDONED",
++        PaymentFailureReason::RetriesExhausted => "RETRIES_EXHAUSTED",
++        PaymentFailureReason::PaymentExpired => "PAYMENT_EXPIRED",
++        PaymentFailureReason::RouteNotFound => "ROUTE_NOT_FOUND",
++        PaymentFailureReason::UnexpectedError => "UNEXPECTED_ROUTING_ERROR",
++        PaymentFailureReason::UnknownRequiredFeatures => "UNKNOWN_REQUIRED_FEATURES",
++        PaymentFailureReason::InvoiceRequestExpired => "INVOICE_REQUEST_EXPIRED",
++        PaymentFailureReason::InvoiceRequestRejected => "INVOICE_REQUEST_REJECTED",
++        PaymentFailureReason::BlindedPathCreationFailed => "BLINDED_PATH_CREATION_FAILED",
++    }
++}
++
  pub(crate) struct InboundPaymentInfoStorage {
-@@ -381,6 +383,13 @@ pub(crate) struct VirtualChannelSessionStore {
+     pub(crate) payments: LdkHashMap<PaymentHash, PaymentInfo>,
+ }
+@@ -381,6 +406,13 @@ pub(crate) struct VirtualChannelSessionStore {
      pub(crate) entries: LdkHashMap<ChannelId, VirtualChannelSession>,
  }
  
@@ -3993,15 +4132,25 @@ index e4abdac..5bbbc60 100644
  impl_writeable_tlv_based!(VirtualChannelSessionStore, {
      (0, entries, required),
  });
-@@ -698,6 +707,7 @@ impl UnlockedAppState {
+@@ -559,6 +591,8 @@ impl UnlockedAppState {
+         {
+             if !recent_payments_payment_ids.contains(payment_id) {
+                 payment_info.status = HTLCStatus::Failed;
++                payment_info.failure_code =
++                    Some("PAYMENT_ABANDONED_AFTER_RESTART".to_owned());
+                 payment_info.updated_at = get_current_timestamp();
+                 failed = true;
+             }
+@@ -698,6 +732,8 @@ impl UnlockedAppState {
                      payment_idx: None,
                      async_hash_index: None,
                      async_host_node_id: None,
 +                    fee_paid_msat: None,
++                    failure_code: None,
                  };
                  self.stamp_payment_idx(&mut payment_info);
                  e.insert(payment_info);
-@@ -711,11 +721,13 @@ impl UnlockedAppState {
+@@ -711,11 +747,13 @@ impl UnlockedAppState {
          payment_id: PaymentId,
          status: HTLCStatus,
          preimage: Option<PaymentPreimage>,
@@ -4015,7 +4164,27 @@ index e4abdac..5bbbc60 100644
          payment_info.updated_at = get_current_timestamp();
          let payment = (*payment_info).clone();
          self.save_outbound_payments(outbound);
-@@ -794,7 +806,7 @@ impl UnlockedAppState {
+@@ -730,6 +768,19 @@ impl UnlockedAppState {
+         self.save_outbound_payments(outbound);
+     }
+ 
++    pub(crate) fn fail_outbound_payment(
++        &self,
++        payment_id: PaymentId,
++        failure_code: impl Into<String>,
++    ) {
++        let mut outbound = self.get_outbound_payments();
++        let payment_info = outbound.payments.get_mut(&payment_id).unwrap();
++        payment_info.status = HTLCStatus::Failed;
++        payment_info.failure_code = Some(failure_code.into());
++        payment_info.updated_at = get_current_timestamp();
++        self.save_outbound_payments(outbound);
++    }
++
+     pub(crate) fn channel_ids(&self) -> LdkHashMap<ChannelId, ChannelId> {
+         self.get_channel_ids_map().channel_ids.clone()
+     }
+@@ -794,7 +845,7 @@ impl UnlockedAppState {
              .get_virtual_channel_session_store()
              .entries
              .values()
@@ -4024,15 +4193,262 @@ index e4abdac..5bbbc60 100644
          if duplicate_virtual_session {
              return Err(APIError::InvalidRequest(
                  "virtual channel session already exists for this peer pair".to_string(),
-@@ -1363,6 +1375,7 @@ impl AsyncOrderInvoiceProvider for AsyncOrderRecipientInvoiceProvider {
+@@ -1363,6 +1414,8 @@ impl AsyncOrderInvoiceProvider for AsyncOrderRecipientInvoiceProvider {
                  payment_idx: None,
                  async_hash_index: self.external_signer_mode.then_some(hash_index),
                  async_host_node_id: self.external_signer_mode.then_some(sender_node_id),
 +                fee_paid_msat: None,
++                failure_code: None,
              },
          )?;
  
-@@ -2537,6 +2550,7 @@ async fn handle_ldk_events(
+@@ -1567,8 +1620,12 @@ fn handle_funding_prepare_err(
+ /// transaction was broadcast. For colored channels this fails the pending RGB
+ /// batch transfer; for vanilla channels it aborts the pending vanilla tx that
+ /// was created (and locked the UTXOs) during `FundingGenerationReady`.
+-async fn handle_open_chan_fail(channel_id: &ChannelId, unlocked_state: Arc<UnlockedAppState>) {
++async fn handle_open_chan_fail(
++    channel_id: &ChannelId,
++    unlocked_state: Arc<UnlockedAppState>,
++) -> bool {
+     let channel_id_hex = channel_id.0.as_hex().to_string();
++    let mut cleanup_succeeded = true;
+     if let Some(rgb_info) =
+         get_rgb_channel_info_optional(channel_id, true, unlocked_state.kv_store.as_ref())
+     {
+@@ -1580,6 +1637,7 @@ async fn handle_open_chan_fail(channel_id: &ChannelId, unlocked_state: Arc<Unloc
+             .await
+             .unwrap();
+             if let Err(e) = failed {
++                cleanup_succeeded = false;
+                 tracing::error!(
+                     "Error failing RGB transfer batch_transfer_idx={batch_transfer_idx} for channel {channel_id}: {e:?}"
+                 );
+@@ -1602,14 +1660,217 @@ async fn handle_open_chan_fail(channel_id: &ChannelId, unlocked_state: Arc<Unloc
+             Ok(()) => {
+                 tracing::info!("Aborted pending vanilla tx {funding_txid} for channel {channel_id}")
+             }
+-            Err(e) => tracing::error!(
+-                "Error aborting pending vanilla tx {funding_txid} for channel {channel_id}: {e:?}"
+-            ),
++            Err(e) => {
++                cleanup_succeeded = false;
++                tracing::error!(
++                    "Error aborting pending vanilla tx {funding_txid} for channel {channel_id}: {e:?}"
++                );
++            }
+         }
+     }
+-    let _ = unlocked_state
+-        .kv_store
+-        .remove(PENDING_FUNDING_NAMESPACE, "", &channel_id_hex, false);
++    if cleanup_succeeded {
++        let _ =
++            unlocked_state
++                .kv_store
++                .remove(PENDING_FUNDING_NAMESPACE, "", &channel_id_hex, false);
++    }
++    cleanup_succeeded
++}
++
++async fn cleanup_virtual_rgb_transfer(
++    session: &VirtualChannelSession,
++    unlocked_state: Arc<UnlockedAppState>,
++) -> bool {
++    let funding_txid = session.virtual_funding_txo.txid.to_string();
++    let unlocked_state_copy = unlocked_state.clone();
++    let funding_txid_copy = funding_txid.clone();
++    let transfers = match tokio::task::spawn_blocking(move || {
++        unlocked_state_copy.rgb_list_transfers_by_txid(funding_txid_copy)
++    })
++    .await
++    {
++        Ok(Ok(transfers)) => transfers,
++        Ok(Err(e)) => {
++            tracing::error!(
++                "Error finding RGB transfers for orphaned virtual funding tx {funding_txid}: {e:?}"
++            );
++            return false;
++        }
++        Err(e) => {
++            tracing::error!(
++                "RGB transfer lookup task failed for orphaned virtual funding tx {funding_txid}: {e}"
++            );
++            return false;
++        }
++    };
++
++    let mut pending_batch_transfer_idxs = transfers
++        .iter()
++        .filter(|transfer| {
++            !matches!(
++                transfer.status,
++                RgbTransferStatus::Settled | RgbTransferStatus::Failed
++            )
++        })
++        .map(|transfer| transfer.batch_transfer_idx)
++        .collect::<Vec<_>>();
++    pending_batch_transfer_idxs.sort_unstable();
++    pending_batch_transfer_idxs.dedup();
++
++    for batch_transfer_idx in pending_batch_transfer_idxs {
++        let unlocked_state_copy = unlocked_state.clone();
++        let result = tokio::task::spawn_blocking(move || {
++            unlocked_state_copy.rgb_fail_transfers(Some(batch_transfer_idx), false, true)
++        })
++        .await;
++        match result {
++            Ok(Ok(_)) => {}
++            Ok(Err(e)) => {
++                tracing::error!(
++                    "Error releasing orphaned virtual RGB transfer batch {batch_transfer_idx} for funding tx {funding_txid}: {e:?}"
++                );
++                return false;
++            }
++            Err(e) => {
++                tracing::error!(
++                    "RGB transfer cleanup task failed for orphaned virtual funding tx {funding_txid}: {e}"
++                );
++                return false;
++            }
++        }
++    }
++
++    let unlocked_state_copy = unlocked_state;
++    let funding_txid_copy = funding_txid.clone();
++    match tokio::task::spawn_blocking(move || {
++        unlocked_state_copy.rgb_list_transfers_by_txid(funding_txid_copy)
++    })
++    .await
++    {
++        Ok(Ok(transfers))
++            if transfers.iter().all(|transfer| {
++                matches!(
++                    transfer.status,
++                    RgbTransferStatus::Settled | RgbTransferStatus::Failed
++                )
++            }) =>
++        {
++            true
++        }
++        Ok(Ok(transfers)) => {
++            let remaining = transfers
++                .iter()
++                .filter(|transfer| {
++                    !matches!(
++                        transfer.status,
++                        RgbTransferStatus::Settled | RgbTransferStatus::Failed
++                    )
++                })
++                .map(|transfer| {
++                    format!(
++                        "batch={} status={:?}",
++                        transfer.batch_transfer_idx, transfer.status
++                    )
++                })
++                .collect::<Vec<_>>()
++                .join(", ");
++            tracing::error!(
++                "Orphaned virtual funding tx {funding_txid} still owns non-terminal RGB transfers after cleanup: {remaining}"
++            );
++            false
++        }
++        Ok(Err(e)) => {
++            tracing::error!(
++                "Error verifying RGB transfer cleanup for orphaned virtual funding tx {funding_txid}: {e:?}"
++            );
++            false
++        }
++        Err(e) => {
++            tracing::error!(
++                "RGB transfer verification task failed for orphaned virtual funding tx {funding_txid}: {e}"
++            );
++            false
++        }
++    }
++}
++
++/// Reconcile a trusted virtual-channel session that no longer exists in LDK.
++///
++/// The host creates RGB transfer state before the remote peer validates the
++/// funding consignment. A peer rejection can therefore remove the LDK channel
++/// while leaving both the session and the RGB allocation persisted. Reopening
++/// must remain blocked until the allocation is released; after cleanup, the
++/// abandoned session is retained as an audit record but no longer blocks the
++/// peer from opening a replacement channel.
++pub(crate) async fn reconcile_orphaned_virtual_session(
++    channel_id: &ChannelId,
++    unlocked_state: Arc<UnlockedAppState>,
++) -> bool {
++    let Some(session) = unlocked_state.virtual_channel_session_get(channel_id) else {
++        return false;
++    };
++    if unlocked_state
++        .channel_manager
++        .list_channels()
++        .iter()
++        .any(|channel| channel.channel_id == *channel_id)
++    {
++        return false;
++    }
++
++    // Persist a blocking state before touching RGB allocations. This also
++    // repairs legacy sessions that were marked abandoned before their transfer
++    // was actually released.
++    unlocked_state.virtual_channel_session_update_status(
++        &session,
++        VirtualChannelSessionStatus::AbandonPending,
++    );
++
++    let final_cleanup = handle_open_chan_fail(&session.channel_id, unlocked_state.clone()).await;
++    let temporary_cleanup = if session.former_temporary_channel_id == session.channel_id {
++        true
++    } else {
++        handle_open_chan_fail(&session.former_temporary_channel_id, unlocked_state.clone()).await
++    };
++    let transfer_cleanup = cleanup_virtual_rgb_transfer(&session, unlocked_state.clone()).await;
++    if !final_cleanup || !temporary_cleanup || !transfer_cleanup {
++        tracing::error!(
++            "EVENT: virtual session {} remains active because staged funding cleanup failed",
++            session.channel_id,
++        );
++        return true;
++    }
++
++    unlocked_state
++        .virtual_channel_session_update_status(&session, VirtualChannelSessionStatus::Abandoned);
++    unlocked_state.virtual_channel_draft_delete(&session.former_temporary_channel_id);
++    unlocked_state.delete_channel_id(session.channel_id);
++
++    for stale_channel_id in [session.channel_id, session.former_temporary_channel_id] {
++        let stale_channel_id_hex = stale_channel_id.0.as_hex().to_string();
++        let _ = unlocked_state.kv_store.remove(
++            "",
++            "",
++            &format!("virtual_channel_{stale_channel_id}"),
++            false,
++        );
++        let _ = unlocked_state
++            .kv_store
++            .remove_rgb_channel_info(&stale_channel_id_hex, false);
++        let _ = unlocked_state
++            .kv_store
++            .remove_rgb_channel_info(&stale_channel_id_hex, true);
++        unlocked_state
++            .kv_store
++            .remove_rgb_consignment(&stale_channel_id_hex);
++    }
++
++    tracing::warn!(
++        "EVENT: reconciled orphaned trusted virtual channel session {} for peer {}",
++        session.channel_id,
++        session.peer_id,
++    );
++    true
+ }
+ 
+ /// Undo what a standard channel's `FundingGenerationReady` preparation staged, so a failure
+@@ -2537,6 +2798,7 @@ async fn handle_ldk_events(
                      payment_id.unwrap(),
                      HTLCStatus::Succeeded,
                      Some(payment_preimage),
@@ -4040,7 +4456,75 @@ index e4abdac..5bbbc60 100644
                  );
                  unlocked_state
                      .async_order_handler
-@@ -4218,16 +4232,16 @@ pub(crate) async fn start_ldk(
+@@ -2679,34 +2941,33 @@ async fn handle_ldk_events(
+             payment_id,
+             ..
+         } => {
++            let failure_reason = reason.unwrap_or(PaymentFailureReason::RetriesExhausted);
+             if let Some(hash) = payment_hash {
+                 clear_rgb_payment_pending(&hash, false, unlocked_state.kv_store.as_ref());
+                 tracing::error!(
+                     "EVENT: Failed to send payment to payment ID {}, payment hash {}: {:?}",
+                     payment_id,
+                     hash,
+-                    if let Some(r) = reason {
+-                        r
+-                    } else {
+-                        PaymentFailureReason::RetriesExhausted
+-                    }
++                    failure_reason
+                 );
+                 if unlocked_state.is_maker_swap(&hash) {
+                     unlocked_state.update_maker_swap_status(&hash, SwapStatus::Failed);
+                 } else {
+-                    unlocked_state.update_outbound_payment_status(payment_id, HTLCStatus::Failed);
++                    unlocked_state.fail_outbound_payment(
++                        payment_id,
++                        payment_failure_code(failure_reason),
++                    );
+                 }
+             } else {
+                 tracing::error!(
+                     "EVENT: Failed fetch invoice for payment ID {}: {:?}",
+                     payment_id,
+-                    if let Some(r) = reason {
+-                        r
+-                    } else {
+-                        PaymentFailureReason::RetriesExhausted
+-                    }
++                    failure_reason
++                );
++                unlocked_state.fail_outbound_payment(
++                    payment_id,
++                    payment_failure_code(failure_reason),
+                 );
+-                unlocked_state.update_outbound_payment_status(payment_id, HTLCStatus::Failed);
+             }
+         }
+         Event::InvoiceReceived { .. } => {
+@@ -2980,7 +3241,9 @@ async fn handle_ldk_events(
+             );
+ 
+             // Release any funds locked for a funding tx that was never broadcast.
+-            handle_open_chan_fail(&channel_id, unlocked_state.clone()).await;
++            if !reconcile_orphaned_virtual_session(&channel_id, unlocked_state.clone()).await {
++                handle_open_chan_fail(&channel_id, unlocked_state.clone()).await;
++            }
+ 
+             let former_temporary_channel_id = unlocked_state.delete_channel_id(channel_id);
+             let virtual_draft_temporary_channel_id = if unlocked_state
+@@ -3025,7 +3288,9 @@ async fn handle_ldk_events(
+             );
+ 
+             // The funding tx was discarded before broadcast; release the locked funds.
+-            handle_open_chan_fail(&channel_id, unlocked_state.clone()).await;
++            if !reconcile_orphaned_virtual_session(&channel_id, unlocked_state.clone()).await {
++                handle_open_chan_fail(&channel_id, unlocked_state.clone()).await;
++            }
+ 
+             unlocked_state.delete_channel_id(channel_id);
+             let _ = unlocked_state.kv_store.remove(
+@@ -4218,16 +4483,16 @@ pub(crate) async fn start_ldk(
      }
  
      // RGB setup
@@ -4060,7 +4544,7 @@ index e4abdac..5bbbc60 100644
              BitcoinNetwork::Regtest => ELECTRUM_URL_REGTEST,
              BitcoinNetwork::Signet => ELECTRUM_URL_SIGNET,
              BitcoinNetwork::Testnet => ELECTRUM_URL_TESTNET,
-@@ -4238,7 +4252,28 @@ pub(crate) async fn start_ldk(
+@@ -4238,7 +4503,28 @@ pub(crate) async fn start_ldk(
                      "with custom signet indexer must be provided"
                  )))
              }
@@ -4089,7 +4573,81 @@ index e4abdac..5bbbc60 100644
      };
      let proxy_endpoint = if let Some(proxy_endpoint) = &unlock_request.proxy_endpoint {
          check_rgb_proxy_endpoint(proxy_endpoint).await?;
-@@ -5263,6 +5298,7 @@ pub(crate) async fn start_ldk(
+@@ -4973,8 +5259,9 @@ pub(crate) async fn start_ldk(
+     let peer_manager_connection_handler = peer_manager.clone();
+     let listening_port = ldk_peer_listening_port;
+     let stop_processing = Arc::new(AtomicBool::new(false));
++    let mut service_tasks = Vec::new();
+     let stop_listen = Arc::clone(&stop_processing);
+-    tokio::spawn(async move {
++    service_tasks.push(tokio::spawn(async move {
+         let listener = tokio::net::TcpListener::bind(format!("[::]:{listening_port}"))
+             .await
+             .expect("Failed to bind to listen port - is something else already listening on it?");
+@@ -4992,7 +5279,7 @@ pub(crate) async fn start_ldk(
+                 .await;
+             });
+         }
+-    });
++    }));
+ 
+     // Connect and Disconnect Blocks
+     let output_sweeper: Arc<OutputSweeper> = Arc::new(output_sweeper);
+@@ -5003,7 +5290,7 @@ pub(crate) async fn start_ldk(
+         let chain_monitor_listener = chain_monitor.clone();
+         let output_sweeper_listener = output_sweeper.clone();
+         let bitcoind_block_source = bitcoind_client.clone();
+-        tokio::spawn(async move {
++        service_tasks.push(tokio::spawn(async move {
+             let chain_poller = poll::ChainPoller::new(bitcoind_block_source.as_ref(), network);
+             let chain_listener = (
+                 chain_monitor_listener,
+@@ -5020,7 +5307,7 @@ pub(crate) async fn start_ldk(
+                 }
+                 tokio::time::sleep(Duration::from_secs(1)).await;
+             }
+-        });
++        }));
+     } else if let Some(tx_sync) = tx_sync_opt.clone() {
+         let confirmables: Vec<Arc<dyn Confirm + Send + Sync>> = vec![
+             channel_manager.clone(),
+@@ -5030,7 +5317,7 @@ pub(crate) async fn start_ldk(
+         sync_chain_data(tx_sync.clone(), confirmables.clone())
+             .await
+             .map_err(|e| APIError::InvalidIndexer(e.to_string()))?;
+-        tokio::spawn(async move {
++        service_tasks.push(tokio::spawn(async move {
+             loop {
+                 if stop_listen.load(Ordering::Acquire) {
+                     return;
+@@ -5040,7 +5327,7 @@ pub(crate) async fn start_ldk(
+                 }
+                 tokio::time::sleep(Duration::from_secs(1)).await;
+             }
+-        });
++        }));
+     } else {
+         let tx_sync = electrum_tx_sync_opt
+             .clone()
+@@ -5053,7 +5340,7 @@ pub(crate) async fn start_ldk(
+         sync_chain_data_electrum(tx_sync.clone(), confirmables.clone())
+             .await
+             .map_err(|e| APIError::InvalidIndexer(e.to_string()))?;
+-        tokio::spawn(async move {
++        service_tasks.push(tokio::spawn(async move {
+             loop {
+                 if stop_listen.load(Ordering::Acquire) {
+                     return;
+@@ -5065,7 +5352,7 @@ pub(crate) async fn start_ldk(
+                 }
+                 tokio::time::sleep(Duration::from_secs(1)).await;
+             }
+-        });
++        }));
+     }
+ 
+     // Read payment info from KVStore
+@@ -5263,6 +5550,7 @@ pub(crate) async fn start_ldk(
  
      let unlocked_state = Arc::new(UnlockedAppState {
          config: static_state.config.clone(),
@@ -4097,7 +4655,213 @@ index e4abdac..5bbbc60 100644
          channel_manager: Arc::clone(&channel_manager),
          gossip_source: Arc::clone(&gossip_source),
          inbound_payments,
-@@ -5859,6 +5895,53 @@ mod tests {
+@@ -5294,6 +5582,29 @@ pub(crate) async fn start_ldk(
+         next_payment_idx,
+     });
+ 
++    // LDK has now restored its complete channel set. Any non-terminal virtual
++    // session absent from that set is an interrupted open/close, not a live
++    // channel. Reconcile it before peers reconnect so an old session cannot
++    // permanently block a replacement channel or reserve RGB inventory.
++    let orphaned_virtual_session_ids = unlocked_state
++        .virtual_channel_session_store()
++        .into_iter()
++        .filter_map(|(channel_id, session)| {
++            (!unlocked_state
++                .channel_manager
++                .list_channels()
++                .iter()
++                .any(|channel| channel.channel_id == channel_id))
++            .then_some((channel_id, session.status))
++        })
++        .collect::<Vec<_>>();
++    for (channel_id, previous_status) in orphaned_virtual_session_ids {
++        if matches!(previous_status, VirtualChannelSessionStatus::Abandoned) {
++            tracing::info!("Verifying cleanup for legacy abandoned virtual session {channel_id}");
++        }
++        reconcile_orphaned_virtual_session(&channel_id, unlocked_state.clone()).await;
++    }
++
+     // Refresh the RGS snapshot on a fixed interval (RGS mode only). The first
+     // tick fires immediately, so a freshly unlocked node syncs right away.
+     let gossip_shutdown = Arc::new(tokio::sync::Notify::new());
+@@ -5370,7 +5681,7 @@ pub(crate) async fn start_ldk(
+     {
+         let drain_store = Arc::clone(&kv_store);
+         let stop_drain = Arc::clone(&stop_processing);
+-        tokio::spawn(async move {
++        service_tasks.push(tokio::spawn(async move {
+             let mut interval = tokio::time::interval(Duration::from_secs(60));
+             interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
+             loop {
+@@ -5381,7 +5692,7 @@ pub(crate) async fn start_ldk(
+                 let store = Arc::clone(&drain_store);
+                 let _ = tokio::task::spawn_blocking(move || store.drain_pending()).await;
+             }
+-        });
++        }));
+     }
+ 
+     // Regularly reconnect to channel peers.
+@@ -5390,7 +5701,7 @@ pub(crate) async fn start_ldk(
+     let connect_db = static_state.db();
+     let stop_connect = Arc::clone(&stop_processing);
+     let reconnect_interval_secs = static_state.config.node.peer_reconnect_interval_secs;
+-    tokio::spawn(async move {
++    service_tasks.push(tokio::spawn(async move {
+         let mut interval = tokio::time::interval(Duration::from_secs(reconnect_interval_secs));
+         interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
+         loop {
+@@ -5422,7 +5733,7 @@ pub(crate) async fn start_ldk(
+                 ),
+             }
+         }
+-    });
++    }));
+ 
+     // Remote external signer force-close resilience. When the signer daemon is briefly unreachable, a
+     // channel signing call returns LDK's async-unavailable sentinel (`Err(())`) and the operation parks
+@@ -5444,7 +5755,7 @@ pub(crate) async fn start_ldk(
+         let su_channel_manager = Arc::clone(&channel_manager);
+         let su_chain_monitor = Arc::clone(&chain_monitor);
+         let su_stop = Arc::clone(&stop_processing);
+-        tokio::spawn(async move {
++        service_tasks.push(tokio::spawn(async move {
+             loop {
+                 // Healthy: idle until the link reports a change (with a coarse timer only to notice
+                 // node shutdown — it drives no signer work).
+@@ -5487,7 +5798,7 @@ pub(crate) async fn start_ldk(
+                     }
+                 }
+             }
+-        });
++        }));
+     }
+ 
+     // Regularly broadcast our node_announcement. This is only required (or possible) if we have
+@@ -5522,7 +5833,7 @@ pub(crate) async fn start_ldk(
+     let chan_man = Arc::clone(&channel_manager);
+     let announce_initial_delay_secs = static_state.config.node.announce_initial_delay_secs;
+     let announce_refresh_interval_secs = static_state.config.node.announce_refresh_interval_secs;
+-    tokio::spawn(async move {
++    service_tasks.push(tokio::spawn(async move {
+         // First wait until we have some peers and maybe have opened a channel.
+         tokio::time::sleep(Duration::from_secs(announce_initial_delay_secs)).await;
+         // Then, update our announcement periodically to keep it fresh but avoid unnecessary churn
+@@ -5546,7 +5857,7 @@ pub(crate) async fn start_ldk(
+                 );
+             }
+         }
+-    });
++    }));
+ 
+     tracing::info!("LDK logs are available at <your-supplied-ldk-data-dir-path>/.ldk/logs");
+     tracing::info!("Local Node ID is {}", channel_manager.get_our_node_id());
+@@ -5563,6 +5874,7 @@ pub(crate) async fn start_ldk(
+             peer_manager: peer_manager.clone(),
+             bp_exit,
+             background_processor: Some(background_processor),
++            service_tasks,
+         },
+         unlocked_state,
+     ))
+@@ -5609,16 +5921,16 @@ async fn sync_chain_data_electrum(
+ }
+ 
+ impl AppState {
+-    fn stop_ldk(&self) -> Option<JoinHandle<Result<(), io::Error>>> {
++    fn stop_ldk(&self) -> Option<LdkShutdownHandles> {
+         let mut ldk_background_services = self.get_ldk_background_services();
+-
+-        if ldk_background_services.is_none() {
+-            // node is locked
+-            tracing::info!("LDK is not running");
+-            return None;
+-        }
+-
+-        let ldk_background_services = ldk_background_services.as_mut().unwrap();
++        let mut ldk_background_services = match ldk_background_services.take() {
++            Some(services) => services,
++            None => {
++                // node is locked
++                tracing::info!("LDK is not running");
++                return None;
++            }
++        };
+ 
+         // Disconnect our peers and stop accepting new connections. This ensures we don't continue
+         // updating our channel data after we've stopped the background processor.
+@@ -5631,10 +5943,11 @@ impl AppState {
+         // Stop the background processor.
+         if !ldk_background_services.bp_exit.is_closed() {
+             ldk_background_services.bp_exit.send(()).unwrap();
+-            ldk_background_services.background_processor.take()
+-        } else {
+-            None
+         }
++        Some(LdkShutdownHandles {
++            background_processor: ldk_background_services.background_processor.take(),
++            service_tasks: std::mem::take(&mut ldk_background_services.service_tasks),
++        })
+     }
+ }
+ 
+@@ -5667,8 +5980,13 @@ pub(crate) async fn stop_ldk(app_state: Arc<AppState>) {
+             )
+         });
+ 
++    let mut shutdown_handles = app_state.stop_ldk();
++
+     #[cfg(feature = "vss")]
+-    if let Some(mut join_handle) = app_state.stop_ldk() {
++    if let Some(mut join_handle) = shutdown_handles
++        .as_mut()
++        .and_then(|handles| handles.background_processor.take())
++    {
+         // Bounded flush: give the final remote-first persists time to reach
+         // VSS, then abort outage-pending retries so shutdown cannot hang.
+         match tokio::time::timeout(BP_SHUTDOWN_FLUSH_TIMEOUT, &mut join_handle).await {
+@@ -5687,7 +6005,10 @@ pub(crate) async fn stop_ldk(app_state: Arc<AppState>) {
+         }
+     }
+     #[cfg(not(feature = "vss"))]
+-    if let Some(join_handle) = app_state.stop_ldk() {
++    if let Some(join_handle) = shutdown_handles
++        .as_mut()
++        .and_then(|handles| handles.background_processor.take())
++    {
+         join_handle.await.unwrap().unwrap();
+     }
+ 
+@@ -5729,6 +6050,27 @@ pub(crate) async fn stop_ldk(app_state: Arc<AppState>) {
+         }
+     }
+ 
++    if let Some(handles) = shutdown_handles.take() {
++        for task in &handles.service_tasks {
++            task.abort();
++        }
++        for task in handles.service_tasks {
++            match task.await {
++                Ok(()) => {}
++                Err(error) if error.is_cancelled() => {}
++                Err(error) => {
++                    tracing::warn!(error = %error, "LDK service task failed during shutdown")
++                }
++            }
++        }
++    }
++
++    // Drop every signer-owning LDK object only after persistence and service
++    // shutdown are complete. Leaving these Arcs in AppState keeps persistent
++    // VLS/redb stores locked across a same-process wallet restart.
++    *app_state.get_unlocked_app_state().await = None;
++    app_state.set_attached_external_signer(None);
++
+     // connect to the peer port so it can be released
+     let peer_port = app_state.static_state.ldk_peer_listening_port;
+     let sock_addr = SocketAddr::from(([127, 0, 0, 1], peer_port));
+@@ -5859,6 +6201,53 @@ mod tests {
          assert!(!access.allows_peer(&peer));
      }
  
@@ -4151,6 +4915,156 @@ index e4abdac..5bbbc60 100644
      fn build_kv_store() -> Arc<dyn KVStoreSync + Send + Sync> {
          let db_path = std::env::temp_dir().join(format!("rln-ldk-unit-{}", uuid::Uuid::new_v4()));
          let connection_string = format!("sqlite:{}?mode=rwc", db_path.display());
+diff --git a/src/node.rs b/src/node.rs
+index c67c2ef..0b1cd36 100644
+--- a/src/node.rs
++++ b/src/node.rs
+@@ -1,4 +1,6 @@
+-use std::sync::Arc;
++use std::collections::HashMap;
++use std::path::{Path, PathBuf};
++use std::sync::{Arc, Mutex, OnceLock, Weak};
+ 
+ use rgb_lib::BitcoinNetwork;
+ 
+@@ -8,7 +10,7 @@ use crate::ldk::stop_ldk;
+ use crate::utils::{start_daemon, AppState};
+ 
+ pub struct NodeConfig {
+-    pub storage_dir_path: std::path::PathBuf,
++    pub storage_dir_path: PathBuf,
+     pub daemon_listening_port: u16,
+     pub ldk_peer_listening_port: u16,
+     pub network: BitcoinNetwork,
+@@ -28,15 +30,79 @@ pub struct NodeConfig {
+     pub remote_signer_listen_addr: Option<std::net::SocketAddr>,
+ }
+ 
++#[derive(Debug)]
++struct NodeInstanceLease {
++    storage_dir_path: PathBuf,
++}
++
++fn node_instance_registry() -> &'static Mutex<HashMap<PathBuf, Weak<NodeInstanceLease>>> {
++    static REGISTRY: OnceLock<Mutex<HashMap<PathBuf, Weak<NodeInstanceLease>>>> = OnceLock::new();
++    REGISTRY.get_or_init(|| Mutex::new(HashMap::new()))
++}
++
++impl NodeInstanceLease {
++    fn acquire(storage_dir_path: &Path) -> Result<Arc<Self>, AppError> {
++        std::fs::create_dir_all(storage_dir_path)?;
++        let canonical_path = std::fs::canonicalize(storage_dir_path)?;
++        let mut registry = node_instance_registry()
++            .lock()
++            .unwrap_or_else(|poisoned| poisoned.into_inner());
++
++        if registry
++            .get(&canonical_path)
++            .and_then(Weak::upgrade)
++            .is_some()
++        {
++            return Err(AppError::NodeInstanceAlreadyActive(
++                canonical_path.display().to_string(),
++            ));
++        }
++
++        let lease = Arc::new(Self {
++            storage_dir_path: canonical_path.clone(),
++        });
++        registry.insert(canonical_path, Arc::downgrade(&lease));
++        Ok(lease)
++    }
++
++    fn for_app_state(state: &AppState) -> Option<Arc<Self>> {
++        let registry = node_instance_registry()
++            .lock()
++            .unwrap_or_else(|poisoned| poisoned.into_inner());
++        registry
++            .get(&state.static_state.storage_dir_path)
++            .and_then(Weak::upgrade)
++    }
++}
++
++impl Drop for NodeInstanceLease {
++    fn drop(&mut self) {
++        let mut registry = node_instance_registry()
++            .lock()
++            .unwrap_or_else(|poisoned| poisoned.into_inner());
++        let should_remove = registry
++            .get(&self.storage_dir_path)
++            .is_some_and(|registered| registered.strong_count() == 0);
++        if should_remove {
++            registry.remove(&self.storage_dir_path);
++        }
++    }
++}
++
+ #[derive(Clone)]
+ pub struct NodeHandle {
+     state: Arc<AppState>,
++    _instance_lease: Option<Arc<NodeInstanceLease>>,
+ }
+ 
+ impl NodeHandle {
+     #[cfg(feature = "uniffi")]
+     pub(crate) fn from_app_state(state: Arc<AppState>) -> Self {
+-        Self { state }
++        let instance_lease = NodeInstanceLease::for_app_state(&state);
++        Self {
++            state,
++            _instance_lease: instance_lease,
++        }
+     }
+ 
+     #[cfg(feature = "uniffi")]
+@@ -44,7 +110,9 @@ impl NodeHandle {
+         self.state.clone()
+     }
+ 
+-    pub async fn new(config: NodeConfig) -> Result<Self, AppError> {
++    pub async fn new(mut config: NodeConfig) -> Result<Self, AppError> {
++        let instance_lease = NodeInstanceLease::acquire(&config.storage_dir_path)?;
++        config.storage_dir_path = instance_lease.storage_dir_path.clone();
+         let args = UserArgs {
+             storage_dir_path: config.storage_dir_path,
+             daemon_listening_port: config.daemon_listening_port,
+@@ -63,7 +131,10 @@ impl NodeHandle {
+             config: Default::default(),
+         };
+         let state = start_daemon(&args).await?;
+-        Ok(Self { state })
++        Ok(Self {
++            state,
++            _instance_lease: Some(instance_lease),
++        })
+     }
+ 
+     pub async fn shutdown(&self) {
+@@ -86,6 +157,24 @@ impl NodeHandle {
+ mod tests {
+     use super::*;
+ 
++    #[test]
++    fn node_instance_lease_rejects_duplicate_storage_ownership() {
++        let tmp = tempfile::tempdir().expect("tempdir");
++        let storage_dir = tmp.path().join("wallet");
++        let first = NodeInstanceLease::acquire(&storage_dir).expect("first owner");
++
++        let duplicate =
++            NodeInstanceLease::acquire(&storage_dir).expect_err("duplicate owner must be rejected");
++        assert!(matches!(
++            duplicate,
++            AppError::NodeInstanceAlreadyActive(path)
++                if path == first.storage_dir_path.display().to_string()
++        ));
++
++        drop(first);
++        NodeInstanceLease::acquire(&storage_dir).expect("ownership released after final drop");
++    }
++
+     /// A `NodeConfig` embedder (a direct Rust consumer, not the uniffi FFI surface — see the `None`
+     /// left in `uniffi_api::handle_from_request`) must be able to configure the remote-signer daemon
+     /// address; without this field, `NodeHandle`-embedding callers could configure external-signer
 diff --git a/src/rgb.rs b/src/rgb.rs
 index 80df750..16b82f0 100644
 --- a/src/rgb.rs
@@ -4493,46 +5407,181 @@ index 80df750..16b82f0 100644
          self.get_rgb_wallet().send_btc_end(self.online, signed_psbt)
      }
 diff --git a/src/routes.rs b/src/routes.rs
-index 975a67d..30958de 100644
+index 975a67d..4dfca49 100644
 --- a/src/routes.rs
 +++ b/src/routes.rs
-@@ -2978,6 +2978,7 @@ pub(crate) async fn keysend(
+@@ -27,7 +27,10 @@ use lightning::{
+     types::payment::{PaymentHash, PaymentPreimage},
+ };
+ use lightning::{
+-    ln::channelmanager::{PaymentId, RecipientOnionFields, Retry},
++    ln::channelmanager::{
++        Bolt11PaymentError, PaymentId, RecipientOnionFields, Retry,
++        RetryableSendFailure,
++    },
+     routing::{
+         gossip::NodeId,
+         router::{PaymentParameters, RouteParameters},
+@@ -79,8 +82,8 @@ use crate::core_types::async_order::{
+     AsyncOrderOutboundInvoiceResponse,
+ };
+ use crate::ldk::{
+-    clear_rgb_payment_pending, peer_has_live_channel, start_ldk, stop_ldk, LdkBackgroundServices,
+-    VirtualChannelSessionStatus,
++    clear_rgb_payment_pending, peer_has_live_channel, reconcile_orphaned_virtual_session,
++    start_ldk, stop_ldk, LdkBackgroundServices, VirtualChannelSessionStatus,
+ };
+ #[cfg(feature = "vss")]
+ use crate::ldk::{derive_vss_identity, derive_vss_identity_from_key_source};
+@@ -1224,6 +1227,25 @@ pub(crate) struct SendPaymentResponse {
+     pub(crate) payment_hash: Option<String>,
+     pub(crate) payment_secret: Option<String>,
+     pub(crate) status: HTLCStatus,
++    pub(crate) failure_code: Option<String>,
++}
++
++fn retryable_send_failure_code(reason: &RetryableSendFailure) -> &'static str {
++    match reason {
++        RetryableSendFailure::PaymentExpired => "PAYMENT_EXPIRED",
++        RetryableSendFailure::RouteNotFound => "ROUTE_NOT_FOUND",
++        RetryableSendFailure::DuplicatePayment => "DUPLICATE_PAYMENT",
++        RetryableSendFailure::OnionPacketSizeExceeded => "ONION_PACKET_TOO_LARGE",
++    }
++}
++
++fn bolt11_payment_failure_code(reason: &Bolt11PaymentError) -> &'static str {
++    match reason {
++        Bolt11PaymentError::InvalidAmount => "INVALID_PAYMENT_AMOUNT",
++        Bolt11PaymentError::SendingFailed(reason) => {
++            retryable_send_failure_code(reason)
++        }
++    }
+ }
+ 
+ #[derive(Deserialize, Serialize)]
+@@ -2111,10 +2133,25 @@ pub(crate) async fn close_channel(
+         } else {
+             if let Some(session) = virtual_session.as_ref() {
+                 if !matches!(session.status, VirtualChannelSessionStatus::Abandoned) {
+-                    unlocked_state.virtual_channel_session_update_status(
+-                        session,
+-                        VirtualChannelSessionStatus::Abandoned,
+-                    );
++                    reconcile_orphaned_virtual_session(
++                        &requested_cid,
++                        Arc::clone(unlocked_state),
++                    )
++                    .await;
++                    if unlocked_state
++                        .virtual_channel_session_get(&requested_cid)
++                        .is_some_and(|current| {
++                            !matches!(
++                                current.status,
++                                VirtualChannelSessionStatus::Abandoned
++                            )
++                        })
++                    {
++                        return Err(APIError::CannotCloseChannel(
++                            "virtual funding cleanup failed; the session remains blocked"
++                                .to_string(),
++                        ));
++                    }
+                 }
+                 return Ok(Json(EmptyResponse {}));
+             }
+@@ -2978,6 +3015,8 @@ pub(crate) async fn keysend(
                  payment_idx: None,
                  async_hash_index: None,
                  async_host_node_id: None,
 +                fee_paid_msat: None,
++                failure_code: None,
  
                  updated_at: created_at,
              },
-@@ -3657,6 +3658,7 @@ pub(crate) async fn ln_invoice(
+@@ -3657,6 +3696,8 @@ pub(crate) async fn ln_invoice(
                  payment_idx: None,
                  async_hash_index: None,
                  async_host_node_id: None,
 +                fee_paid_msat: None,
++                failure_code: None,
              },
          );
  
-@@ -4786,6 +4788,7 @@ pub(crate) async fn send_payment(
+@@ -4744,6 +4785,7 @@ pub(crate) async fn send_payment(
+         let unlocked_state = guard.as_ref().unwrap();
+ 
+         let mut status = HTLCStatus::Pending;
++        let mut failure_code = None;
+         let created_at = get_current_timestamp();
+ 
+         let (payment_id, payment_hash, payment_secret) = if let Ok(offer) = Offer::from_str(&payload.invoice) {
+@@ -4786,6 +4828,8 @@ pub(crate) async fn send_payment(
                      payment_idx: None,
                      async_hash_index: None,
                      async_host_node_id: None,
 +                    fee_paid_msat: None,
++                    failure_code: None,
                  },
              )?;
  
-@@ -4902,6 +4905,7 @@ pub(crate) async fn send_payment(
+@@ -4799,9 +4843,10 @@ pub(crate) async fn send_payment(
+                 .pay_for_offer(&offer, Some(amt_msat), payment_id, params);
+             if pay.is_err() {
+                 tracing::error!("ERROR: failed to pay: {:?}", pay);
+-                unlocked_state.update_outbound_payment_status(payment_id, HTLCStatus::Failed);
++                let code = "PAYMENT_INITIATION_FAILED";
++                unlocked_state.fail_outbound_payment(payment_id, code);
+                 status = HTLCStatus::Failed;
+-                unlocked_state.update_outbound_payment_status(payment_id, status);
++                failure_code = Some(code.to_owned());
+             }
+             (payment_id, None, secret)
+         } else {
+@@ -4902,6 +4947,8 @@ pub(crate) async fn send_payment(
                      payment_idx: None,
                      async_hash_index: None,
                      async_host_node_id: None,
 +                    fee_paid_msat: None,
++                    failure_code: None,
                  },
              )?;
              let payment_hash = PaymentHash(invoice.payment_hash().to_byte_array());
+@@ -4936,8 +4983,10 @@ pub(crate) async fn send_payment(
+                 Err(e) => {
+                     tracing::error!("ERROR: failed to send payment: {:?}", e);
+                     clear_rgb_payment_pending(&payment_hash, false, unlocked_state.kv_store.as_ref());
++                    let code = bolt11_payment_failure_code(&e);
++                    unlocked_state.fail_outbound_payment(payment_id, code);
+                     status = HTLCStatus::Failed;
+-                    unlocked_state.update_outbound_payment_status(payment_id, status);
++                    failure_code = Some(code.to_owned());
+                 },
+             };
+ 
+@@ -4949,6 +4998,7 @@ pub(crate) async fn send_payment(
+             payment_hash: payment_hash.map(|h| hex_str(&h.0)),
+             payment_secret: payment_secret.map(|s| hex_str(&s.0)),
+             status,
++            failure_code,
+         }))
+     })
+     .await
 diff --git a/src/sdk/mod.rs b/src/sdk/mod.rs
-index 3ef5ebc..2f64a2d 100644
+index 3ef5ebc..3951880 100644
 --- a/src/sdk/mod.rs
 +++ b/src/sdk/mod.rs
-@@ -34,6 +34,7 @@ use amplify::{map, s};
+@@ -11,8 +11,8 @@ use crate::core_types::async_order::{
+ };
+ use crate::error::APIError;
+ use crate::ldk::{
+-    clear_rgb_payment_pending, peer_has_live_channel, start_ldk, write_rgb_payment_info_file,
+-    InvoiceType, PaymentInfo, VirtualChannelSessionStatus,
++    clear_rgb_payment_pending, peer_has_live_channel, reconcile_orphaned_virtual_session,
++    start_ldk, write_rgb_payment_info_file, InvoiceType, PaymentInfo, VirtualChannelSessionStatus,
+ };
+ #[cfg(feature = "vss")]
+ use crate::ldk::{derive_vss_identity, derive_vss_identity_from_key_source};
+@@ -34,13 +34,15 @@ use amplify::{map, s};
  use bitcoin::hashes::sha256::Hash as Sha256;
  use bitcoin::hashes::Hash;
  use bitcoin::hex::DisplayHex;
@@ -4540,7 +5589,16 @@ index 3ef5ebc..2f64a2d 100644
  use bitcoin::secp256k1::PublicKey;
  use bitcoin::ScriptBuf;
  use lightning::chain::channelmonitor::Balance;
-@@ -58,6 +59,7 @@ use lightning::util::config::{
+ use lightning::ln::channel_state::ChannelShutdownState;
+ use lightning::ln::channelmanager::Bolt11InvoiceParameters;
+ use lightning::ln::channelmanager::{
+-    OptionalOfferPaymentParams, PaymentId, RecipientOnionFields, Retry,
++    Bolt11PaymentError, OptionalOfferPaymentParams, PaymentId, RecipientOnionFields, Retry,
++    RetryableSendFailure,
+ };
+ use lightning::ln::types::ChannelId;
+ use lightning::offers::offer::{self, Offer};
+@@ -58,6 +60,7 @@ use lightning::util::config::{
  };
  use lightning::util::errors::APIError as LDKAPIError;
  use lightning::util::message_signing;
@@ -4548,7 +5606,7 @@ index 3ef5ebc..2f64a2d 100644
  use lightning::util::IS_SWAP_SCID;
  use lightning::{
      onion_message::messenger::Destination, onion_message::messenger::MessageSendInstructions,
-@@ -73,9 +75,12 @@ use rgb_lib::wallet::{
+@@ -73,9 +76,12 @@ use rgb_lib::wallet::{
  use rgb_lib::{
      bdk_wallet::keys::bip39::Mnemonic,
      keys::{generate_keys, WitnessVersion},
@@ -4563,7 +5621,7 @@ index 3ef5ebc..2f64a2d 100644
  use std::net::ToSocketAddrs;
  use std::str::FromStr;
  use std::sync::Arc;
-@@ -96,6 +101,148 @@ use rgb_lib::{AssetSchema as RgbLibAssetSchema, Assignment as RgbLibAssignment};
+@@ -96,6 +102,148 @@ use rgb_lib::{AssetSchema as RgbLibAssetSchema, Assignment as RgbLibAssignment};
  use serde_json::Value;
  
  const SDK_VIRTUAL_OPEN_MODE_TRUSTED_NO_BROADCAST: &str = "trusted_no_broadcast";
@@ -4712,7 +5770,7 @@ index 3ef5ebc..2f64a2d 100644
  
  struct OpenChannelVirtualIntentGuard {
      unlocked_state: Arc<crate::utils::UnlockedAppState>,
-@@ -204,6 +351,7 @@ pub(crate) struct NodeInfoData {
+@@ -204,6 +352,7 @@ pub(crate) struct NodeInfoData {
  pub(crate) struct NetworkInfoData {
      pub(crate) network: RgbBitcoinNetwork,
      pub(crate) height: u32,
@@ -4720,7 +5778,7 @@ index 3ef5ebc..2f64a2d 100644
  }
  
  pub(crate) struct AddressData {
-@@ -295,6 +443,36 @@ pub(crate) struct SendRgbData {
+@@ -295,6 +444,36 @@ pub(crate) struct SendRgbData {
      pub(crate) batch_transfer_idx: i32,
  }
  
@@ -4757,7 +5815,7 @@ index 3ef5ebc..2f64a2d 100644
  pub(crate) enum AssignmentKindData {
      Fungible,
      NonFungible,
-@@ -410,6 +588,7 @@ pub(crate) struct SendPaymentRequestData {
+@@ -410,6 +589,7 @@ pub(crate) struct SendPaymentRequestData {
      pub(crate) amt_msat: Option<u64>,
      pub(crate) asset_id: Option<String>,
      pub(crate) asset_amount: Option<u64>,
@@ -4765,7 +5823,15 @@ index 3ef5ebc..2f64a2d 100644
  }
  
  pub(crate) struct SendPaymentData {
-@@ -441,6 +620,12 @@ pub(crate) struct CreateUtxosRequestData {
+@@ -417,6 +597,7 @@ pub(crate) struct SendPaymentData {
+     pub(crate) payment_hash: Option<String>,
+     pub(crate) payment_secret: Option<String>,
+     pub(crate) status: HtlcStatus,
++    pub(crate) failure_code: Option<String>,
+ }
+ 
+ pub(crate) struct RefreshTransfersRequestData {
+@@ -441,6 +622,12 @@ pub(crate) struct CreateUtxosRequestData {
      pub(crate) skip_sync: bool,
  }
  
@@ -4778,7 +5844,7 @@ index 3ef5ebc..2f64a2d 100644
  pub(crate) struct IssueAssetNiaRequestData {
      pub(crate) amounts: Vec<u64>,
      pub(crate) ticker: String,
-@@ -498,6 +683,18 @@ pub(crate) struct SendBtcData {
+@@ -498,6 +685,18 @@ pub(crate) struct SendBtcData {
      pub(crate) txid: String,
  }
  
@@ -4797,15 +5863,41 @@ index 3ef5ebc..2f64a2d 100644
  pub(crate) struct MakerInitRequestData {
      pub(crate) qty_from: u64,
      pub(crate) qty_to: u64,
-@@ -571,6 +768,7 @@ pub(crate) struct PaymentData {
+@@ -571,6 +770,8 @@ pub(crate) struct PaymentData {
      pub(crate) payee_pubkey: String,
      pub(crate) preimage: Option<String>,
      pub(crate) description_hash: Option<String>,
 +    pub(crate) fee_paid_msat: Option<u64>,
++    pub(crate) failure_code: Option<String>,
  }
  
  pub(crate) struct CancelHodlInvoiceRequestData {
-@@ -1123,11 +1321,15 @@ pub(crate) async fn node_info(state: Arc<AppState>) -> Result<NodeInfoData, APIE
+@@ -703,6 +904,24 @@ pub(crate) enum ChannelStatus {
+ 
+ pub(crate) type HtlcStatus = crate::core_types::HTLCStatus;
+ 
++fn retryable_send_failure_code(reason: &RetryableSendFailure) -> &'static str {
++    match reason {
++        RetryableSendFailure::PaymentExpired => "PAYMENT_EXPIRED",
++        RetryableSendFailure::RouteNotFound => "ROUTE_NOT_FOUND",
++        RetryableSendFailure::DuplicatePayment => "DUPLICATE_PAYMENT",
++        RetryableSendFailure::OnionPacketSizeExceeded => "ONION_PACKET_TOO_LARGE",
++    }
++}
++
++fn bolt11_payment_failure_code(reason: &Bolt11PaymentError) -> &'static str {
++    match reason {
++        Bolt11PaymentError::InvalidAmount => "INVALID_PAYMENT_AMOUNT",
++        Bolt11PaymentError::SendingFailed(reason) => {
++            retryable_send_failure_code(reason)
++        }
++    }
++}
++
+ #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+ pub(crate) enum PaymentType {
+     Outbound,
+@@ -1123,11 +1342,15 @@ pub(crate) async fn node_info(state: Arc<AppState>) -> Result<NodeInfoData, APIE
  pub(crate) async fn network_info(state: Arc<AppState>) -> Result<NetworkInfoData, APIError> {
      let guard = check_unlocked(&state).await?;
      let unlocked_state = guard.as_ref().unwrap();
@@ -4823,7 +5915,7 @@ index 3ef5ebc..2f64a2d 100644
      })
  }
  
-@@ -1751,18 +1953,10 @@ pub(crate) async fn send_rgb(
+@@ -1751,18 +1974,10 @@ pub(crate) async fn send_rgb(
      })
  }
  
@@ -4846,7 +5938,7 @@ index 3ef5ebc..2f64a2d 100644
          .into_iter()
          .map(|group| {
              let recipients = group
-@@ -1785,7 +1979,20 @@ pub(crate) async fn send_rgb_from_groups(
+@@ -1785,7 +2000,20 @@ pub(crate) async fn send_rgb_from_groups(
                  .collect::<Result<Vec<_>, APIError>>()?;
              Ok((group.asset_id, recipients))
          })
@@ -4868,7 +5960,7 @@ index 3ef5ebc..2f64a2d 100644
  
      send_rgb(
          state,
-@@ -1797,6 +2004,294 @@ pub(crate) async fn send_rgb_from_groups(
+@@ -1797,6 +2025,294 @@ pub(crate) async fn send_rgb_from_groups(
      .await
  }
  
@@ -5163,7 +6255,7 @@ index 3ef5ebc..2f64a2d 100644
  pub(crate) async fn init(
      state: Arc<AppState>,
      password: String,
-@@ -1940,6 +2435,57 @@ pub(crate) async fn vss_clear_fence(
+@@ -1940,6 +2456,57 @@ pub(crate) async fn vss_clear_fence(
      }
  }
  
@@ -5221,7 +6313,30 @@ index 3ef5ebc..2f64a2d 100644
  pub(crate) async fn unlock(state: Arc<AppState>, request: UnlockRequest) -> Result<(), APIError> {
      tracing::info!("Unlock started");
      if is_external_signer_mode_configured(&state)? {
-@@ -2402,6 +2948,144 @@ pub(crate) async fn create_utxos(
+@@ -2222,10 +2789,18 @@ pub(crate) async fn close_channel(
+     } else {
+         if let Some(session) = virtual_session.as_ref() {
+             if !matches!(session.status, VirtualChannelSessionStatus::Abandoned) {
+-                unlocked_state.virtual_channel_session_update_status(
+-                    session,
+-                    VirtualChannelSessionStatus::Abandoned,
+-                );
++                reconcile_orphaned_virtual_session(&requested_cid, Arc::clone(unlocked_state))
++                    .await;
++                if unlocked_state
++                    .virtual_channel_session_get(&requested_cid)
++                    .is_some_and(|current| {
++                        !matches!(current.status, VirtualChannelSessionStatus::Abandoned)
++                    })
++                {
++                    return Err(APIError::CannotCloseChannel(
++                        "virtual funding cleanup failed; the session remains blocked".to_string(),
++                    ));
++                }
+             }
+             return Ok(());
+         }
+@@ -2402,6 +2977,144 @@ pub(crate) async fn create_utxos(
      Ok(())
  }
  
@@ -5366,15 +6481,16 @@ index 3ef5ebc..2f64a2d 100644
  pub(crate) async fn issue_asset_nia(
      state: Arc<AppState>,
      request: IssueAssetNiaRequestData,
-@@ -2581,6 +3265,7 @@ pub(crate) async fn keysend(
+@@ -2581,6 +3294,8 @@ pub(crate) async fn keysend(
              payment_idx: None,
              async_hash_index: None,
              async_host_node_id: None,
 +            fee_paid_msat: None,
++            failure_code: None,
          },
      )?;
      if let Some((contract_id, rgb_amount)) = rgb_payment {
-@@ -2651,6 +3336,181 @@ pub(crate) async fn send_btc(
+@@ -2651,6 +3366,181 @@ pub(crate) async fn send_btc(
      Ok(SendBtcData { txid })
  }
  
@@ -5556,11 +6672,20 @@ index 3ef5ebc..2f64a2d 100644
  pub(crate) async fn post_asset_media(
      state: Arc<AppState>,
      file_bytes: Vec<u8>,
-@@ -3120,10 +3980,15 @@ pub(crate) async fn send_payment(
+@@ -3077,6 +3967,7 @@ pub(crate) async fn send_payment(
+     let unlocked_state = guard.as_ref().unwrap();
+ 
+     let mut status = HtlcStatus::Pending;
++    let mut failure_code = None;
+     let created_at = get_current_timestamp();
+ 
+     let (payment_id, payment_hash, payment_secret) = if let Ok(offer) =
+@@ -3120,10 +4011,16 @@ pub(crate) async fn send_payment(
                  payment_idx: None,
                  async_hash_index: None,
                  async_host_node_id: None,
 +                fee_paid_msat: None,
++                failure_code: None,
              },
          )?;
  
@@ -5572,15 +6697,29 @@ index 3ef5ebc..2f64a2d 100644
              retry_strategy: Retry::Timeout(Duration::from_secs(10)),
              ..Default::default()
          };
-@@ -3222,6 +4087,7 @@ pub(crate) async fn send_payment(
+@@ -3135,9 +4032,10 @@ pub(crate) async fn send_payment(
+         );
+         if pay.is_err() {
+             tracing::error!("ERROR: failed to pay: {:?}", pay);
+-            unlocked_state.update_outbound_payment_status(payment_id, HtlcStatus::Failed);
++            let code = "PAYMENT_INITIATION_FAILED";
++            unlocked_state.fail_outbound_payment(payment_id, code);
+             status = HtlcStatus::Failed;
+-            unlocked_state.update_outbound_payment_status(payment_id, status);
++            failure_code = Some(code.to_owned());
+         }
+         (payment_id, None, secret)
+     } else {
+@@ -3222,6 +4120,8 @@ pub(crate) async fn send_payment(
                  payment_idx: None,
                  async_hash_index: None,
                  async_host_node_id: None,
 +                fee_paid_msat: None,
++                failure_code: None,
              },
          )?;
          let payment_hash = PaymentHash(invoice.payment_hash().to_byte_array());
-@@ -3245,7 +4111,10 @@ pub(crate) async fn send_payment(
+@@ -3245,7 +4145,10 @@ pub(crate) async fn send_payment(
              &invoice,
              payment_id,
              Some(amt_msat),
@@ -5592,7 +6731,27 @@ index 3ef5ebc..2f64a2d 100644
              bolt11_retry,
          ) {
              Ok(_) => {
-@@ -3663,6 +4532,156 @@ pub(crate) async fn sync(state: Arc<AppState>) -> Result<(), APIError> {
+@@ -3259,8 +4162,10 @@ pub(crate) async fn send_payment(
+             Err(e) => {
+                 tracing::error!("ERROR: failed to send payment: {:?}", e);
+                 clear_rgb_payment_pending(&payment_hash, false, unlocked_state.kv_store.as_ref());
++                let code = bolt11_payment_failure_code(&e);
++                unlocked_state.fail_outbound_payment(payment_id, code);
+                 status = HtlcStatus::Failed;
+-                unlocked_state.update_outbound_payment_status(payment_id, status);
++                failure_code = Some(code.to_owned());
+             }
+         };
+ 
+@@ -3272,6 +4177,7 @@ pub(crate) async fn send_payment(
+         payment_hash: payment_hash.map(|h| hex_str(&h.0)),
+         payment_secret: payment_secret.map(|s| hex_str(&s.0)),
+         status,
++        failure_code,
+     })
+ }
+ 
+@@ -3663,6 +4569,156 @@ pub(crate) async fn sync(state: Arc<AppState>) -> Result<(), APIError> {
      Ok(())
  }
  
@@ -5749,47 +6908,79 @@ index 3ef5ebc..2f64a2d 100644
  pub(crate) async fn decode_ln_invoice(
      state: Arc<AppState>,
      invoice: String,
-@@ -3844,6 +4863,7 @@ pub(crate) async fn create_ln_invoice(
+@@ -3844,6 +4900,8 @@ pub(crate) async fn create_ln_invoice(
              payment_idx: None,
              async_hash_index: None,
              async_host_node_id: None,
 +            fee_paid_msat: None,
++            failure_code: None,
          },
      );
  
-@@ -3888,6 +4908,7 @@ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentDat
+@@ -3888,6 +4946,8 @@ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentDat
              payee_pubkey: payment_info.payee_pubkey.to_string(),
              preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
              description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
 +            fee_paid_msat: payment_info.fee_paid_msat,
++            failure_code: payment_info.failure_code.clone(),
          });
      }
  
-@@ -3913,6 +4934,7 @@ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentDat
+@@ -3913,6 +4973,8 @@ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentDat
              payee_pubkey: payment_info.payee_pubkey.to_string(),
              preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
              description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
 +            fee_paid_msat: payment_info.fee_paid_msat,
++            failure_code: payment_info.failure_code.clone(),
          });
      }
  
-@@ -3959,6 +4981,7 @@ pub(crate) async fn get_payment(
+@@ -3959,6 +5021,8 @@ pub(crate) async fn get_payment(
                          payee_pubkey: payment_info.payee_pubkey.to_string(),
                          preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
                          description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
 +                        fee_paid_msat: payment_info.fee_paid_msat,
++                        failure_code: payment_info.failure_code.clone(),
                      });
                  }
              }
-@@ -3987,6 +5010,7 @@ pub(crate) async fn get_payment(
+@@ -3987,6 +5051,8 @@ pub(crate) async fn get_payment(
                          payee_pubkey: payment_info.payee_pubkey.to_string(),
                          preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
                          description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
 +                        fee_paid_msat: payment_info.fee_paid_msat,
++                        failure_code: payment_info.failure_code.clone(),
                      });
                  }
              }
-@@ -4451,13 +5475,7 @@ mod tests {
+@@ -4390,6 +5456,26 @@ mod tests {
+     use tokio::sync::Mutex as TokioMutex;
+     use tokio_util::sync::CancellationToken;
+ 
++    #[test]
++    fn bolt11_initiation_failures_have_stable_codes() {
++        assert_eq!(
++            bolt11_payment_failure_code(&Bolt11PaymentError::InvalidAmount),
++            "INVALID_PAYMENT_AMOUNT"
++        );
++        assert_eq!(
++            bolt11_payment_failure_code(&Bolt11PaymentError::SendingFailed(
++                RetryableSendFailure::RouteNotFound,
++            )),
++            "ROUTE_NOT_FOUND"
++        );
++        assert_eq!(
++            bolt11_payment_failure_code(&Bolt11PaymentError::SendingFailed(
++                RetryableSendFailure::DuplicatePayment,
++            )),
++            "DUPLICATE_PAYMENT"
++        );
++    }
++
+     #[test]
+     fn verify_message_signature_accepts_known_lightning_vector_and_rejects_tampering() {
+         let message = b"is this compatible?";
+@@ -4451,13 +5537,7 @@ mod tests {
      }
  
      fn mock_locked_state() -> Arc<AppState> {
@@ -6215,6 +7406,152 @@ index 89331d4..5770b44 100644
              })
              .expect("node A sendpayment");
          let payment_hash = send_payment.payment_hash.expect("payment hash");
+diff --git a/src/test/lib_sdk/rgb_utxo_isolation.rs b/src/test/lib_sdk/rgb_utxo_isolation.rs
+new file mode 100644
+index 0000000..eb3dd0f
+--- /dev/null
++++ b/src/test/lib_sdk/rgb_utxo_isolation.rs
+@@ -0,0 +1,140 @@
++use crate::helpers::*;
++use sea_orm::{ConnectionTrait, Database, DbBackend, Statement};
++use serial_test::serial;
++use std::fs;
++use std::path::Path;
++
++const SETUP_OUTPUT_COUNT: u8 = 4;
++const SETUP_OUTPUT_SIZE_SAT: u32 = 20_000;
++
++fn sqlite_scalar(database: &Path, query: &str) -> i64 {
++    let runtime = tokio::runtime::Runtime::new().expect("create SQLite test runtime");
++    let connection = runtime
++        .block_on(Database::connect(format!(
++            "sqlite:{}?mode=ro",
++            database.display()
++        )))
++        .expect("open RGB wallet database");
++    let row = runtime
++        .block_on(connection.query_one(Statement::from_string(DbBackend::Sqlite, query.to_owned())))
++        .expect("query RGB wallet database")
++        .expect("SQLite scalar row");
++    row.try_get_by_index(0).expect("SQLite scalar value")
++}
++
++fn rgb_database(node_dir: &Path) -> std::path::PathBuf {
++    let mut databases = fs::read_dir(node_dir)
++        .expect("read node storage directory")
++        .filter_map(Result::ok)
++        .map(|entry| entry.path().join("rgb_lib_db"))
++        .filter(|path| path.is_file())
++        .collect::<Vec<_>>();
++    assert_eq!(
++        databases.len(),
++        1,
++        "expected one initialized RGB wallet database under node storage"
++    );
++    databases.pop().expect("RGB wallet database")
++}
++
++fn assert_setup_outputs_are_available(database: &Path, txid: &str) {
++    let output_count = sqlite_scalar(
++        database,
++        &format!("select count(*) from txo where txid = '{txid}';"),
++    );
++    assert_eq!(output_count, i64::from(SETUP_OUTPUT_COUNT));
++    let pending_count = sqlite_scalar(
++        database,
++        &format!("select count(*) from txo where txid = '{txid}' and pending_witness = 1;"),
++    );
++    assert_eq!(
++        pending_count, 0,
++        "isolated RGB setup outputs must remain available for sends"
++    );
++}
++
++#[test]
++#[serial]
++fn prepared_rgb_utxos_are_isolated_from_existing_and_future_witness_invoices() {
++    ensure_regtest_available();
++
++    let test_dir = test_dir("sdk_rgb_utxo_isolation");
++    if test_dir.exists() {
++        fs::remove_dir_all(&test_dir).expect("remove previous isolation test dir");
++    }
++    fs::create_dir_all(&test_dir).expect("create isolation test dir");
++    let node_dir = test_dir.join("node");
++    let node =
++        make_node_with_reuse_addresses(&node_dir, NODE_A_DAEMON_PORT + 750, NODE_A_PEER_PORT + 750);
++
++    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
++        node.init("isolation-pass".to_string(), None)
++            .expect("initialize isolation wallet");
++        node.unlock(unlock_request("isolation-pass"))
++            .expect("unlock isolation wallet");
++        ensure_funded(&node, 100_000, "isolation wallet");
++        let database = rgb_database(&node_dir);
++
++        let existing_invoice = node
++            .rgbinvoice(SdkRgbInvoiceRequest {
++                asset_id: None,
++                assignment_kind: Some(AssignmentKind::Fungible),
++                assignment_amount: Some(1),
++                duration_seconds: Some(3_600),
++                min_confirmations: 1,
++                witness: true,
++            })
++            .expect("create existing witness invoice");
++
++        let plan = node
++            .prepare_create_utxos(SdkCreateUtxosRequest {
++                up_to: false,
++                num: Some(SETUP_OUTPUT_COUNT),
++                size: Some(SETUP_OUTPUT_SIZE_SAT),
++                fee_rate: CREATE_UTXOS_FEE_RATE,
++                skip_sync: false,
++            })
++            .expect("prepare isolated RGB UTXO setup");
++
++        assert_eq!(
++            sqlite_scalar(
++                &database,
++                "select derivation_index from reuse_address_index where keychain = 0;"
++            ),
++            2,
++            "setup preparation must use one colored address and reserve the next for receives"
++        );
++
++        node.commit_prepared_create_utxos(SdkCommitPreparedSendRequest {
++            plan_id: plan.plan_id,
++        })
++        .expect("commit isolated RGB UTXO setup");
++        mine(1);
++        node.sync().expect("sync committed RGB UTXO setup");
++        let setup_txid = plan.plan_id.to_string();
++        assert_setup_outputs_are_available(&database, &setup_txid);
++
++        let future_invoice = node
++            .rgbinvoice(SdkRgbInvoiceRequest {
++                asset_id: None,
++                assignment_kind: Some(AssignmentKind::Fungible),
++                assignment_amount: Some(1),
++                duration_seconds: Some(3_600),
++                min_confirmations: 1,
++                witness: true,
++            })
++            .expect("create future witness invoice");
++        assert_ne!(
++            future_invoice.recipient_id.0, existing_invoice.recipient_id.0,
++            "future witness invoices must not reuse the pre-setup receive script"
++        );
++
++        node.sync().expect("sync after future witness invoice");
++        assert_setup_outputs_are_available(&database, &setup_txid);
++    }));
++
++    node.shutdown();
++    if let Err(panic) = result {
++        std::panic::resume_unwind(panic);
++    }
++}
 diff --git a/src/test/lib_sdk/vanilla_payment_on_rgb_channel.rs b/src/test/lib_sdk/vanilla_payment_on_rgb_channel.rs
 index 862f288..0108a52 100644
 --- a/src/test/lib_sdk/vanilla_payment_on_rgb_channel.rs
@@ -6228,7 +7565,7 @@ index 862f288..0108a52 100644
              .expect("node A sendpayment");
          let payment_hash = send_payment
 diff --git a/src/uniffi_api/mod.rs b/src/uniffi_api/mod.rs
-index c6173a3..15a1db8 100644
+index c6173a3..648ea3e 100644
 --- a/src/uniffi_api/mod.rs
 +++ b/src/uniffi_api/mod.rs
 @@ -115,11 +115,8 @@ fn handle_from_request(request: SdkInitRequest) -> Result<NodeHandle, RlnError>
@@ -6265,15 +7602,16 @@ index c6173a3..15a1db8 100644
      let txid = Txid::from_str(&data.txid).map_err(RlnError::internal)?;
      Ok(SendRgbResponse {
          txid,
-@@ -200,6 +205,7 @@ fn map_payment_data(data: crate::sdk::PaymentData) -> Result<Payment, RlnError>
+@@ -200,6 +205,8 @@ fn map_payment_data(data: crate::sdk::PaymentData) -> Result<Payment, RlnError>
          payee_pubkey,
          preimage: data.preimage,
          description_hash: data.description_hash,
 +        fee_paid_msat: data.fee_paid_msat,
++        failure_code: data.failure_code,
      })
  }
  
-@@ -312,11 +318,34 @@ fn map_transaction(tx: crate::sdk::TransactionData) -> Result<Transaction, RlnEr
+@@ -312,11 +319,34 @@ fn map_transaction(tx: crate::sdk::TransactionData) -> Result<Transaction, RlnEr
      })
  }
  
@@ -6308,7 +7646,7 @@ index c6173a3..15a1db8 100644
      Ok(Transfer {
          idx: t.idx,
          created_at: t.created_at,
-@@ -328,6 +357,8 @@ fn map_transfer(t: crate::sdk::TransferData) -> Result<Transfer, RlnError> {
+@@ -328,6 +358,8 @@ fn map_transfer(t: crate::sdk::TransferData) -> Result<Transfer, RlnError> {
              .into_iter()
              .map(|a| format!("{:?}", a))
              .collect(),
@@ -6317,7 +7655,7 @@ index c6173a3..15a1db8 100644
          kind: format!("{:?}", t.kind),
          txid,
          recipient_id: t.recipient_id,
-@@ -415,6 +446,22 @@ impl SdkNode {
+@@ -415,6 +447,22 @@ impl SdkNode {
          Ok(version)
      }
  
@@ -6340,7 +7678,7 @@ index c6173a3..15a1db8 100644
      pub fn connectpeer(&self, peer_pubkey_and_addr: String) -> Result<(), RlnError> {
          let state = self.handle.app_state();
          block_on_sdk(sdk::connect_peer(state, peer_pubkey_and_addr))?;
-@@ -460,6 +507,61 @@ impl SdkNode {
+@@ -460,6 +508,61 @@ impl SdkNode {
          Ok(())
      }
  
@@ -6402,7 +7740,7 @@ index c6173a3..15a1db8 100644
      pub fn issueassetnia(&self, request: SdkIssueAssetNiaRequest) -> Result<AssetNia, RlnError> {
          let state = self.handle.app_state();
          let asset = block_on_sdk(sdk::issue_asset_nia(
-@@ -673,6 +775,91 @@ impl SdkNode {
+@@ -673,6 +776,91 @@ impl SdkNode {
          Ok(SdkSendBtcResponse { txid })
      }
  
@@ -6494,7 +7832,7 @@ index c6173a3..15a1db8 100644
      pub fn makerinit(
          &self,
          request: SdkMakerInitRequest,
-@@ -787,6 +974,7 @@ impl SdkNode {
+@@ -787,6 +975,7 @@ impl SdkNode {
                  amt_msat: request.amt_msat,
                  asset_id: request.asset_id.map(|id| id.to_string()),
                  asset_amount: request.asset_amount,
@@ -6502,7 +7840,15 @@ index c6173a3..15a1db8 100644
              },
          ))?;
          let status = match response.status {
-@@ -847,6 +1035,35 @@ impl SdkNode {
+@@ -809,6 +998,7 @@ impl SdkNode {
+             payment_hash,
+             payment_secret: response.payment_secret,
+             status,
++            failure_code: response.failure_code,
+         })
+     }
+ 
+@@ -847,6 +1037,35 @@ impl SdkNode {
          Ok(())
      }
  
@@ -6538,7 +7884,7 @@ index c6173a3..15a1db8 100644
      pub fn node_info(&self) -> Result<NodeInfo, RlnError> {
          let state = self.handle.app_state();
          let data = block_on_sdk(sdk::node_info(state))?;
-@@ -1029,6 +1246,7 @@ impl SdkNode {
+@@ -1029,6 +1248,7 @@ impl SdkNode {
          Ok(NetworkInfo {
              network: format!("{:?}", info.network),
              height: info.height,
@@ -6546,7 +7892,7 @@ index c6173a3..15a1db8 100644
          })
      }
  
-@@ -1441,6 +1659,67 @@ impl SdkNode {
+@@ -1441,6 +1661,67 @@ impl SdkNode {
          send_rgb_from_state(self.handle.app_state(), request)
      }
  
@@ -6614,26 +7960,197 @@ index c6173a3..15a1db8 100644
      pub fn apay_new(&self, host_node_id: String) -> Result<AsyncOrderNewResponse, RlnError> {
          let state = self.handle.app_state();
          let response = block_on_sdk(sdk::async_order_new(
+diff --git a/src/uniffi_api/native_signer.rs b/src/uniffi_api/native_signer.rs
+index 42f6c14..cf1f4ff 100644
+--- a/src/uniffi_api/native_signer.rs
++++ b/src/uniffi_api/native_signer.rs
+@@ -11,14 +11,18 @@ use bitcoin::Network;
+ use rand::rngs::OsRng;
+ use rand::RngCore;
+ use signer_external::contract::{BootstrapData, ExternalSignerBackend, SignerRequest};
+-use std::sync::Arc;
++use std::sync::{Arc, RwLock};
+ 
+-#[derive(uniffi::Object)]
+-pub struct NativeExternalSigner {
++struct NativeExternalSignerState {
+     backend: Arc<dyn ExternalSignerBackend>,
+     transport: Arc<InProcessVlsTransport>,
+ }
+ 
++#[derive(uniffi::Object)]
++pub struct NativeExternalSigner {
++    state: RwLock<Option<NativeExternalSignerState>>,
++}
++
+ impl NativeExternalSigner {
+     fn parse_network(network: &str) -> Result<Network, RlnError> {
+         match network.to_lowercase().as_str() {
+@@ -74,6 +78,29 @@ impl NativeExternalSigner {
+             api_level: data.api_level,
+         }
+     }
++
++    fn with_state<T>(
++        &self,
++        operation: impl FnOnce(&NativeExternalSignerState) -> Result<T, RlnError>,
++    ) -> Result<T, RlnError> {
++        let state = self
++            .state
++            .read()
++            .map_err(|_| RlnError::internal("native external signer state is poisoned"))?;
++        let state = state
++            .as_ref()
++            .ok_or_else(|| RlnError::internal("native external signer is shut down"))?;
++        operation(state)
++    }
++
++    /// Release the seed-bearing VLS node and its persistent store for every
++    /// outstanding `Arc` clone. Node shutdown must complete before this is
++    /// called so final channel-state persistence can still use the signer.
++    pub fn shutdown(&self) {
++        if let Ok(mut state) = self.state.write() {
++            *state = None;
++        }
++    }
+ }
+ 
+ #[uniffi::export]
+@@ -94,7 +121,9 @@ impl NativeExternalSigner {
+                 tracing::error!(error = ?e, "native signer transport init failed");
+                 RlnError::internal(format!("native signer transport init failed: {e}"))
+             })?;
+-        Ok(Arc::new(Self { backend, transport }))
++        Ok(Arc::new(Self {
++            state: RwLock::new(Some(NativeExternalSignerState { backend, transport })),
++        }))
+     }
+ 
+     /// Like [`Self::new`], but with a disk-backed VLS store under `storage_dir_path`, so a
+@@ -133,34 +162,39 @@ impl NativeExternalSigner {
+                     "native signer persistent transport init failed: {e}"
+                 ))
+             })?;
+-        Ok(Arc::new(Self { backend, transport }))
++        Ok(Arc::new(Self {
++            state: RwLock::new(Some(NativeExternalSignerState { backend, transport })),
++        }))
+     }
+ 
+     pub fn bootstrap(&self) -> Result<SdkExternalSignerBootstrap, RlnError> {
+-        let bootstrap = match self.backend.call(SignerRequest::Bootstrap).map_err(|e| {
+-            tracing::error!(error = ?e, "native external signer bootstrap failed");
+-            RlnError::internal(format!("native external signer bootstrap failed: {e}"))
+-        })? {
+-            signer_external::contract::SignerResponse::Bootstrap(data) => data,
+-            other => {
+-                tracing::error!(response = ?other, "native external signer returned non-bootstrap response");
+-                return Err(RlnError::internal(
+-                    "native external signer returned non-bootstrap response",
+-                ));
+-            }
+-        };
+-        Ok(Self::map_bootstrap(bootstrap))
++        self.with_state(|state| {
++            let bootstrap = match state.backend.call(SignerRequest::Bootstrap).map_err(|e| {
++                tracing::error!(error = ?e, "native external signer bootstrap failed");
++                RlnError::internal(format!("native external signer bootstrap failed: {e}"))
++            })? {
++                signer_external::contract::SignerResponse::Bootstrap(data) => data,
++                other => {
++                    tracing::error!(response = ?other, "native external signer returned non-bootstrap response");
++                    return Err(RlnError::internal(
++                        "native external signer returned non-bootstrap response",
++                    ));
++                }
++            };
++            Ok(Self::map_bootstrap(bootstrap))
++        })
+     }
+ }
+ 
+ impl ExternalSignerHost for NativeExternalSigner {
+     fn call(&self, request: Vec<u8>) -> Result<Vec<u8>, RlnError> {
+-        in_process_vls::handle_envelope(self.backend.as_ref(), &self.transport, &request).map_err(
+-            |e| {
+-                tracing::error!(error = ?e, "native external signer envelope failed");
+-                RlnError::internal(format!("native external signer envelope failed: {e}"))
+-            },
+-        )
++        self.with_state(|state| {
++            in_process_vls::handle_envelope(state.backend.as_ref(), &state.transport, &request)
++                .map_err(|e| {
++                    tracing::error!(error = ?e, "native external signer envelope failed");
++                    RlnError::internal(format!("native external signer envelope failed: {e}"))
++                })
++        })
+     }
+ }
+ 
+@@ -210,4 +244,29 @@ mod tests {
+                 .expect("explicit permissive is allowed off-mainnet")
+         );
+     }
++
++    #[test]
++    fn shutdown_releases_persistent_store_with_outstanding_arc_clones() {
++        let dir = tempfile::tempdir().unwrap();
++        let storage_dir = dir.path().join("vls-signer");
++        let signer = NativeExternalSigner::new_with_storage(
++            "11".repeat(32),
++            "regtest".to_string(),
++            Some(true),
++            storage_dir.display().to_string(),
++        )
++        .unwrap();
++        let leaked_clone = Arc::clone(&signer);
++
++        signer.shutdown();
++        assert!(leaked_clone.bootstrap().is_err());
++
++        NativeExternalSigner::new_with_storage(
++            "11".repeat(32),
++            "regtest".to_string(),
++            Some(true),
++            storage_dir.display().to_string(),
++        )
++        .expect("shutdown must release redb even while an Arc clone remains alive");
++    }
+ }
+diff --git a/src/uniffi_api/state.rs b/src/uniffi_api/state.rs
+index 59faef0..a303cf2 100644
+--- a/src/uniffi_api/state.rs
++++ b/src/uniffi_api/state.rs
+@@ -232,6 +232,7 @@ pub(super) fn map_app_error(err: AppError) -> RlnError {
+     let msg = err.to_string();
+     stash_api_error_detail(msg.clone());
+     match err {
++        AppError::NodeInstanceAlreadyActive(_) => RlnError::Conflict(msg),
+         AppError::UnavailablePort(_) | AppError::InvalidAuthenticationArgs => {
+             RlnError::InvalidRequest(msg)
+         }
 diff --git a/src/uniffi_api/tests.rs b/src/uniffi_api/tests.rs
-index 4f37a95..ae411f3 100644
+index 4f37a95..afea3a2 100644
 --- a/src/uniffi_api/tests.rs
 +++ b/src/uniffi_api/tests.rs
-@@ -412,11 +412,13 @@ mod uniffi_smoke_tests {
+@@ -412,11 +412,15 @@ mod uniffi_smoke_tests {
                  .to_string(),
              preimage: expected_preimage.clone(),
              description_hash: None,
 +            fee_paid_msat: Some(25),
++            failure_code: Some("ROUTE_NOT_FOUND".to_string()),
          };
  
          let mapped = map_payment_data(data).expect("payment mapping should succeed");
          assert_eq!(mapped.payment_hash.0, [7u8; 32]);
          assert_eq!(mapped.preimage, expected_preimage);
 +        assert_eq!(mapped.fee_paid_msat, Some(25));
++        assert_eq!(mapped.failure_code.as_deref(), Some("ROUTE_NOT_FOUND"));
          assert!(matches!(mapped.payment_type, PaymentType::InboundHodl));
      }
  
 diff --git a/src/uniffi_api/types.rs b/src/uniffi_api/types.rs
-index beeaf62..c05f28a 100644
+index beeaf62..46e3528 100644
 --- a/src/uniffi_api/types.rs
 +++ b/src/uniffi_api/types.rs
 @@ -10,6 +10,7 @@ pub type Bolt11Invoice = lightning_invoice::Bolt11Invoice;
@@ -6677,15 +8194,16 @@ index beeaf62..c05f28a 100644
  pub struct SignMessageResponse {
      pub signed_message: String,
  }
-@@ -140,6 +160,7 @@ pub struct Payment {
+@@ -140,6 +160,8 @@ pub struct Payment {
      pub payee_pubkey: PublicKey,
      pub preimage: Option<String>,
      pub description_hash: Option<String>,
 +    pub fee_paid_msat: Option<u64>,
++    pub failure_code: Option<String>,
  }
  
  pub enum PaymentType {
-@@ -405,6 +426,11 @@ pub struct TransferTransportEndpoint {
+@@ -405,6 +427,11 @@ pub struct TransferTransportEndpoint {
      pub used: bool,
  }
  
@@ -6697,7 +8215,7 @@ index beeaf62..c05f28a 100644
  pub struct Transfer {
      pub idx: i32,
      pub created_at: i64,
-@@ -412,6 +438,8 @@ pub struct Transfer {
+@@ -412,6 +439,8 @@ pub struct Transfer {
      pub status: String,
      pub requested_assignment: Option<String>,
      pub assignments: Vec<String>,
@@ -6706,7 +8224,7 @@ index beeaf62..c05f28a 100644
      pub kind: String,
      pub txid: Option<Txid>,
      pub recipient_id: Option<String>,
-@@ -534,6 +562,7 @@ pub struct SdkSendPaymentRequest {
+@@ -534,6 +563,7 @@ pub struct SdkSendPaymentRequest {
      pub amt_msat: Option<u64>,
      pub asset_id: Option<ContractId>,
      pub asset_amount: Option<u64>,
@@ -6714,7 +8232,15 @@ index beeaf62..c05f28a 100644
  }
  
  pub struct SdkSendPaymentResponse {
-@@ -565,6 +594,16 @@ pub struct SdkCreateUtxosRequest {
+@@ -541,6 +571,7 @@ pub struct SdkSendPaymentResponse {
+     pub payment_hash: Option<PaymentHash>,
+     pub payment_secret: Option<String>,
+     pub status: HtlcStatus,
++    pub failure_code: Option<String>,
+ }
+ 
+ pub struct SdkRefreshTransfersRequest {
+@@ -565,6 +596,16 @@ pub struct SdkCreateUtxosRequest {
      pub skip_sync: bool,
  }
  
@@ -6731,7 +8257,7 @@ index beeaf62..c05f28a 100644
  pub struct SdkIssueAssetNiaRequest {
      pub amounts: Vec<u64>,
      pub ticker: String,
-@@ -622,6 +661,52 @@ pub struct SdkSendBtcResponse {
+@@ -622,6 +663,52 @@ pub struct SdkSendBtcResponse {
      pub txid: Txid,
  }
  

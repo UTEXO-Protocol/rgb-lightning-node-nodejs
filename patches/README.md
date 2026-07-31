@@ -16,6 +16,11 @@ matching file are built directly from upstream.
 
 ## c-ffi-utexo-patches-v0.10.0-beta.3.patch
 
+This overlay includes transactional orphaned virtual-channel recovery so a
+failed RGB channel open cannot permanently reserve inventory or block the peer.
+Lightning send responses and persisted payment records expose stable failure
+codes, and node shutdown releases native ownership before signer destruction.
+
 Adds versioned dual-keychain synchronization, bounded decimal-safe wallet
 snapshots, explicit Lightning routing-fee caps, and persisted actual routing
 fees to the pinned v0.10 native source. It preserves complete Lightning
