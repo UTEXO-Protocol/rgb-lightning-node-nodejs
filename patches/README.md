@@ -36,6 +36,9 @@ previous native session reaches its terminal abandoned state.
 Inbound channels are classified as virtual only when an explicitly configured
 trusted peer requests SCID privacy; ordinary inbound channels retain standard
 LDK handling even while virtual-channel support is enabled.
+The local VSS writer identity now survives process restarts without being
+replicated with the mnemonic, allowing the same installation to reclaim its
+fence while independently provisioned installations remain excluded.
 
 Adds the versioned wallet synchronization and exact snapshot contract used by
 WDK portfolio refreshes. Routine synchronization FullSyncs both Vanilla and

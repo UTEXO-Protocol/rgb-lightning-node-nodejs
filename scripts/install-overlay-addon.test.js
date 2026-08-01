@@ -17,7 +17,7 @@ test('package overlay metadata is exact and checksum-pinned', () => {
   assert.equal(config.commit, '0bfa66fa256a6c36f3737d5b6402eacea40c68fc')
   assert.equal(
     config.patchSha256,
-    'e68d22c829c899674cb8b20d5456783c10a62e563c39b7f9a44885db2d17b57c'
+    '9ce782cbc7ed291d768afc2cbb3c5c3ab96a11a656a4f6a51fd5f3d7d3055823'
   )
   assert.equal(config.rustToolchain, '1.88.0')
 })
@@ -35,6 +35,8 @@ test('overlay contains the complete native operation registry source', () => {
   assert.match(patch, /pub\(crate\) fn status\(/)
   assert.match(patch, /pub\(crate\) fn adopt\(/)
   assert.match(patch, /pub\(crate\) fn cancel\(/)
+  assert.match(patch, /load_or_create_writer_id/)
+  assert.match(patch, /vss_same_installation_reclaims_fence_after_restart/)
 })
 
 test('overlay preserves wallet discovery, RGB payment identity, and inbound channel semantics', () => {

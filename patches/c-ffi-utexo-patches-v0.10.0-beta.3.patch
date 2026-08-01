@@ -1,5 +1,5 @@
 diff --git a/bindings/c-ffi/Cargo.lock b/bindings/c-ffi/Cargo.lock
-index 5886c2dad3ab839a54a67db6f8852e9a064cce31..401c5fe634feafc5b7cd83636ac2ffe9c7be9561 100644
+index 5886c2d..401c5fe 100644
 --- a/bindings/c-ffi/Cargo.lock
 +++ b/bindings/c-ffi/Cargo.lock
 @@ -177,7 +177,7 @@ version = "1.1.5"
@@ -203,7 +203,7 @@ index 5886c2dad3ab839a54a67db6f8852e9a064cce31..401c5fe634feafc5b7cd83636ac2ffe9
  
  [[package]]
 diff --git a/bindings/c-ffi/Cargo.toml b/bindings/c-ffi/Cargo.toml
-index 2385e9fb4afb10076ffd5fba0de995e0cd591896..eb9ee54bcbf6140b791ffa674c5d336f404b780f 100644
+index 2385e9f..eb9ee54 100644
 --- a/bindings/c-ffi/Cargo.toml
 +++ b/bindings/c-ffi/Cargo.toml
 @@ -24,6 +24,7 @@ serde = { version = "1.0", features = ["derive"] }
@@ -215,7 +215,7 @@ index 2385e9fb4afb10076ffd5fba0de995e0cd591896..eb9ee54bcbf6140b791ffa674c5d336f
  [build-dependencies]
  cbindgen = "0.29.0"
 diff --git a/bindings/c-ffi/rln.h b/bindings/c-ffi/rln.h
-index eb7e5720fb56a391d66a6a2bcaeb8951cb94915b..49abfcfd54a2540988e1f3eaa8c71bf937b3f2d1 100644
+index eb7e572..49abfcf 100644
 --- a/bindings/c-ffi/rln.h
 +++ b/bindings/c-ffi/rln.h
 @@ -26,8 +26,9 @@ typedef struct CResult {
@@ -384,7 +384,7 @@ index eb7e5720fb56a391d66a6a2bcaeb8951cb94915b..49abfcfd54a2540988e1f3eaa8c71bf9
 +struct CResultString rln_wallet_snapshot(const struct COpaqueStruct *node,
 +                                         const char *request_json);
 diff --git a/bindings/c-ffi/rln.hpp b/bindings/c-ffi/rln.hpp
-index 64266ecd582ccf2bc6b254f2a32cc25e47a6848b..023ba919d11a0d4e170fedb198af8a6699d96f48 100644
+index 64266ec..023ba91 100644
 --- a/bindings/c-ffi/rln.hpp
 +++ b/bindings/c-ffi/rln.hpp
 @@ -29,8 +29,9 @@ struct CResult {
@@ -539,7 +539,7 @@ index 64266ecd582ccf2bc6b254f2a32cc25e47a6848b..023ba919d11a0d4e170fedb198af8a66
 +
  }  // extern "C"
 diff --git a/bindings/c-ffi/src/api.rs b/bindings/c-ffi/src/api.rs
-index edb35eddf1b5a15b8965bb012b227357c2bf3635..e36a7ee6456118712dc42f426ae75f47c18c248f 100644
+index edb35ed..e36a7ee 100644
 --- a/bindings/c-ffi/src/api.rs
 +++ b/bindings/c-ffi/src/api.rs
 @@ -3,9 +3,12 @@
@@ -1284,7 +1284,7 @@ index edb35eddf1b5a15b8965bb012b227357c2bf3635..e36a7ee6456118712dc42f426ae75f47
 +    }
 +}
 diff --git a/bindings/c-ffi/src/json_types.rs b/bindings/c-ffi/src/json_types.rs
-index fc570e0696a2053aac7f7230473b2e51f37abe05..48a9d6a9ed455a2b2302bd69848cc6a69dd59032 100644
+index fc570e0..48a9d6a 100644
 --- a/bindings/c-ffi/src/json_types.rs
 +++ b/bindings/c-ffi/src/json_types.rs
 @@ -15,25 +15,28 @@ use hex::DisplayHex;
@@ -2465,7 +2465,7 @@ index fc570e0696a2053aac7f7230473b2e51f37abe05..48a9d6a9ed455a2b2302bd69848cc6a6
      }
  }
 diff --git a/bindings/c-ffi/src/lib.rs b/bindings/c-ffi/src/lib.rs
-index 24c3371d26d8a79fb3d7307095235f4c99fb373e..10fb3e5aa737249bd12738a71be9378ee4f61837 100644
+index 24c3371..10fb3e5 100644
 --- a/bindings/c-ffi/src/lib.rs
 +++ b/bindings/c-ffi/src/lib.rs
 @@ -9,6 +9,7 @@
@@ -3217,7 +3217,7 @@ index 24c3371d26d8a79fb3d7307095235f4c99fb373e..10fb3e5aa737249bd12738a71be9378e
  }
 diff --git a/bindings/c-ffi/src/native_operations.rs b/bindings/c-ffi/src/native_operations.rs
 new file mode 100644
-index 0000000000000000000000000000000000000000..856f7d3669167f6866c25b928882c6e96e58f4b9
+index 0000000..856f7d3
 --- /dev/null
 +++ b/bindings/c-ffi/src/native_operations.rs
 @@ -0,0 +1,378 @@
@@ -3600,7 +3600,7 @@ index 0000000000000000000000000000000000000000..856f7d3669167f6866c25b928882c6e9
 +    }
 +}
 diff --git a/bindings/c-ffi/src/utils.rs b/bindings/c-ffi/src/utils.rs
-index 344f6d9e7e0603c08771ef972370d98a146614ff..3b4ed423743c819ff1466a407913fe8f80905069 100644
+index 344f6d9..3b4ed42 100644
 --- a/bindings/c-ffi/src/utils.rs
 +++ b/bindings/c-ffi/src/utils.rs
 @@ -88,7 +88,7 @@ impl CReturnType for Arc<NativeExternalSigner> {}
@@ -3627,7 +3627,7 @@ index 344f6d9e7e0603c08771ef972370d98a146614ff..3b4ed423743c819ff1466a407913fe8f
  /// and trigger `panic_cannot_unwind`.
  ///
 diff --git a/bindings/rgb_lightning_node.udl b/bindings/rgb_lightning_node.udl
-index 286134a1b2aa50ba6264e09b4e523adba0e3a1cd..5c2e955a166266729b28840aa35d8642995df42d 100644
+index 286134a..5c2e955 100644
 --- a/bindings/rgb_lightning_node.udl
 +++ b/bindings/rgb_lightning_node.udl
 @@ -73,6 +73,16 @@ interface SdkNode {
@@ -3780,7 +3780,7 @@ index 286134a1b2aa50ba6264e09b4e523adba0e3a1cd..5c2e955a166266729b28840aa35d8642
  
  dictionary SendRgbRequest {
 diff --git a/src/error.rs b/src/error.rs
-index 95b360264ee50d481362b56a1bb94621a98be0ed..1eb2e4de96e59a10e5ee798e099b97be0df04783 100644
+index 95b3602..1eb2e4d 100644
 --- a/src/error.rs
 +++ b/src/error.rs
 @@ -661,6 +661,9 @@ impl IntoResponse for APIError {
@@ -3794,7 +3794,7 @@ index 95b360264ee50d481362b56a1bb94621a98be0ed..1eb2e4de96e59a10e5ee798e099b97be
      InvalidAuthenticationArgs,
  
 diff --git a/src/indexer.rs b/src/indexer.rs
-index a7602997ada5a6de96e4b8d777a5d5563fbb6db2..6cdcb68d529b7f3544a35fbc05657eb5ce9eb5f9 100644
+index a760299..6cdcb68 100644
 --- a/src/indexer.rs
 +++ b/src/indexer.rs
 @@ -1,4 +1,4 @@
@@ -4121,7 +4121,7 @@ index a7602997ada5a6de96e4b8d777a5d5563fbb6db2..6cdcb68d529b7f3544a35fbc05657eb5
      client: &ElectrumClient,
      height: usize,
 diff --git a/src/ldk.rs b/src/ldk.rs
-index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b0260380ed0 100644
+index e4abdac..f30cebc 100644
 --- a/src/ldk.rs
 +++ b/src/ldk.rs
 @@ -96,7 +96,7 @@ use rgb_lib::{
@@ -4816,7 +4816,25 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
  
              unlocked_state.delete_channel_id(channel_id);
              let _ = unlocked_state.kv_store.remove(
-@@ -4218,16 +4473,16 @@ pub(crate) async fn start_ldk(
+@@ -4003,12 +4258,16 @@ pub(crate) async fn start_ldk(
+         (&static_state.vss_url, &vss_identity)
+     {
+         tracing::info!(store_id = %identity.pubkey_hex, "Initializing VSS KV store");
++        let writer_id =
++            crate::vss_kv_store::load_or_create_writer_id(&static_state.storage_dir_path)
++                .map_err(|e| APIError::FailedVssInit(e.to_string()))?;
+         let vss_kv_store = Arc::new(
+-            crate::vss_kv_store::VssKvStore::new_with_retry(
++            crate::vss_kv_store::VssKvStore::new_with_retry_and_instance_id(
+                 vss_url.clone(),
+                 identity.pubkey_hex.clone(),
+                 identity.signing_key,
+                 &static_state.config.vss,
++                writer_id,
+             )
+             .map_err(|e| APIError::FailedVssInit(e.to_string()))?,
+         );
+@@ -4218,16 +4477,16 @@ pub(crate) async fn start_ldk(
      }
  
      // RGB setup
@@ -4836,7 +4854,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
              BitcoinNetwork::Regtest => ELECTRUM_URL_REGTEST,
              BitcoinNetwork::Signet => ELECTRUM_URL_SIGNET,
              BitcoinNetwork::Testnet => ELECTRUM_URL_TESTNET,
-@@ -4238,7 +4493,28 @@ pub(crate) async fn start_ldk(
+@@ -4238,7 +4497,28 @@ pub(crate) async fn start_ldk(
                      "with custom signet indexer must be provided"
                  )))
              }
@@ -4865,7 +4883,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
      };
      let proxy_endpoint = if let Some(proxy_endpoint) = &unlock_request.proxy_endpoint {
          check_rgb_proxy_endpoint(proxy_endpoint).await?;
-@@ -4973,8 +5249,9 @@ pub(crate) async fn start_ldk(
+@@ -4973,8 +5253,9 @@ pub(crate) async fn start_ldk(
      let peer_manager_connection_handler = peer_manager.clone();
      let listening_port = ldk_peer_listening_port;
      let stop_processing = Arc::new(AtomicBool::new(false));
@@ -4876,7 +4894,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
          let listener = tokio::net::TcpListener::bind(format!("[::]:{listening_port}"))
              .await
              .expect("Failed to bind to listen port - is something else already listening on it?");
-@@ -4992,7 +5269,7 @@ pub(crate) async fn start_ldk(
+@@ -4992,7 +5273,7 @@ pub(crate) async fn start_ldk(
                  .await;
              });
          }
@@ -4885,7 +4903,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
  
      // Connect and Disconnect Blocks
      let output_sweeper: Arc<OutputSweeper> = Arc::new(output_sweeper);
-@@ -5003,7 +5280,7 @@ pub(crate) async fn start_ldk(
+@@ -5003,7 +5284,7 @@ pub(crate) async fn start_ldk(
          let chain_monitor_listener = chain_monitor.clone();
          let output_sweeper_listener = output_sweeper.clone();
          let bitcoind_block_source = bitcoind_client.clone();
@@ -4894,7 +4912,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
              let chain_poller = poll::ChainPoller::new(bitcoind_block_source.as_ref(), network);
              let chain_listener = (
                  chain_monitor_listener,
-@@ -5020,7 +5297,7 @@ pub(crate) async fn start_ldk(
+@@ -5020,7 +5301,7 @@ pub(crate) async fn start_ldk(
                  }
                  tokio::time::sleep(Duration::from_secs(1)).await;
              }
@@ -4903,7 +4921,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
      } else if let Some(tx_sync) = tx_sync_opt.clone() {
          let confirmables: Vec<Arc<dyn Confirm + Send + Sync>> = vec![
              channel_manager.clone(),
-@@ -5030,7 +5307,7 @@ pub(crate) async fn start_ldk(
+@@ -5030,7 +5311,7 @@ pub(crate) async fn start_ldk(
          sync_chain_data(tx_sync.clone(), confirmables.clone())
              .await
              .map_err(|e| APIError::InvalidIndexer(e.to_string()))?;
@@ -4912,7 +4930,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
              loop {
                  if stop_listen.load(Ordering::Acquire) {
                      return;
-@@ -5040,7 +5317,7 @@ pub(crate) async fn start_ldk(
+@@ -5040,7 +5321,7 @@ pub(crate) async fn start_ldk(
                  }
                  tokio::time::sleep(Duration::from_secs(1)).await;
              }
@@ -4921,7 +4939,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
      } else {
          let tx_sync = electrum_tx_sync_opt
              .clone()
-@@ -5053,7 +5330,7 @@ pub(crate) async fn start_ldk(
+@@ -5053,7 +5334,7 @@ pub(crate) async fn start_ldk(
          sync_chain_data_electrum(tx_sync.clone(), confirmables.clone())
              .await
              .map_err(|e| APIError::InvalidIndexer(e.to_string()))?;
@@ -4930,7 +4948,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
              loop {
                  if stop_listen.load(Ordering::Acquire) {
                      return;
-@@ -5065,7 +5342,7 @@ pub(crate) async fn start_ldk(
+@@ -5065,7 +5346,7 @@ pub(crate) async fn start_ldk(
                  }
                  tokio::time::sleep(Duration::from_secs(1)).await;
              }
@@ -4939,7 +4957,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
      }
  
      // Read payment info from KVStore
-@@ -5263,6 +5540,7 @@ pub(crate) async fn start_ldk(
+@@ -5263,6 +5544,7 @@ pub(crate) async fn start_ldk(
  
      let unlocked_state = Arc::new(UnlockedAppState {
          config: static_state.config.clone(),
@@ -4947,7 +4965,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
          channel_manager: Arc::clone(&channel_manager),
          gossip_source: Arc::clone(&gossip_source),
          inbound_payments,
-@@ -5294,6 +5572,29 @@ pub(crate) async fn start_ldk(
+@@ -5294,6 +5576,29 @@ pub(crate) async fn start_ldk(
          next_payment_idx,
      });
  
@@ -4977,7 +4995,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
      // Refresh the RGS snapshot on a fixed interval (RGS mode only). The first
      // tick fires immediately, so a freshly unlocked node syncs right away.
      let gossip_shutdown = Arc::new(tokio::sync::Notify::new());
-@@ -5370,7 +5671,7 @@ pub(crate) async fn start_ldk(
+@@ -5370,7 +5675,7 @@ pub(crate) async fn start_ldk(
      {
          let drain_store = Arc::clone(&kv_store);
          let stop_drain = Arc::clone(&stop_processing);
@@ -4986,7 +5004,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
              let mut interval = tokio::time::interval(Duration::from_secs(60));
              interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
              loop {
-@@ -5381,7 +5682,7 @@ pub(crate) async fn start_ldk(
+@@ -5381,7 +5686,7 @@ pub(crate) async fn start_ldk(
                  let store = Arc::clone(&drain_store);
                  let _ = tokio::task::spawn_blocking(move || store.drain_pending()).await;
              }
@@ -4995,7 +5013,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
      }
  
      // Regularly reconnect to channel peers.
-@@ -5390,7 +5691,7 @@ pub(crate) async fn start_ldk(
+@@ -5390,7 +5695,7 @@ pub(crate) async fn start_ldk(
      let connect_db = static_state.db();
      let stop_connect = Arc::clone(&stop_processing);
      let reconnect_interval_secs = static_state.config.node.peer_reconnect_interval_secs;
@@ -5004,7 +5022,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
          let mut interval = tokio::time::interval(Duration::from_secs(reconnect_interval_secs));
          interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
          loop {
-@@ -5422,7 +5723,7 @@ pub(crate) async fn start_ldk(
+@@ -5422,7 +5727,7 @@ pub(crate) async fn start_ldk(
                  ),
              }
          }
@@ -5013,7 +5031,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
  
      // Remote external signer force-close resilience. When the signer daemon is briefly unreachable, a
      // channel signing call returns LDK's async-unavailable sentinel (`Err(())`) and the operation parks
-@@ -5444,7 +5745,7 @@ pub(crate) async fn start_ldk(
+@@ -5444,7 +5749,7 @@ pub(crate) async fn start_ldk(
          let su_channel_manager = Arc::clone(&channel_manager);
          let su_chain_monitor = Arc::clone(&chain_monitor);
          let su_stop = Arc::clone(&stop_processing);
@@ -5022,7 +5040,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
              loop {
                  // Healthy: idle until the link reports a change (with a coarse timer only to notice
                  // node shutdown — it drives no signer work).
-@@ -5487,7 +5788,7 @@ pub(crate) async fn start_ldk(
+@@ -5487,7 +5792,7 @@ pub(crate) async fn start_ldk(
                      }
                  }
              }
@@ -5031,7 +5049,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
      }
  
      // Regularly broadcast our node_announcement. This is only required (or possible) if we have
-@@ -5522,7 +5823,7 @@ pub(crate) async fn start_ldk(
+@@ -5522,7 +5827,7 @@ pub(crate) async fn start_ldk(
      let chan_man = Arc::clone(&channel_manager);
      let announce_initial_delay_secs = static_state.config.node.announce_initial_delay_secs;
      let announce_refresh_interval_secs = static_state.config.node.announce_refresh_interval_secs;
@@ -5040,7 +5058,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
          // First wait until we have some peers and maybe have opened a channel.
          tokio::time::sleep(Duration::from_secs(announce_initial_delay_secs)).await;
          // Then, update our announcement periodically to keep it fresh but avoid unnecessary churn
-@@ -5546,7 +5847,7 @@ pub(crate) async fn start_ldk(
+@@ -5546,7 +5851,7 @@ pub(crate) async fn start_ldk(
                  );
              }
          }
@@ -5049,7 +5067,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
  
      tracing::info!("LDK logs are available at <your-supplied-ldk-data-dir-path>/.ldk/logs");
      tracing::info!("Local Node ID is {}", channel_manager.get_our_node_id());
-@@ -5563,6 +5864,7 @@ pub(crate) async fn start_ldk(
+@@ -5563,6 +5868,7 @@ pub(crate) async fn start_ldk(
              peer_manager: peer_manager.clone(),
              bp_exit,
              background_processor: Some(background_processor),
@@ -5057,7 +5075,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
          },
          unlocked_state,
      ))
-@@ -5609,16 +5911,16 @@ async fn sync_chain_data_electrum(
+@@ -5609,16 +5915,16 @@ async fn sync_chain_data_electrum(
  }
  
  impl AppState {
@@ -5083,7 +5101,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
  
          // Disconnect our peers and stop accepting new connections. This ensures we don't continue
          // updating our channel data after we've stopped the background processor.
-@@ -5631,10 +5933,11 @@ impl AppState {
+@@ -5631,10 +5937,11 @@ impl AppState {
          // Stop the background processor.
          if !ldk_background_services.bp_exit.is_closed() {
              ldk_background_services.bp_exit.send(()).unwrap();
@@ -5098,7 +5116,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
      }
  }
  
-@@ -5667,8 +5970,13 @@ pub(crate) async fn stop_ldk(app_state: Arc<AppState>) {
+@@ -5667,8 +5974,13 @@ pub(crate) async fn stop_ldk(app_state: Arc<AppState>) {
              )
          });
  
@@ -5113,7 +5131,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
          // Bounded flush: give the final remote-first persists time to reach
          // VSS, then abort outage-pending retries so shutdown cannot hang.
          match tokio::time::timeout(BP_SHUTDOWN_FLUSH_TIMEOUT, &mut join_handle).await {
-@@ -5687,7 +5995,10 @@ pub(crate) async fn stop_ldk(app_state: Arc<AppState>) {
+@@ -5687,13 +5999,17 @@ pub(crate) async fn stop_ldk(app_state: Arc<AppState>) {
          }
      }
      #[cfg(not(feature = "vss"))]
@@ -5125,7 +5143,16 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
          join_handle.await.unwrap().unwrap();
      }
  
-@@ -5729,6 +6040,27 @@ pub(crate) async fn stop_ldk(app_state: Arc<AppState>) {
+     // Graceful teardown (lock, shutdown, signal): release the VSS fence so
+-    // the next unlock — a fresh instance id — takes over without an explicit
+-    // /vssclearfence. Hard kills still leave the fence behind by design.
++    // another installation can take over without an explicit /vssclearfence.
++    // Hard kills retain the fence; this installation can safely reclaim it
++    // because its writer identity survives process restarts.
+     #[cfg(feature = "vss")]
+     {
+         if let Some((kv_store, monitor_kv_store)) = stores {
+@@ -5729,6 +6045,27 @@ pub(crate) async fn stop_ldk(app_state: Arc<AppState>) {
          }
      }
  
@@ -5153,7 +5180,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
      // connect to the peer port so it can be released
      let peer_port = app_state.static_state.ldk_peer_listening_port;
      let sock_addr = SocketAddr::from(([127, 0, 0, 1], peer_port));
-@@ -5859,6 +6191,120 @@ mod tests {
+@@ -5859,6 +6196,120 @@ mod tests {
          assert!(!access.allows_peer(&peer));
      }
  
@@ -5275,7 +5302,7 @@ index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b02
          let db_path = std::env::temp_dir().join(format!("rln-ldk-unit-{}", uuid::Uuid::new_v4()));
          let connection_string = format!("sqlite:{}?mode=rwc", db_path.display());
 diff --git a/src/node.rs b/src/node.rs
-index c67c2effabf8912af0f1d377c232c79e5f3e7428..0b1cd36d6e6b36023d20de11634e414f1488d7b0 100644
+index c67c2ef..0b1cd36 100644
 --- a/src/node.rs
 +++ b/src/node.rs
 @@ -1,4 +1,6 @@
@@ -5425,7 +5452,7 @@ index c67c2effabf8912af0f1d377c232c79e5f3e7428..0b1cd36d6e6b36023d20de11634e414f
      /// left in `uniffi_api::handle_from_request`) must be able to configure the remote-signer daemon
      /// address; without this field, `NodeHandle`-embedding callers could configure external-signer
 diff --git a/src/rgb.rs b/src/rgb.rs
-index 80df75096abf0e9c42e7909d8418311bbcba4f73..bcde61cb3f6d3554179da544efe33834cea8d33b 100644
+index 80df750..bcde61c 100644
 --- a/src/rgb.rs
 +++ b/src/rgb.rs
 @@ -19,21 +19,37 @@ use rgb_lib::{
@@ -5783,7 +5810,7 @@ index 80df75096abf0e9c42e7909d8418311bbcba4f73..bcde61cb3f6d3554179da544efe33834
          self.get_rgb_wallet().send_btc_end(self.online, signed_psbt)
      }
 diff --git a/src/routes.rs b/src/routes.rs
-index 975a67dd870148848f72bbb32403c6a522b8d8be..78ae911773404cdc1c95ddb9e1b9e3a206d05294 100644
+index 975a67d..78ae911 100644
 --- a/src/routes.rs
 +++ b/src/routes.rs
 @@ -27,7 +27,9 @@ use lightning::{
@@ -6211,7 +6238,7 @@ index 975a67dd870148848f72bbb32403c6a522b8d8be..78ae911773404cdc1c95ddb9e1b9e3a2
      })
      .await
 diff --git a/src/sdk/mod.rs b/src/sdk/mod.rs
-index 3ef5ebc0456f476bbb9f42d4312d6618ba1443cb..3e290416cdb6992ab0b5cb501d50129e51c46682 100644
+index 3ef5ebc..3e29041 100644
 --- a/src/sdk/mod.rs
 +++ b/src/sdk/mod.rs
 @@ -11,8 +11,8 @@ use crate::core_types::async_order::{
@@ -7862,7 +7889,7 @@ index 3ef5ebc0456f476bbb9f42d4312d6618ba1443cb..3e290416cdb6992ab0b5cb501d50129e
          std::fs::create_dir_all(&storage_dir).expect("create temp storage dir");
          let db_path = storage_dir.join("rln_db");
 diff --git a/src/signer/channel_signer.rs b/src/signer/channel_signer.rs
-index 6e24decc5614e140f7428fe63e06a106b8367a71..c38c65a971005f22d09ca50f5e50b600e338d787 100644
+index 6e24dec..c38c65a 100644
 --- a/src/signer/channel_signer.rs
 +++ b/src/signer/channel_signer.rs
 @@ -410,15 +410,58 @@ impl ChannelSigner for ExternalChannelSigner {
@@ -7931,7 +7958,7 @@ index 6e24decc5614e140f7428fe63e06a106b8367a71..c38c65a971005f22d09ca50f5e50b600
  
      fn validate_holder_commitment(
 diff --git a/src/test/address_reuse.rs b/src/test/address_reuse.rs
-index ce8296402bf5fdc510379ffe4be9b58bf4e1ccf9..dc16cdba777818aa0464c3d86bffd027d479d906 100644
+index ce82964..dc16cdb 100644
 --- a/src/test/address_reuse.rs
 +++ b/src/test/address_reuse.rs
 @@ -92,17 +92,18 @@ async fn rotate_advances_pin_and_new_address_receives_funds() {
@@ -7960,7 +7987,7 @@ index ce8296402bf5fdc510379ffe4be9b58bf4e1ccf9..dc16cdba777818aa0464c3d86bffd027
  
  /// `/rotateaddress` is rejected when reuse is disabled.
 diff --git a/src/test/lib_sdk/close_coop_vanilla.rs b/src/test/lib_sdk/close_coop_vanilla.rs
-index 99dfc4de1727df3db4e955fc4214023ee4a51799..1a89d81785726b5ae393c1b84995bdf06cff5073 100644
+index 99dfc4d..1a89d81 100644
 --- a/src/test/lib_sdk/close_coop_vanilla.rs
 +++ b/src/test/lib_sdk/close_coop_vanilla.rs
 @@ -206,6 +206,7 @@ fn run_close_coop_vanilla(name: &str, port_offset: u16, with_anchors: bool) {
@@ -7972,7 +7999,7 @@ index 99dfc4de1727df3db4e955fc4214023ee4a51799..1a89d81785726b5ae393c1b84995bdf0
              .expect("node B sendpayment");
          let payment_hash = send_payment.payment_hash.expect("vanilla payment hash");
 diff --git a/src/test/lib_sdk/external_signer.rs b/src/test/lib_sdk/external_signer.rs
-index 8a52af35b01ed9b299b8be41a7e0568f3c4d97cd..0a2dbbc91fb74e9b6f1c078739403ae03337012b 100644
+index 8a52af3..0a2dbbc 100644
 --- a/src/test/lib_sdk/external_signer.rs
 +++ b/src/test/lib_sdk/external_signer.rs
 @@ -682,6 +682,7 @@ fn rgb_native_external_signer_mixed_one_hop_payment_quick() {
@@ -8186,7 +8213,7 @@ index 8a52af35b01ed9b299b8be41a7e0568f3c4d97cd..0a2dbbc91fb74e9b6f1c078739403ae0
              .unwrap_or_else(|e| panic!("{label}: sendpayment: {e:?}"));
          let payment_hash = send.payment_hash.expect("payment_hash");
 diff --git a/src/test/lib_sdk/helpers.rs b/src/test/lib_sdk/helpers.rs
-index a20ac6d050e0f1bae2ae6fc69bcc5c85147a4f0f..095b12ccf4d707381140ff5106b9c397b59420e1 100644
+index a20ac6d..095b12c 100644
 --- a/src/test/lib_sdk/helpers.rs
 +++ b/src/test/lib_sdk/helpers.rs
 @@ -3,11 +3,11 @@ use once_cell::sync::Lazy;
@@ -8246,7 +8273,7 @@ index a20ac6d050e0f1bae2ae6fc69bcc5c85147a4f0f..095b12ccf4d707381140ff5106b9c397
          .expect("sendpayment with ln balance checks");
  
 diff --git a/src/test/lib_sdk/mod.rs b/src/test/lib_sdk/mod.rs
-index 586ebd846fb9d12ddcf1e791b435793d926d92b9..d57e712b44c377d0be88433cb425e25c1cb4d1a7 100644
+index 586ebd8..d57e712 100644
 --- a/src/test/lib_sdk/mod.rs
 +++ b/src/test/lib_sdk/mod.rs
 @@ -13,6 +13,7 @@ mod multi_hop;
@@ -8258,7 +8285,7 @@ index 586ebd846fb9d12ddcf1e791b435793d926d92b9..d57e712b44c377d0be88433cb425e25c
  mod swap_roundtrip_buy;
  mod vanilla_payment_on_rgb_channel;
 diff --git a/src/test/lib_sdk/multi_hop.rs b/src/test/lib_sdk/multi_hop.rs
-index acb4fd2cab3b2d9b22591fe78b1263a8a4668f91..34bce6c3f6b19b795d62d6a84c130242f2ddd4c6 100644
+index acb4fd2..34bce6c 100644
 --- a/src/test/lib_sdk/multi_hop.rs
 +++ b/src/test/lib_sdk/multi_hop.rs
 @@ -253,6 +253,7 @@ fn multi_hop() {
@@ -8270,7 +8297,7 @@ index acb4fd2cab3b2d9b22591fe78b1263a8a4668f91..34bce6c3f6b19b795d62d6a84c130242
              .expect("node A sendpayment");
          let payment_hash = send_payment
 diff --git a/src/test/lib_sdk/payment.rs b/src/test/lib_sdk/payment.rs
-index 574fd5df1474c2d313b8ba8108e929f525f5b7c5..22440e5a55bbc9739d6a16993596334ef51e9398 100644
+index 574fd5d..22440e5 100644
 --- a/src/test/lib_sdk/payment.rs
 +++ b/src/test/lib_sdk/payment.rs
 @@ -285,6 +285,7 @@ fn success() {
@@ -8290,7 +8317,7 @@ index 574fd5df1474c2d313b8ba8108e929f525f5b7c5..22440e5a55bbc9739d6a16993596334e
              .expect("node B sendpayment fourth");
          let decoded = node_a
 diff --git a/src/test/lib_sdk/restart.rs b/src/test/lib_sdk/restart.rs
-index 89331d42494c11557fd30c08761279f3af36d684..5770b445a0846effd37791e53c80dc21fd697f9b 100644
+index 89331d4..5770b44 100644
 --- a/src/test/lib_sdk/restart.rs
 +++ b/src/test/lib_sdk/restart.rs
 @@ -169,6 +169,7 @@ fn restart() {
@@ -8303,7 +8330,7 @@ index 89331d42494c11557fd30c08761279f3af36d684..5770b445a0846effd37791e53c80dc21
          let payment_hash = send_payment.payment_hash.expect("payment hash");
 diff --git a/src/test/lib_sdk/rgb_utxo_isolation.rs b/src/test/lib_sdk/rgb_utxo_isolation.rs
 new file mode 100644
-index 0000000000000000000000000000000000000000..eb3dd0f05d3dba4f64851d87b20229e664d1d6a7
+index 0000000..eb3dd0f
 --- /dev/null
 +++ b/src/test/lib_sdk/rgb_utxo_isolation.rs
 @@ -0,0 +1,140 @@
@@ -8448,7 +8475,7 @@ index 0000000000000000000000000000000000000000..eb3dd0f05d3dba4f64851d87b20229e6
 +    }
 +}
 diff --git a/src/test/lib_sdk/vanilla_payment_on_rgb_channel.rs b/src/test/lib_sdk/vanilla_payment_on_rgb_channel.rs
-index 862f288297d6272ffdf75a1f37cec83a88189041..0108a52669d0fa5807782846a61c0064e9f0fd22 100644
+index 862f288..0108a52 100644
 --- a/src/test/lib_sdk/vanilla_payment_on_rgb_channel.rs
 +++ b/src/test/lib_sdk/vanilla_payment_on_rgb_channel.rs
 @@ -114,6 +114,7 @@ fn vanilla_payment_on_rgb_channel() {
@@ -8459,8 +8486,91 @@ index 862f288297d6272ffdf75a1f37cec83a88189041..0108a52669d0fa5807782846a61c0064
              })
              .expect("node A sendpayment");
          let payment_hash = send_payment
+diff --git a/src/test/vss.rs b/src/test/vss.rs
+index ab7e5f4..4fc2e95 100644
+--- a/src/test/vss.rs
++++ b/src/test/vss.rs
+@@ -12,6 +12,7 @@ mod tests {
+     use hex::DisplayHex;
+     use lightning::util::persist::KVStoreSync;
+     use sea_orm::{ConnectOptions, Database};
++    use uuid::Uuid;
+ 
+     use crate::kv_store::SeaOrmKvStore;
+     use crate::synced_kv_store::SyncedKvStore;
+@@ -573,6 +574,59 @@ mod tests {
+             .expect("b acquires fence after clear");
+     }
+ 
++    /// An abrupt process exit leaves the remote fence in place. A restart
++    /// from the same local node data must reuse its writer identity and reclaim
++    /// that fence without weakening the different-installation exclusion.
++    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++    async fn vss_same_installation_reclaims_fence_after_restart() {
++        if !vss_server_available() {
++            eprintln!("SKIP: VSS server not available at {VSS_URL}");
++            return;
++        }
++
++        let (signing_key, store_id) = generate_test_keys();
++        let writer_id = Uuid::new_v4();
++        let retry = crate::config::VssSection::default();
++        let original = VssKvStore::new_with_retry_and_instance_id(
++            VSS_URL.to_string(),
++            store_id.clone(),
++            signing_key,
++            &retry,
++            writer_id,
++        )
++        .expect("original store");
++        original.acquire_fence().expect("original acquires fence");
++        drop(original);
++
++        let restarted = VssKvStore::new_with_retry_and_instance_id(
++            VSS_URL.to_string(),
++            store_id.clone(),
++            signing_key,
++            &retry,
++            writer_id,
++        )
++        .expect("restarted store");
++        restarted
++            .acquire_fence()
++            .expect("same installation reclaims its fence");
++
++        let other_installation = VssKvStore::new_with_retry_and_instance_id(
++            VSS_URL.to_string(),
++            store_id,
++            signing_key,
++            &retry,
++            Uuid::new_v4(),
++        )
++        .expect("other store");
++        other_installation
++            .acquire_fence()
++            .expect_err("a different installation must remain fenced out");
++
++        restarted
++            .release_fence_if_owned()
++            .expect("test cleanup releases fence");
++    }
++
+     /// `delete_fence` is idempotent: clearing an absent fence must not error,
+     /// so it stays safe to call defensively before unlock.
+     #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+@@ -698,8 +752,8 @@ mod tests {
+         crate::test::shutdown(&[node_address]).await;
+     }
+ 
+-    /// A graceful lock must release the VSS fence: the next unlock runs under
+-    /// a fresh instance id and must take over without `/vssclearfence`.
++    /// A graceful lock must release the VSS fence so the next unlock can
++    /// proceed without `/vssclearfence`.
+     #[serial_test::serial]
+     #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+     async fn vss_lock_releases_fence_for_next_unlock() {
 diff --git a/src/uniffi_api/mod.rs b/src/uniffi_api/mod.rs
-index c6173a390f180ab7664a6b883464961f9c855925..45e1a2e1b8dce9ca7783f275f8c57973251dec04 100644
+index c6173a3..45e1a2e 100644
 --- a/src/uniffi_api/mod.rs
 +++ b/src/uniffi_api/mod.rs
 @@ -115,11 +115,8 @@ fn handle_from_request(request: SdkInitRequest) -> Result<NodeHandle, RlnError>
@@ -8866,7 +8976,7 @@ index c6173a390f180ab7664a6b883464961f9c855925..45e1a2e1b8dce9ca7783f275f8c57973
          let state = self.handle.app_state();
          let response = block_on_sdk(sdk::async_order_new(
 diff --git a/src/uniffi_api/native_signer.rs b/src/uniffi_api/native_signer.rs
-index 42f6c146b0b5715a2ade52f5e9718de43edc6c90..cf1f4ffe020ce11912b653ef1f46a333d26a7734 100644
+index 42f6c14..cf1f4ff 100644
 --- a/src/uniffi_api/native_signer.rs
 +++ b/src/uniffi_api/native_signer.rs
 @@ -11,14 +11,18 @@ use bitcoin::Network;
@@ -9023,7 +9133,7 @@ index 42f6c146b0b5715a2ade52f5e9718de43edc6c90..cf1f4ffe020ce11912b653ef1f46a333
 +    }
  }
 diff --git a/src/uniffi_api/state.rs b/src/uniffi_api/state.rs
-index 59faef015734e5aa4d309bfc9bdc6203da81a0a1..a303cf2dc12f823ee74a56991e232494895d6332 100644
+index 59faef0..a303cf2 100644
 --- a/src/uniffi_api/state.rs
 +++ b/src/uniffi_api/state.rs
 @@ -232,6 +232,7 @@ pub(super) fn map_app_error(err: AppError) -> RlnError {
@@ -9035,7 +9145,7 @@ index 59faef015734e5aa4d309bfc9bdc6203da81a0a1..a303cf2dc12f823ee74a56991e232494
              RlnError::InvalidRequest(msg)
          }
 diff --git a/src/uniffi_api/tests.rs b/src/uniffi_api/tests.rs
-index 4f37a9564b5801e7ef5f84a55fe4cd0409fe26e9..afea3a2fdfb49d3198a43ff9392acbaa697b31e8 100644
+index 4f37a95..afea3a2 100644
 --- a/src/uniffi_api/tests.rs
 +++ b/src/uniffi_api/tests.rs
 @@ -412,11 +412,15 @@ mod uniffi_smoke_tests {
@@ -9055,7 +9165,7 @@ index 4f37a9564b5801e7ef5f84a55fe4cd0409fe26e9..afea3a2fdfb49d3198a43ff9392acbaa
      }
  
 diff --git a/src/uniffi_api/types.rs b/src/uniffi_api/types.rs
-index beeaf62ea3e2ece39fcb5a1ec8cccf3476d4e063..bdac98621b1e496cb243ad316ea774856c50ea20 100644
+index beeaf62..bdac986 100644
 --- a/src/uniffi_api/types.rs
 +++ b/src/uniffi_api/types.rs
 @@ -10,6 +10,7 @@ pub type Bolt11Invoice = lightning_invoice::Bolt11Invoice;
@@ -9226,7 +9336,7 @@ index beeaf62ea3e2ece39fcb5a1ec8cccf3476d4e063..bdac98621b1e496cb243ad316ea77485
      pub qty_from: u64,
      pub qty_to: u64,
 diff --git a/src/utils.rs b/src/utils.rs
-index 33cfc42dffa59d1254392941bbb1e377b6ee9177..f8a6e340de47fdeab0394122e06c4aa1cf960d1b 100644
+index 33cfc42..f8a6e34 100644
 --- a/src/utils.rs
 +++ b/src/utils.rs
 @@ -164,6 +164,7 @@ impl StaticState {
@@ -9238,10 +9348,152 @@ index 33cfc42dffa59d1254392941bbb1e377b6ee9177..f8a6e340de47fdeab0394122e06c4aa1
      pub(crate) gossip_source: Arc<crate::gossip::GossipSource>,
      pub(crate) inbound_payments: Arc<Mutex<InboundPaymentInfoStorage>>,
 diff --git a/src/vss_kv_store.rs b/src/vss_kv_store.rs
-index b956bd1a8b3ca266248bbf1e6b3260dafa47101a..af869d58a6ca4db52dd10a576eba70f4998782a6 100644
+index b956bd1..3c395f9 100644
 --- a/src/vss_kv_store.rs
 +++ b/src/vss_kv_store.rs
-@@ -613,6 +613,78 @@ impl VssKvStore {
+@@ -1,4 +1,7 @@
+ use std::collections::HashMap;
++use std::fs;
++use std::io::Write;
++use std::path::Path;
+ use std::sync::Arc;
+ use std::time::Duration;
+ 
+@@ -85,6 +88,13 @@ const HEADER_LEN: usize = 1 + SALT_LEN + NONCE_LEN;
+ /// this key explicitly.
+ const FENCE_KEY: &str = "__rln_instance__";
+ 
++/// Local, non-replicated identity for the process owner of a VSS store.
++///
++/// The value must survive ordinary process restarts, but must not follow the
++/// mnemonic to another installation. Keeping it beside the local node state
++/// gives each independently provisioned data directory a distinct writer ID.
++const VSS_WRITER_ID_FILE: &str = ".vss_writer_id";
++
+ /// How many writes between periodic fence re-checks.
+ ///
+ /// The startup fence acquire catches the common case (another instance is
+@@ -102,14 +112,85 @@ pub struct VssKvStore {
+     client: VssClient<VssRetryPolicy>,
+     store_id: String,
+     signing_key: SecretKey,
+-    /// Per-process identity used by [`Self::acquire_fence`] and the periodic
+-    /// fence re-check.
++    /// Per-local-installation identity used by [`Self::acquire_fence`] and the
++    /// periodic fence re-check.
+     instance_id: Uuid,
+     /// Counter incremented on every write; modulo [`FENCE_CHECK_INTERVAL`] is
+     /// used to schedule periodic fence re-checks.
+     write_counter: std::sync::atomic::AtomicU64,
+ }
+ 
++fn read_writer_id(path: &Path) -> Result<Uuid, io::Error> {
++    let raw = fs::read_to_string(path).map_err(|error| {
++        io::Error::new(
++            io::ErrorKind::Other,
++            format!("failed to read local VSS writer identity: {error}"),
++        )
++    })?;
++    Uuid::parse_str(raw.trim()).map_err(|error| {
++        io::Error::new(
++            io::ErrorKind::InvalidData,
++            format!("invalid local VSS writer identity: {error}"),
++        )
++    })
++}
++
++/// Returns the stable VSS writer identity for one local node data directory.
++///
++/// The candidate is fully written and synced before a hard link publishes it
++/// at the canonical path. The link is an atomic no-clobber operation: racing
++/// starters either publish one complete value or read the already-published
++/// value. A malformed existing value fails closed rather than silently taking
++/// ownership with a replacement identity.
++pub(crate) fn load_or_create_writer_id(storage_dir: &Path) -> Result<Uuid, io::Error> {
++    fs::create_dir_all(storage_dir)?;
++    let path = storage_dir.join(VSS_WRITER_ID_FILE);
++    if path.exists() {
++        return read_writer_id(&path);
++    }
++
++    let candidate = Uuid::new_v4();
++    let temporary_path = storage_dir.join(format!("{VSS_WRITER_ID_FILE}.{}.tmp", Uuid::new_v4()));
++
++    #[cfg(unix)]
++    let mut temporary_file = {
++        use std::os::unix::fs::OpenOptionsExt;
++        fs::OpenOptions::new()
++            .create_new(true)
++            .write(true)
++            .mode(0o600)
++            .open(&temporary_path)?
++    };
++    #[cfg(not(unix))]
++    let mut temporary_file = fs::OpenOptions::new()
++        .create_new(true)
++        .write(true)
++        .open(&temporary_path)?;
++
++    temporary_file.write_all(candidate.to_string().as_bytes())?;
++    temporary_file.sync_all()?;
++    drop(temporary_file);
++
++    let publish_result = fs::hard_link(&temporary_path, &path);
++    let cleanup_result = fs::remove_file(&temporary_path);
++    if let Err(error) = cleanup_result {
++        tracing::warn!(
++            path = %temporary_path.display(),
++            error = %error,
++            "failed to remove temporary VSS writer identity file"
++        );
++    }
++
++    match publish_result {
++        Ok(()) => Ok(candidate),
++        Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => read_writer_id(&path),
++        Err(error) => Err(io::Error::new(
++            io::ErrorKind::Other,
++            format!("failed to publish local VSS writer identity: {error}"),
++        )),
++    }
++}
++
+ impl VssKvStore {
+     /// Creates a new VssKvStore connected to the given VSS server.
+     ///
+@@ -137,6 +218,22 @@ impl VssKvStore {
+         store_id: String,
+         signing_key: SecretKey,
+         retry: &crate::config::VssSection,
++    ) -> Result<Self, io::Error> {
++        Self::new_with_retry_and_instance_id(
++            server_url,
++            store_id,
++            signing_key,
++            retry,
++            Uuid::new_v4(),
++        )
++    }
++
++    pub(crate) fn new_with_retry_and_instance_id(
++        server_url: String,
++        store_id: String,
++        signing_key: SecretKey,
++        retry: &crate::config::VssSection,
++        instance_id: Uuid,
+     ) -> Result<Self, io::Error> {
+         let auth_provider = SigsAuthProvider::new(signing_key, HashMap::new());
+ 
+@@ -151,7 +248,7 @@ impl VssKvStore {
+             client,
+             store_id,
+             signing_key,
+-            instance_id: Uuid::new_v4(),
++            instance_id,
+             write_counter: std::sync::atomic::AtomicU64::new(0),
+         })
+     }
+@@ -613,6 +710,78 @@ impl VssKvStore {
  
          Ok(all_items)
      }
@@ -9320,3 +9572,43 @@ index b956bd1a8b3ca266248bbf1e6b3260dafa47101a..af869d58a6ca4db52dd10a576eba70f4
  }
  
  /// Encode a `(primary_namespace, secondary_namespace, key)` triple as a
+@@ -913,3 +1082,39 @@ mod fence_release_guard_tests {
+         );
+     }
+ }
++
++#[cfg(test)]
++mod writer_id_tests {
++    use super::{load_or_create_writer_id, VSS_WRITER_ID_FILE};
++
++    #[test]
++    fn writer_id_survives_process_restart_for_same_local_state() {
++        let storage = tempfile::tempdir().expect("temporary storage");
++        let first = load_or_create_writer_id(storage.path()).expect("create writer id");
++        let restarted = load_or_create_writer_id(storage.path()).expect("read writer id");
++
++        assert_eq!(first, restarted);
++    }
++
++    #[test]
++    fn independent_local_state_gets_a_distinct_writer_id() {
++        let first_storage = tempfile::tempdir().expect("first temporary storage");
++        let second_storage = tempfile::tempdir().expect("second temporary storage");
++
++        let first = load_or_create_writer_id(first_storage.path()).expect("first writer id");
++        let second = load_or_create_writer_id(second_storage.path()).expect("second writer id");
++
++        assert_ne!(first, second);
++    }
++
++    #[test]
++    fn corrupt_writer_id_fails_closed() {
++        let storage = tempfile::tempdir().expect("temporary storage");
++        std::fs::write(storage.path().join(VSS_WRITER_ID_FILE), "not-a-uuid")
++            .expect("write corrupt identity");
++
++        let error = load_or_create_writer_id(storage.path()).expect_err("corruption must fail");
++
++        assert_eq!(error.kind(), bitcoin::io::ErrorKind::InvalidData);
++    }
++}
