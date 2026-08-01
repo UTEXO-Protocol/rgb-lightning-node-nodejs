@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Publish the persisted local VSS writer identity with an Android-safe
+  exclusive-create protocol, bounded concurrent-reader retry, and fail-closed
+  corruption handling.
+
 ## 0.1.0-beta.15
 
 - Expose the disk-backed native VLS signer needed for channel operation after

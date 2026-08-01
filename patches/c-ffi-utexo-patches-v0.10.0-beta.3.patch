@@ -9348,7 +9348,7 @@ index 33cfc42..f8a6e34 100644
      pub(crate) gossip_source: Arc<crate::gossip::GossipSource>,
      pub(crate) inbound_payments: Arc<Mutex<InboundPaymentInfoStorage>>,
 diff --git a/src/vss_kv_store.rs b/src/vss_kv_store.rs
-index b956bd1..3c395f9 100644
+index b956bd1..e27d99a 100644
 --- a/src/vss_kv_store.rs
 +++ b/src/vss_kv_store.rs
 @@ -1,4 +1,7 @@
@@ -9359,7 +9359,7 @@ index b956bd1..3c395f9 100644
  use std::sync::Arc;
  use std::time::Duration;
  
-@@ -85,6 +88,13 @@ const HEADER_LEN: usize = 1 + SALT_LEN + NONCE_LEN;
+@@ -85,6 +88,30 @@ const HEADER_LEN: usize = 1 + SALT_LEN + NONCE_LEN;
  /// this key explicitly.
  const FENCE_KEY: &str = "__rln_instance__";
  
@@ -9370,10 +9370,27 @@ index b956bd1..3c395f9 100644
 +/// gives each independently provisioned data directory a distinct writer ID.
 +const VSS_WRITER_ID_FILE: &str = ".vss_writer_id";
 +
++/// A competing process can observe the exclusively-created identity file
++/// between `open` and `sync_all`. Bound that publication window rather than
++/// ever replacing an identity whose durability is uncertain.
++const VSS_WRITER_ID_READ_ATTEMPTS: usize = 50;
++const VSS_WRITER_ID_READ_RETRY_DELAY: Duration = Duration::from_millis(10);
++
++fn bitcoin_io_kind(kind: std::io::ErrorKind) -> io::ErrorKind {
++    match kind {
++        std::io::ErrorKind::NotFound => io::ErrorKind::NotFound,
++        std::io::ErrorKind::PermissionDenied => io::ErrorKind::PermissionDenied,
++        std::io::ErrorKind::AlreadyExists => io::ErrorKind::AlreadyExists,
++        std::io::ErrorKind::InvalidData => io::ErrorKind::InvalidData,
++        std::io::ErrorKind::TimedOut => io::ErrorKind::TimedOut,
++        _ => io::ErrorKind::Other,
++    }
++}
++
  /// How many writes between periodic fence re-checks.
  ///
  /// The startup fence acquire catches the common case (another instance is
-@@ -102,14 +112,85 @@ pub struct VssKvStore {
+@@ -102,14 +129,92 @@ pub struct VssKvStore {
      client: VssClient<VssRetryPolicy>,
      store_id: String,
      signing_key: SecretKey,
@@ -9390,7 +9407,7 @@ index b956bd1..3c395f9 100644
 +fn read_writer_id(path: &Path) -> Result<Uuid, io::Error> {
 +    let raw = fs::read_to_string(path).map_err(|error| {
 +        io::Error::new(
-+            io::ErrorKind::Other,
++            bitcoin_io_kind(error.kind()),
 +            format!("failed to read local VSS writer identity: {error}"),
 +        )
 +    })?;
@@ -9402,58 +9419,65 @@ index b956bd1..3c395f9 100644
 +    })
 +}
 +
++fn read_competing_writer_id(path: &Path) -> Result<Uuid, io::Error> {
++    for attempt in 0..VSS_WRITER_ID_READ_ATTEMPTS {
++        match read_writer_id(path) {
++            Ok(writer_id) => return Ok(writer_id),
++            Err(error)
++                if attempt + 1 < VSS_WRITER_ID_READ_ATTEMPTS
++                    && matches!(
++                        error.kind(),
++                        io::ErrorKind::NotFound | io::ErrorKind::InvalidData
++                    ) =>
++            {
++                std::thread::sleep(VSS_WRITER_ID_READ_RETRY_DELAY);
++            }
++            Err(error) => return Err(error),
++        }
++    }
++
++    unreachable!("the bounded writer identity read loop always returns")
++}
++
 +/// Returns the stable VSS writer identity for one local node data directory.
 +///
-+/// The candidate is fully written and synced before a hard link publishes it
-+/// at the canonical path. The link is an atomic no-clobber operation: racing
-+/// starters either publish one complete value or read the already-published
-+/// value. A malformed existing value fails closed rather than silently taking
-+/// ownership with a replacement identity.
++/// The canonical file is opened with exclusive-create semantics, which is the
++/// portable no-clobber primitive available in Android application storage.
++/// Racing starters either create and durably sync one value or wait briefly
++/// for that value to finish publishing. A malformed existing value fails
++/// closed rather than silently taking ownership with a replacement identity.
 +pub(crate) fn load_or_create_writer_id(storage_dir: &Path) -> Result<Uuid, io::Error> {
 +    fs::create_dir_all(storage_dir)?;
 +    let path = storage_dir.join(VSS_WRITER_ID_FILE);
-+    if path.exists() {
-+        return read_writer_id(&path);
-+    }
-+
 +    let candidate = Uuid::new_v4();
-+    let temporary_path = storage_dir.join(format!("{VSS_WRITER_ID_FILE}.{}.tmp", Uuid::new_v4()));
 +
 +    #[cfg(unix)]
-+    let mut temporary_file = {
++    let create_result = {
 +        use std::os::unix::fs::OpenOptionsExt;
 +        fs::OpenOptions::new()
 +            .create_new(true)
 +            .write(true)
 +            .mode(0o600)
-+            .open(&temporary_path)?
++            .open(&path)
 +    };
 +    #[cfg(not(unix))]
-+    let mut temporary_file = fs::OpenOptions::new()
++    let create_result = fs::OpenOptions::new()
 +        .create_new(true)
 +        .write(true)
-+        .open(&temporary_path)?;
++        .open(&path);
 +
-+    temporary_file.write_all(candidate.to_string().as_bytes())?;
-+    temporary_file.sync_all()?;
-+    drop(temporary_file);
-+
-+    let publish_result = fs::hard_link(&temporary_path, &path);
-+    let cleanup_result = fs::remove_file(&temporary_path);
-+    if let Err(error) = cleanup_result {
-+        tracing::warn!(
-+            path = %temporary_path.display(),
-+            error = %error,
-+            "failed to remove temporary VSS writer identity file"
-+        );
-+    }
-+
-+    match publish_result {
-+        Ok(()) => Ok(candidate),
-+        Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => read_writer_id(&path),
++    match create_result {
++        Ok(mut file) => {
++            file.write_all(candidate.to_string().as_bytes())?;
++            file.sync_all()?;
++            Ok(candidate)
++        }
++        Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {
++            read_competing_writer_id(&path)
++        }
 +        Err(error) => Err(io::Error::new(
-+            io::ErrorKind::Other,
-+            format!("failed to publish local VSS writer identity: {error}"),
++            bitcoin_io_kind(error.kind()),
++            format!("failed to create local VSS writer identity: {error}"),
 +        )),
 +    }
 +}
@@ -9461,7 +9485,7 @@ index b956bd1..3c395f9 100644
  impl VssKvStore {
      /// Creates a new VssKvStore connected to the given VSS server.
      ///
-@@ -137,6 +218,22 @@ impl VssKvStore {
+@@ -137,6 +242,22 @@ impl VssKvStore {
          store_id: String,
          signing_key: SecretKey,
          retry: &crate::config::VssSection,
@@ -9484,7 +9508,7 @@ index b956bd1..3c395f9 100644
      ) -> Result<Self, io::Error> {
          let auth_provider = SigsAuthProvider::new(signing_key, HashMap::new());
  
-@@ -151,7 +248,7 @@ impl VssKvStore {
+@@ -151,7 +272,7 @@ impl VssKvStore {
              client,
              store_id,
              signing_key,
@@ -9493,7 +9517,7 @@ index b956bd1..3c395f9 100644
              write_counter: std::sync::atomic::AtomicU64::new(0),
          })
      }
-@@ -613,6 +710,78 @@ impl VssKvStore {
+@@ -613,6 +734,78 @@ impl VssKvStore {
  
          Ok(all_items)
      }
@@ -9572,7 +9596,7 @@ index b956bd1..3c395f9 100644
  }
  
  /// Encode a `(primary_namespace, secondary_namespace, key)` triple as a
-@@ -913,3 +1082,39 @@ mod fence_release_guard_tests {
+@@ -913,3 +1106,72 @@ mod fence_release_guard_tests {
          );
      }
  }
@@ -9580,6 +9604,7 @@ index b956bd1..3c395f9 100644
 +#[cfg(test)]
 +mod writer_id_tests {
 +    use super::{load_or_create_writer_id, VSS_WRITER_ID_FILE};
++    use std::sync::{Arc, Barrier};
 +
 +    #[test]
 +    fn writer_id_survives_process_restart_for_same_local_state() {
@@ -9610,5 +9635,37 @@ index b956bd1..3c395f9 100644
 +        let error = load_or_create_writer_id(storage.path()).expect_err("corruption must fail");
 +
 +        assert_eq!(error.kind(), bitcoin::io::ErrorKind::InvalidData);
++    }
++
++    #[test]
++    fn concurrent_starters_share_one_complete_writer_id() {
++        let storage = tempfile::tempdir().expect("temporary storage");
++        let storage_path = Arc::new(storage.path().to_path_buf());
++        let barrier = Arc::new(Barrier::new(16));
++        let starters = (0..16)
++            .map(|_| {
++                let storage_path = Arc::clone(&storage_path);
++                let barrier = Arc::clone(&barrier);
++                std::thread::spawn(move || {
++                    barrier.wait();
++                    load_or_create_writer_id(&storage_path).expect("load one writer id")
++                })
++            })
++            .collect::<Vec<_>>();
++
++        let writer_ids = starters
++            .into_iter()
++            .map(|starter| starter.join().expect("starter thread"))
++            .collect::<Vec<_>>();
++
++        assert!(writer_ids
++            .iter()
++            .all(|writer_id| *writer_id == writer_ids[0]));
++        assert_eq!(
++            std::fs::read_to_string(storage.path().join(VSS_WRITER_ID_FILE))
++                .expect("read writer identity")
++                .len(),
++            36,
++        );
 +    }
 +}
