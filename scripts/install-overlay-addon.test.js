@@ -17,7 +17,7 @@ test('package overlay metadata is exact and checksum-pinned', () => {
   assert.equal(config.commit, '0bfa66fa256a6c36f3737d5b6402eacea40c68fc')
   assert.equal(
     config.patchSha256,
-    '59d5d7c77a6563934d571ff36b0564c7e44b24f68ce07b305fe6c535ab1f50d1'
+    'e68d22c829c899674cb8b20d5456783c10a62e563c39b7f9a44885db2d17b57c'
   )
   assert.equal(config.rustToolchain, '1.88.0')
 })
@@ -35,6 +35,17 @@ test('overlay contains the complete native operation registry source', () => {
   assert.match(patch, /pub\(crate\) fn status\(/)
   assert.match(patch, /pub\(crate\) fn adopt\(/)
   assert.match(patch, /pub\(crate\) fn cancel\(/)
+})
+
+test('overlay preserves wallet discovery, RGB payment identity, and inbound channel semantics', () => {
+  const config = readConfig()
+  const patch = fs.readFileSync(path.resolve(config.patchPath), 'utf8')
+
+  assert.match(patch, /does not match the revealed wallet address/)
+  assert.match(patch, /payment_info_persists_rgb_identity_with_its_payment_status/)
+  assert.match(patch, /standard_inbound_channel_is_not_reclassified_when_virtual_support_is_enabled/)
+  assert.match(patch, /INVOICE_EXPIRED/)
+  assert.match(patch, /utexo-wallet-v3/)
 })
 
 test('addon provenance rejects stale patch and tampered artifact identities', () => {

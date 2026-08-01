@@ -1,5 +1,5 @@
 diff --git a/bindings/c-ffi/Cargo.lock b/bindings/c-ffi/Cargo.lock
-index 5886c2d..401c5fe 100644
+index 5886c2dad3ab839a54a67db6f8852e9a064cce31..401c5fe634feafc5b7cd83636ac2ffe9c7be9561 100644
 --- a/bindings/c-ffi/Cargo.lock
 +++ b/bindings/c-ffi/Cargo.lock
 @@ -177,7 +177,7 @@ version = "1.1.5"
@@ -203,7 +203,7 @@ index 5886c2d..401c5fe 100644
  
  [[package]]
 diff --git a/bindings/c-ffi/Cargo.toml b/bindings/c-ffi/Cargo.toml
-index 2385e9f..eb9ee54 100644
+index 2385e9fb4afb10076ffd5fba0de995e0cd591896..eb9ee54bcbf6140b791ffa674c5d336f404b780f 100644
 --- a/bindings/c-ffi/Cargo.toml
 +++ b/bindings/c-ffi/Cargo.toml
 @@ -24,6 +24,7 @@ serde = { version = "1.0", features = ["derive"] }
@@ -215,7 +215,7 @@ index 2385e9f..eb9ee54 100644
  [build-dependencies]
  cbindgen = "0.29.0"
 diff --git a/bindings/c-ffi/rln.h b/bindings/c-ffi/rln.h
-index eb7e572..49abfcf 100644
+index eb7e5720fb56a391d66a6a2bcaeb8951cb94915b..49abfcfd54a2540988e1f3eaa8c71bf937b3f2d1 100644
 --- a/bindings/c-ffi/rln.h
 +++ b/bindings/c-ffi/rln.h
 @@ -26,8 +26,9 @@ typedef struct CResult {
@@ -384,7 +384,7 @@ index eb7e572..49abfcf 100644
 +struct CResultString rln_wallet_snapshot(const struct COpaqueStruct *node,
 +                                         const char *request_json);
 diff --git a/bindings/c-ffi/rln.hpp b/bindings/c-ffi/rln.hpp
-index 64266ec..023ba91 100644
+index 64266ecd582ccf2bc6b254f2a32cc25e47a6848b..023ba919d11a0d4e170fedb198af8a6699d96f48 100644
 --- a/bindings/c-ffi/rln.hpp
 +++ b/bindings/c-ffi/rln.hpp
 @@ -29,8 +29,9 @@ struct CResult {
@@ -539,7 +539,7 @@ index 64266ec..023ba91 100644
 +
  }  // extern "C"
 diff --git a/bindings/c-ffi/src/api.rs b/bindings/c-ffi/src/api.rs
-index edb35ed..6d42159 100644
+index edb35eddf1b5a15b8965bb012b227357c2bf3635..e36a7ee6456118712dc42f426ae75f47c18c248f 100644
 --- a/bindings/c-ffi/src/api.rs
 +++ b/bindings/c-ffi/src/api.rs
 @@ -3,9 +3,12 @@
@@ -1146,8 +1146,8 @@ index edb35ed..6d42159 100644
 +    })?;
 +    let completed_at_ms = unix_time_ms()?;
 +    json(JsonWalletSnapshotResponse {
-+        contract_version: 2,
-+        native_source: "rgb-lightning-node-v0.10.0-beta.3+utexo-wallet-v2",
++        contract_version: 3,
++        native_source: "rgb-lightning-node-v0.10.0-beta.3+utexo-wallet-v3",
 +        capture_sequence: capture_sequence.to_string(),
 +        capture_attempts,
 +        stable_capture_count: 2,
@@ -1284,7 +1284,7 @@ index edb35ed..6d42159 100644
 +    }
 +}
 diff --git a/bindings/c-ffi/src/json_types.rs b/bindings/c-ffi/src/json_types.rs
-index fc570e0..34b0efc 100644
+index fc570e0696a2053aac7f7230473b2e51f37abe05..48a9d6a9ed455a2b2302bd69848cc6a69dd59032 100644
 --- a/bindings/c-ffi/src/json_types.rs
 +++ b/bindings/c-ffi/src/json_types.rs
 @@ -15,25 +15,28 @@ use hex::DisplayHex;
@@ -1394,7 +1394,17 @@ index fc570e0..34b0efc 100644
          }
      }
  }
-@@ -604,6 +620,8 @@ pub(crate) struct JsonPayment {
+@@ -596,14 +612,18 @@ pub(crate) struct JsonPayment {
+     pub amt_msat: Option<u64>,
+     pub asset_amount: Option<u64>,
+     pub asset_id: Option<String>,
++    pub carrier_msat: Option<u64>,
+     pub payment_hash: String,
+     pub payment_type: PaymentTypeStr,
+     pub status: HtlcStatusStr,
+     pub created_at: u64,
+     pub updated_at: u64,
++    pub expires_at: Option<u64>,
      pub payee_pubkey: String,
      pub preimage: Option<String>,
      pub description_hash: Option<String>,
@@ -1403,7 +1413,17 @@ index fc570e0..34b0efc 100644
  }
  
  impl From<Payment> for JsonPayment {
-@@ -620,6 +638,8 @@ impl From<Payment> for JsonPayment {
+@@ -612,14 +632,18 @@ impl From<Payment> for JsonPayment {
+             amt_msat: p.amt_msat,
+             asset_amount: p.asset_amount,
+             asset_id: p.asset_id.as_ref().map(fmt_contract_id),
++            carrier_msat: p.carrier_msat,
+             payment_hash: fmt_payment_hash(&p.payment_hash),
+             payment_type: p.payment_type.into(),
+             status: p.status.into(),
+             created_at: p.created_at,
+             updated_at: p.updated_at,
++            expires_at: p.expires_at,
              payee_pubkey: fmt_pubkey(&p.payee_pubkey),
              preimage: p.preimage,
              description_hash: p.description_hash,
@@ -1412,7 +1432,7 @@ index fc570e0..34b0efc 100644
          }
      }
  }
-@@ -762,6 +782,7 @@ pub(crate) struct JsonDecodeLnInvoiceResponse {
+@@ -762,6 +786,7 @@ pub(crate) struct JsonDecodeLnInvoiceResponse {
      pub payment_hash: String,
      pub payment_secret: String,
      pub payee_pubkey: Option<String>,
@@ -1420,7 +1440,7 @@ index fc570e0..34b0efc 100644
      pub network: String,
  }
  
-@@ -776,35 +797,82 @@ impl From<DecodeLnInvoiceResponse> for JsonDecodeLnInvoiceResponse {
+@@ -776,35 +801,82 @@ impl From<DecodeLnInvoiceResponse> for JsonDecodeLnInvoiceResponse {
              payment_hash: fmt_payment_hash(&r.payment_hash),
              payment_secret: r.payment_secret,
              payee_pubkey: r.payee_pubkey.as_ref().map(fmt_pubkey),
@@ -1509,7 +1529,7 @@ index fc570e0..34b0efc 100644
      }
  }
  
-@@ -1527,13 +1595,15 @@ impl From<NodeInfo> for JsonNodeInfo {
+@@ -1527,13 +1599,15 @@ impl From<NodeInfo> for JsonNodeInfo {
  pub(crate) struct JsonNetworkInfo {
      pub network: String,
      pub height: u32,
@@ -1526,7 +1546,7 @@ index fc570e0..34b0efc 100644
          }
      }
  }
-@@ -1581,6 +1651,667 @@ impl From<BtcBalanceInfo> for JsonBtcBalanceInfo {
+@@ -1581,6 +1655,709 @@ impl From<BtcBalanceInfo> for JsonBtcBalanceInfo {
      }
  }
  
@@ -1853,13 +1873,16 @@ index fc570e0..34b0efc 100644
 +    pub amt_msat: Option<String>,
 +    pub asset_amount: Option<String>,
 +    pub asset_id: Option<String>,
++    pub carrier_msat: Option<String>,
 +    pub payment_hash: String,
 +    pub payment_type: PaymentTypeStr,
 +    pub status: HtlcStatusStr,
 +    pub created_at: String,
 +    pub updated_at: String,
++    pub expires_at: Option<String>,
 +    pub payee_pubkey: String,
 +    pub fee_paid_msat: Option<String>,
++    pub failure_code: Option<String>,
 +}
 +
 +impl From<Payment> for JsonWalletSnapshotPayment {
@@ -1868,13 +1891,16 @@ index fc570e0..34b0efc 100644
 +            amt_msat: payment.amt_msat.map(|value| value.to_string()),
 +            asset_amount: payment.asset_amount.map(|value| value.to_string()),
 +            asset_id: payment.asset_id.as_ref().map(fmt_contract_id),
++            carrier_msat: payment.carrier_msat.map(|value| value.to_string()),
 +            payment_hash: fmt_payment_hash(&payment.payment_hash),
 +            payment_type: payment.payment_type.into(),
 +            status: payment.status.into(),
 +            created_at: payment.created_at.to_string(),
 +            updated_at: payment.updated_at.to_string(),
++            expires_at: payment.expires_at.map(|value| value.to_string()),
 +            payee_pubkey: fmt_pubkey(&payment.payee_pubkey),
 +            fee_paid_msat: payment.fee_paid_msat.map(|value| value.to_string()),
++            failure_code: payment.failure_code,
 +        }
 +    }
 +}
@@ -2189,12 +2215,48 @@ index fc570e0..34b0efc 100644
 +        assert_eq!(json["colored"]["spendable"], "5");
 +        assert!(json["vanilla"]["settled"].is_string());
 +    }
++
++    #[test]
++    fn wallet_snapshot_payment_serializes_durable_rgb_identity_and_terminal_reason() {
++        let payment = Payment {
++            amt_msat: Some(3_000),
++            asset_amount: Some(12_500_000),
++            asset_id: Some(parse_contract_id(
++                "rgb:EIkAVQvq-WbAb5JG-CYxbUER-oqDNwne-ZNxBDID-p0cpf9U",
++            )
++            .expect("valid contract id")),
++            carrier_msat: Some(3_000),
++            payment_hash: parse_payment_hash(&"11".repeat(32)).expect("valid payment hash"),
++            payment_type: PaymentType::InboundHodl,
++            status: HtlcStatus::Failed,
++            created_at: 1_700_000_000,
++            updated_at: 1_700_000_100,
++            expires_at: Some(1_700_003_600),
++            payee_pubkey: parse_pubkey(
++                "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
++            )
++            .expect("valid public key"),
++            preimage: None,
++            description_hash: None,
++            fee_paid_msat: None,
++            failure_code: Some("INVOICE_EXPIRED".to_string()),
++        };
++
++        let json = serde_json::to_value(JsonWalletSnapshotPayment::from(payment))
++            .expect("serialize snapshot payment");
++
++        assert_eq!(json["amt_msat"], "3000");
++        assert_eq!(json["asset_amount"], "12500000");
++        assert_eq!(json["carrier_msat"], "3000");
++        assert_eq!(json["expires_at"], "1700003600");
++        assert_eq!(json["failure_code"], "INVOICE_EXPIRED");
++    }
 +}
 +
  #[derive(Debug, Serialize)]
  pub(crate) struct JsonSignMessageResponse {
      pub signed_message: String,
-@@ -1669,6 +2400,169 @@ impl From<SdkSendBtcResponse> for JsonSendBtcResponse {
+@@ -1669,6 +2446,169 @@ impl From<SdkSendBtcResponse> for JsonSendBtcResponse {
      }
  }
  
@@ -2364,7 +2426,7 @@ index fc570e0..34b0efc 100644
  #[derive(Debug, Deserialize)]
  pub(crate) struct JsonCreateUtxosRequest {
      pub up_to: bool,
-@@ -1780,6 +2674,8 @@ pub(crate) struct JsonTransfer {
+@@ -1780,6 +2720,8 @@ pub(crate) struct JsonTransfer {
      pub status: String,
      pub requested_assignment: Option<String>,
      pub assignments: Vec<String>,
@@ -2373,7 +2435,7 @@ index fc570e0..34b0efc 100644
      pub kind: String,
      pub txid: Option<String>,
      pub recipient_id: Option<String>,
-@@ -1798,6 +2694,12 @@ impl From<Transfer> for JsonTransfer {
+@@ -1798,6 +2740,12 @@ impl From<Transfer> for JsonTransfer {
              status: t.status,
              requested_assignment: t.requested_assignment,
              assignments: t.assignments,
@@ -2386,7 +2448,7 @@ index fc570e0..34b0efc 100644
              kind: t.kind,
              txid: t.txid.as_ref().map(fmt_txid),
              recipient_id: t.recipient_id,
-@@ -1847,6 +2749,7 @@ impl From<Utxo> for JsonUtxo {
+@@ -1847,6 +2795,7 @@ impl From<Utxo> for JsonUtxo {
  pub(crate) struct JsonUnspent {
      pub utxo: JsonUtxo,
      pub rgb_allocations: Vec<JsonRgbAllocation>,
@@ -2394,7 +2456,7 @@ index fc570e0..34b0efc 100644
  }
  
  impl From<Unspent> for JsonUnspent {
-@@ -1854,6 +2757,7 @@ impl From<Unspent> for JsonUnspent {
+@@ -1854,6 +2803,7 @@ impl From<Unspent> for JsonUnspent {
          JsonUnspent {
              utxo: u.utxo.into(),
              rgb_allocations: u.rgb_allocations.into_iter().map(Into::into).collect(),
@@ -2403,7 +2465,7 @@ index fc570e0..34b0efc 100644
      }
  }
 diff --git a/bindings/c-ffi/src/lib.rs b/bindings/c-ffi/src/lib.rs
-index 24c3371..10fb3e5 100644
+index 24c3371d26d8a79fb3d7307095235f4c99fb373e..10fb3e5aa737249bd12738a71be9378ee4f61837 100644
 --- a/bindings/c-ffi/src/lib.rs
 +++ b/bindings/c-ffi/src/lib.rs
 @@ -9,6 +9,7 @@
@@ -3155,7 +3217,7 @@ index 24c3371..10fb3e5 100644
  }
 diff --git a/bindings/c-ffi/src/native_operations.rs b/bindings/c-ffi/src/native_operations.rs
 new file mode 100644
-index 0000000..856f7d3
+index 0000000000000000000000000000000000000000..856f7d3669167f6866c25b928882c6e96e58f4b9
 --- /dev/null
 +++ b/bindings/c-ffi/src/native_operations.rs
 @@ -0,0 +1,378 @@
@@ -3538,7 +3600,7 @@ index 0000000..856f7d3
 +    }
 +}
 diff --git a/bindings/c-ffi/src/utils.rs b/bindings/c-ffi/src/utils.rs
-index 344f6d9..3b4ed42 100644
+index 344f6d9e7e0603c08771ef972370d98a146614ff..3b4ed423743c819ff1466a407913fe8f80905069 100644
 --- a/bindings/c-ffi/src/utils.rs
 +++ b/bindings/c-ffi/src/utils.rs
 @@ -88,7 +88,7 @@ impl CReturnType for Arc<NativeExternalSigner> {}
@@ -3565,7 +3627,7 @@ index 344f6d9..3b4ed42 100644
  /// and trigger `panic_cannot_unwind`.
  ///
 diff --git a/bindings/rgb_lightning_node.udl b/bindings/rgb_lightning_node.udl
-index 286134a..178e5ec 100644
+index 286134a1b2aa50ba6264e09b4e523adba0e3a1cd..5c2e955a166266729b28840aa35d8642995df42d 100644
 --- a/bindings/rgb_lightning_node.udl
 +++ b/bindings/rgb_lightning_node.udl
 @@ -73,6 +73,16 @@ interface SdkNode {
@@ -3608,7 +3670,17 @@ index 286134a..178e5ec 100644
  };
  
  dictionary AddressInfo {
-@@ -225,6 +244,8 @@ dictionary Payment {
+@@ -217,14 +236,18 @@ dictionary Payment {
+     u64? amt_msat;
+     u64? asset_amount;
+     ContractId? asset_id;
++    u64? carrier_msat;
+     PaymentHash payment_hash;
+     PaymentType payment_type;
+     HtlcStatus status;
+     u64 created_at;
+     u64 updated_at;
++    u64? expires_at;
      PublicKey payee_pubkey;
      string? preimage;
      string? description_hash;
@@ -3617,7 +3689,7 @@ index 286134a..178e5ec 100644
  };
  
  enum PaymentType {
-@@ -490,6 +511,11 @@ dictionary TransferTransportEndpoint {
+@@ -490,6 +513,11 @@ dictionary TransferTransportEndpoint {
      boolean used;
  };
  
@@ -3629,7 +3701,7 @@ index 286134a..178e5ec 100644
  dictionary Transfer {
      i32 idx;
      i64 created_at;
-@@ -497,6 +523,8 @@ dictionary Transfer {
+@@ -497,6 +525,8 @@ dictionary Transfer {
      string status;
      string? requested_assignment;
      sequence<string> assignments;
@@ -3638,7 +3710,7 @@ index 286134a..178e5ec 100644
      string kind;
      Txid? txid;
      string? recipient_id;
-@@ -712,6 +740,52 @@ dictionary SdkSendBtcResponse {
+@@ -712,6 +742,52 @@ dictionary SdkSendBtcResponse {
      Txid txid;
  };
  
@@ -3691,7 +3763,7 @@ index 286134a..178e5ec 100644
  dictionary SdkMakerInitRequest {
      u64 qty_from;
      u64 qty_to;
-@@ -771,6 +845,7 @@ dictionary SdkSendPaymentRequest {
+@@ -771,6 +847,7 @@ dictionary SdkSendPaymentRequest {
      u64? amt_msat;
      ContractId? asset_id;
      u64? asset_amount;
@@ -3699,7 +3771,7 @@ index 286134a..178e5ec 100644
  };
  
  dictionary SdkSendPaymentResponse {
-@@ -778,6 +853,7 @@ dictionary SdkSendPaymentResponse {
+@@ -778,6 +855,7 @@ dictionary SdkSendPaymentResponse {
      PaymentHash? payment_hash;
      string? payment_secret;
      HtlcStatus status;
@@ -3708,7 +3780,7 @@ index 286134a..178e5ec 100644
  
  dictionary SendRgbRequest {
 diff --git a/src/error.rs b/src/error.rs
-index 95b3602..1eb2e4d 100644
+index 95b360264ee50d481362b56a1bb94621a98be0ed..1eb2e4de96e59a10e5ee798e099b97be0df04783 100644
 --- a/src/error.rs
 +++ b/src/error.rs
 @@ -661,6 +661,9 @@ impl IntoResponse for APIError {
@@ -3722,7 +3794,7 @@ index 95b3602..1eb2e4d 100644
      InvalidAuthenticationArgs,
  
 diff --git a/src/indexer.rs b/src/indexer.rs
-index a760299..6cdcb68 100644
+index a7602997ada5a6de96e4b8d777a5d5563fbb6db2..6cdcb68d529b7f3544a35fbc05657eb5ce9eb5f9 100644
 --- a/src/indexer.rs
 +++ b/src/indexer.rs
 @@ -1,4 +1,4 @@
@@ -4049,7 +4121,7 @@ index a760299..6cdcb68 100644
      client: &ElectrumClient,
      height: usize,
 diff --git a/src/ldk.rs b/src/ldk.rs
-index e4abdac..7429b0a 100644
+index e4abdac82dcc400f2d3723a185678a7cc4a64edd..b79e1946b77b5eeb2d635a5480459b0260380ed0 100644
 --- a/src/ldk.rs
 +++ b/src/ldk.rs
 @@ -96,7 +96,7 @@ use rgb_lib::{
@@ -4083,21 +4155,27 @@ index e4abdac..7429b0a 100644
  }
  
  #[derive(Clone, Debug)]
-@@ -271,6 +277,8 @@ pub(crate) struct PaymentInfo {
+@@ -271,6 +277,11 @@ pub(crate) struct PaymentInfo {
      pub(crate) payment_idx: Option<u64>,
      pub(crate) async_hash_index: Option<u64>,
      pub(crate) async_host_node_id: Option<PublicKey>,
 +    pub(crate) fee_paid_msat: Option<u64>,
 +    pub(crate) failure_code: Option<String>,
++    pub(crate) asset_id: Option<String>,
++    pub(crate) asset_amount: Option<u64>,
++    pub(crate) carrier_msat: Option<u64>,
  }
  
  impl_writeable_tlv_based!(PaymentInfo, {
-@@ -288,8 +296,25 @@ impl_writeable_tlv_based!(PaymentInfo, {
+@@ -288,8 +299,37 @@ impl_writeable_tlv_based!(PaymentInfo, {
      (22, payment_idx, option),
      (24, async_hash_index, option),
      (26, async_host_node_id, option),
 +    (28, fee_paid_msat, option),
 +    (30, failure_code, option),
++    (32, asset_id, option),
++    (34, asset_amount, option),
++    (36, carrier_msat, option),
  });
  
 +fn payment_failure_code(reason: PaymentFailureReason) -> &'static str {
@@ -4115,10 +4193,19 @@ index e4abdac..7429b0a 100644
 +    }
 +}
 +
++fn is_trusted_virtual_inbound(
++    enabled: bool,
++    trusted_peers: &[PublicKey],
++    counterparty: &PublicKey,
++    supports_scid_privacy: bool,
++) -> bool {
++    enabled && supports_scid_privacy && trusted_peers.contains(counterparty)
++}
++
  pub(crate) struct InboundPaymentInfoStorage {
      pub(crate) payments: LdkHashMap<PaymentHash, PaymentInfo>,
  }
-@@ -381,6 +406,13 @@ pub(crate) struct VirtualChannelSessionStore {
+@@ -381,6 +421,13 @@ pub(crate) struct VirtualChannelSessionStore {
      pub(crate) entries: LdkHashMap<ChannelId, VirtualChannelSession>,
  }
  
@@ -4132,25 +4219,82 @@ index e4abdac..7429b0a 100644
  impl_writeable_tlv_based!(VirtualChannelSessionStore, {
      (0, entries, required),
  });
-@@ -559,6 +591,8 @@ impl UnlockedAppState {
+@@ -534,6 +581,7 @@ impl UnlockedAppState {
+         &self,
+         payment_hash: PaymentHash,
+         status: HTLCStatus,
++        failure_code: &'static str,
+     ) {
+         self.channel_manager.fail_htlc_backwards(&payment_hash);
+         self.upsert_inbound_payment(
+@@ -545,6 +593,7 @@ impl UnlockedAppState {
+             self.channel_manager.get_our_node_id(),
+             None,
+             None,
++            Some(failure_code),
+         );
+         clear_rgb_payment_pending(&payment_hash, true, self.kv_store.as_ref());
+     }
+@@ -559,6 +608,7 @@ impl UnlockedAppState {
          {
              if !recent_payments_payment_ids.contains(payment_id) {
                  payment_info.status = HTLCStatus::Failed;
-+                payment_info.failure_code =
-+                    Some("PAYMENT_ABANDONED_AFTER_RESTART".to_owned());
++                payment_info.failure_code = Some("PAYMENT_ABANDONED_AFTER_RESTART".to_owned());
                  payment_info.updated_at = get_current_timestamp();
                  failed = true;
              }
-@@ -698,6 +732,8 @@ impl UnlockedAppState {
+@@ -580,6 +630,7 @@ impl UnlockedAppState {
+                     if let Some(expires_at) = payment_info.expires_at {
+                         if now > expires_at {
+                             payment_info.status = HTLCStatus::Failed;
++                            payment_info.failure_code = Some("INVOICE_EXPIRED".to_owned());
+                             payment_info.updated_at = now;
+                             failed = true;
+                         }
+@@ -628,7 +679,11 @@ impl UnlockedAppState {
+                 claim_deadline_height,
+                 expires_at
+             );
+-            self.fail_htlc_backwards_and_update_inbound_payment(payment_hash, HTLCStatus::Failed);
++            self.fail_htlc_backwards_and_update_inbound_payment(
++                payment_hash,
++                HTLCStatus::Failed,
++                "INVOICE_CLAIM_WINDOW_EXPIRED",
++            );
+         }
+ 
+         self.inbound_payments()
+@@ -665,6 +720,7 @@ impl UnlockedAppState {
+         payee_pubkey: PublicKey,
+         claim_deadline_height: Option<u32>,
+         invoice_type: Option<InvoiceType>,
++        failure_code: Option<&str>,
+     ) {
+         let mut inbound = self.get_inbound_payments();
+         match inbound.payments.entry(payment_hash) {
+@@ -680,6 +736,9 @@ impl UnlockedAppState {
+                 if claim_deadline_height.is_some() {
+                     payment_info.claim_deadline_height = claim_deadline_height;
+                 }
++                if let Some(failure_code) = failure_code {
++                    payment_info.failure_code = Some(failure_code.to_owned());
++                }
+             }
+             Entry::Vacant(e) => {
+                 let created_at = get_current_timestamp();
+@@ -698,6 +757,11 @@ impl UnlockedAppState {
                      payment_idx: None,
                      async_hash_index: None,
                      async_host_node_id: None,
 +                    fee_paid_msat: None,
-+                    failure_code: None,
++                    failure_code: failure_code.map(str::to_owned),
++                    asset_id: None,
++                    asset_amount: None,
++                    carrier_msat: None,
                  };
                  self.stamp_payment_idx(&mut payment_info);
                  e.insert(payment_info);
-@@ -711,11 +747,13 @@ impl UnlockedAppState {
+@@ -711,11 +775,13 @@ impl UnlockedAppState {
          payment_id: PaymentId,
          status: HTLCStatus,
          preimage: Option<PaymentPreimage>,
@@ -4164,7 +4308,7 @@ index e4abdac..7429b0a 100644
          payment_info.updated_at = get_current_timestamp();
          let payment = (*payment_info).clone();
          self.save_outbound_payments(outbound);
-@@ -730,6 +768,19 @@ impl UnlockedAppState {
+@@ -730,6 +796,19 @@ impl UnlockedAppState {
          self.save_outbound_payments(outbound);
      }
  
@@ -4184,7 +4328,7 @@ index e4abdac..7429b0a 100644
      pub(crate) fn channel_ids(&self) -> LdkHashMap<ChannelId, ChannelId> {
          self.get_channel_ids_map().channel_ids.clone()
      }
-@@ -794,7 +845,7 @@ impl UnlockedAppState {
+@@ -794,7 +873,7 @@ impl UnlockedAppState {
              .get_virtual_channel_session_store()
              .entries
              .values()
@@ -4193,16 +4337,19 @@ index e4abdac..7429b0a 100644
          if duplicate_virtual_session {
              return Err(APIError::InvalidRequest(
                  "virtual channel session already exists for this peer pair".to_string(),
-@@ -1363,6 +1414,8 @@ impl AsyncOrderInvoiceProvider for AsyncOrderRecipientInvoiceProvider {
+@@ -1363,6 +1442,11 @@ impl AsyncOrderInvoiceProvider for AsyncOrderRecipientInvoiceProvider {
                  payment_idx: None,
                  async_hash_index: self.external_signer_mode.then_some(hash_index),
                  async_host_node_id: self.external_signer_mode.then_some(sender_node_id),
 +                fee_paid_msat: None,
 +                failure_code: None,
++                asset_id: None,
++                asset_amount: None,
++                carrier_msat: None,
              },
          )?;
  
-@@ -1567,8 +1620,12 @@ fn handle_funding_prepare_err(
+@@ -1567,8 +1651,12 @@ fn handle_funding_prepare_err(
  /// transaction was broadcast. For colored channels this fails the pending RGB
  /// batch transfer; for vanilla channels it aborts the pending vanilla tx that
  /// was created (and locked the UTXOs) during `FundingGenerationReady`.
@@ -4216,7 +4363,7 @@ index e4abdac..7429b0a 100644
      if let Some(rgb_info) =
          get_rgb_channel_info_optional(channel_id, true, unlocked_state.kv_store.as_ref())
      {
-@@ -1580,6 +1637,7 @@ async fn handle_open_chan_fail(channel_id: &ChannelId, unlocked_state: Arc<Unloc
+@@ -1580,6 +1668,7 @@ async fn handle_open_chan_fail(channel_id: &ChannelId, unlocked_state: Arc<Unloc
              .await
              .unwrap();
              if let Err(e) = failed {
@@ -4224,7 +4371,7 @@ index e4abdac..7429b0a 100644
                  tracing::error!(
                      "Error failing RGB transfer batch_transfer_idx={batch_transfer_idx} for channel {channel_id}: {e:?}"
                  );
-@@ -1602,14 +1660,217 @@ async fn handle_open_chan_fail(channel_id: &ChannelId, unlocked_state: Arc<Unloc
+@@ -1602,14 +1691,217 @@ async fn handle_open_chan_fail(channel_id: &ChannelId, unlocked_state: Arc<Unloc
              Ok(()) => {
                  tracing::info!("Aborted pending vanilla tx {funding_txid} for channel {channel_id}")
              }
@@ -4237,11 +4384,8 @@ index e4abdac..7429b0a 100644
 +                    "Error aborting pending vanilla tx {funding_txid} for channel {channel_id}: {e:?}"
 +                );
 +            }
-         }
-     }
--    let _ = unlocked_state
--        .kv_store
--        .remove(PENDING_FUNDING_NAMESPACE, "", &channel_id_hex, false);
++        }
++    }
 +    if cleanup_succeeded {
 +        let _ =
 +            unlocked_state
@@ -4364,8 +4508,11 @@ index e4abdac..7429b0a 100644
 +                "RGB transfer verification task failed for orphaned virtual funding tx {funding_txid}: {e}"
 +            );
 +            false
-+        }
-+    }
+         }
+     }
+-    let _ = unlocked_state
+-        .kv_store
+-        .remove(PENDING_FUNDING_NAMESPACE, "", &channel_id_hex, false);
 +}
 +
 +/// Reconcile a trusted virtual-channel session that no longer exists in LDK.
@@ -4448,7 +4595,47 @@ index e4abdac..7429b0a 100644
  }
  
  /// Undo what a standard channel's `FundingGenerationReady` preparation staged, so a failure
-@@ -2537,6 +2798,7 @@ async fn handle_ldk_events(
+@@ -2313,6 +2605,7 @@ async fn handle_ldk_events(
+                     unlocked_state.fail_htlc_backwards_and_update_inbound_payment(
+                         payment_hash,
+                         HTLCStatus::Failed,
++                        "INVOICE_EXPIRED",
+                     );
+                     return Ok(());
+                 }
+@@ -2329,6 +2622,7 @@ async fn handle_ldk_events(
+                     unlocked_state.fail_htlc_backwards_and_update_inbound_payment(
+                         payment_hash,
+                         HTLCStatus::Failed,
++                        "PAYMENT_AMOUNT_BELOW_INVOICE",
+                     );
+                     return Ok(());
+                 }
+@@ -2387,6 +2681,7 @@ async fn handle_ldk_events(
+                                                 .fail_htlc_backwards_and_update_inbound_payment(
+                                                     payment_hash,
+                                                     HTLCStatus::Failed,
++                                                    "INVALID_ASYNC_PAYMENT_PREIMAGE",
+                                                 );
+                                             return Ok(());
+                                         }
+@@ -2423,6 +2718,7 @@ async fn handle_ldk_events(
+                         unlocked_state.channel_manager.get_our_node_id(),
+                         claim_deadline,
+                         None,
++                        None,
+                     );
+                     unlocked_state
+                         .async_order_handler
+@@ -2505,6 +2801,7 @@ async fn handle_ldk_events(
+                     receiver_node_id.unwrap(),
+                     None,
+                     None,
++                    None,
+                 );
+             }
+         }
+@@ -2537,6 +2834,7 @@ async fn handle_ldk_events(
                      payment_id.unwrap(),
                      HTLCStatus::Succeeded,
                      Some(payment_preimage),
@@ -4456,7 +4643,116 @@ index e4abdac..7429b0a 100644
                  );
                  unlocked_state
                      .async_order_handler
-@@ -2679,34 +2941,33 @@ async fn handle_ldk_events(
+@@ -2580,62 +2878,25 @@ async fn handle_ldk_events(
+                 .copy_from_slice(&unlocked_state.entropy_source.get_secure_random_bytes()[..16]);
+             let user_channel_id = u128::from_be_bytes(random_bytes);
+ 
+-            let (res, accepted) = if static_state.enable_virtual_channels_v0 {
+-                let trusted_virtual_peer = static_state.virtual_peer_pubkeys.is_empty()
+-                    || static_state
+-                        .virtual_peer_pubkeys
+-                        .iter()
+-                        .any(|trusted_peer| trusted_peer == counterparty_node_id);
+-                if !trusted_virtual_peer {
+-                    let err = "untrusted_virtual_peer".to_string();
+-                    tracing::error!(
+-                        "EVENT: Rejected inbound trusted virtual channel ({}) from {}: {}",
+-                        temporary_channel_id,
+-                        hex_str(&counterparty_node_id.serialize()),
+-                        err,
+-                    );
+-                    (
+-                        unlocked_state
+-                            .channel_manager
+-                            .force_close_broadcasting_latest_txn(
+-                                temporary_channel_id,
+-                                counterparty_node_id,
+-                                err,
+-                            ),
+-                        false,
+-                    )
+-                } else if !channel_type.supports_scid_privacy() {
+-                    let err = "unsupported_scid_alias".to_string();
+-                    tracing::error!(
+-                        "EVENT: Rejected inbound channel ({}) from {}: {}",
+-                        temporary_channel_id,
+-                        hex_str(&counterparty_node_id.serialize()),
+-                        err,
+-                    );
+-                    (
+-                        unlocked_state
+-                            .channel_manager
+-                            .force_close_broadcasting_latest_txn(
+-                                temporary_channel_id,
+-                                counterparty_node_id,
+-                                err,
+-                            ),
+-                        false,
+-                    )
+-                } else {
+-                    (
+-                        unlocked_state
+-                            .channel_manager
+-                            .accept_inbound_channel_from_trusted_peer_0conf(
+-                                temporary_channel_id,
+-                                counterparty_node_id,
+-                                user_channel_id,
+-                                None,
+-                                ChannelFundingType::Virtual,
+-                            ),
+-                        true,
+-                    )
+-                }
++            let trusted_virtual_peer = is_trusted_virtual_inbound(
++                static_state.enable_virtual_channels_v0,
++                &static_state.virtual_peer_pubkeys,
++                counterparty_node_id,
++                channel_type.supports_scid_privacy(),
++            );
++            let (res, accepted_as) = if trusted_virtual_peer {
++                (
++                    unlocked_state
++                        .channel_manager
++                        .accept_inbound_channel_from_trusted_peer_0conf(
++                            temporary_channel_id,
++                            counterparty_node_id,
++                            user_channel_id,
++                            None,
++                            ChannelFundingType::Virtual,
++                        ),
++                    "trusted_virtual",
++                )
+             } else {
+                 (
+                     unlocked_state.channel_manager.accept_inbound_channel(
+@@ -2644,7 +2905,7 @@ async fn handle_ldk_events(
+                         user_channel_id,
+                         None,
+                     ),
+-                    true,
++                    "standard",
+                 )
+             };
+ 
+@@ -2655,15 +2916,10 @@ async fn handle_ldk_events(
+                     hex_str(&counterparty_node_id.serialize()),
+                     e,
+                 );
+-            } else if accepted {
+-                tracing::info!(
+-                    "EVENT: Accepted inbound channel ({}) from {}",
+-                    temporary_channel_id,
+-                    hex_str(&counterparty_node_id.serialize()),
+-                );
+             } else {
+                 tracing::info!(
+-                    "EVENT: Rejected inbound channel ({}) from {}",
++                    "EVENT: Accepted {} inbound channel ({}) from {}",
++                    accepted_as,
+                     temporary_channel_id,
+                     hex_str(&counterparty_node_id.serialize()),
+                 );
+@@ -2679,34 +2935,29 @@ async fn handle_ldk_events(
              payment_id,
              ..
          } => {
@@ -4478,10 +4774,8 @@ index e4abdac..7429b0a 100644
                      unlocked_state.update_maker_swap_status(&hash, SwapStatus::Failed);
                  } else {
 -                    unlocked_state.update_outbound_payment_status(payment_id, HTLCStatus::Failed);
-+                    unlocked_state.fail_outbound_payment(
-+                        payment_id,
-+                        payment_failure_code(failure_reason),
-+                    );
++                    unlocked_state
++                        .fail_outbound_payment(payment_id, payment_failure_code(failure_reason));
                  }
              } else {
                  tracing::error!(
@@ -4493,16 +4787,14 @@ index e4abdac..7429b0a 100644
 -                        PaymentFailureReason::RetriesExhausted
 -                    }
 +                    failure_reason
-+                );
-+                unlocked_state.fail_outbound_payment(
-+                    payment_id,
-+                    payment_failure_code(failure_reason),
                  );
 -                unlocked_state.update_outbound_payment_status(payment_id, HTLCStatus::Failed);
++                unlocked_state
++                    .fail_outbound_payment(payment_id, payment_failure_code(failure_reason));
              }
          }
          Event::InvoiceReceived { .. } => {
-@@ -2980,7 +3241,9 @@ async fn handle_ldk_events(
+@@ -2980,7 +3231,9 @@ async fn handle_ldk_events(
              );
  
              // Release any funds locked for a funding tx that was never broadcast.
@@ -4513,7 +4805,7 @@ index e4abdac..7429b0a 100644
  
              let former_temporary_channel_id = unlocked_state.delete_channel_id(channel_id);
              let virtual_draft_temporary_channel_id = if unlocked_state
-@@ -3025,7 +3288,9 @@ async fn handle_ldk_events(
+@@ -3025,7 +3278,9 @@ async fn handle_ldk_events(
              );
  
              // The funding tx was discarded before broadcast; release the locked funds.
@@ -4524,7 +4816,7 @@ index e4abdac..7429b0a 100644
  
              unlocked_state.delete_channel_id(channel_id);
              let _ = unlocked_state.kv_store.remove(
-@@ -4218,16 +4483,16 @@ pub(crate) async fn start_ldk(
+@@ -4218,16 +4473,16 @@ pub(crate) async fn start_ldk(
      }
  
      // RGB setup
@@ -4544,7 +4836,7 @@ index e4abdac..7429b0a 100644
              BitcoinNetwork::Regtest => ELECTRUM_URL_REGTEST,
              BitcoinNetwork::Signet => ELECTRUM_URL_SIGNET,
              BitcoinNetwork::Testnet => ELECTRUM_URL_TESTNET,
-@@ -4238,7 +4503,28 @@ pub(crate) async fn start_ldk(
+@@ -4238,7 +4493,28 @@ pub(crate) async fn start_ldk(
                      "with custom signet indexer must be provided"
                  )))
              }
@@ -4573,7 +4865,7 @@ index e4abdac..7429b0a 100644
      };
      let proxy_endpoint = if let Some(proxy_endpoint) = &unlock_request.proxy_endpoint {
          check_rgb_proxy_endpoint(proxy_endpoint).await?;
-@@ -4973,8 +5259,9 @@ pub(crate) async fn start_ldk(
+@@ -4973,8 +5249,9 @@ pub(crate) async fn start_ldk(
      let peer_manager_connection_handler = peer_manager.clone();
      let listening_port = ldk_peer_listening_port;
      let stop_processing = Arc::new(AtomicBool::new(false));
@@ -4584,7 +4876,7 @@ index e4abdac..7429b0a 100644
          let listener = tokio::net::TcpListener::bind(format!("[::]:{listening_port}"))
              .await
              .expect("Failed to bind to listen port - is something else already listening on it?");
-@@ -4992,7 +5279,7 @@ pub(crate) async fn start_ldk(
+@@ -4992,7 +5269,7 @@ pub(crate) async fn start_ldk(
                  .await;
              });
          }
@@ -4593,7 +4885,7 @@ index e4abdac..7429b0a 100644
  
      // Connect and Disconnect Blocks
      let output_sweeper: Arc<OutputSweeper> = Arc::new(output_sweeper);
-@@ -5003,7 +5290,7 @@ pub(crate) async fn start_ldk(
+@@ -5003,7 +5280,7 @@ pub(crate) async fn start_ldk(
          let chain_monitor_listener = chain_monitor.clone();
          let output_sweeper_listener = output_sweeper.clone();
          let bitcoind_block_source = bitcoind_client.clone();
@@ -4602,7 +4894,7 @@ index e4abdac..7429b0a 100644
              let chain_poller = poll::ChainPoller::new(bitcoind_block_source.as_ref(), network);
              let chain_listener = (
                  chain_monitor_listener,
-@@ -5020,7 +5307,7 @@ pub(crate) async fn start_ldk(
+@@ -5020,7 +5297,7 @@ pub(crate) async fn start_ldk(
                  }
                  tokio::time::sleep(Duration::from_secs(1)).await;
              }
@@ -4611,7 +4903,7 @@ index e4abdac..7429b0a 100644
      } else if let Some(tx_sync) = tx_sync_opt.clone() {
          let confirmables: Vec<Arc<dyn Confirm + Send + Sync>> = vec![
              channel_manager.clone(),
-@@ -5030,7 +5317,7 @@ pub(crate) async fn start_ldk(
+@@ -5030,7 +5307,7 @@ pub(crate) async fn start_ldk(
          sync_chain_data(tx_sync.clone(), confirmables.clone())
              .await
              .map_err(|e| APIError::InvalidIndexer(e.to_string()))?;
@@ -4620,7 +4912,7 @@ index e4abdac..7429b0a 100644
              loop {
                  if stop_listen.load(Ordering::Acquire) {
                      return;
-@@ -5040,7 +5327,7 @@ pub(crate) async fn start_ldk(
+@@ -5040,7 +5317,7 @@ pub(crate) async fn start_ldk(
                  }
                  tokio::time::sleep(Duration::from_secs(1)).await;
              }
@@ -4629,7 +4921,7 @@ index e4abdac..7429b0a 100644
      } else {
          let tx_sync = electrum_tx_sync_opt
              .clone()
-@@ -5053,7 +5340,7 @@ pub(crate) async fn start_ldk(
+@@ -5053,7 +5330,7 @@ pub(crate) async fn start_ldk(
          sync_chain_data_electrum(tx_sync.clone(), confirmables.clone())
              .await
              .map_err(|e| APIError::InvalidIndexer(e.to_string()))?;
@@ -4638,7 +4930,7 @@ index e4abdac..7429b0a 100644
              loop {
                  if stop_listen.load(Ordering::Acquire) {
                      return;
-@@ -5065,7 +5352,7 @@ pub(crate) async fn start_ldk(
+@@ -5065,7 +5342,7 @@ pub(crate) async fn start_ldk(
                  }
                  tokio::time::sleep(Duration::from_secs(1)).await;
              }
@@ -4647,7 +4939,7 @@ index e4abdac..7429b0a 100644
      }
  
      // Read payment info from KVStore
-@@ -5263,6 +5550,7 @@ pub(crate) async fn start_ldk(
+@@ -5263,6 +5540,7 @@ pub(crate) async fn start_ldk(
  
      let unlocked_state = Arc::new(UnlockedAppState {
          config: static_state.config.clone(),
@@ -4655,7 +4947,7 @@ index e4abdac..7429b0a 100644
          channel_manager: Arc::clone(&channel_manager),
          gossip_source: Arc::clone(&gossip_source),
          inbound_payments,
-@@ -5294,6 +5582,29 @@ pub(crate) async fn start_ldk(
+@@ -5294,6 +5572,29 @@ pub(crate) async fn start_ldk(
          next_payment_idx,
      });
  
@@ -4685,7 +4977,7 @@ index e4abdac..7429b0a 100644
      // Refresh the RGS snapshot on a fixed interval (RGS mode only). The first
      // tick fires immediately, so a freshly unlocked node syncs right away.
      let gossip_shutdown = Arc::new(tokio::sync::Notify::new());
-@@ -5370,7 +5681,7 @@ pub(crate) async fn start_ldk(
+@@ -5370,7 +5671,7 @@ pub(crate) async fn start_ldk(
      {
          let drain_store = Arc::clone(&kv_store);
          let stop_drain = Arc::clone(&stop_processing);
@@ -4694,7 +4986,7 @@ index e4abdac..7429b0a 100644
              let mut interval = tokio::time::interval(Duration::from_secs(60));
              interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
              loop {
-@@ -5381,7 +5692,7 @@ pub(crate) async fn start_ldk(
+@@ -5381,7 +5682,7 @@ pub(crate) async fn start_ldk(
                  let store = Arc::clone(&drain_store);
                  let _ = tokio::task::spawn_blocking(move || store.drain_pending()).await;
              }
@@ -4703,7 +4995,7 @@ index e4abdac..7429b0a 100644
      }
  
      // Regularly reconnect to channel peers.
-@@ -5390,7 +5701,7 @@ pub(crate) async fn start_ldk(
+@@ -5390,7 +5691,7 @@ pub(crate) async fn start_ldk(
      let connect_db = static_state.db();
      let stop_connect = Arc::clone(&stop_processing);
      let reconnect_interval_secs = static_state.config.node.peer_reconnect_interval_secs;
@@ -4712,7 +5004,7 @@ index e4abdac..7429b0a 100644
          let mut interval = tokio::time::interval(Duration::from_secs(reconnect_interval_secs));
          interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
          loop {
-@@ -5422,7 +5733,7 @@ pub(crate) async fn start_ldk(
+@@ -5422,7 +5723,7 @@ pub(crate) async fn start_ldk(
                  ),
              }
          }
@@ -4721,7 +5013,7 @@ index e4abdac..7429b0a 100644
  
      // Remote external signer force-close resilience. When the signer daemon is briefly unreachable, a
      // channel signing call returns LDK's async-unavailable sentinel (`Err(())`) and the operation parks
-@@ -5444,7 +5755,7 @@ pub(crate) async fn start_ldk(
+@@ -5444,7 +5745,7 @@ pub(crate) async fn start_ldk(
          let su_channel_manager = Arc::clone(&channel_manager);
          let su_chain_monitor = Arc::clone(&chain_monitor);
          let su_stop = Arc::clone(&stop_processing);
@@ -4730,7 +5022,7 @@ index e4abdac..7429b0a 100644
              loop {
                  // Healthy: idle until the link reports a change (with a coarse timer only to notice
                  // node shutdown — it drives no signer work).
-@@ -5487,7 +5798,7 @@ pub(crate) async fn start_ldk(
+@@ -5487,7 +5788,7 @@ pub(crate) async fn start_ldk(
                      }
                  }
              }
@@ -4739,7 +5031,7 @@ index e4abdac..7429b0a 100644
      }
  
      // Regularly broadcast our node_announcement. This is only required (or possible) if we have
-@@ -5522,7 +5833,7 @@ pub(crate) async fn start_ldk(
+@@ -5522,7 +5823,7 @@ pub(crate) async fn start_ldk(
      let chan_man = Arc::clone(&channel_manager);
      let announce_initial_delay_secs = static_state.config.node.announce_initial_delay_secs;
      let announce_refresh_interval_secs = static_state.config.node.announce_refresh_interval_secs;
@@ -4748,7 +5040,7 @@ index e4abdac..7429b0a 100644
          // First wait until we have some peers and maybe have opened a channel.
          tokio::time::sleep(Duration::from_secs(announce_initial_delay_secs)).await;
          // Then, update our announcement periodically to keep it fresh but avoid unnecessary churn
-@@ -5546,7 +5857,7 @@ pub(crate) async fn start_ldk(
+@@ -5546,7 +5847,7 @@ pub(crate) async fn start_ldk(
                  );
              }
          }
@@ -4757,7 +5049,7 @@ index e4abdac..7429b0a 100644
  
      tracing::info!("LDK logs are available at <your-supplied-ldk-data-dir-path>/.ldk/logs");
      tracing::info!("Local Node ID is {}", channel_manager.get_our_node_id());
-@@ -5563,6 +5874,7 @@ pub(crate) async fn start_ldk(
+@@ -5563,6 +5864,7 @@ pub(crate) async fn start_ldk(
              peer_manager: peer_manager.clone(),
              bp_exit,
              background_processor: Some(background_processor),
@@ -4765,7 +5057,7 @@ index e4abdac..7429b0a 100644
          },
          unlocked_state,
      ))
-@@ -5609,16 +5921,16 @@ async fn sync_chain_data_electrum(
+@@ -5609,16 +5911,16 @@ async fn sync_chain_data_electrum(
  }
  
  impl AppState {
@@ -4791,7 +5083,7 @@ index e4abdac..7429b0a 100644
  
          // Disconnect our peers and stop accepting new connections. This ensures we don't continue
          // updating our channel data after we've stopped the background processor.
-@@ -5631,10 +5943,11 @@ impl AppState {
+@@ -5631,10 +5933,11 @@ impl AppState {
          // Stop the background processor.
          if !ldk_background_services.bp_exit.is_closed() {
              ldk_background_services.bp_exit.send(()).unwrap();
@@ -4806,7 +5098,7 @@ index e4abdac..7429b0a 100644
      }
  }
  
-@@ -5667,8 +5980,13 @@ pub(crate) async fn stop_ldk(app_state: Arc<AppState>) {
+@@ -5667,8 +5970,13 @@ pub(crate) async fn stop_ldk(app_state: Arc<AppState>) {
              )
          });
  
@@ -4821,7 +5113,7 @@ index e4abdac..7429b0a 100644
          // Bounded flush: give the final remote-first persists time to reach
          // VSS, then abort outage-pending retries so shutdown cannot hang.
          match tokio::time::timeout(BP_SHUTDOWN_FLUSH_TIMEOUT, &mut join_handle).await {
-@@ -5687,7 +6005,10 @@ pub(crate) async fn stop_ldk(app_state: Arc<AppState>) {
+@@ -5687,7 +5995,10 @@ pub(crate) async fn stop_ldk(app_state: Arc<AppState>) {
          }
      }
      #[cfg(not(feature = "vss"))]
@@ -4833,7 +5125,7 @@ index e4abdac..7429b0a 100644
          join_handle.await.unwrap().unwrap();
      }
  
-@@ -5729,6 +6050,27 @@ pub(crate) async fn stop_ldk(app_state: Arc<AppState>) {
+@@ -5729,6 +6040,27 @@ pub(crate) async fn stop_ldk(app_state: Arc<AppState>) {
          }
      }
  
@@ -4861,10 +5153,77 @@ index e4abdac..7429b0a 100644
      // connect to the peer port so it can be released
      let peer_port = app_state.static_state.ldk_peer_listening_port;
      let sock_addr = SocketAddr::from(([127, 0, 0, 1], peer_port));
-@@ -5859,6 +6201,53 @@ mod tests {
+@@ -5859,6 +6191,120 @@ mod tests {
          assert!(!access.allows_peer(&peer));
      }
  
++    #[test]
++    fn standard_inbound_channel_is_not_reclassified_when_virtual_support_is_enabled() {
++        let trusted_peer = test_peer_pubkey(7);
++        assert!(!is_trusted_virtual_inbound(
++            true,
++            &[trusted_peer],
++            &trusted_peer,
++            false,
++        ));
++    }
++
++    #[test]
++    fn virtual_inbound_requires_both_scid_privacy_and_a_trusted_peer() {
++        let trusted_peer = test_peer_pubkey(8);
++        let other_peer = test_peer_pubkey(9);
++        assert!(is_trusted_virtual_inbound(
++            true,
++            &[trusted_peer],
++            &trusted_peer,
++            true,
++        ));
++        assert!(!is_trusted_virtual_inbound(
++            true,
++            &[trusted_peer],
++            &other_peer,
++            true,
++        ));
++        assert!(!is_trusted_virtual_inbound(
++            false,
++            &[trusted_peer],
++            &trusted_peer,
++            true,
++        ));
++        assert!(!is_trusted_virtual_inbound(true, &[], &trusted_peer, true,));
++    }
++
++    #[test]
++    fn payment_info_persists_rgb_identity_with_its_payment_status() {
++        let payment = PaymentInfo {
++            preimage: None,
++            secret: None,
++            status: HTLCStatus::Succeeded,
++            amt_msat: Some(3_000_000),
++            created_at: 100,
++            updated_at: 101,
++            payee_pubkey: test_peer_pubkey(10),
++            expires_at: Some(200),
++            claim_deadline_height: None,
++            invoice_type: Some(InvoiceType::AutoClaim),
++            description_hash: None,
++            payment_idx: Some(1),
++            async_hash_index: None,
++            async_host_node_id: None,
++            fee_paid_msat: Some(250),
++            failure_code: None,
++            asset_id: Some(test_contract_id().to_string()),
++            asset_amount: Some(2_500_000),
++            carrier_msat: Some(3_000_000),
++        };
++
++        let decoded = PaymentInfo::read(&mut &payment.encode()[..]).expect("decode payment info");
++        assert_eq!(decoded.asset_id, payment.asset_id);
++        assert_eq!(decoded.asset_amount, payment.asset_amount);
++        assert_eq!(decoded.carrier_msat, payment.carrier_msat);
++        assert_eq!(decoded.status, payment.status);
++    }
++
 +    #[test]
 +    fn abandoned_virtual_session_does_not_block_reopen_for_same_peer() {
 +        let peer = test_peer_pubkey(4);
@@ -4916,7 +5275,7 @@ index e4abdac..7429b0a 100644
          let db_path = std::env::temp_dir().join(format!("rln-ldk-unit-{}", uuid::Uuid::new_v4()));
          let connection_string = format!("sqlite:{}?mode=rwc", db_path.display());
 diff --git a/src/node.rs b/src/node.rs
-index c67c2ef..0b1cd36 100644
+index c67c2effabf8912af0f1d377c232c79e5f3e7428..0b1cd36d6e6b36023d20de11634e414f1488d7b0 100644
 --- a/src/node.rs
 +++ b/src/node.rs
 @@ -1,4 +1,6 @@
@@ -5066,7 +5425,7 @@ index c67c2ef..0b1cd36 100644
      /// left in `uniffi_api::handle_from_request`) must be able to configure the remote-signer daemon
      /// address; without this field, `NodeHandle`-embedding callers could configure external-signer
 diff --git a/src/rgb.rs b/src/rgb.rs
-index 80df750..16b82f0 100644
+index 80df75096abf0e9c42e7909d8418311bbcba4f73..bcde61cb3f6d3554179da544efe33834cea8d33b 100644
 --- a/src/rgb.rs
 +++ b/src/rgb.rs
 @@ -19,21 +19,37 @@ use rgb_lib::{
@@ -5276,7 +5635,7 @@ index 80df750..16b82f0 100644
      pub(crate) fn create_utxos_end(
          &self,
          signed_psbt: String,
-@@ -658,6 +811,93 @@ impl RgbLibWalletWrapper {
+@@ -658,12 +811,109 @@ impl RgbLibWalletWrapper {
          )
      }
  
@@ -5370,7 +5729,24 @@ index 80df750..16b82f0 100644
      pub(crate) fn get_address(&self) -> Result<String, RgbLibError> {
          self.get_rgb_wallet().get_address()
      }
-@@ -932,6 +1172,35 @@ impl RgbLibWalletWrapper {
+ 
+     pub(crate) fn rotate_address(&self) -> Result<String, RgbLibError> {
+-        self.get_rgb_wallet().rotate_address(KeychainKind::Internal)
++        let mut wallet = self.get_rgb_wallet();
++        let rotated = wallet.rotate_address(KeychainKind::Internal)?;
++        let revealed = wallet.get_address()?;
++        if revealed != rotated {
++            return Err(RgbLibError::Internal {
++                details: format!(
++                    "rotated address {rotated} does not match the revealed wallet address {revealed}"
++                ),
++            });
++        }
++        Ok(revealed)
+     }
+ 
+     pub(crate) fn get_asset_balance(
+@@ -932,6 +1182,35 @@ impl RgbLibWalletWrapper {
          )
      }
  
@@ -5407,22 +5783,21 @@ index 80df750..16b82f0 100644
          self.get_rgb_wallet().send_btc_end(self.online, signed_psbt)
      }
 diff --git a/src/routes.rs b/src/routes.rs
-index 975a67d..4dfca49 100644
+index 975a67dd870148848f72bbb32403c6a522b8d8be..78ae911773404cdc1c95ddb9e1b9e3a206d05294 100644
 --- a/src/routes.rs
 +++ b/src/routes.rs
-@@ -27,7 +27,10 @@ use lightning::{
+@@ -27,7 +27,9 @@ use lightning::{
      types::payment::{PaymentHash, PaymentPreimage},
  };
  use lightning::{
 -    ln::channelmanager::{PaymentId, RecipientOnionFields, Retry},
 +    ln::channelmanager::{
-+        Bolt11PaymentError, PaymentId, RecipientOnionFields, Retry,
-+        RetryableSendFailure,
++        Bolt11PaymentError, PaymentId, RecipientOnionFields, Retry, RetryableSendFailure,
 +    },
      routing::{
          gossip::NodeId,
          router::{PaymentParameters, RouteParameters},
-@@ -79,8 +82,8 @@ use crate::core_types::async_order::{
+@@ -79,8 +81,8 @@ use crate::core_types::async_order::{
      AsyncOrderOutboundInvoiceResponse,
  };
  use crate::ldk::{
@@ -5433,7 +5808,68 @@ index 975a67d..4dfca49 100644
  };
  #[cfg(feature = "vss")]
  use crate::ldk::{derive_vss_identity, derive_vss_identity_from_key_source};
-@@ -1224,6 +1227,25 @@ pub(crate) struct SendPaymentResponse {
+@@ -1035,14 +1037,18 @@ pub(crate) struct Payment {
+     pub(crate) amt_msat: Option<u64>,
+     pub(crate) asset_amount: Option<u64>,
+     pub(crate) asset_id: Option<String>,
++    pub(crate) carrier_msat: Option<u64>,
+     pub(crate) payment_hash: String,
+     pub(crate) payment_type: PaymentType,
+     pub(crate) status: HTLCStatus,
+     pub(crate) created_at: u64,
+     pub(crate) updated_at: u64,
++    pub(crate) expires_at: Option<u64>,
+     pub(crate) payee_pubkey: String,
+     pub(crate) preimage: Option<String>,
+     pub(crate) description_hash: Option<String>,
++    pub(crate) fee_paid_msat: Option<u64>,
++    pub(crate) failure_code: Option<String>,
+ }
+ 
+ pub(crate) fn description_hash_from_invoice(invoice: &Bolt11Invoice) -> Option<[u8; 32]> {
+@@ -1059,6 +1065,41 @@ fn payment_type_from_invoice(invoice_type: Option<InvoiceType>) -> PaymentType {
+     }
+ }
+ 
++fn payment_rgb_binding(
++    unlocked_state: &UnlockedAppState,
++    payment_hash: &PaymentHash,
++    inbound: bool,
++    payment_info: &PaymentInfo,
++) -> Result<(Option<u64>, Option<String>, Option<u64>), APIError> {
++    if payment_info.asset_id.is_none() && payment_info.asset_amount.is_some() {
++        return Err(APIError::Unexpected(format!(
++            "payment {} has an RGB amount without an RGB contract ID",
++            hex_str(&payment_hash.0),
++        )));
++    }
++    if let Some(asset_id) = payment_info.asset_id.as_ref() {
++        return Ok((
++            payment_info.asset_amount,
++            Some(asset_id.clone()),
++            payment_info.carrier_msat.or(payment_info.amt_msat),
++        ));
++    }
++    Ok(
++        match unlocked_state
++            .kv_store
++            .read_rgb_payment_info(payment_hash, inbound)
++            .ok()
++        {
++            Some(info) => (
++                Some(info.amount),
++                Some(info.contract_id.to_string()),
++                payment_info.amt_msat,
++            ),
++            None => (None, None, None),
++        },
++    )
++}
++
+ #[derive(Clone, Deserialize, Serialize)]
+ pub(crate) struct Peer {
+     pub(crate) pubkey: String,
+@@ -1224,6 +1265,23 @@ pub(crate) struct SendPaymentResponse {
      pub(crate) payment_hash: Option<String>,
      pub(crate) payment_secret: Option<String>,
      pub(crate) status: HTLCStatus,
@@ -5452,14 +5888,44 @@ index 975a67d..4dfca49 100644
 +fn bolt11_payment_failure_code(reason: &Bolt11PaymentError) -> &'static str {
 +    match reason {
 +        Bolt11PaymentError::InvalidAmount => "INVALID_PAYMENT_AMOUNT",
-+        Bolt11PaymentError::SendingFailed(reason) => {
-+            retryable_send_failure_code(reason)
-+        }
++        Bolt11PaymentError::SendingFailed(reason) => retryable_send_failure_code(reason),
 +    }
  }
  
  #[derive(Deserialize, Serialize)]
-@@ -2111,10 +2133,25 @@ pub(crate) async fn close_channel(
+@@ -1915,8 +1973,11 @@ pub(crate) async fn cancel_hodl_invoice(
+             _ => return Err(APIError::InvoiceNotClaimable),
+         }
+ 
+-        unlocked_state
+-            .fail_htlc_backwards_and_update_inbound_payment(payment_hash, HTLCStatus::Cancelled);
++        unlocked_state.fail_htlc_backwards_and_update_inbound_payment(
++            payment_hash,
++            HTLCStatus::Cancelled,
++            "INVOICE_CANCELLED",
++        );
+ 
+         Ok(Json(EmptyResponse {}))
+     })
+@@ -2039,8 +2100,15 @@ pub(crate) async fn claim_hodl_invoice(
+         };
+ 
+         if let Some(terminal_error) = terminal_error {
+-            unlocked_state
+-                .fail_htlc_backwards_and_update_inbound_payment(payment_hash, HTLCStatus::Failed);
++            let failure_code = match &terminal_error {
++                APIError::ClaimDeadlineExceeded => "INVOICE_CLAIM_DEADLINE_EXCEEDED",
++                _ => "INVOICE_EXPIRED",
++            };
++            unlocked_state.fail_htlc_backwards_and_update_inbound_payment(
++                payment_hash,
++                HTLCStatus::Failed,
++                failure_code,
++            );
+             return Err(terminal_error);
+         }
+ 
+@@ -2111,10 +2179,25 @@ pub(crate) async fn close_channel(
          } else {
              if let Some(session) = virtual_session.as_ref() {
                  if !matches!(session.status, VirtualChannelSessionStatus::Abandoned) {
@@ -5489,25 +5955,187 @@ index 975a67d..4dfca49 100644
                  }
                  return Ok(Json(EmptyResponse {}));
              }
-@@ -2978,6 +3015,8 @@ pub(crate) async fn keysend(
+@@ -2511,26 +2594,26 @@ pub(crate) async fn get_payment(
+                 if payment_hash == &requested_ph
+                     && payment_type_from_invoice(payment_info.invoice_type) == payload.payment_type
+                 {
+-                    let (asset_amount, asset_id) = unlocked_state
+-                        .kv_store
+-                        .read_rgb_payment_info(payment_hash, true)
+-                        .ok()
+-                        .map(|info| (Some(info.amount), Some(info.contract_id.to_string())))
+-                        .unwrap_or((None, None));
++                    let (asset_amount, asset_id, carrier_msat) =
++                        payment_rgb_binding(unlocked_state, payment_hash, true, payment_info)?;
+ 
+                     return Ok(Json(GetPaymentResponse {
+                         payment: Payment {
+                             amt_msat: payment_info.amt_msat,
+                             asset_amount,
+                             asset_id,
++                            carrier_msat,
+                             payment_hash: hex_str(&payment_hash.0),
+                             payment_type: payment_type_from_invoice(payment_info.invoice_type),
+                             status: payment_info.status,
+                             created_at: payment_info.created_at,
+                             updated_at: payment_info.updated_at,
++                            expires_at: payment_info.expires_at,
+                             payee_pubkey: payment_info.payee_pubkey.to_string(),
+                             preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
+                             description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
++                            fee_paid_msat: payment_info.fee_paid_msat,
++                            failure_code: payment_info.failure_code.clone(),
+                         },
+                     }));
+                 }
+@@ -2541,26 +2624,26 @@ pub(crate) async fn get_payment(
+             for (payment_id, payment_info) in &outbound_payments {
+                 let payment_hash = &PaymentHash(payment_id.0);
+                 if payment_hash == &requested_ph {
+-                    let (asset_amount, asset_id) = unlocked_state
+-                        .kv_store
+-                        .read_rgb_payment_info(payment_hash, false)
+-                        .ok()
+-                        .map(|info| (Some(info.amount), Some(info.contract_id.to_string())))
+-                        .unwrap_or((None, None));
++                    let (asset_amount, asset_id, carrier_msat) =
++                        payment_rgb_binding(unlocked_state, payment_hash, false, payment_info)?;
+ 
+                     return Ok(Json(GetPaymentResponse {
+                         payment: Payment {
+                             amt_msat: payment_info.amt_msat,
+                             asset_amount,
+                             asset_id,
++                            carrier_msat,
+                             payment_hash: hex_str(&payment_hash.0),
+                             payment_type: PaymentType::Outbound,
+                             status: payment_info.status,
+                             created_at: payment_info.created_at,
+                             updated_at: payment_info.updated_at,
++                            expires_at: payment_info.expires_at,
+                             payee_pubkey: payment_info.payee_pubkey.to_string(),
+                             preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
+                             description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
++                            fee_paid_msat: payment_info.fee_paid_msat,
++                            failure_code: payment_info.failure_code.clone(),
+                         },
+                     }));
+                 }
+@@ -2961,6 +3044,9 @@ pub(crate) async fn keysend(
+             amt_msat,
+             rgb_payment,
+         );
++        let durable_rgb = rgb_payment
++            .as_ref()
++            .map(|(contract_id, amount)| (contract_id.to_string(), *amount));
+         let created_at = get_current_timestamp();
+         unlocked_state.add_outbound_payment(
+             payment_id,
+@@ -2978,6 +3064,11 @@ pub(crate) async fn keysend(
                  payment_idx: None,
                  async_hash_index: None,
                  async_host_node_id: None,
 +                fee_paid_msat: None,
 +                failure_code: None,
++                asset_id: durable_rgb.as_ref().map(|(asset_id, _)| asset_id.clone()),
++                asset_amount: durable_rgb.as_ref().map(|(_, amount)| *amount),
++                carrier_msat: durable_rgb.as_ref().map(|_| amt_msat),
  
                  updated_at: created_at,
              },
-@@ -3657,6 +3696,8 @@ pub(crate) async fn ln_invoice(
+@@ -3215,13 +3306,8 @@ pub(crate) async fn list_payments(
+     let mut all: Vec<(u64, Payment)> = vec![];
+ 
+     for (payment_hash, payment_info) in &inbound_payments {
+-        let (asset_amount, asset_id) = match unlocked_state
+-            .kv_store
+-            .read_rgb_payment_info(payment_hash, true)
+-        {
+-            Ok(info) => (Some(info.amount), Some(info.contract_id.to_string())),
+-            Err(_) => (None, None),
+-        };
++        let (asset_amount, asset_id, carrier_msat) =
++            payment_rgb_binding(unlocked_state, payment_hash, true, payment_info)?;
+ 
+         all.push((
+             payment_info.payment_idx.unwrap_or(0),
+@@ -3229,14 +3315,18 @@ pub(crate) async fn list_payments(
+                 amt_msat: payment_info.amt_msat,
+                 asset_amount,
+                 asset_id,
++                carrier_msat,
+                 payment_hash: hex_str(&payment_hash.0),
+                 payment_type: payment_type_from_invoice(payment_info.invoice_type),
+                 status: payment_info.status,
+                 created_at: payment_info.created_at,
+                 updated_at: payment_info.updated_at,
++                expires_at: payment_info.expires_at,
+                 payee_pubkey: payment_info.payee_pubkey.to_string(),
+                 preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
+                 description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
++                fee_paid_msat: payment_info.fee_paid_msat,
++                failure_code: payment_info.failure_code.clone(),
+             },
+         ));
+     }
+@@ -3244,13 +3334,8 @@ pub(crate) async fn list_payments(
+     for (payment_id, payment_info) in &outbound_payments {
+         let payment_hash = &PaymentHash(payment_id.0);
+ 
+-        let (asset_amount, asset_id) = match unlocked_state
+-            .kv_store
+-            .read_rgb_payment_info(payment_hash, false)
+-        {
+-            Ok(info) => (Some(info.amount), Some(info.contract_id.to_string())),
+-            Err(_) => (None, None),
+-        };
++        let (asset_amount, asset_id, carrier_msat) =
++            payment_rgb_binding(unlocked_state, payment_hash, false, payment_info)?;
+ 
+         all.push((
+             payment_info.payment_idx.unwrap_or(0),
+@@ -3258,14 +3343,18 @@ pub(crate) async fn list_payments(
+                 amt_msat: payment_info.amt_msat,
+                 asset_amount,
+                 asset_id,
++                carrier_msat,
+                 payment_hash: hex_str(&payment_hash.0),
+                 payment_type: PaymentType::Outbound,
+                 status: payment_info.status,
+                 created_at: payment_info.created_at,
+                 updated_at: payment_info.updated_at,
++                expires_at: payment_info.expires_at,
+                 payee_pubkey: payment_info.payee_pubkey.to_string(),
+                 preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
+                 description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
++                fee_paid_msat: payment_info.fee_paid_msat,
++                failure_code: payment_info.failure_code.clone(),
+             },
+         ));
+     }
+@@ -3612,6 +3701,9 @@ pub(crate) async fn ln_invoice(
+             None => Bolt11InvoiceDescription::Direct(Description::empty()),
+         };
+ 
++        let durable_rgb = contract_id
++            .as_ref()
++            .map(|contract_id| (contract_id.to_string(), payload.asset_amount));
+         let invoice_params = Bolt11InvoiceParameters {
+             amount_msats: payload.amt_msat,
+             description,
+@@ -3657,6 +3749,11 @@ pub(crate) async fn ln_invoice(
                  payment_idx: None,
                  async_hash_index: None,
                  async_host_node_id: None,
 +                fee_paid_msat: None,
 +                failure_code: None,
++                asset_id: durable_rgb.as_ref().map(|(asset_id, _)| asset_id.clone()),
++                asset_amount: durable_rgb.as_ref().and_then(|(_, amount)| *amount),
++                carrier_msat: durable_rgb.as_ref().and_then(|_| payload.amt_msat),
              },
          );
  
-@@ -4744,6 +4785,7 @@ pub(crate) async fn send_payment(
+@@ -4744,6 +4841,7 @@ pub(crate) async fn send_payment(
          let unlocked_state = guard.as_ref().unwrap();
  
          let mut status = HTLCStatus::Pending;
@@ -5515,16 +6143,19 @@ index 975a67d..4dfca49 100644
          let created_at = get_current_timestamp();
  
          let (payment_id, payment_hash, payment_secret) = if let Ok(offer) = Offer::from_str(&payload.invoice) {
-@@ -4786,6 +4828,8 @@ pub(crate) async fn send_payment(
+@@ -4786,6 +4884,11 @@ pub(crate) async fn send_payment(
                      payment_idx: None,
                      async_hash_index: None,
                      async_host_node_id: None,
 +                    fee_paid_msat: None,
 +                    failure_code: None,
++                    asset_id: None,
++                    asset_amount: None,
++                    carrier_msat: None,
                  },
              )?;
  
-@@ -4799,9 +4843,10 @@ pub(crate) async fn send_payment(
+@@ -4799,9 +4902,10 @@ pub(crate) async fn send_payment(
                  .pay_for_offer(&offer, Some(amt_msat), payment_id, params);
              if pay.is_err() {
                  tracing::error!("ERROR: failed to pay: {:?}", pay);
@@ -5537,16 +6168,29 @@ index 975a67d..4dfca49 100644
              }
              (payment_id, None, secret)
          } else {
-@@ -4902,6 +4947,8 @@ pub(crate) async fn send_payment(
+@@ -4885,6 +4989,9 @@ pub(crate) async fn send_payment(
+             }
+ 
+             let secret = payment_secret;
++            let durable_rgb = rgb_payment
++                .as_ref()
++                .map(|(contract_id, amount)| (contract_id.to_string(), *amount));
+             unlocked_state.add_outbound_payment(
+                 payment_id,
+                 PaymentInfo {
+@@ -4902,6 +5009,11 @@ pub(crate) async fn send_payment(
                      payment_idx: None,
                      async_hash_index: None,
                      async_host_node_id: None,
 +                    fee_paid_msat: None,
 +                    failure_code: None,
++                    asset_id: durable_rgb.as_ref().map(|(asset_id, _)| asset_id.clone()),
++                    asset_amount: durable_rgb.as_ref().map(|(_, amount)| *amount),
++                    carrier_msat: durable_rgb.as_ref().map(|_| amt_msat),
                  },
              )?;
              let payment_hash = PaymentHash(invoice.payment_hash().to_byte_array());
-@@ -4936,8 +4983,10 @@ pub(crate) async fn send_payment(
+@@ -4936,8 +5048,10 @@ pub(crate) async fn send_payment(
                  Err(e) => {
                      tracing::error!("ERROR: failed to send payment: {:?}", e);
                      clear_rgb_payment_pending(&payment_hash, false, unlocked_state.kv_store.as_ref());
@@ -5558,7 +6202,7 @@ index 975a67d..4dfca49 100644
                  },
              };
  
-@@ -4949,6 +4998,7 @@ pub(crate) async fn send_payment(
+@@ -4949,6 +5063,7 @@ pub(crate) async fn send_payment(
              payment_hash: payment_hash.map(|h| hex_str(&h.0)),
              payment_secret: payment_secret.map(|s| hex_str(&s.0)),
              status,
@@ -5567,7 +6211,7 @@ index 975a67d..4dfca49 100644
      })
      .await
 diff --git a/src/sdk/mod.rs b/src/sdk/mod.rs
-index 3ef5ebc..3951880 100644
+index 3ef5ebc0456f476bbb9f42d4312d6618ba1443cb..3e290416cdb6992ab0b5cb501d50129e51c46682 100644
 --- a/src/sdk/mod.rs
 +++ b/src/sdk/mod.rs
 @@ -11,8 +11,8 @@ use crate::core_types::async_order::{
@@ -5581,7 +6225,14 @@ index 3ef5ebc..3951880 100644
  };
  #[cfg(feature = "vss")]
  use crate::ldk::{derive_vss_identity, derive_vss_identity_from_key_source};
-@@ -34,13 +34,15 @@ use amplify::{map, s};
+@@ -28,19 +28,21 @@ use crate::utils::{
+     get_max_local_rgb_amount, get_route, hex_str, hex_str_to_compressed_pubkey, hex_str_to_vec,
+     is_external_signer_mode_configured, new_jsonrpc_request_id, parse_peer_info,
+     validate_and_parse_description_hash, validate_and_parse_payment_hash,
+-    validate_and_parse_payment_preimage, AppState, UserOnionMessageContents,
++    validate_and_parse_payment_preimage, AppState, UnlockedAppState, UserOnionMessageContents,
+ };
+ use amplify::{map, s};
  use bitcoin::hashes::sha256::Hash as Sha256;
  use bitcoin::hashes::Hash;
  use bitcoin::hex::DisplayHex;
@@ -5863,7 +6514,17 @@ index 3ef5ebc..3951880 100644
  pub(crate) struct MakerInitRequestData {
      pub(crate) qty_from: u64,
      pub(crate) qty_to: u64,
-@@ -571,6 +770,8 @@ pub(crate) struct PaymentData {
+@@ -563,14 +762,18 @@ pub(crate) struct PaymentData {
+     pub(crate) amt_msat: Option<u64>,
+     pub(crate) asset_amount: Option<u64>,
+     pub(crate) asset_id: Option<String>,
++    pub(crate) carrier_msat: Option<u64>,
+     pub(crate) payment_hash: String,
+     pub(crate) payment_type: PaymentType,
+     pub(crate) status: HtlcStatus,
+     pub(crate) created_at: u64,
+     pub(crate) updated_at: u64,
++    pub(crate) expires_at: Option<u64>,
      pub(crate) payee_pubkey: String,
      pub(crate) preimage: Option<String>,
      pub(crate) description_hash: Option<String>,
@@ -5872,7 +6533,7 @@ index 3ef5ebc..3951880 100644
  }
  
  pub(crate) struct CancelHodlInvoiceRequestData {
-@@ -703,6 +904,24 @@ pub(crate) enum ChannelStatus {
+@@ -703,6 +906,22 @@ pub(crate) enum ChannelStatus {
  
  pub(crate) type HtlcStatus = crate::core_types::HTLCStatus;
  
@@ -5888,9 +6549,7 @@ index 3ef5ebc..3951880 100644
 +fn bolt11_payment_failure_code(reason: &Bolt11PaymentError) -> &'static str {
 +    match reason {
 +        Bolt11PaymentError::InvalidAmount => "INVALID_PAYMENT_AMOUNT",
-+        Bolt11PaymentError::SendingFailed(reason) => {
-+            retryable_send_failure_code(reason)
-+        }
++        Bolt11PaymentError::SendingFailed(reason) => retryable_send_failure_code(reason),
 +    }
 +}
 +
@@ -6481,16 +7140,29 @@ index 3ef5ebc..3951880 100644
  pub(crate) async fn issue_asset_nia(
      state: Arc<AppState>,
      request: IssueAssetNiaRequestData,
-@@ -2581,6 +3294,8 @@ pub(crate) async fn keysend(
+@@ -2563,6 +3276,9 @@ pub(crate) async fn keysend(
+         amt_msat,
+         rgb_payment,
+     );
++    let durable_rgb = rgb_payment
++        .as_ref()
++        .map(|(contract_id, amount)| (contract_id.to_string(), *amount));
+     let created_at = get_current_timestamp();
+     unlocked_state.add_outbound_payment(
+         payment_id,
+@@ -2581,6 +3297,11 @@ pub(crate) async fn keysend(
              payment_idx: None,
              async_hash_index: None,
              async_host_node_id: None,
 +            fee_paid_msat: None,
 +            failure_code: None,
++            asset_id: durable_rgb.as_ref().map(|(asset_id, _)| asset_id.clone()),
++            asset_amount: durable_rgb.as_ref().map(|(_, amount)| *amount),
++            carrier_msat: durable_rgb.as_ref().map(|_| amt_msat),
          },
      )?;
      if let Some((contract_id, rgb_amount)) = rgb_payment {
-@@ -2651,6 +3366,181 @@ pub(crate) async fn send_btc(
+@@ -2651,6 +3372,181 @@ pub(crate) async fn send_btc(
      Ok(SendBtcData { txid })
  }
  
@@ -6672,7 +7344,7 @@ index 3ef5ebc..3951880 100644
  pub(crate) async fn post_asset_media(
      state: Arc<AppState>,
      file_bytes: Vec<u8>,
-@@ -3077,6 +3967,7 @@ pub(crate) async fn send_payment(
+@@ -3077,6 +3973,7 @@ pub(crate) async fn send_payment(
      let unlocked_state = guard.as_ref().unwrap();
  
      let mut status = HtlcStatus::Pending;
@@ -6680,12 +7352,15 @@ index 3ef5ebc..3951880 100644
      let created_at = get_current_timestamp();
  
      let (payment_id, payment_hash, payment_secret) = if let Ok(offer) =
-@@ -3120,10 +4011,16 @@ pub(crate) async fn send_payment(
+@@ -3120,10 +4017,19 @@ pub(crate) async fn send_payment(
                  payment_idx: None,
                  async_hash_index: None,
                  async_host_node_id: None,
 +                fee_paid_msat: None,
 +                failure_code: None,
++                asset_id: None,
++                asset_amount: None,
++                carrier_msat: None,
              },
          )?;
  
@@ -6697,7 +7372,7 @@ index 3ef5ebc..3951880 100644
              retry_strategy: Retry::Timeout(Duration::from_secs(10)),
              ..Default::default()
          };
-@@ -3135,9 +4032,10 @@ pub(crate) async fn send_payment(
+@@ -3135,9 +4041,10 @@ pub(crate) async fn send_payment(
          );
          if pay.is_err() {
              tracing::error!("ERROR: failed to pay: {:?}", pay);
@@ -6710,16 +7385,29 @@ index 3ef5ebc..3951880 100644
          }
          (payment_id, None, secret)
      } else {
-@@ -3222,6 +4120,8 @@ pub(crate) async fn send_payment(
+@@ -3205,6 +4112,9 @@ pub(crate) async fn send_payment(
+         };
+ 
+         let secret = payment_secret;
++        let durable_rgb = rgb_payment
++            .as_ref()
++            .map(|(contract_id, amount)| (contract_id.to_string(), *amount));
+         unlocked_state.add_outbound_payment(
+             payment_id,
+             PaymentInfo {
+@@ -3222,6 +4132,11 @@ pub(crate) async fn send_payment(
                  payment_idx: None,
                  async_hash_index: None,
                  async_host_node_id: None,
 +                fee_paid_msat: None,
 +                failure_code: None,
++                asset_id: durable_rgb.as_ref().map(|(asset_id, _)| asset_id.clone()),
++                asset_amount: durable_rgb.as_ref().map(|(_, amount)| *amount),
++                carrier_msat: durable_rgb.as_ref().map(|_| amt_msat),
              },
          )?;
          let payment_hash = PaymentHash(invoice.payment_hash().to_byte_array());
-@@ -3245,7 +4145,10 @@ pub(crate) async fn send_payment(
+@@ -3245,7 +4160,10 @@ pub(crate) async fn send_payment(
              &invoice,
              payment_id,
              Some(amt_msat),
@@ -6731,7 +7419,7 @@ index 3ef5ebc..3951880 100644
              bolt11_retry,
          ) {
              Ok(_) => {
-@@ -3259,8 +4162,10 @@ pub(crate) async fn send_payment(
+@@ -3259,8 +4177,10 @@ pub(crate) async fn send_payment(
              Err(e) => {
                  tracing::error!("ERROR: failed to send payment: {:?}", e);
                  clear_rgb_payment_pending(&payment_hash, false, unlocked_state.kv_store.as_ref());
@@ -6743,7 +7431,7 @@ index 3ef5ebc..3951880 100644
              }
          };
  
-@@ -3272,6 +4177,7 @@ pub(crate) async fn send_payment(
+@@ -3272,6 +4192,7 @@ pub(crate) async fn send_payment(
          payment_hash: payment_hash.map(|h| hex_str(&h.0)),
          payment_secret: payment_secret.map(|s| hex_str(&s.0)),
          status,
@@ -6751,7 +7439,7 @@ index 3ef5ebc..3951880 100644
      })
  }
  
-@@ -3663,6 +4569,156 @@ pub(crate) async fn sync(state: Arc<AppState>) -> Result<(), APIError> {
+@@ -3663,6 +4584,156 @@ pub(crate) async fn sync(state: Arc<AppState>) -> Result<(), APIError> {
      Ok(())
  }
  
@@ -6908,16 +7596,94 @@ index 3ef5ebc..3951880 100644
  pub(crate) async fn decode_ln_invoice(
      state: Arc<AppState>,
      invoice: String,
-@@ -3844,6 +4900,8 @@ pub(crate) async fn create_ln_invoice(
+@@ -3797,6 +4868,9 @@ pub(crate) async fn create_ln_invoice(
+         None => Bolt11InvoiceDescription::Direct(Description::empty()),
+     };
+ 
++    let durable_rgb = contract_id
++        .as_ref()
++        .map(|contract_id| (contract_id.to_string(), asset_amount));
+     let invoice_params = Bolt11InvoiceParameters {
+         amount_msats: amt_msat,
+         description,
+@@ -3844,6 +4918,11 @@ pub(crate) async fn create_ln_invoice(
              payment_idx: None,
              async_hash_index: None,
              async_host_node_id: None,
 +            fee_paid_msat: None,
 +            failure_code: None,
++            asset_id: durable_rgb.as_ref().map(|(asset_id, _)| asset_id.clone()),
++            asset_amount: durable_rgb.as_ref().and_then(|(_, amount)| *amount),
++            carrier_msat: durable_rgb.as_ref().and_then(|_| amt_msat),
          },
      );
  
-@@ -3888,6 +4946,8 @@ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentDat
+@@ -3859,6 +4938,41 @@ fn payment_type_from_invoice(invoice_type: Option<InvoiceType>) -> PaymentType {
+     }
+ }
+ 
++fn payment_rgb_binding(
++    unlocked_state: &UnlockedAppState,
++    payment_hash: &PaymentHash,
++    inbound: bool,
++    payment_info: &PaymentInfo,
++) -> Result<(Option<u64>, Option<String>, Option<u64>), APIError> {
++    if payment_info.asset_id.is_none() && payment_info.asset_amount.is_some() {
++        return Err(APIError::Unexpected(format!(
++            "payment {} has an RGB amount without an RGB contract ID",
++            hex_str(&payment_hash.0),
++        )));
++    }
++
++    if let Some(asset_id) = payment_info.asset_id.as_ref() {
++        return Ok((
++            payment_info.asset_amount,
++            Some(asset_id.clone()),
++            payment_info.carrier_msat.or(payment_info.amt_msat),
++        ));
++    }
++
++    let legacy = unlocked_state
++        .kv_store
++        .read_rgb_payment_info(payment_hash, inbound)
++        .ok();
++    Ok(match legacy {
++        Some(info) => (
++            Some(info.amount),
++            Some(info.contract_id.to_string()),
++            payment_info.amt_msat,
++        ),
++        None => (None, None, None),
++    })
++}
++
+ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentData>, APIError> {
+     let guard = check_unlocked(&state).await?;
+     let unlocked_state = guard.as_ref().unwrap();
+@@ -3869,50 +4983,50 @@ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentDat
+     let mut payments = vec![];
+ 
+     for (payment_hash, payment_info) in &inbound_payments {
+-        let (asset_amount, asset_id) = unlocked_state
+-            .kv_store
+-            .read_rgb_payment_info(payment_hash, true)
+-            .ok()
+-            .map(|info| (Some(info.amount), Some(info.contract_id.to_string())))
+-            .unwrap_or((None, None));
++        let (asset_amount, asset_id, carrier_msat) =
++            payment_rgb_binding(unlocked_state, payment_hash, true, payment_info)?;
+ 
+         payments.push(PaymentData {
+             amt_msat: payment_info.amt_msat,
+             asset_amount,
+             asset_id,
++            carrier_msat,
+             payment_hash: hex_str(&payment_hash.0),
+             payment_type: payment_type_from_invoice(payment_info.invoice_type),
+             status: payment_info.status,
+             created_at: payment_info.created_at,
+             updated_at: payment_info.updated_at,
++            expires_at: payment_info.expires_at,
              payee_pubkey: payment_info.payee_pubkey.to_string(),
              preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
              description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
@@ -6926,7 +7692,29 @@ index 3ef5ebc..3951880 100644
          });
      }
  
-@@ -3913,6 +4973,8 @@ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentDat
+     for (payment_id, payment_info) in &outbound_payments {
+         let payment_hash = &PaymentHash(payment_id.0);
+ 
+-        let (asset_amount, asset_id) = unlocked_state
+-            .kv_store
+-            .read_rgb_payment_info(payment_hash, false)
+-            .ok()
+-            .map(|info| (Some(info.amount), Some(info.contract_id.to_string())))
+-            .unwrap_or((None, None));
++        let (asset_amount, asset_id, carrier_msat) =
++            payment_rgb_binding(unlocked_state, payment_hash, false, payment_info)?;
+ 
+         payments.push(PaymentData {
+             amt_msat: payment_info.amt_msat,
+             asset_amount,
+             asset_id,
++            carrier_msat,
+             payment_hash: hex_str(&payment_hash.0),
+             payment_type: PaymentType::Outbound,
+             status: payment_info.status,
+             created_at: payment_info.created_at,
+             updated_at: payment_info.updated_at,
++            expires_at: payment_info.expires_at,
              payee_pubkey: payment_info.payee_pubkey.to_string(),
              preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
              description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
@@ -6935,7 +7723,30 @@ index 3ef5ebc..3951880 100644
          });
      }
  
-@@ -3959,6 +5021,8 @@ pub(crate) async fn get_payment(
+@@ -3940,25 +5054,25 @@ pub(crate) async fn get_payment(
+                 if payment_hash == &requested_ph
+                     && payment_type_from_invoice(payment_info.invoice_type) == payment_type
+                 {
+-                    let (asset_amount, asset_id) = unlocked_state
+-                        .kv_store
+-                        .read_rgb_payment_info(payment_hash, true)
+-                        .ok()
+-                        .map(|info| (Some(info.amount), Some(info.contract_id.to_string())))
+-                        .unwrap_or((None, None));
++                    let (asset_amount, asset_id, carrier_msat) =
++                        payment_rgb_binding(unlocked_state, payment_hash, true, payment_info)?;
+ 
+                     return Ok(PaymentData {
+                         amt_msat: payment_info.amt_msat,
+                         asset_amount,
+                         asset_id,
++                        carrier_msat,
+                         payment_hash: hex_str(&payment_hash.0),
+                         payment_type: payment_type_from_invoice(payment_info.invoice_type),
+                         status: payment_info.status,
+                         created_at: payment_info.created_at,
+                         updated_at: payment_info.updated_at,
++                        expires_at: payment_info.expires_at,
                          payee_pubkey: payment_info.payee_pubkey.to_string(),
                          preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
                          description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
@@ -6944,7 +7755,30 @@ index 3ef5ebc..3951880 100644
                      });
                  }
              }
-@@ -3987,6 +5051,8 @@ pub(crate) async fn get_payment(
+@@ -3968,25 +5082,25 @@ pub(crate) async fn get_payment(
+             for (payment_id, payment_info) in &outbound_payments {
+                 let payment_hash = &PaymentHash(payment_id.0);
+                 if payment_hash == &requested_ph {
+-                    let (asset_amount, asset_id) = unlocked_state
+-                        .kv_store
+-                        .read_rgb_payment_info(payment_hash, false)
+-                        .ok()
+-                        .map(|info| (Some(info.amount), Some(info.contract_id.to_string())))
+-                        .unwrap_or((None, None));
++                    let (asset_amount, asset_id, carrier_msat) =
++                        payment_rgb_binding(unlocked_state, payment_hash, false, payment_info)?;
+ 
+                     return Ok(PaymentData {
+                         amt_msat: payment_info.amt_msat,
+                         asset_amount,
+                         asset_id,
++                        carrier_msat,
+                         payment_hash: hex_str(&payment_hash.0),
+                         payment_type: PaymentType::Outbound,
+                         status: payment_info.status,
+                         created_at: payment_info.created_at,
+                         updated_at: payment_info.updated_at,
++                        expires_at: payment_info.expires_at,
                          payee_pubkey: payment_info.payee_pubkey.to_string(),
                          preimage: payment_info.preimage.map(|p| hex_str(&p.0)),
                          description_hash: payment_info.description_hash.map(|h| hex_str(&h)),
@@ -6953,7 +7787,39 @@ index 3ef5ebc..3951880 100644
                      });
                  }
              }
-@@ -4390,6 +5456,26 @@ mod tests {
+@@ -4020,8 +5134,11 @@ pub(crate) async fn cancel_hodl_invoice(
+         _ => return Err(APIError::InvoiceNotClaimable),
+     }
+ 
+-    unlocked_state
+-        .fail_htlc_backwards_and_update_inbound_payment(payment_hash, HtlcStatus::Cancelled);
++    unlocked_state.fail_htlc_backwards_and_update_inbound_payment(
++        payment_hash,
++        HtlcStatus::Cancelled,
++        "INVOICE_CANCELLED",
++    );
+     Ok(())
+ }
+ 
+@@ -4094,8 +5211,15 @@ pub(crate) async fn claim_hodl_invoice(
+     };
+ 
+     if let Some(terminal_error) = terminal_error {
+-        unlocked_state
+-            .fail_htlc_backwards_and_update_inbound_payment(payment_hash, HtlcStatus::Failed);
++        let failure_code = match &terminal_error {
++            APIError::ClaimDeadlineExceeded => "INVOICE_CLAIM_DEADLINE_EXCEEDED",
++            _ => "INVOICE_EXPIRED",
++        };
++        unlocked_state.fail_htlc_backwards_and_update_inbound_payment(
++            payment_hash,
++            HtlcStatus::Failed,
++            failure_code,
++        );
+         return Err(terminal_error);
+     }
+ 
+@@ -4390,6 +5514,26 @@ mod tests {
      use tokio::sync::Mutex as TokioMutex;
      use tokio_util::sync::CancellationToken;
  
@@ -6980,7 +7846,7 @@ index 3ef5ebc..3951880 100644
      #[test]
      fn verify_message_signature_accepts_known_lightning_vector_and_rejects_tampering() {
          let message = b"is this compatible?";
-@@ -4451,13 +5537,7 @@ mod tests {
+@@ -4451,13 +5595,7 @@ mod tests {
      }
  
      fn mock_locked_state() -> Arc<AppState> {
@@ -6996,7 +7862,7 @@ index 3ef5ebc..3951880 100644
          std::fs::create_dir_all(&storage_dir).expect("create temp storage dir");
          let db_path = storage_dir.join("rln_db");
 diff --git a/src/signer/channel_signer.rs b/src/signer/channel_signer.rs
-index 6e24dec..c38c65a 100644
+index 6e24decc5614e140f7428fe63e06a106b8367a71..c38c65a971005f22d09ca50f5e50b600e338d787 100644
 --- a/src/signer/channel_signer.rs
 +++ b/src/signer/channel_signer.rs
 @@ -410,15 +410,58 @@ impl ChannelSigner for ExternalChannelSigner {
@@ -7064,8 +7930,37 @@ index 6e24dec..c38c65a 100644
      }
  
      fn validate_holder_commitment(
+diff --git a/src/test/address_reuse.rs b/src/test/address_reuse.rs
+index ce8296402bf5fdc510379ffe4be9b58bf4e1ccf9..dc16cdba777818aa0464c3d86bffd027d479d906 100644
+--- a/src/test/address_reuse.rs
++++ b/src/test/address_reuse.rs
+@@ -92,17 +92,18 @@ async fn rotate_advances_pin_and_new_address_receives_funds() {
+ 
+     let rotated = rotate_address(node_addr).await;
+     assert_ne!(rotated, pinned);
++    // Fund before calling `/address` again. A follow-up address lookup reveals
++    // the script to BDK and used to hide a rotate-only discovery defect.
++    fund_and_mine(rotated.clone(), FUND_SATS);
++    assert!(
++        settled_btc(node_addr).await >= 2 * FUND_SATS,
++        "funds sent to the rotated address must be spendable"
++    );
+     assert_eq!(
+         rotated,
+         address(node_addr).await,
+         "the pin must move to the rotated address"
+     );
+-
+-    fund_and_mine(rotated, FUND_SATS);
+-    assert!(
+-        settled_btc(node_addr).await >= 2 * FUND_SATS,
+-        "funds sent to the rotated address must be spendable"
+-    );
+ }
+ 
+ /// `/rotateaddress` is rejected when reuse is disabled.
 diff --git a/src/test/lib_sdk/close_coop_vanilla.rs b/src/test/lib_sdk/close_coop_vanilla.rs
-index 99dfc4d..1a89d81 100644
+index 99dfc4de1727df3db4e955fc4214023ee4a51799..1a89d81785726b5ae393c1b84995bdf06cff5073 100644
 --- a/src/test/lib_sdk/close_coop_vanilla.rs
 +++ b/src/test/lib_sdk/close_coop_vanilla.rs
 @@ -206,6 +206,7 @@ fn run_close_coop_vanilla(name: &str, port_offset: u16, with_anchors: bool) {
@@ -7077,7 +7972,7 @@ index 99dfc4d..1a89d81 100644
              .expect("node B sendpayment");
          let payment_hash = send_payment.payment_hash.expect("vanilla payment hash");
 diff --git a/src/test/lib_sdk/external_signer.rs b/src/test/lib_sdk/external_signer.rs
-index 8a52af3..0a2dbbc 100644
+index 8a52af35b01ed9b299b8be41a7e0568f3c4d97cd..0a2dbbc91fb74e9b6f1c078739403ae03337012b 100644
 --- a/src/test/lib_sdk/external_signer.rs
 +++ b/src/test/lib_sdk/external_signer.rs
 @@ -682,6 +682,7 @@ fn rgb_native_external_signer_mixed_one_hop_payment_quick() {
@@ -7291,7 +8186,7 @@ index 8a52af3..0a2dbbc 100644
              .unwrap_or_else(|e| panic!("{label}: sendpayment: {e:?}"));
          let payment_hash = send.payment_hash.expect("payment_hash");
 diff --git a/src/test/lib_sdk/helpers.rs b/src/test/lib_sdk/helpers.rs
-index a20ac6d..095b12c 100644
+index a20ac6d050e0f1bae2ae6fc69bcc5c85147a4f0f..095b12ccf4d707381140ff5106b9c397b59420e1 100644
 --- a/src/test/lib_sdk/helpers.rs
 +++ b/src/test/lib_sdk/helpers.rs
 @@ -3,11 +3,11 @@ use once_cell::sync::Lazy;
@@ -7351,7 +8246,7 @@ index a20ac6d..095b12c 100644
          .expect("sendpayment with ln balance checks");
  
 diff --git a/src/test/lib_sdk/mod.rs b/src/test/lib_sdk/mod.rs
-index 586ebd8..d57e712 100644
+index 586ebd846fb9d12ddcf1e791b435793d926d92b9..d57e712b44c377d0be88433cb425e25c1cb4d1a7 100644
 --- a/src/test/lib_sdk/mod.rs
 +++ b/src/test/lib_sdk/mod.rs
 @@ -13,6 +13,7 @@ mod multi_hop;
@@ -7363,7 +8258,7 @@ index 586ebd8..d57e712 100644
  mod swap_roundtrip_buy;
  mod vanilla_payment_on_rgb_channel;
 diff --git a/src/test/lib_sdk/multi_hop.rs b/src/test/lib_sdk/multi_hop.rs
-index acb4fd2..34bce6c 100644
+index acb4fd2cab3b2d9b22591fe78b1263a8a4668f91..34bce6c3f6b19b795d62d6a84c130242f2ddd4c6 100644
 --- a/src/test/lib_sdk/multi_hop.rs
 +++ b/src/test/lib_sdk/multi_hop.rs
 @@ -253,6 +253,7 @@ fn multi_hop() {
@@ -7375,7 +8270,7 @@ index acb4fd2..34bce6c 100644
              .expect("node A sendpayment");
          let payment_hash = send_payment
 diff --git a/src/test/lib_sdk/payment.rs b/src/test/lib_sdk/payment.rs
-index 574fd5d..22440e5 100644
+index 574fd5df1474c2d313b8ba8108e929f525f5b7c5..22440e5a55bbc9739d6a16993596334ef51e9398 100644
 --- a/src/test/lib_sdk/payment.rs
 +++ b/src/test/lib_sdk/payment.rs
 @@ -285,6 +285,7 @@ fn success() {
@@ -7395,7 +8290,7 @@ index 574fd5d..22440e5 100644
              .expect("node B sendpayment fourth");
          let decoded = node_a
 diff --git a/src/test/lib_sdk/restart.rs b/src/test/lib_sdk/restart.rs
-index 89331d4..5770b44 100644
+index 89331d42494c11557fd30c08761279f3af36d684..5770b445a0846effd37791e53c80dc21fd697f9b 100644
 --- a/src/test/lib_sdk/restart.rs
 +++ b/src/test/lib_sdk/restart.rs
 @@ -169,6 +169,7 @@ fn restart() {
@@ -7408,7 +8303,7 @@ index 89331d4..5770b44 100644
          let payment_hash = send_payment.payment_hash.expect("payment hash");
 diff --git a/src/test/lib_sdk/rgb_utxo_isolation.rs b/src/test/lib_sdk/rgb_utxo_isolation.rs
 new file mode 100644
-index 0000000..eb3dd0f
+index 0000000000000000000000000000000000000000..eb3dd0f05d3dba4f64851d87b20229e664d1d6a7
 --- /dev/null
 +++ b/src/test/lib_sdk/rgb_utxo_isolation.rs
 @@ -0,0 +1,140 @@
@@ -7553,7 +8448,7 @@ index 0000000..eb3dd0f
 +    }
 +}
 diff --git a/src/test/lib_sdk/vanilla_payment_on_rgb_channel.rs b/src/test/lib_sdk/vanilla_payment_on_rgb_channel.rs
-index 862f288..0108a52 100644
+index 862f288297d6272ffdf75a1f37cec83a88189041..0108a52669d0fa5807782846a61c0064e9f0fd22 100644
 --- a/src/test/lib_sdk/vanilla_payment_on_rgb_channel.rs
 +++ b/src/test/lib_sdk/vanilla_payment_on_rgb_channel.rs
 @@ -114,6 +114,7 @@ fn vanilla_payment_on_rgb_channel() {
@@ -7565,7 +8460,7 @@ index 862f288..0108a52 100644
              .expect("node A sendpayment");
          let payment_hash = send_payment
 diff --git a/src/uniffi_api/mod.rs b/src/uniffi_api/mod.rs
-index c6173a3..648ea3e 100644
+index c6173a390f180ab7664a6b883464961f9c855925..45e1a2e1b8dce9ca7783f275f8c57973251dec04 100644
 --- a/src/uniffi_api/mod.rs
 +++ b/src/uniffi_api/mod.rs
 @@ -115,11 +115,8 @@ fn handle_from_request(request: SdkInitRequest) -> Result<NodeHandle, RlnError>
@@ -7602,7 +8497,17 @@ index c6173a3..648ea3e 100644
      let txid = Txid::from_str(&data.txid).map_err(RlnError::internal)?;
      Ok(SendRgbResponse {
          txid,
-@@ -200,6 +205,8 @@ fn map_payment_data(data: crate::sdk::PaymentData) -> Result<Payment, RlnError>
+@@ -192,14 +197,18 @@ fn map_payment_data(data: crate::sdk::PaymentData) -> Result<Payment, RlnError>
+         amt_msat: data.amt_msat,
+         asset_amount: data.asset_amount,
+         asset_id,
++        carrier_msat: data.carrier_msat,
+         payment_hash,
+         payment_type,
+         status,
+         created_at: data.created_at,
+         updated_at: data.updated_at,
++        expires_at: data.expires_at,
          payee_pubkey,
          preimage: data.preimage,
          description_hash: data.description_hash,
@@ -7611,7 +8516,7 @@ index c6173a3..648ea3e 100644
      })
  }
  
-@@ -312,11 +319,34 @@ fn map_transaction(tx: crate::sdk::TransactionData) -> Result<Transaction, RlnEr
+@@ -312,11 +321,34 @@ fn map_transaction(tx: crate::sdk::TransactionData) -> Result<Transaction, RlnEr
      })
  }
  
@@ -7646,7 +8551,7 @@ index c6173a3..648ea3e 100644
      Ok(Transfer {
          idx: t.idx,
          created_at: t.created_at,
-@@ -328,6 +358,8 @@ fn map_transfer(t: crate::sdk::TransferData) -> Result<Transfer, RlnError> {
+@@ -328,6 +360,8 @@ fn map_transfer(t: crate::sdk::TransferData) -> Result<Transfer, RlnError> {
              .into_iter()
              .map(|a| format!("{:?}", a))
              .collect(),
@@ -7655,7 +8560,7 @@ index c6173a3..648ea3e 100644
          kind: format!("{:?}", t.kind),
          txid,
          recipient_id: t.recipient_id,
-@@ -415,6 +447,22 @@ impl SdkNode {
+@@ -415,6 +449,22 @@ impl SdkNode {
          Ok(version)
      }
  
@@ -7678,7 +8583,7 @@ index c6173a3..648ea3e 100644
      pub fn connectpeer(&self, peer_pubkey_and_addr: String) -> Result<(), RlnError> {
          let state = self.handle.app_state();
          block_on_sdk(sdk::connect_peer(state, peer_pubkey_and_addr))?;
-@@ -460,6 +508,61 @@ impl SdkNode {
+@@ -460,6 +510,61 @@ impl SdkNode {
          Ok(())
      }
  
@@ -7740,7 +8645,7 @@ index c6173a3..648ea3e 100644
      pub fn issueassetnia(&self, request: SdkIssueAssetNiaRequest) -> Result<AssetNia, RlnError> {
          let state = self.handle.app_state();
          let asset = block_on_sdk(sdk::issue_asset_nia(
-@@ -673,6 +776,91 @@ impl SdkNode {
+@@ -673,6 +778,91 @@ impl SdkNode {
          Ok(SdkSendBtcResponse { txid })
      }
  
@@ -7832,7 +8737,7 @@ index c6173a3..648ea3e 100644
      pub fn makerinit(
          &self,
          request: SdkMakerInitRequest,
-@@ -787,6 +975,7 @@ impl SdkNode {
+@@ -787,6 +977,7 @@ impl SdkNode {
                  amt_msat: request.amt_msat,
                  asset_id: request.asset_id.map(|id| id.to_string()),
                  asset_amount: request.asset_amount,
@@ -7840,7 +8745,7 @@ index c6173a3..648ea3e 100644
              },
          ))?;
          let status = match response.status {
-@@ -809,6 +998,7 @@ impl SdkNode {
+@@ -809,6 +1000,7 @@ impl SdkNode {
              payment_hash,
              payment_secret: response.payment_secret,
              status,
@@ -7848,7 +8753,7 @@ index c6173a3..648ea3e 100644
          })
      }
  
-@@ -847,6 +1037,35 @@ impl SdkNode {
+@@ -847,6 +1039,35 @@ impl SdkNode {
          Ok(())
      }
  
@@ -7884,7 +8789,7 @@ index c6173a3..648ea3e 100644
      pub fn node_info(&self) -> Result<NodeInfo, RlnError> {
          let state = self.handle.app_state();
          let data = block_on_sdk(sdk::node_info(state))?;
-@@ -1029,6 +1248,7 @@ impl SdkNode {
+@@ -1029,6 +1250,7 @@ impl SdkNode {
          Ok(NetworkInfo {
              network: format!("{:?}", info.network),
              height: info.height,
@@ -7892,7 +8797,7 @@ index c6173a3..648ea3e 100644
          })
      }
  
-@@ -1441,6 +1661,67 @@ impl SdkNode {
+@@ -1441,6 +1663,67 @@ impl SdkNode {
          send_rgb_from_state(self.handle.app_state(), request)
      }
  
@@ -7961,7 +8866,7 @@ index c6173a3..648ea3e 100644
          let state = self.handle.app_state();
          let response = block_on_sdk(sdk::async_order_new(
 diff --git a/src/uniffi_api/native_signer.rs b/src/uniffi_api/native_signer.rs
-index 42f6c14..cf1f4ff 100644
+index 42f6c146b0b5715a2ade52f5e9718de43edc6c90..cf1f4ffe020ce11912b653ef1f46a333d26a7734 100644
 --- a/src/uniffi_api/native_signer.rs
 +++ b/src/uniffi_api/native_signer.rs
 @@ -11,14 +11,18 @@ use bitcoin::Network;
@@ -8118,7 +9023,7 @@ index 42f6c14..cf1f4ff 100644
 +    }
  }
 diff --git a/src/uniffi_api/state.rs b/src/uniffi_api/state.rs
-index 59faef0..a303cf2 100644
+index 59faef015734e5aa4d309bfc9bdc6203da81a0a1..a303cf2dc12f823ee74a56991e232494895d6332 100644
 --- a/src/uniffi_api/state.rs
 +++ b/src/uniffi_api/state.rs
 @@ -232,6 +232,7 @@ pub(super) fn map_app_error(err: AppError) -> RlnError {
@@ -8130,7 +9035,7 @@ index 59faef0..a303cf2 100644
              RlnError::InvalidRequest(msg)
          }
 diff --git a/src/uniffi_api/tests.rs b/src/uniffi_api/tests.rs
-index 4f37a95..afea3a2 100644
+index 4f37a9564b5801e7ef5f84a55fe4cd0409fe26e9..afea3a2fdfb49d3198a43ff9392acbaa697b31e8 100644
 --- a/src/uniffi_api/tests.rs
 +++ b/src/uniffi_api/tests.rs
 @@ -412,11 +412,15 @@ mod uniffi_smoke_tests {
@@ -8150,7 +9055,7 @@ index 4f37a95..afea3a2 100644
      }
  
 diff --git a/src/uniffi_api/types.rs b/src/uniffi_api/types.rs
-index beeaf62..46e3528 100644
+index beeaf62ea3e2ece39fcb5a1ec8cccf3476d4e063..bdac98621b1e496cb243ad316ea774856c50ea20 100644
 --- a/src/uniffi_api/types.rs
 +++ b/src/uniffi_api/types.rs
 @@ -10,6 +10,7 @@ pub type Bolt11Invoice = lightning_invoice::Bolt11Invoice;
@@ -8194,7 +9099,17 @@ index beeaf62..46e3528 100644
  pub struct SignMessageResponse {
      pub signed_message: String,
  }
-@@ -140,6 +160,8 @@ pub struct Payment {
+@@ -132,14 +152,18 @@ pub struct Payment {
+     pub amt_msat: Option<u64>,
+     pub asset_amount: Option<u64>,
+     pub asset_id: Option<ContractId>,
++    pub carrier_msat: Option<u64>,
+     pub payment_hash: PaymentHash,
+     pub payment_type: PaymentType,
+     pub status: HtlcStatus,
+     pub created_at: u64,
+     pub updated_at: u64,
++    pub expires_at: Option<u64>,
      pub payee_pubkey: PublicKey,
      pub preimage: Option<String>,
      pub description_hash: Option<String>,
@@ -8203,7 +9118,7 @@ index beeaf62..46e3528 100644
  }
  
  pub enum PaymentType {
-@@ -405,6 +427,11 @@ pub struct TransferTransportEndpoint {
+@@ -405,6 +429,11 @@ pub struct TransferTransportEndpoint {
      pub used: bool,
  }
  
@@ -8215,7 +9130,7 @@ index beeaf62..46e3528 100644
  pub struct Transfer {
      pub idx: i32,
      pub created_at: i64,
-@@ -412,6 +439,8 @@ pub struct Transfer {
+@@ -412,6 +441,8 @@ pub struct Transfer {
      pub status: String,
      pub requested_assignment: Option<String>,
      pub assignments: Vec<String>,
@@ -8224,7 +9139,7 @@ index beeaf62..46e3528 100644
      pub kind: String,
      pub txid: Option<Txid>,
      pub recipient_id: Option<String>,
-@@ -534,6 +563,7 @@ pub struct SdkSendPaymentRequest {
+@@ -534,6 +565,7 @@ pub struct SdkSendPaymentRequest {
      pub amt_msat: Option<u64>,
      pub asset_id: Option<ContractId>,
      pub asset_amount: Option<u64>,
@@ -8232,7 +9147,7 @@ index beeaf62..46e3528 100644
  }
  
  pub struct SdkSendPaymentResponse {
-@@ -541,6 +571,7 @@ pub struct SdkSendPaymentResponse {
+@@ -541,6 +573,7 @@ pub struct SdkSendPaymentResponse {
      pub payment_hash: Option<PaymentHash>,
      pub payment_secret: Option<String>,
      pub status: HtlcStatus,
@@ -8240,7 +9155,7 @@ index beeaf62..46e3528 100644
  }
  
  pub struct SdkRefreshTransfersRequest {
-@@ -565,6 +596,16 @@ pub struct SdkCreateUtxosRequest {
+@@ -565,6 +598,16 @@ pub struct SdkCreateUtxosRequest {
      pub skip_sync: bool,
  }
  
@@ -8257,7 +9172,7 @@ index beeaf62..46e3528 100644
  pub struct SdkIssueAssetNiaRequest {
      pub amounts: Vec<u64>,
      pub ticker: String,
-@@ -622,6 +663,52 @@ pub struct SdkSendBtcResponse {
+@@ -622,6 +665,52 @@ pub struct SdkSendBtcResponse {
      pub txid: Txid,
  }
  
@@ -8311,7 +9226,7 @@ index beeaf62..46e3528 100644
      pub qty_from: u64,
      pub qty_to: u64,
 diff --git a/src/utils.rs b/src/utils.rs
-index 33cfc42..f8a6e34 100644
+index 33cfc42dffa59d1254392941bbb1e377b6ee9177..f8a6e340de47fdeab0394122e06c4aa1cf960d1b 100644
 --- a/src/utils.rs
 +++ b/src/utils.rs
 @@ -164,6 +164,7 @@ impl StaticState {
@@ -8323,7 +9238,7 @@ index 33cfc42..f8a6e34 100644
      pub(crate) gossip_source: Arc<crate::gossip::GossipSource>,
      pub(crate) inbound_payments: Arc<Mutex<InboundPaymentInfoStorage>>,
 diff --git a/src/vss_kv_store.rs b/src/vss_kv_store.rs
-index b956bd1..af869d5 100644
+index b956bd1a8b3ca266248bbf1e6b3260dafa47101a..af869d58a6ca4db52dd10a576eba70f4998782a6 100644
 --- a/src/vss_kv_store.rs
 +++ b/src/vss_kv_store.rs
 @@ -613,6 +613,78 @@ impl VssKvStore {

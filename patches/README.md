@@ -20,6 +20,9 @@ This overlay includes transactional orphaned virtual-channel recovery so a
 failed RGB channel open cannot permanently reserve inventory or block the peer.
 Lightning send responses and persisted payment records expose stable failure
 codes, and node shutdown releases native ownership before signer destruction.
+RGB contract, asset amount, carrier millisatoshis, invoice expiry, and terminal
+reason remain bound to the same payment after restart and are exposed by wallet
+snapshot contract v3. Address rotation reveals the new script before returning.
 
 Adds versioned dual-keychain synchronization, bounded decimal-safe wallet
 snapshots, explicit Lightning routing-fee caps, and persisted actual routing
@@ -30,6 +33,9 @@ cancellation, pending vanilla transaction inspection, and RGB UTXO setup
 isolation from existing and future witness invoices.
 The same overlay permits a replacement trusted virtual channel only after the
 previous native session reaches its terminal abandoned state.
+Inbound channels are classified as virtual only when an explicitly configured
+trusted peer requests SCID privacy; ordinary inbound channels retain standard
+LDK handling even while virtual-channel support is enabled.
 
 Adds the versioned wallet synchronization and exact snapshot contract used by
 WDK portfolio refreshes. Routine synchronization FullSyncs both Vanilla and
