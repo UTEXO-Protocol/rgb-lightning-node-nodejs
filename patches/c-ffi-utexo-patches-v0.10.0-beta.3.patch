@@ -4121,7 +4121,7 @@ index a760299..6cdcb68 100644
      client: &ElectrumClient,
      height: usize,
 diff --git a/src/ldk.rs b/src/ldk.rs
-index e4abdac..f30cebc 100644
+index e4abdac..cd556e2 100644
 --- a/src/ldk.rs
 +++ b/src/ldk.rs
 @@ -96,7 +96,7 @@ use rgb_lib::{
@@ -4142,7 +4142,7 @@ index e4abdac..f30cebc 100644
  
  pub(crate) const INBOUND_PAYMENTS_KEY: &str = "inbound_payments";
  const OUTBOUND_PAYMENTS_KEY: &str = "outbound_payments";
-@@ -253,6 +253,12 @@ pub(crate) struct LdkBackgroundServices {
+@@ -253,6 +253,13 @@ pub(crate) struct LdkBackgroundServices {
      peer_manager: Arc<PeerManager>,
      bp_exit: Sender<()>,
      background_processor: Option<JoinHandle<Result<(), io::Error>>>,
@@ -4152,10 +4152,11 @@ index e4abdac..f30cebc 100644
 +struct LdkShutdownHandles {
 +    background_processor: Option<JoinHandle<Result<(), io::Error>>>,
 +    service_tasks: Vec<JoinHandle<()>>,
++    peer_manager: Arc<PeerManager>,
  }
  
  #[derive(Clone, Debug)]
-@@ -271,6 +277,11 @@ pub(crate) struct PaymentInfo {
+@@ -271,6 +278,11 @@ pub(crate) struct PaymentInfo {
      pub(crate) payment_idx: Option<u64>,
      pub(crate) async_hash_index: Option<u64>,
      pub(crate) async_host_node_id: Option<PublicKey>,
@@ -4167,7 +4168,7 @@ index e4abdac..f30cebc 100644
  }
  
  impl_writeable_tlv_based!(PaymentInfo, {
-@@ -288,8 +299,37 @@ impl_writeable_tlv_based!(PaymentInfo, {
+@@ -288,8 +300,37 @@ impl_writeable_tlv_based!(PaymentInfo, {
      (22, payment_idx, option),
      (24, async_hash_index, option),
      (26, async_host_node_id, option),
@@ -4205,7 +4206,7 @@ index e4abdac..f30cebc 100644
  pub(crate) struct InboundPaymentInfoStorage {
      pub(crate) payments: LdkHashMap<PaymentHash, PaymentInfo>,
  }
-@@ -381,6 +421,13 @@ pub(crate) struct VirtualChannelSessionStore {
+@@ -381,6 +422,13 @@ pub(crate) struct VirtualChannelSessionStore {
      pub(crate) entries: LdkHashMap<ChannelId, VirtualChannelSession>,
  }
  
@@ -4219,7 +4220,7 @@ index e4abdac..f30cebc 100644
  impl_writeable_tlv_based!(VirtualChannelSessionStore, {
      (0, entries, required),
  });
-@@ -534,6 +581,7 @@ impl UnlockedAppState {
+@@ -534,6 +582,7 @@ impl UnlockedAppState {
          &self,
          payment_hash: PaymentHash,
          status: HTLCStatus,
@@ -4227,7 +4228,7 @@ index e4abdac..f30cebc 100644
      ) {
          self.channel_manager.fail_htlc_backwards(&payment_hash);
          self.upsert_inbound_payment(
-@@ -545,6 +593,7 @@ impl UnlockedAppState {
+@@ -545,6 +594,7 @@ impl UnlockedAppState {
              self.channel_manager.get_our_node_id(),
              None,
              None,
@@ -4235,7 +4236,7 @@ index e4abdac..f30cebc 100644
          );
          clear_rgb_payment_pending(&payment_hash, true, self.kv_store.as_ref());
      }
-@@ -559,6 +608,7 @@ impl UnlockedAppState {
+@@ -559,6 +609,7 @@ impl UnlockedAppState {
          {
              if !recent_payments_payment_ids.contains(payment_id) {
                  payment_info.status = HTLCStatus::Failed;
@@ -4243,7 +4244,7 @@ index e4abdac..f30cebc 100644
                  payment_info.updated_at = get_current_timestamp();
                  failed = true;
              }
-@@ -580,6 +630,7 @@ impl UnlockedAppState {
+@@ -580,6 +631,7 @@ impl UnlockedAppState {
                      if let Some(expires_at) = payment_info.expires_at {
                          if now > expires_at {
                              payment_info.status = HTLCStatus::Failed;
@@ -4251,7 +4252,7 @@ index e4abdac..f30cebc 100644
                              payment_info.updated_at = now;
                              failed = true;
                          }
-@@ -628,7 +679,11 @@ impl UnlockedAppState {
+@@ -628,7 +680,11 @@ impl UnlockedAppState {
                  claim_deadline_height,
                  expires_at
              );
@@ -4264,7 +4265,7 @@ index e4abdac..f30cebc 100644
          }
  
          self.inbound_payments()
-@@ -665,6 +720,7 @@ impl UnlockedAppState {
+@@ -665,6 +721,7 @@ impl UnlockedAppState {
          payee_pubkey: PublicKey,
          claim_deadline_height: Option<u32>,
          invoice_type: Option<InvoiceType>,
@@ -4272,7 +4273,7 @@ index e4abdac..f30cebc 100644
      ) {
          let mut inbound = self.get_inbound_payments();
          match inbound.payments.entry(payment_hash) {
-@@ -680,6 +736,9 @@ impl UnlockedAppState {
+@@ -680,6 +737,9 @@ impl UnlockedAppState {
                  if claim_deadline_height.is_some() {
                      payment_info.claim_deadline_height = claim_deadline_height;
                  }
@@ -4282,7 +4283,7 @@ index e4abdac..f30cebc 100644
              }
              Entry::Vacant(e) => {
                  let created_at = get_current_timestamp();
-@@ -698,6 +757,11 @@ impl UnlockedAppState {
+@@ -698,6 +758,11 @@ impl UnlockedAppState {
                      payment_idx: None,
                      async_hash_index: None,
                      async_host_node_id: None,
@@ -4294,7 +4295,7 @@ index e4abdac..f30cebc 100644
                  };
                  self.stamp_payment_idx(&mut payment_info);
                  e.insert(payment_info);
-@@ -711,11 +775,13 @@ impl UnlockedAppState {
+@@ -711,11 +776,13 @@ impl UnlockedAppState {
          payment_id: PaymentId,
          status: HTLCStatus,
          preimage: Option<PaymentPreimage>,
@@ -4308,7 +4309,7 @@ index e4abdac..f30cebc 100644
          payment_info.updated_at = get_current_timestamp();
          let payment = (*payment_info).clone();
          self.save_outbound_payments(outbound);
-@@ -730,6 +796,19 @@ impl UnlockedAppState {
+@@ -730,6 +797,19 @@ impl UnlockedAppState {
          self.save_outbound_payments(outbound);
      }
  
@@ -4328,7 +4329,7 @@ index e4abdac..f30cebc 100644
      pub(crate) fn channel_ids(&self) -> LdkHashMap<ChannelId, ChannelId> {
          self.get_channel_ids_map().channel_ids.clone()
      }
-@@ -794,7 +873,7 @@ impl UnlockedAppState {
+@@ -794,7 +874,7 @@ impl UnlockedAppState {
              .get_virtual_channel_session_store()
              .entries
              .values()
@@ -4337,7 +4338,7 @@ index e4abdac..f30cebc 100644
          if duplicate_virtual_session {
              return Err(APIError::InvalidRequest(
                  "virtual channel session already exists for this peer pair".to_string(),
-@@ -1363,6 +1442,11 @@ impl AsyncOrderInvoiceProvider for AsyncOrderRecipientInvoiceProvider {
+@@ -1363,6 +1443,11 @@ impl AsyncOrderInvoiceProvider for AsyncOrderRecipientInvoiceProvider {
                  payment_idx: None,
                  async_hash_index: self.external_signer_mode.then_some(hash_index),
                  async_host_node_id: self.external_signer_mode.then_some(sender_node_id),
@@ -4349,7 +4350,7 @@ index e4abdac..f30cebc 100644
              },
          )?;
  
-@@ -1567,8 +1651,12 @@ fn handle_funding_prepare_err(
+@@ -1567,8 +1652,12 @@ fn handle_funding_prepare_err(
  /// transaction was broadcast. For colored channels this fails the pending RGB
  /// batch transfer; for vanilla channels it aborts the pending vanilla tx that
  /// was created (and locked the UTXOs) during `FundingGenerationReady`.
@@ -4363,7 +4364,7 @@ index e4abdac..f30cebc 100644
      if let Some(rgb_info) =
          get_rgb_channel_info_optional(channel_id, true, unlocked_state.kv_store.as_ref())
      {
-@@ -1580,6 +1668,7 @@ async fn handle_open_chan_fail(channel_id: &ChannelId, unlocked_state: Arc<Unloc
+@@ -1580,6 +1669,7 @@ async fn handle_open_chan_fail(channel_id: &ChannelId, unlocked_state: Arc<Unloc
              .await
              .unwrap();
              if let Err(e) = failed {
@@ -4371,7 +4372,7 @@ index e4abdac..f30cebc 100644
                  tracing::error!(
                      "Error failing RGB transfer batch_transfer_idx={batch_transfer_idx} for channel {channel_id}: {e:?}"
                  );
-@@ -1602,14 +1691,217 @@ async fn handle_open_chan_fail(channel_id: &ChannelId, unlocked_state: Arc<Unloc
+@@ -1602,14 +1692,217 @@ async fn handle_open_chan_fail(channel_id: &ChannelId, unlocked_state: Arc<Unloc
              Ok(()) => {
                  tracing::info!("Aborted pending vanilla tx {funding_txid} for channel {channel_id}")
              }
@@ -4595,7 +4596,7 @@ index e4abdac..f30cebc 100644
  }
  
  /// Undo what a standard channel's `FundingGenerationReady` preparation staged, so a failure
-@@ -2313,6 +2605,7 @@ async fn handle_ldk_events(
+@@ -2313,6 +2606,7 @@ async fn handle_ldk_events(
                      unlocked_state.fail_htlc_backwards_and_update_inbound_payment(
                          payment_hash,
                          HTLCStatus::Failed,
@@ -4603,7 +4604,7 @@ index e4abdac..f30cebc 100644
                      );
                      return Ok(());
                  }
-@@ -2329,6 +2622,7 @@ async fn handle_ldk_events(
+@@ -2329,6 +2623,7 @@ async fn handle_ldk_events(
                      unlocked_state.fail_htlc_backwards_and_update_inbound_payment(
                          payment_hash,
                          HTLCStatus::Failed,
@@ -4611,7 +4612,7 @@ index e4abdac..f30cebc 100644
                      );
                      return Ok(());
                  }
-@@ -2387,6 +2681,7 @@ async fn handle_ldk_events(
+@@ -2387,6 +2682,7 @@ async fn handle_ldk_events(
                                                  .fail_htlc_backwards_and_update_inbound_payment(
                                                      payment_hash,
                                                      HTLCStatus::Failed,
@@ -4619,7 +4620,7 @@ index e4abdac..f30cebc 100644
                                                  );
                                              return Ok(());
                                          }
-@@ -2423,6 +2718,7 @@ async fn handle_ldk_events(
+@@ -2423,6 +2719,7 @@ async fn handle_ldk_events(
                          unlocked_state.channel_manager.get_our_node_id(),
                          claim_deadline,
                          None,
@@ -4627,7 +4628,7 @@ index e4abdac..f30cebc 100644
                      );
                      unlocked_state
                          .async_order_handler
-@@ -2505,6 +2801,7 @@ async fn handle_ldk_events(
+@@ -2505,6 +2802,7 @@ async fn handle_ldk_events(
                      receiver_node_id.unwrap(),
                      None,
                      None,
@@ -4635,7 +4636,7 @@ index e4abdac..f30cebc 100644
                  );
              }
          }
-@@ -2537,6 +2834,7 @@ async fn handle_ldk_events(
+@@ -2537,6 +2835,7 @@ async fn handle_ldk_events(
                      payment_id.unwrap(),
                      HTLCStatus::Succeeded,
                      Some(payment_preimage),
@@ -4643,7 +4644,7 @@ index e4abdac..f30cebc 100644
                  );
                  unlocked_state
                      .async_order_handler
-@@ -2580,62 +2878,25 @@ async fn handle_ldk_events(
+@@ -2580,62 +2879,25 @@ async fn handle_ldk_events(
                  .copy_from_slice(&unlocked_state.entropy_source.get_secure_random_bytes()[..16]);
              let user_channel_id = u128::from_be_bytes(random_bytes);
  
@@ -4725,7 +4726,7 @@ index e4abdac..f30cebc 100644
              } else {
                  (
                      unlocked_state.channel_manager.accept_inbound_channel(
-@@ -2644,7 +2905,7 @@ async fn handle_ldk_events(
+@@ -2644,7 +2906,7 @@ async fn handle_ldk_events(
                          user_channel_id,
                          None,
                      ),
@@ -4734,7 +4735,7 @@ index e4abdac..f30cebc 100644
                  )
              };
  
-@@ -2655,15 +2916,10 @@ async fn handle_ldk_events(
+@@ -2655,15 +2917,10 @@ async fn handle_ldk_events(
                      hex_str(&counterparty_node_id.serialize()),
                      e,
                  );
@@ -4752,7 +4753,7 @@ index e4abdac..f30cebc 100644
                      temporary_channel_id,
                      hex_str(&counterparty_node_id.serialize()),
                  );
-@@ -2679,34 +2935,29 @@ async fn handle_ldk_events(
+@@ -2679,34 +2936,29 @@ async fn handle_ldk_events(
              payment_id,
              ..
          } => {
@@ -4794,7 +4795,7 @@ index e4abdac..f30cebc 100644
              }
          }
          Event::InvoiceReceived { .. } => {
-@@ -2980,7 +3231,9 @@ async fn handle_ldk_events(
+@@ -2980,7 +3232,9 @@ async fn handle_ldk_events(
              );
  
              // Release any funds locked for a funding tx that was never broadcast.
@@ -4805,7 +4806,7 @@ index e4abdac..f30cebc 100644
  
              let former_temporary_channel_id = unlocked_state.delete_channel_id(channel_id);
              let virtual_draft_temporary_channel_id = if unlocked_state
-@@ -3025,7 +3278,9 @@ async fn handle_ldk_events(
+@@ -3025,7 +3279,9 @@ async fn handle_ldk_events(
              );
  
              // The funding tx was discarded before broadcast; release the locked funds.
@@ -4816,7 +4817,7 @@ index e4abdac..f30cebc 100644
  
              unlocked_state.delete_channel_id(channel_id);
              let _ = unlocked_state.kv_store.remove(
-@@ -4003,12 +4258,16 @@ pub(crate) async fn start_ldk(
+@@ -4003,12 +4259,16 @@ pub(crate) async fn start_ldk(
          (&static_state.vss_url, &vss_identity)
      {
          tracing::info!(store_id = %identity.pubkey_hex, "Initializing VSS KV store");
@@ -4834,7 +4835,7 @@ index e4abdac..f30cebc 100644
              )
              .map_err(|e| APIError::FailedVssInit(e.to_string()))?,
          );
-@@ -4218,16 +4477,16 @@ pub(crate) async fn start_ldk(
+@@ -4218,16 +4478,16 @@ pub(crate) async fn start_ldk(
      }
  
      // RGB setup
@@ -4854,7 +4855,7 @@ index e4abdac..f30cebc 100644
              BitcoinNetwork::Regtest => ELECTRUM_URL_REGTEST,
              BitcoinNetwork::Signet => ELECTRUM_URL_SIGNET,
              BitcoinNetwork::Testnet => ELECTRUM_URL_TESTNET,
-@@ -4238,7 +4497,28 @@ pub(crate) async fn start_ldk(
+@@ -4238,7 +4498,28 @@ pub(crate) async fn start_ldk(
                      "with custom signet indexer must be provided"
                  )))
              }
@@ -4883,7 +4884,7 @@ index e4abdac..f30cebc 100644
      };
      let proxy_endpoint = if let Some(proxy_endpoint) = &unlock_request.proxy_endpoint {
          check_rgb_proxy_endpoint(proxy_endpoint).await?;
-@@ -4973,8 +5253,9 @@ pub(crate) async fn start_ldk(
+@@ -4973,8 +5254,9 @@ pub(crate) async fn start_ldk(
      let peer_manager_connection_handler = peer_manager.clone();
      let listening_port = ldk_peer_listening_port;
      let stop_processing = Arc::new(AtomicBool::new(false));
@@ -4894,7 +4895,7 @@ index e4abdac..f30cebc 100644
          let listener = tokio::net::TcpListener::bind(format!("[::]:{listening_port}"))
              .await
              .expect("Failed to bind to listen port - is something else already listening on it?");
-@@ -4992,7 +5273,7 @@ pub(crate) async fn start_ldk(
+@@ -4992,7 +5274,7 @@ pub(crate) async fn start_ldk(
                  .await;
              });
          }
@@ -4903,7 +4904,7 @@ index e4abdac..f30cebc 100644
  
      // Connect and Disconnect Blocks
      let output_sweeper: Arc<OutputSweeper> = Arc::new(output_sweeper);
-@@ -5003,7 +5284,7 @@ pub(crate) async fn start_ldk(
+@@ -5003,7 +5285,7 @@ pub(crate) async fn start_ldk(
          let chain_monitor_listener = chain_monitor.clone();
          let output_sweeper_listener = output_sweeper.clone();
          let bitcoind_block_source = bitcoind_client.clone();
@@ -4912,7 +4913,7 @@ index e4abdac..f30cebc 100644
              let chain_poller = poll::ChainPoller::new(bitcoind_block_source.as_ref(), network);
              let chain_listener = (
                  chain_monitor_listener,
-@@ -5020,7 +5301,7 @@ pub(crate) async fn start_ldk(
+@@ -5020,7 +5302,7 @@ pub(crate) async fn start_ldk(
                  }
                  tokio::time::sleep(Duration::from_secs(1)).await;
              }
@@ -4921,7 +4922,7 @@ index e4abdac..f30cebc 100644
      } else if let Some(tx_sync) = tx_sync_opt.clone() {
          let confirmables: Vec<Arc<dyn Confirm + Send + Sync>> = vec![
              channel_manager.clone(),
-@@ -5030,7 +5311,7 @@ pub(crate) async fn start_ldk(
+@@ -5030,7 +5312,7 @@ pub(crate) async fn start_ldk(
          sync_chain_data(tx_sync.clone(), confirmables.clone())
              .await
              .map_err(|e| APIError::InvalidIndexer(e.to_string()))?;
@@ -4930,7 +4931,7 @@ index e4abdac..f30cebc 100644
              loop {
                  if stop_listen.load(Ordering::Acquire) {
                      return;
-@@ -5040,7 +5321,7 @@ pub(crate) async fn start_ldk(
+@@ -5040,7 +5322,7 @@ pub(crate) async fn start_ldk(
                  }
                  tokio::time::sleep(Duration::from_secs(1)).await;
              }
@@ -4939,7 +4940,7 @@ index e4abdac..f30cebc 100644
      } else {
          let tx_sync = electrum_tx_sync_opt
              .clone()
-@@ -5053,7 +5334,7 @@ pub(crate) async fn start_ldk(
+@@ -5053,7 +5335,7 @@ pub(crate) async fn start_ldk(
          sync_chain_data_electrum(tx_sync.clone(), confirmables.clone())
              .await
              .map_err(|e| APIError::InvalidIndexer(e.to_string()))?;
@@ -4948,7 +4949,7 @@ index e4abdac..f30cebc 100644
              loop {
                  if stop_listen.load(Ordering::Acquire) {
                      return;
-@@ -5065,7 +5346,7 @@ pub(crate) async fn start_ldk(
+@@ -5065,7 +5347,7 @@ pub(crate) async fn start_ldk(
                  }
                  tokio::time::sleep(Duration::from_secs(1)).await;
              }
@@ -4957,7 +4958,7 @@ index e4abdac..f30cebc 100644
      }
  
      // Read payment info from KVStore
-@@ -5263,6 +5544,7 @@ pub(crate) async fn start_ldk(
+@@ -5263,6 +5545,7 @@ pub(crate) async fn start_ldk(
  
      let unlocked_state = Arc::new(UnlockedAppState {
          config: static_state.config.clone(),
@@ -4965,7 +4966,7 @@ index e4abdac..f30cebc 100644
          channel_manager: Arc::clone(&channel_manager),
          gossip_source: Arc::clone(&gossip_source),
          inbound_payments,
-@@ -5294,6 +5576,29 @@ pub(crate) async fn start_ldk(
+@@ -5294,6 +5577,29 @@ pub(crate) async fn start_ldk(
          next_payment_idx,
      });
  
@@ -4995,7 +4996,7 @@ index e4abdac..f30cebc 100644
      // Refresh the RGS snapshot on a fixed interval (RGS mode only). The first
      // tick fires immediately, so a freshly unlocked node syncs right away.
      let gossip_shutdown = Arc::new(tokio::sync::Notify::new());
-@@ -5370,7 +5675,7 @@ pub(crate) async fn start_ldk(
+@@ -5370,7 +5676,7 @@ pub(crate) async fn start_ldk(
      {
          let drain_store = Arc::clone(&kv_store);
          let stop_drain = Arc::clone(&stop_processing);
@@ -5004,7 +5005,7 @@ index e4abdac..f30cebc 100644
              let mut interval = tokio::time::interval(Duration::from_secs(60));
              interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
              loop {
-@@ -5381,7 +5686,7 @@ pub(crate) async fn start_ldk(
+@@ -5381,7 +5687,7 @@ pub(crate) async fn start_ldk(
                  let store = Arc::clone(&drain_store);
                  let _ = tokio::task::spawn_blocking(move || store.drain_pending()).await;
              }
@@ -5013,7 +5014,7 @@ index e4abdac..f30cebc 100644
      }
  
      // Regularly reconnect to channel peers.
-@@ -5390,7 +5695,7 @@ pub(crate) async fn start_ldk(
+@@ -5390,7 +5696,7 @@ pub(crate) async fn start_ldk(
      let connect_db = static_state.db();
      let stop_connect = Arc::clone(&stop_processing);
      let reconnect_interval_secs = static_state.config.node.peer_reconnect_interval_secs;
@@ -5022,7 +5023,7 @@ index e4abdac..f30cebc 100644
          let mut interval = tokio::time::interval(Duration::from_secs(reconnect_interval_secs));
          interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
          loop {
-@@ -5422,7 +5727,7 @@ pub(crate) async fn start_ldk(
+@@ -5422,7 +5728,7 @@ pub(crate) async fn start_ldk(
                  ),
              }
          }
@@ -5031,7 +5032,7 @@ index e4abdac..f30cebc 100644
  
      // Remote external signer force-close resilience. When the signer daemon is briefly unreachable, a
      // channel signing call returns LDK's async-unavailable sentinel (`Err(())`) and the operation parks
-@@ -5444,7 +5749,7 @@ pub(crate) async fn start_ldk(
+@@ -5444,7 +5750,7 @@ pub(crate) async fn start_ldk(
          let su_channel_manager = Arc::clone(&channel_manager);
          let su_chain_monitor = Arc::clone(&chain_monitor);
          let su_stop = Arc::clone(&stop_processing);
@@ -5040,7 +5041,7 @@ index e4abdac..f30cebc 100644
              loop {
                  // Healthy: idle until the link reports a change (with a coarse timer only to notice
                  // node shutdown — it drives no signer work).
-@@ -5487,7 +5792,7 @@ pub(crate) async fn start_ldk(
+@@ -5487,7 +5793,7 @@ pub(crate) async fn start_ldk(
                      }
                  }
              }
@@ -5049,7 +5050,7 @@ index e4abdac..f30cebc 100644
      }
  
      // Regularly broadcast our node_announcement. This is only required (or possible) if we have
-@@ -5522,7 +5827,7 @@ pub(crate) async fn start_ldk(
+@@ -5522,7 +5828,7 @@ pub(crate) async fn start_ldk(
      let chan_man = Arc::clone(&channel_manager);
      let announce_initial_delay_secs = static_state.config.node.announce_initial_delay_secs;
      let announce_refresh_interval_secs = static_state.config.node.announce_refresh_interval_secs;
@@ -5058,7 +5059,7 @@ index e4abdac..f30cebc 100644
          // First wait until we have some peers and maybe have opened a channel.
          tokio::time::sleep(Duration::from_secs(announce_initial_delay_secs)).await;
          // Then, update our announcement periodically to keep it fresh but avoid unnecessary churn
-@@ -5546,7 +5851,7 @@ pub(crate) async fn start_ldk(
+@@ -5546,7 +5852,7 @@ pub(crate) async fn start_ldk(
                  );
              }
          }
@@ -5067,7 +5068,7 @@ index e4abdac..f30cebc 100644
  
      tracing::info!("LDK logs are available at <your-supplied-ldk-data-dir-path>/.ldk/logs");
      tracing::info!("Local Node ID is {}", channel_manager.get_our_node_id());
-@@ -5563,6 +5868,7 @@ pub(crate) async fn start_ldk(
+@@ -5563,6 +5869,7 @@ pub(crate) async fn start_ldk(
              peer_manager: peer_manager.clone(),
              bp_exit,
              background_processor: Some(background_processor),
@@ -5075,21 +5076,13 @@ index e4abdac..f30cebc 100644
          },
          unlocked_state,
      ))
-@@ -5609,16 +5915,16 @@ async fn sync_chain_data_electrum(
+@@ -5609,32 +5916,37 @@ async fn sync_chain_data_electrum(
  }
  
  impl AppState {
 -    fn stop_ldk(&self) -> Option<JoinHandle<Result<(), io::Error>>> {
 +    fn stop_ldk(&self) -> Option<LdkShutdownHandles> {
          let mut ldk_background_services = self.get_ldk_background_services();
--
--        if ldk_background_services.is_none() {
--            // node is locked
--            tracing::info!("LDK is not running");
--            return None;
--        }
--
--        let ldk_background_services = ldk_background_services.as_mut().unwrap();
 +        let mut ldk_background_services = match ldk_background_services.take() {
 +            Some(services) => services,
 +            None => {
@@ -5099,9 +5092,28 @@ index e4abdac..f30cebc 100644
 +            }
 +        };
  
-         // Disconnect our peers and stop accepting new connections. This ensures we don't continue
-         // updating our channel data after we've stopped the background processor.
-@@ -5631,10 +5937,11 @@ impl AppState {
+-        if ldk_background_services.is_none() {
+-            // node is locked
+-            tracing::info!("LDK is not running");
+-            return None;
+-        }
+-
+-        let ldk_background_services = ldk_background_services.as_mut().unwrap();
+-
+-        // Disconnect our peers and stop accepting new connections. This ensures we don't continue
+-        // updating our channel data after we've stopped the background processor.
++        // Stop admitting new service work before the final peer disconnect. In
++        // particular, the persisted-peer reconnect task may already be waiting
++        // inside an outbound connection attempt when shutdown starts.
+         ldk_background_services
+             .stop_processing
+             .store(true, Ordering::Release);
+         ldk_background_services.gossip_shutdown.notify_one();
+-        ldk_background_services.peer_manager.disconnect_all_peers();
++        for task in &ldk_background_services.service_tasks {
++            task.abort();
++        }
+
          // Stop the background processor.
          if !ldk_background_services.bp_exit.is_closed() {
              ldk_background_services.bp_exit.send(()).unwrap();
@@ -5112,15 +5124,33 @@ index e4abdac..f30cebc 100644
 +        Some(LdkShutdownHandles {
 +            background_processor: ldk_background_services.background_processor.take(),
 +            service_tasks: std::mem::take(&mut ldk_background_services.service_tasks),
++            peer_manager: Arc::clone(&ldk_background_services.peer_manager),
 +        })
      }
  }
  
-@@ -5667,8 +5974,13 @@ pub(crate) async fn stop_ldk(app_state: Arc<AppState>) {
+@@ -5667,8 +5979,30 @@ pub(crate) async fn stop_ldk(app_state: Arc<AppState>) {
              )
          });
  
 +    let mut shutdown_handles = app_state.stop_ldk();
++
++    // Join every aborted listener/reconnect/sync task before disconnecting
++    // peers. Disconnecting first allows an in-flight reconnect to establish a
++    // replacement socket during the VSS flush, leaving the remote peer with a
++    // half-open connection after this runtime has been destroyed.
++    if let Some(handles) = shutdown_handles.as_mut() {
++        for task in std::mem::take(&mut handles.service_tasks) {
++            match task.await {
++                Ok(()) => {}
++                Err(error) if error.is_cancelled() => {}
++                Err(error) => {
++                    tracing::warn!(error = %error, "LDK service task failed during shutdown")
++                }
++            }
++        }
++        handles.peer_manager.disconnect_all_peers();
++    }
 +
      #[cfg(feature = "vss")]
 -    if let Some(mut join_handle) = app_state.stop_ldk() {
@@ -5131,7 +5161,7 @@ index e4abdac..f30cebc 100644
          // Bounded flush: give the final remote-first persists time to reach
          // VSS, then abort outage-pending retries so shutdown cannot hang.
          match tokio::time::timeout(BP_SHUTDOWN_FLUSH_TIMEOUT, &mut join_handle).await {
-@@ -5687,13 +5999,17 @@ pub(crate) async fn stop_ldk(app_state: Arc<AppState>) {
+@@ -5687,13 +6021,17 @@ pub(crate) async fn stop_ldk(app_state: Arc<AppState>) {
          }
      }
      #[cfg(not(feature = "vss"))]
@@ -5152,25 +5182,10 @@ index e4abdac..f30cebc 100644
      #[cfg(feature = "vss")]
      {
          if let Some((kv_store, monitor_kv_store)) = stores {
-@@ -5729,6 +6045,27 @@ pub(crate) async fn stop_ldk(app_state: Arc<AppState>) {
+@@ -5729,6 +6067,12 @@ pub(crate) async fn stop_ldk(app_state: Arc<AppState>) {
          }
      }
  
-+    if let Some(handles) = shutdown_handles.take() {
-+        for task in &handles.service_tasks {
-+            task.abort();
-+        }
-+        for task in handles.service_tasks {
-+            match task.await {
-+                Ok(()) => {}
-+                Err(error) if error.is_cancelled() => {}
-+                Err(error) => {
-+                    tracing::warn!(error = %error, "LDK service task failed during shutdown")
-+                }
-+            }
-+        }
-+    }
-+
 +    // Drop every signer-owning LDK object only after persistence and service
 +    // shutdown are complete. Leaving these Arcs in AppState keeps persistent
 +    // VLS/redb stores locked across a same-process wallet restart.
@@ -5180,7 +5195,7 @@ index e4abdac..f30cebc 100644
      // connect to the peer port so it can be released
      let peer_port = app_state.static_state.ldk_peer_listening_port;
      let sock_addr = SocketAddr::from(([127, 0, 0, 1], peer_port));
-@@ -5859,6 +6196,120 @@ mod tests {
+@@ -5859,6 +6203,120 @@ mod tests {
          assert!(!access.allows_peer(&peer));
      }
  

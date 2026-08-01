@@ -17,7 +17,7 @@ test('package overlay metadata is exact and checksum-pinned', () => {
   assert.equal(config.commit, '0bfa66fa256a6c36f3737d5b6402eacea40c68fc')
   assert.equal(
     config.patchSha256,
-    'be9913c478aa270b4296ba64b5c6dadb2be65875e8d453874303c77ec37d2178'
+    '7b8c0401ee6ecfbd8c5328b0815da3d34d10dd17d30d736028a86f91c8b4c869'
   )
   assert.equal(config.rustToolchain, '1.88.0')
 })
@@ -37,6 +37,12 @@ test('overlay contains the complete native operation registry source', () => {
   assert.match(patch, /pub\(crate\) fn cancel\(/)
   assert.match(patch, /load_or_create_writer_id/)
   assert.match(patch, /vss_same_installation_reclaims_fence_after_restart/)
+  const joinTasks = patch.indexOf('for task in std::mem::take\(&mut handles.service_tasks\)')
+  const disconnectPeers = patch.indexOf('handles.peer_manager.disconnect_all_peers\(\)')
+  const waitForPersistence = patch.indexOf('BP_SHUTDOWN_FLUSH_TIMEOUT, &mut join_handle')
+  assert.ok(joinTasks >= 0, 'overlay must join aborted service tasks')
+  assert.ok(disconnectPeers > joinTasks, 'final peer disconnect must follow task quiescence')
+  assert.ok(waitForPersistence > disconnectPeers, 'persistence flush must follow final disconnect')
 })
 
 test('overlay preserves wallet discovery, RGB payment identity, and inbound channel semantics', () => {

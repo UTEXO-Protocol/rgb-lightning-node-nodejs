@@ -20,6 +20,8 @@ This overlay includes transactional orphaned virtual-channel recovery so a
 failed RGB channel open cannot permanently reserve inventory or block the peer.
 Lightning send responses and persisted payment records expose stable failure
 codes, and node shutdown releases native ownership before signer destruction.
+Shutdown now aborts and joins peer reconnect/listener tasks before its final
+peer disconnect, so a reconnect cannot leave the LSP with a half-open socket.
 RGB contract, asset amount, carrier millisatoshis, invoice expiry, and terminal
 reason remain bound to the same payment after restart and are exposed by wallet
 snapshot contract v3. Address rotation reveals the new script before returning.
