@@ -77,7 +77,7 @@ index 8a7a1cf..1152b59 100644
  name = "rgb-lib"
  version = "0.3.0-beta.6"
 -source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?tag=v0.3.0-beta.27#d8dba807d5028635143ffc8098e1b59086b646a0"
-+source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?rev=d7d9b230cb5c1d989b2cdd92eed966290d9ac00f#d7d9b230cb5c1d989b2cdd92eed966290d9ac00f"
++source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?rev=2e1026e9b15fffdbc2ea8b0f7f23a10ffe1f11ca#2e1026e9b15fffdbc2ea8b0f7f23a10ffe1f11ca"
  dependencies = [
   "amplify",
   "base64 0.22.1",
@@ -86,7 +86,7 @@ index 8a7a1cf..1152b59 100644
  name = "rgb-lib-migration"
  version = "0.3.0-beta.4"
 -source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?tag=v0.3.0-beta.27#d8dba807d5028635143ffc8098e1b59086b646a0"
-+source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?rev=d7d9b230cb5c1d989b2cdd92eed966290d9ac00f#d7d9b230cb5c1d989b2cdd92eed966290d9ac00f"
++source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?rev=2e1026e9b15fffdbc2ea8b0f7f23a10ffe1f11ca#2e1026e9b15fffdbc2ea8b0f7f23a10ffe1f11ca"
  dependencies = [
   "sea-orm-migration",
   "tokio",
@@ -162,7 +162,7 @@ index eaf0f44..d834a84 100644
  regex = { version = "1.11", default-features = false }
  reqwest = { version = "0.12", default-features = false, features = ["json", "native-tls"] }
 -rgb-lib = { git = "https://github.com/UTEXO-Protocol/rgb-lib.git", tag = "v0.3.0-beta.27", features = [
-+rgb-lib = { git = "https://github.com/UTEXO-Protocol/rgb-lib.git", rev = "d7d9b230cb5c1d989b2cdd92eed966290d9ac00f", features = [
++rgb-lib = { git = "https://github.com/UTEXO-Protocol/rgb-lib.git", rev = "2e1026e9b15fffdbc2ea8b0f7f23a10ffe1f11ca", features = [
      "electrum",
      "esplora",
  ] }
@@ -216,7 +216,7 @@ index 5886c2d..1d50102 100644
  name = "rgb-lib"
  version = "0.3.0-beta.6"
 -source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?tag=v0.3.0-beta.27#d8dba807d5028635143ffc8098e1b59086b646a0"
-+source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?rev=d7d9b230cb5c1d989b2cdd92eed966290d9ac00f#d7d9b230cb5c1d989b2cdd92eed966290d9ac00f"
++source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?rev=2e1026e9b15fffdbc2ea8b0f7f23a10ffe1f11ca#2e1026e9b15fffdbc2ea8b0f7f23a10ffe1f11ca"
  dependencies = [
   "amplify",
   "base64 0.22.1",
@@ -225,7 +225,7 @@ index 5886c2d..1d50102 100644
  name = "rgb-lib-migration"
  version = "0.3.0-beta.4"
 -source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?tag=v0.3.0-beta.27#d8dba807d5028635143ffc8098e1b59086b646a0"
-+source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?rev=d7d9b230cb5c1d989b2cdd92eed966290d9ac00f#d7d9b230cb5c1d989b2cdd92eed966290d9ac00f"
++source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?rev=2e1026e9b15fffdbc2ea8b0f7f23a10ffe1f11ca#2e1026e9b15fffdbc2ea8b0f7f23a10ffe1f11ca"
  dependencies = [
   "sea-orm-migration",
   "tokio",
