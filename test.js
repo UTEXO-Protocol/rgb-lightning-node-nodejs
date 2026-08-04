@@ -44,6 +44,7 @@ try {
     'listTransactionsByTxid',
     'listTransfersByTxid',
     'importRgbTransferConsignment',
+    'importRgbContract',
     'verifyMessage'
   ]) {
     if (typeof node[method] !== 'function') throw new Error(`SdkNode.${method} is missing`)

@@ -237,6 +237,17 @@ export interface ImportRgbTransferConsignmentResponse {
   metadata: JsonObject
 }
 
+export interface ImportRgbContractRequest {
+  contract_base64: string
+  expected_asset_id: string
+}
+
+export interface ImportRgbContractResponse {
+  asset_id: string
+  already_imported: boolean
+  metadata: JsonObject
+}
+
 export interface WalletSnapshotTransferEndpoint {
   endpoint: string
   transport_type: string
@@ -476,6 +487,7 @@ export class SdkNode {
   decodeRgbInvoice(invoice: string): DecodedRgbInvoice
   sendRgb(request: JsonRequest): JsonValue
   importRgbTransferConsignment(request: ImportRgbTransferConsignmentRequest): ImportRgbTransferConsignmentResponse
+  importRgbContract(request: ImportRgbContractRequest): ImportRgbContractResponse
   prepareRgbSend(request: JsonRequest): PreparedRgbSendResponse
   commitPreparedRgbSend(request: CommitPreparedSendRequest): JsonValue
   cancelRgbSendPlan(request: { plan_id: string }): CancelBtcSendPlanResponse

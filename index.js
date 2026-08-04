@@ -300,6 +300,10 @@ class SdkNode {
     return JSON.parse(this._inner.importRgbTransferConsignment(JSON.stringify(request)))
   }
 
+  importRgbContract (request) {
+    return JSON.parse(this._inner.importRgbContract(JSON.stringify(request)))
+  }
+
   prepareRgbSend (request) {
     return JSON.parse(this._inner.prepareRgbSend(JSON.stringify(request)))
   }

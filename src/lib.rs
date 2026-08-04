@@ -30,9 +30,9 @@ use rlncffi::{
     rln_connect_peer, rln_create_utxos, rln_decode_ln_invoice, rln_decode_rgb_invoice,
     rln_disconnect_peer, rln_estimate_fee, rln_fail_transfers, rln_free_string,
     rln_get_asset_media, rln_get_channel_id, rln_get_payment, rln_get_swap,
-    rln_import_rgb_transfer_consignment, rln_inflate, rln_invoice_status, rln_issue_asset_cfa,
-    rln_issue_asset_ifa, rln_issue_asset_nia, rln_issue_asset_uda, rln_keysend,
-    rln_list_address_receipts, rln_list_assets, rln_list_channels, rln_list_payments,
+    rln_import_rgb_contract, rln_import_rgb_transfer_consignment, rln_inflate, rln_invoice_status,
+    rln_issue_asset_cfa, rln_issue_asset_ifa, rln_issue_asset_nia, rln_issue_asset_uda,
+    rln_keysend, rln_list_address_receipts, rln_list_assets, rln_list_channels, rln_list_payments,
     rln_list_peers, rln_list_pending_rgb_send_plans, rln_list_pending_vanilla_transactions,
     rln_list_swaps, rln_list_transactions, rln_list_transactions_by_txid, rln_list_transfers,
     rln_list_transfers_by_txid, rln_list_unspents, rln_ln_invoice, rln_maker_execute,
@@ -643,6 +643,11 @@ impl SdkNode {
     #[napi]
     pub fn import_rgb_transfer_consignment(&self, request_json: String) -> Result<String> {
         fwd_json_req!(self, rln_import_rgb_transfer_consignment, request_json)
+    }
+
+    #[napi]
+    pub fn import_rgb_contract(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_import_rgb_contract, request_json)
     }
 
     #[napi]
