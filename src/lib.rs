@@ -29,28 +29,28 @@ use rlncffi::{
     rln_commit_prepared_btc_send, rln_commit_prepared_create_utxos, rln_commit_prepared_rgb_send,
     rln_connect_peer, rln_create_utxos, rln_decode_ln_invoice, rln_decode_rgb_invoice,
     rln_disconnect_peer, rln_estimate_fee, rln_fail_transfers, rln_free_string,
-    rln_get_asset_media, rln_get_channel_id, rln_get_payment, rln_get_swap, rln_inflate,
-    rln_invoice_status, rln_issue_asset_cfa, rln_issue_asset_ifa, rln_issue_asset_nia,
-    rln_issue_asset_uda, rln_keysend, rln_list_address_receipts, rln_list_assets,
-    rln_list_channels, rln_list_payments, rln_list_peers, rln_list_pending_rgb_send_plans,
-    rln_list_pending_vanilla_transactions, rln_list_swaps, rln_list_transactions,
-    rln_list_transactions_by_txid, rln_list_transfers, rln_list_transfers_by_txid,
-    rln_list_unspents, rln_ln_invoice, rln_maker_execute, rln_maker_init,
-    rln_native_external_signer_bootstrap, rln_native_external_signer_new,
+    rln_get_asset_media, rln_get_channel_id, rln_get_payment, rln_get_swap,
+    rln_import_rgb_transfer_consignment, rln_inflate, rln_invoice_status, rln_issue_asset_cfa,
+    rln_issue_asset_ifa, rln_issue_asset_nia, rln_issue_asset_uda, rln_keysend,
+    rln_list_address_receipts, rln_list_assets, rln_list_channels, rln_list_payments,
+    rln_list_peers, rln_list_pending_rgb_send_plans, rln_list_pending_vanilla_transactions,
+    rln_list_swaps, rln_list_transactions, rln_list_transactions_by_txid, rln_list_transfers,
+    rln_list_transfers_by_txid, rln_list_unspents, rln_ln_invoice, rln_maker_execute,
+    rln_maker_init, rln_native_external_signer_bootstrap, rln_native_external_signer_new,
     rln_native_external_signer_new_with_storage, rln_network_info, rln_node_info, rln_open_channel,
     rln_post_asset_media, rln_prepare_btc_send, rln_prepare_create_utxos, rln_prepare_rgb_send,
-    rln_refresh_transfers, rln_rgb_invoice, rln_rotate_address, rln_sdk_node_apay_new,
-    rln_sdk_node_attach_native_external_signer, rln_sdk_node_detach_external_signer,
-    rln_sdk_node_init_with_external_signer, rln_sdk_node_init_with_native_external_signer,
-    rln_sdk_node_adopt_native_operation, rln_sdk_node_cancel_native_operation,
-    rln_sdk_node_native_operation_status, rln_sdk_node_new, rln_sdk_node_shutdown,
-    rln_sdk_node_start_unlock_with_native_external_signer,
+    rln_refresh_transfers, rln_rgb_invoice, rln_rotate_address,
+    rln_sdk_node_adopt_native_operation, rln_sdk_node_apay_new,
+    rln_sdk_node_attach_native_external_signer, rln_sdk_node_cancel_native_operation,
+    rln_sdk_node_detach_external_signer, rln_sdk_node_init_with_external_signer,
+    rln_sdk_node_init_with_native_external_signer, rln_sdk_node_native_operation_status,
+    rln_sdk_node_new, rln_sdk_node_shutdown, rln_sdk_node_start_unlock_with_native_external_signer,
     rln_sdk_node_unlock_with_attached_external_signer,
     rln_sdk_node_unlock_with_native_external_signer, rln_sdk_node_vss_backup,
     rln_sdk_node_vss_clear_fence, rln_sdk_node_vss_delete_all, rln_send_btc,
-    rln_send_onion_message, rln_send_payment,
-    rln_send_rgb, rln_sign_message, rln_sync, rln_sync_wallet, rln_taker, rln_verify_message,
-    rln_wallet_snapshot, COpaqueStruct, CResultString, CResultValue,
+    rln_send_onion_message, rln_send_payment, rln_send_rgb, rln_sign_message, rln_sync,
+    rln_sync_wallet, rln_taker, rln_verify_message, rln_wallet_snapshot, COpaqueStruct,
+    CResultString, CResultValue,
 };
 
 // ---------------------------------------------------------------------------
@@ -638,6 +638,11 @@ impl SdkNode {
     #[napi]
     pub fn send_rgb(&self, request_json: String) -> Result<String> {
         fwd_json_req!(self, rln_send_rgb, request_json)
+    }
+
+    #[napi]
+    pub fn import_rgb_transfer_consignment(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_import_rgb_transfer_consignment, request_json)
     }
 
     #[napi]
