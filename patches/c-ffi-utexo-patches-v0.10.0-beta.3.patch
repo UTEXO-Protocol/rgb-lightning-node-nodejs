@@ -1058,7 +1058,7 @@ index edb35ed..4ce7e83 100644
  }
 
  pub(crate) fn sync(node: &COpaqueStruct) -> Result<String, Error> {
-@@ -610,6 +814,207 @@ pub(crate) fn sync(node: &COpaqueStruct) -> Result<String, Error> {
+@@ -610,6 +814,222 @@ pub(crate) fn sync(node: &COpaqueStruct) -> Result<String, Error> {
      ok_void()
  }
 
@@ -1095,11 +1095,26 @@ index edb35ed..4ce7e83 100644
 +    let network_before = JsonNetworkInfo::from(node.network_info()?);
 +    let node_info = node.node_info()?;
 +    let btc = node.btc_balance(true)?;
-+    let listed_assets = node.list_assets(vec!["Nia".to_string()])?;
-+    let assets = listed_assets.nia.unwrap_or_default();
++    let listed_assets = node.list_assets(vec!["Nia".to_string(), "Ifa".to_string()])?;
++    let mut assets = Vec::<JsonWalletSnapshotAsset>::new();
++    assets.extend(
++        listed_assets
++            .nia
++            .unwrap_or_default()
++            .into_iter()
++            .map(Into::into),
++    );
++    assets.extend(
++        listed_assets
++            .ifa
++            .unwrap_or_default()
++            .into_iter()
++            .map(Into::into),
++    );
++    assets.sort_by(|left, right| left.asset_id.cmp(&right.asset_id));
 +    if assets.len() > max_assets {
 +        return Err(Error::StringParse(format!(
-+            "native NIA inventory contains {} entries, exceeding max_assets {max_assets}",
++            "native RGB inventory contains {} entries, exceeding max_assets {max_assets}",
 +            assets.len()
 +        )));
 +    }
@@ -1729,7 +1744,7 @@ index fc570e0..9201de9 100644
          }
      }
  }
-@@ -1581,6 +1731,709 @@ impl From<BtcBalanceInfo> for JsonBtcBalanceInfo {
+@@ -1581,6 +1731,721 @@ impl From<BtcBalanceInfo> for JsonBtcBalanceInfo {
      }
  }
 
@@ -1901,6 +1916,18 @@ index fc570e0..9201de9 100644
 +
 +impl From<AssetNia> for JsonWalletSnapshotAsset {
 +    fn from(asset: AssetNia) -> Self {
++        Self {
++            asset_id: fmt_contract_id(&asset.asset_id),
++            ticker: asset.ticker,
++            name: asset.name,
++            precision: asset.precision,
++            balance: asset.balance.into(),
++        }
++    }
++}
++
++impl From<AssetIfa> for JsonWalletSnapshotAsset {
++    fn from(asset: AssetIfa) -> Self {
 +        Self {
 +            asset_id: fmt_contract_id(&asset.asset_id),
 +            ticker: asset.ticker,
