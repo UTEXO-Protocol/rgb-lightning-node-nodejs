@@ -132,6 +132,21 @@ function existingAddonMatches (config) {
   }
 }
 
+function recordAddonProvenance (config) {
+  const addon = addonPath()
+  if (!fs.existsSync(addon) || fs.statSync(addon).size === 0) {
+    fail(`cannot record provenance for missing addon ${addon}`)
+  }
+  fs.writeFileSync(
+    manifestPath,
+    `${JSON.stringify({
+      ...identity(config),
+      addonSha256: sha256(addon)
+    }, null, 2)}\n`,
+    { mode: 0o600 }
+  )
+}
+
 function validateAndApplySource (config) {
   const head = run('git', ['-C', sourceRoot, 'rev-parse', 'HEAD'], { capture: true }).trim()
   if (head !== config.commit) {
@@ -185,14 +200,7 @@ function buildAddon (config) {
   }
   const addon = addonPath()
   fs.copyFileSync(built, addon)
-  fs.writeFileSync(
-    manifestPath,
-    `${JSON.stringify({
-      ...identity(config),
-      addonSha256: sha256(addon)
-    }, null, 2)}\n`,
-    { mode: 0o600 }
-  )
+  recordAddonProvenance(config)
 }
 
 function main () {
@@ -216,5 +224,6 @@ module.exports = {
   existingAddonMatches,
   identity,
   manifestMatches,
+  recordAddonProvenance,
   readConfig
 }
