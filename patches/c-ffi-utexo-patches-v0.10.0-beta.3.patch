@@ -1,5 +1,5 @@
 diff --git a/Cargo.lock b/Cargo.lock
-index 8a7a1cf..9a3bc75 100644
+index 8a7a1cf..ebd1aae 100644
 --- a/Cargo.lock
 +++ b/Cargo.lock
 @@ -4249,7 +4249,7 @@ dependencies = [
@@ -7,7 +7,7 @@ index 8a7a1cf..9a3bc75 100644
  name = "rgb-lib"
  version = "0.3.0-beta.6"
 -source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?tag=v0.3.0-beta.27#d8dba807d5028635143ffc8098e1b59086b646a0"
-+source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?rev=2e1026e9b15fffdbc2ea8b0f7f23a10ffe1f11ca#2e1026e9b15fffdbc2ea8b0f7f23a10ffe1f11ca"
++source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?rev=b33aac2188c386a2addc8feb1a99663033c32c07#b33aac2188c386a2addc8feb1a99663033c32c07"
  dependencies = [
   "amplify",
   "base64 0.22.1",
@@ -16,12 +16,12 @@ index 8a7a1cf..9a3bc75 100644
  name = "rgb-lib-migration"
  version = "0.3.0-beta.4"
 -source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?tag=v0.3.0-beta.27#d8dba807d5028635143ffc8098e1b59086b646a0"
-+source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?rev=2e1026e9b15fffdbc2ea8b0f7f23a10ffe1f11ca#2e1026e9b15fffdbc2ea8b0f7f23a10ffe1f11ca"
++source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?rev=b33aac2188c386a2addc8feb1a99663033c32c07#b33aac2188c386a2addc8feb1a99663033c32c07"
  dependencies = [
   "sea-orm-migration",
   "tokio",
 diff --git a/Cargo.toml b/Cargo.toml
-index eaf0f44..ebf7b9e 100644
+index eaf0f44..3b03c4a 100644
 --- a/Cargo.toml
 +++ b/Cargo.toml
 @@ -66,7 +66,7 @@ magic-crypt = "4.0.1"
@@ -29,12 +29,12 @@ index eaf0f44..ebf7b9e 100644
  regex = { version = "1.11", default-features = false }
  reqwest = { version = "0.12", default-features = false, features = ["json", "native-tls"] }
 -rgb-lib = { git = "https://github.com/UTEXO-Protocol/rgb-lib.git", tag = "v0.3.0-beta.27", features = [
-+rgb-lib = { git = "https://github.com/UTEXO-Protocol/rgb-lib.git", rev = "2e1026e9b15fffdbc2ea8b0f7f23a10ffe1f11ca", features = [
++rgb-lib = { git = "https://github.com/UTEXO-Protocol/rgb-lib.git", rev = "b33aac2188c386a2addc8feb1a99663033c32c07", features = [
      "electrum",
      "esplora",
  ] }
 diff --git a/bindings/c-ffi/Cargo.lock b/bindings/c-ffi/Cargo.lock
-index 5886c2d..c152284 100644
+index 5886c2d..745468a 100644
 --- a/bindings/c-ffi/Cargo.lock
 +++ b/bindings/c-ffi/Cargo.lock
 @@ -177,7 +177,7 @@ version = "1.1.5"
@@ -112,7 +112,7 @@ index 5886c2d..c152284 100644
  name = "rgb-lib"
  version = "0.3.0-beta.6"
 -source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?tag=v0.3.0-beta.27#d8dba807d5028635143ffc8098e1b59086b646a0"
-+source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?rev=2e1026e9b15fffdbc2ea8b0f7f23a10ffe1f11ca#2e1026e9b15fffdbc2ea8b0f7f23a10ffe1f11ca"
++source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?rev=b33aac2188c386a2addc8feb1a99663033c32c07#b33aac2188c386a2addc8feb1a99663033c32c07"
  dependencies = [
   "amplify",
   "base64 0.22.1",
@@ -121,7 +121,7 @@ index 5886c2d..c152284 100644
  name = "rgb-lib-migration"
  version = "0.3.0-beta.4"
 -source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?tag=v0.3.0-beta.27#d8dba807d5028635143ffc8098e1b59086b646a0"
-+source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?rev=2e1026e9b15fffdbc2ea8b0f7f23a10ffe1f11ca#2e1026e9b15fffdbc2ea8b0f7f23a10ffe1f11ca"
++source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?rev=b33aac2188c386a2addc8feb1a99663033c32c07#b33aac2188c386a2addc8feb1a99663033c32c07"
  dependencies = [
   "sea-orm-migration",
   "tokio",
@@ -1382,7 +1382,7 @@ index edb35ed..4ce7e83 100644
 +    }
 +}
 diff --git a/bindings/c-ffi/src/json_types.rs b/bindings/c-ffi/src/json_types.rs
-index fc570e0..9201de9 100644
+index fc570e0..3cc4948 100644
 --- a/bindings/c-ffi/src/json_types.rs
 +++ b/bindings/c-ffi/src/json_types.rs
 @@ -15,25 +15,30 @@ use hex::DisplayHex;
@@ -1729,7 +1729,7 @@ index fc570e0..9201de9 100644
          }
      }
  }
-@@ -1581,6 +1731,709 @@ impl From<BtcBalanceInfo> for JsonBtcBalanceInfo {
+@@ -1581,6 +1731,744 @@ impl From<BtcBalanceInfo> for JsonBtcBalanceInfo {
      }
  }
 
@@ -2182,6 +2182,41 @@ index fc570e0..9201de9 100644
 +mod wallet_snapshot_contract_tests {
 +    use super::*;
 +
++    const ASSET_ID: &str = "rgb:CJkb4YZw-jRiz2sk-~PARPio-wtVYI1c-XAEYCqO-wTfvRZ8";
++
++    #[test]
++    fn rgb_contract_import_request_uses_the_documented_json_shape() {
++        let json = format!(r#"{{"contract_base64":"AA==","expected_asset_id":"{ASSET_ID}"}}"#);
++        let request: JsonImportRgbContractRequest = serde_json::from_str(&json).unwrap();
++        let typed = ImportRgbContractRequest::try_from(request).unwrap();
++
++        assert_eq!(typed.contract_base64, "AA==");
++        assert_eq!(typed.expected_asset_id.to_string(), ASSET_ID);
++    }
++
++    #[test]
++    fn rgb_transfer_import_request_preserves_optional_asset_verification() {
++        let json = format!(
++            r#"{{"consignment_base64":"AA==","offchain_txid":"offchain-id","expected_asset_id":"{ASSET_ID}"}}"#
++        );
++        let request: JsonImportRgbTransferConsignmentRequest = serde_json::from_str(&json).unwrap();
++        let typed = ImportRgbTransferConsignmentRequest::try_from(request).unwrap();
++
++        assert_eq!(typed.consignment_base64, "AA==");
++        assert_eq!(typed.offchain_txid, "offchain-id");
++        assert_eq!(typed.expected_asset_id.unwrap().to_string(), ASSET_ID);
++    }
++
++    #[test]
++    fn rgb_import_request_rejects_an_invalid_expected_asset_id() {
++        let request = JsonImportRgbContractRequest {
++            contract_base64: "AA==".to_string(),
++            expected_asset_id: "not-an-asset-id".to_string(),
++        };
++
++        assert!(ImportRgbContractRequest::try_from(request).is_err());
++    }
++
 +    #[test]
 +    fn send_payment_request_preserves_explicit_routing_fee_cap() {
 +        let request = serde_json::from_str::<JsonSendPaymentRequest>(
@@ -2439,7 +2474,7 @@ index fc570e0..9201de9 100644
  #[derive(Debug, Serialize)]
  pub(crate) struct JsonSignMessageResponse {
      pub signed_message: String,
-@@ -1669,6 +2522,169 @@ impl From<SdkSendBtcResponse> for JsonSendBtcResponse {
+@@ -1669,6 +2557,169 @@ impl From<SdkSendBtcResponse> for JsonSendBtcResponse {
      }
  }
 
@@ -2609,7 +2644,7 @@ index fc570e0..9201de9 100644
  #[derive(Debug, Deserialize)]
  pub(crate) struct JsonCreateUtxosRequest {
      pub up_to: bool,
-@@ -1780,6 +2796,8 @@ pub(crate) struct JsonTransfer {
+@@ -1780,6 +2831,8 @@ pub(crate) struct JsonTransfer {
      pub status: String,
      pub requested_assignment: Option<String>,
      pub assignments: Vec<String>,
@@ -2618,7 +2653,7 @@ index fc570e0..9201de9 100644
      pub kind: String,
      pub txid: Option<String>,
      pub recipient_id: Option<String>,
-@@ -1798,6 +2816,12 @@ impl From<Transfer> for JsonTransfer {
+@@ -1798,6 +2851,12 @@ impl From<Transfer> for JsonTransfer {
              status: t.status,
              requested_assignment: t.requested_assignment,
              assignments: t.assignments,
@@ -2631,7 +2666,7 @@ index fc570e0..9201de9 100644
              kind: t.kind,
              txid: t.txid.as_ref().map(fmt_txid),
              recipient_id: t.recipient_id,
-@@ -1847,6 +2871,7 @@ impl From<Utxo> for JsonUtxo {
+@@ -1847,6 +2906,7 @@ impl From<Utxo> for JsonUtxo {
  pub(crate) struct JsonUnspent {
      pub utxo: JsonUtxo,
      pub rgb_allocations: Vec<JsonRgbAllocation>,
@@ -2639,7 +2674,7 @@ index fc570e0..9201de9 100644
  }
 
  impl From<Unspent> for JsonUnspent {
-@@ -1854,6 +2879,7 @@ impl From<Unspent> for JsonUnspent {
+@@ -1854,6 +2914,7 @@ impl From<Unspent> for JsonUnspent {
          JsonUnspent {
              utxo: u.utxo.into(),
              rgb_allocations: u.rgb_allocations.into_iter().map(Into::into).collect(),
@@ -4034,6 +4069,33 @@ index 286134a..044fe68 100644
  };
 
  dictionary SendRgbRequest {
+Submodule rust-lightning contains modified content
+diff --git a/rust-lightning/lightning-invoice/Cargo.toml b/rust-lightning/lightning-invoice/Cargo.toml
+index 3b4d5fe27..c1d834acf 100644
+--- a/rust-lightning/lightning-invoice/Cargo.toml
++++ b/rust-lightning/lightning-invoice/Cargo.toml
+@@ -24,7 +24,7 @@ serde = { version = "1.0", optional = true, default-features = false, features =
+ bitcoin = { version = "0.32.2", default-features = false, features = ["secp-recovery"] }
+
+ # RGB and related
+-rgb-lib = { git = "https://github.com/UTEXO-Protocol/rgb-lib.git", tag = "v0.3.0-beta.27", features = [
++rgb-lib = { git = "https://github.com/UTEXO-Protocol/rgb-lib.git", rev = "b33aac2188c386a2addc8feb1a99663033c32c07", features = [
+     "electrum",
+     "esplora",
+ ] }
+diff --git a/rust-lightning/lightning/Cargo.toml b/rust-lightning/lightning/Cargo.toml
+index 8cc1a7f3e..30a97d9a0 100644
+--- a/rust-lightning/lightning/Cargo.toml
++++ b/rust-lightning/lightning/Cargo.toml
+@@ -54,7 +54,7 @@ inventory = { version = "0.3", optional = true  }
+ # RGB and related
+ bincode = "1.3"
+ futures = "0.3"
+-rgb-lib = { git = "https://github.com/UTEXO-Protocol/rgb-lib.git", tag = "v0.3.0-beta.27", features = [
++rgb-lib = { git = "https://github.com/UTEXO-Protocol/rgb-lib.git", rev = "b33aac2188c386a2addc8feb1a99663033c32c07", features = [
+     "electrum",
+     "esplora",
+ ] }
 diff --git a/src/error.rs b/src/error.rs
 index 95b3602..072b05a 100644
 --- a/src/error.rs
@@ -5593,11 +5655,39 @@ index e4abdac..cd556e2 100644
      fn build_kv_store() -> Arc<dyn KVStoreSync + Send + Sync> {
          let db_path = std::env::temp_dir().join(format!("rln-ldk-unit-{}", uuid::Uuid::new_v4()));
          let connection_string = format!("sqlite:{}?mode=rwc", db_path.display());
+diff --git a/src/lib.rs b/src/lib.rs
+index 11b4b32..7d9f7c0 100644
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -27,6 +27,7 @@ mod kv_store;
+ mod ldk;
+ mod node;
+ mod rgb;
++mod rgb_import;
+ mod routes;
+ mod runtime;
+ mod sdk;
 diff --git a/src/main.rs b/src/main.rs
-index 750cab6..e19f50e 100644
+index 750cab6..1ffd4da 100644
 --- a/src/main.rs
 +++ b/src/main.rs
-@@ -67,13 +67,13 @@ use crate::routes::{
+@@ -20,6 +20,7 @@ mod indexer;
+ mod kv_store;
+ mod ldk;
+ mod rgb;
++mod rgb_import;
+ mod routes;
+ mod runtime;
+ mod signer;
+@@ -60,6 +61,7 @@ use crate::args::UserArgs;
+ use crate::auth::conditional_auth_middleware;
+ use crate::error::AppError;
+ use crate::ldk::stop_ldk;
++use crate::rgb_import::MAX_RGB_IMPORT_BODY_BYTES;
+ #[cfg(feature = "remote-signer")]
+ use crate::routes::init_external_signer;
+ use crate::routes::{
+@@ -67,13 +69,13 @@ use crate::routes::{
      btc_balance, cancel_hodl_invoice, change_password, check_indexer_url, check_proxy_endpoint,
      claim_hodl_invoice, close_channel, connect_peer, create_utxos, decode_ln_invoice,
      decode_rgb_invoice, decode_swapstring, disconnect_peer, estimate_fee, fail_transfers,
@@ -5609,24 +5699,28 @@ index 750cab6..e19f50e 100644
 -    rotate_address, send_btc, send_onion_message, send_payment, send_rgb, shutdown, sign_message,
 -    sync, taker, unlock,
 +    get_asset_media, get_channel_id, get_payment, get_swap, import_rgb_contract,
-+    import_rgb_transfer_consignment, inflate, init, invoice_status, issue_asset_cfa, issue_asset_nia,
-+    issue_asset_uda, keysend, list_assets, list_channels, list_payments, list_peers, list_swaps,
-+    list_transactions, list_transfers, list_unspents, ln_invoice, lock, maker_execute, maker_init,
-+    network_info, node_info, open_channel, post_asset_media, refresh_transfers, restore,
-+    revoke_token, rgb_invoice, rotate_address, send_btc, send_onion_message, send_payment,
-+    send_rgb, shutdown, sign_message, sync, taker, unlock,
++    import_rgb_transfer_consignment, inflate, init, invoice_status, issue_asset_cfa,
++    issue_asset_nia, issue_asset_uda, keysend, list_assets, list_channels, list_payments,
++    list_peers, list_swaps, list_transactions, list_transfers, list_unspents, ln_invoice, lock,
++    maker_execute, maker_init, network_info, node_info, open_channel, post_asset_media,
++    refresh_transfers, restore, revoke_token, rgb_invoice, rotate_address, send_btc,
++    send_onion_message, send_payment, send_rgb, shutdown, sign_message, sync, taker, unlock,
  };
  #[cfg(feature = "vss")]
  use crate::routes::{vss_backup, vss_backup_info, vss_clear_fence};
-@@ -155,6 +155,11 @@ pub(crate) async fn app(args: UserArgs) -> Result<(Router, Arc<AppState>), AppEr
+@@ -155,6 +157,15 @@ pub(crate) async fn app(args: UserArgs) -> Result<(Router, Arc<AppState>), AppEr
          .route("/getpayment", post(get_payment))
          .route("/getswap", post(get_swap))
          .route("/inflate", post(inflate))
 +        .route(
 +            "/importrgbtransferconsignment",
-+            post(import_rgb_transfer_consignment),
++            post(import_rgb_transfer_consignment)
++                .layer(RequestBodyLimitLayer::new(MAX_RGB_IMPORT_BODY_BYTES)),
 +        )
-+        .route("/importrgbcontract", post(import_rgb_contract))
++        .route(
++            "/importrgbcontract",
++            post(import_rgb_contract).layer(RequestBodyLimitLayer::new(MAX_RGB_IMPORT_BODY_BYTES)),
++        )
          .route("/init", post(init))
          .route("/invoicestatus", post(invoice_status))
          .route("/issueassetcfa", post(issue_asset_cfa))
@@ -5781,20 +5875,23 @@ index c67c2ef..0b1cd36 100644
      /// left in `uniffi_api::handle_from_request`) must be able to configure the remote-signer daemon
      /// address; without this field, `NodeHandle`-embedding callers could configure external-signer
 diff --git a/src/rgb.rs b/src/rgb.rs
-index 80df750..0593d3a 100644
+index 80df750..05e8430 100644
 --- a/src/rgb.rs
 +++ b/src/rgb.rs
-@@ -19,21 +19,37 @@ use rgb_lib::{
+@@ -18,22 +18,38 @@ use rgb_lib::{
+     bitcoin::psbt::Psbt as BitcoinPsbt,
      wallet::{
          rust_only::{check_proxy_url, ColoringInfo},
-         AssetCFA, AssetIFA, AssetNIA, AssetUDA, Assets, Balance, BtcBalance, Metadata, Online,
+-        AssetCFA, AssetIFA, AssetNIA, AssetUDA, Assets, Balance, BtcBalance, Metadata, Online,
 -        OperationResult, ReceiveData, Recipient, RefreshFilter, RefreshResult, RgbWalletOpsOffline,
 -        RgbWalletOpsOnline, SendBeginResult, SinglesigKeys, SyncOptions,
 -        Transaction as RgbLibTransaction, Transfer, TransportEndpoint, Unspent,
-+        OperationResult, PendingVanillaTx, PsbtInspection, ReceiveData, Recipient, RefreshFilter,
-+        RefreshResult, RgbWalletOpsOffline, RgbWalletOpsOnline, SendBeginResult, SinglesigKeys,
-+        SyncOptions, Transaction as RgbLibTransaction, Transfer, TransportEndpoint, Unspent,
-         Wallet as RgbLibWallet,
+-        Wallet as RgbLibWallet,
++        AssetCFA, AssetFilter, AssetIFA, AssetNIA, AssetUDA, Assets, Balance, BtcBalance, Metadata,
++        Online, OperationResult, PendingVanillaTx, PsbtInspection, ReceiveData, Recipient,
++        RefreshFilter, RefreshResult, RgbWalletOpsOffline, RgbWalletOpsOnline, SendBeginResult,
++        SinglesigKeys, SyncOptions, Transaction as RgbLibTransaction, Transfer, TransportEndpoint,
++        Unspent, Wallet as RgbLibWallet,
      },
 -    AssetSchema, Assignment, BitcoinNetwork, ContractId, Error as RgbLibError, Fascia, RgbTransfer,
 -    RgbTransport, RgbTxid, UpdateRes, WitnessOrd,
@@ -5872,16 +5969,16 @@ index 80df750..0593d3a 100644
 +        offchain_txid: String,
 +    ) -> Result<(Metadata, bool), RgbLibError> {
 +        let contract_id = consignment.contract_id();
-+        match self.rgb_wallet_wrapper.get_asset_metadata(contract_id) {
-+            Ok(metadata) => Ok((metadata, true)),
-+            Err(RgbLibError::AssetNotFound { .. }) => {
-+                self.rgb_wallet_wrapper
-+                    .save_new_asset(consignment, offchain_txid)?;
-+                let metadata = self.rgb_wallet_wrapper.get_asset_metadata(contract_id)?;
-+                Ok((metadata, false))
-+            }
-+            Err(error) => Err(error),
-+        }
++        let already_imported = match self.rgb_get_asset_metadata(contract_id) {
++            Ok(_) => true,
++            Err(RgbLibError::AssetNotFound { .. }) => false,
++            Err(error) => return Err(error),
++        };
++
++        self.rgb_wallet_wrapper
++            .save_new_asset(consignment, offchain_txid)?;
++        let metadata = self.rgb_get_asset_metadata(contract_id)?;
++        Ok((metadata, already_imported))
 +    }
 +
 +    pub(crate) fn rgb_import_asset_contract(
@@ -6035,7 +6132,7 @@ index 80df750..0593d3a 100644
 +        batch_transfer_idx: i32,
 +    ) -> Result<bool, RgbLibError> {
 +        let mut wallet = self.get_rgb_wallet();
-+        let transfers = wallet.list_transfers_by_txid(plan_id.clone())?;
++        let transfers = wallet.list_transfers(AssetFilter::AnyOrNone, Some(plan_id.clone()))?;
 +        if transfers.is_empty() {
 +            return Ok(false);
 +        }
@@ -6136,7 +6233,34 @@ index 80df750..0593d3a 100644
      }
 
      pub(crate) fn get_asset_balance(
-@@ -859,6 +1135,13 @@ impl RgbLibWalletWrapper {
+@@ -754,6 +1030,7 @@ impl RgbLibWalletWrapper {
+             amounts,
+             inflation_amounts,
+             reject_list_url,
++            None,
+         )
+     }
+
+@@ -803,14 +1080,16 @@ impl RgbLibWalletWrapper {
+     }
+
+     pub(crate) fn list_transfers(&self, asset_id: String) -> Result<Vec<Transfer>, RgbLibError> {
+-        self.get_rgb_wallet().list_transfers(Some(asset_id))
++        self.get_rgb_wallet()
++            .list_transfers(AssetFilter::Id(asset_id), None)
+     }
+
+     pub(crate) fn list_transfers_by_txid(
+         &self,
+         txid: String,
+     ) -> Result<Vec<Transfer>, RgbLibError> {
+-        self.get_rgb_wallet().list_transfers_by_txid(txid)
++        self.get_rgb_wallet()
++            .list_transfers(AssetFilter::AnyOrNone, Some(txid))
+     }
+
+     pub(crate) fn list_unspents(
+@@ -859,6 +1138,13 @@ impl RgbLibWalletWrapper {
              .save_new_asset(consignment, offchain_txid)
      }
 
@@ -6150,7 +6274,7 @@ index 80df750..0593d3a 100644
      pub(crate) fn send(
          &self,
          recipient_map: HashMap<String, Vec<Recipient>>,
-@@ -932,6 +1215,35 @@ impl RgbLibWalletWrapper {
+@@ -932,6 +1218,35 @@ impl RgbLibWalletWrapper {
          )
      }
 
@@ -6186,24 +6310,272 @@ index 80df750..0593d3a 100644
      pub(crate) fn send_btc_end(&self, signed_psbt: String) -> Result<String, RgbLibError> {
          self.get_rgb_wallet().send_btc_end(self.online, signed_psbt)
      }
+diff --git a/src/rgb_import.rs b/src/rgb_import.rs
+new file mode 100644
+index 0000000..93ba5f5
+--- /dev/null
++++ b/src/rgb_import.rs
+@@ -0,0 +1,247 @@
++use crate::error::APIError;
++use crate::utils::AppState;
++use base64::{engine::general_purpose, Engine as _};
++use rgb_lib::wallet::Metadata as RgbLibMetadata;
++use rgb_lib::{
++    ConsignmentExt, ContractId, Error as RgbLibError, FileContent, RgbContract, RgbTransfer,
++    RgbTxid,
++};
++use std::str::FromStr;
++use std::sync::Arc;
++
++pub(crate) const MAX_RGB_IMPORT_BASE64_CHARACTERS: usize = 16 * 1024 * 1024;
++pub(crate) const MAX_RGB_IMPORT_BODY_BYTES: usize = MAX_RGB_IMPORT_BASE64_CHARACTERS + 4 * 1024;
++
++pub(crate) struct ImportRgbTransferConsignmentRequestData {
++    pub(crate) consignment_base64: String,
++    pub(crate) offchain_txid: String,
++    pub(crate) expected_asset_id: Option<String>,
++}
++
++pub(crate) struct ImportRgbContractRequestData {
++    pub(crate) contract_base64: String,
++    pub(crate) expected_asset_id: String,
++}
++
++pub(crate) struct ImportRgbData {
++    pub(crate) asset_id: String,
++    pub(crate) already_imported: bool,
++    pub(crate) metadata: RgbLibMetadata,
++}
++
++#[derive(Clone, Copy)]
++enum RgbPayloadKind {
++    Contract,
++    TransferConsignment,
++}
++
++impl RgbPayloadKind {
++    fn invalid(self, details: String) -> APIError {
++        match self {
++            Self::Contract => APIError::InvalidRgbContract(details),
++            Self::TransferConsignment => APIError::InvalidRgbConsignment(details),
++        }
++    }
++
++    fn label(self) -> &'static str {
++        match self {
++            Self::Contract => "contract",
++            Self::TransferConsignment => "transfer consignment",
++        }
++    }
++}
++
++fn decode_rgb_base64(value: String, kind: RgbPayloadKind) -> Result<Vec<u8>, APIError> {
++    if value.is_empty() || value.len() > MAX_RGB_IMPORT_BASE64_CHARACTERS {
++        return Err(kind.invalid(format!("{} payload size is invalid", kind.label())));
++    }
++    general_purpose::STANDARD
++        .decode(value)
++        .map_err(|error| kind.invalid(format!("invalid base64: {error}")))
++}
++
++fn validate_expected_asset_id(
++    expected_asset_id: &str,
++    actual_contract_id: &ContractId,
++    kind: RgbPayloadKind,
++) -> Result<(), APIError> {
++    let expected_contract_id = ContractId::from_str(expected_asset_id)
++        .map_err(|_| APIError::InvalidAssetID(expected_asset_id.to_string()))?;
++    if &expected_contract_id != actual_contract_id {
++        return Err(kind.invalid(format!(
++            "expected asset id {expected_asset_id}, got {actual_contract_id}"
++        )));
++    }
++    Ok(())
++}
++
++async fn parse_rgb_payload<T, F>(operation: &'static str, parse: F) -> Result<T, APIError>
++where
++    T: Send + 'static,
++    F: FnOnce() -> Result<T, APIError> + Send + 'static,
++{
++    tokio::task::spawn_blocking(parse)
++        .await
++        .map_err(|error| APIError::Unexpected(format!("{operation} parse task failed: {error}")))?
++}
++
++async fn run_rgb_import<F>(
++    state: Arc<AppState>,
++    operation: &'static str,
++    import: F,
++) -> Result<ImportRgbData, APIError>
++where
++    F: FnOnce(Arc<crate::utils::UnlockedAppState>) -> Result<ImportRgbData, APIError>
++        + Send
++        + 'static,
++{
++    // The outer task deliberately owns the lifecycle guard. If an HTTP or FFI caller stops
++    // waiting, a mutation that has already started still runs to completion before shutdown can
++    // replace the unlocked state.
++    let task = tokio::spawn(async move {
++        if *state.get_changing_state() {
++            return Err(APIError::ChangingState);
++        }
++        let unlocked_state_guard = state.get_unlocked_app_state().await;
++        let unlocked_state = unlocked_state_guard
++            .as_ref()
++            .cloned()
++            .ok_or(APIError::LockedNode)?;
++        let result = tokio::task::spawn_blocking(move || import(unlocked_state))
++            .await
++            .map_err(|error| {
++                APIError::Unexpected(format!("{operation} import task failed: {error}"))
++            })?;
++        drop(unlocked_state_guard);
++        result
++    });
++
++    task.await
++        .map_err(|error| APIError::Unexpected(format!("{operation} task failed: {error}")))?
++}
++
++fn map_contract_import_error(error: RgbLibError) -> APIError {
++    match error {
++        RgbLibError::InvalidConsignment => {
++            APIError::InvalidRgbContract("contract validation failed".to_string())
++        }
++        other => APIError::from(other),
++    }
++}
++
++fn map_transfer_import_error(error: RgbLibError) -> APIError {
++    match error {
++        RgbLibError::InvalidConsignment => {
++            APIError::InvalidRgbConsignment("transfer validation failed".to_string())
++        }
++        RgbLibError::InvalidTxid => {
++            APIError::InvalidRgbConsignment("off-chain transaction ID is invalid".to_string())
++        }
++        other => APIError::from(other),
++    }
++}
++
++/// Register metadata from a transfer the native RGB receive path has already accepted.
++///
++/// This does not accept asset allocations or replace the normal receive protocol. The transfer
++/// payload and off-chain transaction ID are still validated on every call; duplicate metadata
++/// registration is idempotent only when the RGB stock remains consistent with the database.
++pub(crate) async fn import_rgb_transfer_consignment(
++    state: Arc<AppState>,
++    request: ImportRgbTransferConsignmentRequestData,
++) -> Result<ImportRgbData, APIError> {
++    RgbTxid::from_str(&request.offchain_txid).map_err(|_| {
++        APIError::InvalidRgbConsignment("off-chain transaction ID is invalid".to_string())
++    })?;
++    let expected_asset_id = request.expected_asset_id;
++    let (consignment, contract_id) = parse_rgb_payload("transfer consignment", move || {
++        let bytes = decode_rgb_base64(
++            request.consignment_base64,
++            RgbPayloadKind::TransferConsignment,
++        )?;
++        let consignment = RgbTransfer::load(&bytes[..])
++            .map_err(|error| APIError::InvalidRgbConsignment(error.to_string()))?;
++        let contract_id = consignment.contract_id();
++        if let Some(expected_asset_id) = expected_asset_id.as_deref() {
++            validate_expected_asset_id(
++                expected_asset_id,
++                &contract_id,
++                RgbPayloadKind::TransferConsignment,
++            )?;
++        }
++        Ok((consignment, contract_id))
++    })
++    .await?;
++    let offchain_txid = request.offchain_txid;
++    run_rgb_import(state, "transfer consignment", move |unlocked_state| {
++        let (metadata, already_imported) = unlocked_state
++            .rgb_import_transfer_consignment(consignment, offchain_txid)
++            .map_err(map_transfer_import_error)?;
++        Ok(ImportRgbData {
++            asset_id: contract_id.to_string(),
++            already_imported,
++            metadata,
++        })
++    })
++    .await
++}
++
++/// Validate and register public RGB contract metadata without importing allocations.
++pub(crate) async fn import_rgb_contract(
++    state: Arc<AppState>,
++    request: ImportRgbContractRequestData,
++) -> Result<ImportRgbData, APIError> {
++    let expected_asset_id = request.expected_asset_id;
++    let (contract, contract_id) = parse_rgb_payload("contract", move || {
++        let bytes = decode_rgb_base64(request.contract_base64, RgbPayloadKind::Contract)?;
++        let contract = RgbContract::load(&bytes[..])
++            .map_err(|error| APIError::InvalidRgbContract(error.to_string()))?;
++        let contract_id = contract.contract_id();
++        validate_expected_asset_id(&expected_asset_id, &contract_id, RgbPayloadKind::Contract)?;
++        Ok((contract, contract_id))
++    })
++    .await?;
++
++    run_rgb_import(state, "contract", move |unlocked_state| {
++        let (metadata, already_imported) = unlocked_state
++            .rgb_import_asset_contract(contract)
++            .map_err(map_contract_import_error)?;
++        Ok(ImportRgbData {
++            asset_id: contract_id.to_string(),
++            already_imported,
++            metadata,
++        })
++    })
++    .await
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    #[test]
++    fn base64_validation_is_bounded_and_payload_specific() {
++        assert!(matches!(
++            decode_rgb_base64(String::new(), RgbPayloadKind::Contract),
++            Err(APIError::InvalidRgbContract(_))
++        ));
++        assert!(matches!(
++            decode_rgb_base64(
++                "not base64".to_string(),
++                RgbPayloadKind::TransferConsignment
++            ),
++            Err(APIError::InvalidRgbConsignment(_))
++        ));
++        assert!(matches!(
++            decode_rgb_base64(
++                "A".repeat(MAX_RGB_IMPORT_BASE64_CHARACTERS + 1),
++                RgbPayloadKind::Contract,
++            ),
++            Err(APIError::InvalidRgbContract(_))
++        ));
++        assert_eq!(
++            decode_rgb_base64("YWJj".to_string(), RgbPayloadKind::Contract).unwrap(),
++            b"abc"
++        );
++    }
++}
 diff --git a/src/routes.rs b/src/routes.rs
-index 975a67d..aebc1c6 100644
+index 975a67d..67fad2b 100644
 --- a/src/routes.rs
 +++ b/src/routes.rs
-@@ -1,10 +1,12 @@
+@@ -1,4 +1,7 @@
  use crate::ldk::write_rgb_payment_info_file;
-+use crate::sdk;
++use crate::rgb_import::{
++    self, ImportRgbContractRequestData, ImportRgbTransferConsignmentRequestData,
++};
  use amplify::{map, s};
  use axum::{
      extract::{Multipart, State},
-     Json,
- };
- use axum_extra::extract::WithRejection;
-+use base64::{engine::general_purpose, Engine as _};
- use biscuit_auth::Biscuit;
- use bitcoin::hashes::sha256::{self, Hash as Sha256};
- use bitcoin::hashes::Hash;
-@@ -27,7 +29,9 @@ use lightning::{
+@@ -27,7 +30,9 @@ use lightning::{
      types::payment::{PaymentHash, PaymentPreimage},
  };
  use lightning::{
@@ -6214,7 +6586,7 @@ index 975a67d..aebc1c6 100644
      routing::{
          gossip::NodeId,
          router::{PaymentParameters, RouteParameters},
-@@ -48,15 +52,16 @@ use rgb_lib::{
+@@ -48,12 +53,12 @@ use rgb_lib::{
          },
          AssetCFA as RgbLibAssetCFA, AssetIFA as RgbLibAssetIFA, AssetNIA as RgbLibAssetNIA,
          AssetUDA as RgbLibAssetUDA, Balance as RgbLibBalance, EmbeddedMedia as RgbLibEmbeddedMedia,
@@ -6232,12 +6604,7 @@ index 975a67d..aebc1c6 100644
 +        TokenLight as RgbLibTokenLight, WitnessData as RgbLibWitnessData,
      },
      AssetSchema as RgbLibAssetSchema, Assignment as RgbLibAssignment,
--    BitcoinNetwork as RgbLibNetwork, ContractId, RgbTransport,
-+    BitcoinNetwork as RgbLibNetwork, ConsignmentExt, ContractId, FileContent, RgbTransfer,
-+    RgbTransport,
- };
- use serde::{Deserialize, Serialize};
- use serde_json::Value;
+     BitcoinNetwork as RgbLibNetwork, ContractId, RgbTransport,
 @@ -79,8 +84,8 @@ use crate::core_types::async_order::{
      AsyncOrderOutboundInvoiceResponse,
  };
@@ -6283,7 +6650,31 @@ index 975a67d..aebc1c6 100644
  #[derive(Deserialize, Serialize)]
  pub(crate) struct AssetNIA {
      pub(crate) asset_id: String,
-@@ -1035,14 +1067,18 @@ pub(crate) struct Payment {
+@@ -323,6 +355,7 @@ pub(crate) enum Assignment {
+     NonFungible,
+     InflationRight(u64),
+     Any,
++    LinkRight,
+ }
+
+ impl From<RgbLibAssignment> for Assignment {
+@@ -332,6 +365,7 @@ impl From<RgbLibAssignment> for Assignment {
+             RgbLibAssignment::NonFungible => Self::NonFungible,
+             RgbLibAssignment::InflationRight(amt) => Self::InflationRight(amt),
+             RgbLibAssignment::Any => Self::Any,
++            RgbLibAssignment::LinkRight => Self::LinkRight,
+         }
+     }
+ }
+@@ -343,6 +377,7 @@ impl From<Assignment> for RgbLibAssignment {
+             Assignment::NonFungible => Self::NonFungible,
+             Assignment::InflationRight(amt) => Self::InflationRight(amt),
+             Assignment::Any => Self::Any,
++            Assignment::LinkRight => Self::LinkRight,
+         }
+     }
+ }
+@@ -1035,14 +1070,18 @@ pub(crate) struct Payment {
      pub(crate) amt_msat: Option<u64>,
      pub(crate) asset_amount: Option<u64>,
      pub(crate) asset_id: Option<String>,
@@ -6302,7 +6693,7 @@ index 975a67d..aebc1c6 100644
  }
 
  pub(crate) fn description_hash_from_invoice(invoice: &Bolt11Invoice) -> Option<[u8; 32]> {
-@@ -1059,6 +1095,41 @@ fn payment_type_from_invoice(invoice_type: Option<InvoiceType>) -> PaymentType {
+@@ -1059,6 +1098,41 @@ fn payment_type_from_invoice(invoice_type: Option<InvoiceType>) -> PaymentType {
      }
  }
 
@@ -6344,7 +6735,7 @@ index 975a67d..aebc1c6 100644
  #[derive(Clone, Deserialize, Serialize)]
  pub(crate) struct Peer {
      pub(crate) pubkey: String,
-@@ -1224,6 +1295,23 @@ pub(crate) struct SendPaymentResponse {
+@@ -1224,6 +1298,23 @@ pub(crate) struct SendPaymentResponse {
      pub(crate) payment_hash: Option<String>,
      pub(crate) payment_secret: Option<String>,
      pub(crate) status: HTLCStatus,
@@ -6368,7 +6759,15 @@ index 975a67d..aebc1c6 100644
  }
 
  #[derive(Deserialize, Serialize)]
-@@ -1832,7 +1920,11 @@ pub(crate) async fn asset_metadata(
+@@ -1427,6 +1518,7 @@ pub(crate) enum TransferKind {
+     Send,
+     Inflation,
+     Burn,
++    Link,
+ }
+
+ #[derive(Debug, PartialEq, Deserialize, Serialize)]
+@@ -1832,7 +1924,11 @@ pub(crate) async fn asset_metadata(
          .unwrap()
          .rgb_get_asset_metadata(contract_id)?;
 
@@ -6381,57 +6780,10 @@ index 975a67d..aebc1c6 100644
          asset_schema: metadata.asset_schema.into(),
          initial_supply: metadata.initial_supply,
          max_supply: metadata.max_supply,
-@@ -1843,6 +1935,113 @@ pub(crate) async fn asset_metadata(
+@@ -1843,6 +1939,49 @@ pub(crate) async fn asset_metadata(
          ticker: metadata.ticker,
          details: metadata.details,
          token: metadata.token.map(|t| t.into()),
-+    }
-+}
-+
-+fn asset_metadata_response_from_data(metadata: sdk::AssetMetadataData) -> AssetMetadataResponse {
-+    AssetMetadataResponse {
-+        asset_schema: metadata.asset_schema.into(),
-+        initial_supply: metadata.initial_supply,
-+        max_supply: metadata.max_supply,
-+        known_circulating_supply: metadata.known_circulating_supply,
-+        timestamp: metadata.timestamp,
-+        name: metadata.name,
-+        precision: metadata.precision,
-+        ticker: metadata.ticker,
-+        details: metadata.details,
-+        token: metadata.token.map(|token| Token {
-+            index: token.index,
-+            ticker: token.ticker,
-+            name: token.name,
-+            details: token.details,
-+            embedded_media: token.embedded_media.map(|media| EmbeddedMedia {
-+                mime: media.mime,
-+                data: media.data,
-+            }),
-+            media: token.media.map(|media| Media {
-+                file_path: media.file_path,
-+                digest: media.digest,
-+                mime: media.mime,
-+            }),
-+            attachments: token
-+                .attachments
-+                .into_iter()
-+                .map(|(index, media)| {
-+                    (
-+                        index,
-+                        Media {
-+                            file_path: media.file_path,
-+                            digest: media.digest,
-+                            mime: media.mime,
-+                        },
-+                    )
-+                })
-+                .collect(),
-+            reserves: token.reserves.map(|reserves| ProofOfReserves {
-+                utxo: reserves.utxo,
-+                proof: reserves.proof,
-+            }),
-+        }),
 +    }
 +}
 +
@@ -6442,37 +6794,20 @@ index 975a67d..aebc1c6 100644
 +        APIError,
 +    >,
 +) -> Result<Json<ImportRgbTransferConsignmentResponse>, APIError> {
-+    let consignment_bytes = general_purpose::STANDARD
-+        .decode(payload.consignment_base64)
-+        .map_err(|error| APIError::InvalidRgbConsignment(format!("invalid base64: {error}")))?;
-+    let consignment = RgbTransfer::load(&consignment_bytes[..])
-+        .map_err(|error| APIError::InvalidRgbConsignment(error.to_string()))?;
-+    let asset_id = consignment.contract_id().to_string();
-+
-+    if let Some(expected_asset_id) = payload.expected_asset_id {
-+        let expected_contract_id = ContractId::from_str(&expected_asset_id)
-+            .map_err(|_| APIError::InvalidAssetID(expected_asset_id.clone()))?;
-+        if expected_contract_id != consignment.contract_id() {
-+            return Err(APIError::InvalidRgbConsignment(format!(
-+                "expected asset id {expected_asset_id}, got {asset_id}"
-+            )));
-+        }
-+    }
-+
-+    let guard = state.check_unlocked().await?;
-+    let unlocked_state = guard.as_ref().unwrap();
-+    let unlocked_state_copy = unlocked_state.clone();
-+    let offchain_txid = payload.offchain_txid;
-+    let (metadata, already_imported) = tokio::task::spawn_blocking(move || {
-+        unlocked_state_copy.rgb_import_transfer_consignment(consignment, offchain_txid)
-+    })
-+    .await
-+    .unwrap()?;
++    let imported = rgb_import::import_rgb_transfer_consignment(
++        state,
++        ImportRgbTransferConsignmentRequestData {
++            consignment_base64: payload.consignment_base64,
++            offchain_txid: payload.offchain_txid,
++            expected_asset_id: payload.expected_asset_id,
++        },
++    )
++    .await?;
 +
 +    Ok(Json(ImportRgbTransferConsignmentResponse {
-+        asset_id,
-+        already_imported,
-+        metadata: asset_metadata_response_from_metadata(metadata),
++        asset_id: imported.asset_id,
++        already_imported: imported.already_imported,
++        metadata: asset_metadata_response_from_metadata(imported.metadata),
 +    }))
 +}
 +
@@ -6480,9 +6815,9 @@ index 975a67d..aebc1c6 100644
 +    State(state): State<Arc<AppState>>,
 +    WithRejection(Json(payload), _): WithRejection<Json<ImportRgbContractRequest>, APIError>,
 +) -> Result<Json<ImportRgbContractResponse>, APIError> {
-+    let imported = sdk::import_rgb_contract(
++    let imported = rgb_import::import_rgb_contract(
 +        state,
-+        sdk::ImportRgbContractRequestData {
++        ImportRgbContractRequestData {
 +            contract_base64: payload.contract_base64,
 +            expected_asset_id: payload.expected_asset_id,
 +        },
@@ -6491,11 +6826,11 @@ index 975a67d..aebc1c6 100644
 +    Ok(Json(ImportRgbContractResponse {
 +        asset_id: imported.asset_id,
 +        already_imported: imported.already_imported,
-+        metadata: asset_metadata_response_from_data(imported.metadata),
++        metadata: asset_metadata_response_from_metadata(imported.metadata),
      }))
  }
 
-@@ -1915,8 +2114,11 @@ pub(crate) async fn cancel_hodl_invoice(
+@@ -1915,8 +2054,11 @@ pub(crate) async fn cancel_hodl_invoice(
              _ => return Err(APIError::InvoiceNotClaimable),
          }
 
@@ -6509,7 +6844,7 @@ index 975a67d..aebc1c6 100644
 
          Ok(Json(EmptyResponse {}))
      })
-@@ -2039,8 +2241,15 @@ pub(crate) async fn claim_hodl_invoice(
+@@ -2039,8 +2181,15 @@ pub(crate) async fn claim_hodl_invoice(
          };
 
          if let Some(terminal_error) = terminal_error {
@@ -6527,7 +6862,7 @@ index 975a67d..aebc1c6 100644
              return Err(terminal_error);
          }
 
-@@ -2111,10 +2320,25 @@ pub(crate) async fn close_channel(
+@@ -2111,10 +2260,25 @@ pub(crate) async fn close_channel(
          } else {
              if let Some(session) = virtual_session.as_ref() {
                  if !matches!(session.status, VirtualChannelSessionStatus::Abandoned) {
@@ -6557,7 +6892,7 @@ index 975a67d..aebc1c6 100644
                  }
                  return Ok(Json(EmptyResponse {}));
              }
-@@ -2511,26 +2735,26 @@ pub(crate) async fn get_payment(
+@@ -2511,26 +2675,26 @@ pub(crate) async fn get_payment(
                  if payment_hash == &requested_ph
                      && payment_type_from_invoice(payment_info.invoice_type) == payload.payment_type
                  {
@@ -6590,7 +6925,7 @@ index 975a67d..aebc1c6 100644
                          },
                      }));
                  }
-@@ -2541,26 +2765,26 @@ pub(crate) async fn get_payment(
+@@ -2541,26 +2705,26 @@ pub(crate) async fn get_payment(
              for (payment_id, payment_info) in &outbound_payments {
                  let payment_hash = &PaymentHash(payment_id.0);
                  if payment_hash == &requested_ph {
@@ -6623,7 +6958,7 @@ index 975a67d..aebc1c6 100644
                          },
                      }));
                  }
-@@ -2961,6 +3185,9 @@ pub(crate) async fn keysend(
+@@ -2961,6 +3125,9 @@ pub(crate) async fn keysend(
              amt_msat,
              rgb_payment,
          );
@@ -6633,7 +6968,7 @@ index 975a67d..aebc1c6 100644
          let created_at = get_current_timestamp();
          unlocked_state.add_outbound_payment(
              payment_id,
-@@ -2978,6 +3205,11 @@ pub(crate) async fn keysend(
+@@ -2978,6 +3145,11 @@ pub(crate) async fn keysend(
                  payment_idx: None,
                  async_hash_index: None,
                  async_host_node_id: None,
@@ -6645,7 +6980,7 @@ index 975a67d..aebc1c6 100644
 
                  updated_at: created_at,
              },
-@@ -3215,13 +3447,8 @@ pub(crate) async fn list_payments(
+@@ -3215,13 +3387,8 @@ pub(crate) async fn list_payments(
      let mut all: Vec<(u64, Payment)> = vec![];
 
      for (payment_hash, payment_info) in &inbound_payments {
@@ -6661,7 +6996,7 @@ index 975a67d..aebc1c6 100644
 
          all.push((
              payment_info.payment_idx.unwrap_or(0),
-@@ -3229,14 +3456,18 @@ pub(crate) async fn list_payments(
+@@ -3229,14 +3396,18 @@ pub(crate) async fn list_payments(
                  amt_msat: payment_info.amt_msat,
                  asset_amount,
                  asset_id,
@@ -6680,7 +7015,7 @@ index 975a67d..aebc1c6 100644
              },
          ));
      }
-@@ -3244,13 +3475,8 @@ pub(crate) async fn list_payments(
+@@ -3244,13 +3415,8 @@ pub(crate) async fn list_payments(
      for (payment_id, payment_info) in &outbound_payments {
          let payment_hash = &PaymentHash(payment_id.0);
 
@@ -6696,7 +7031,7 @@ index 975a67d..aebc1c6 100644
 
          all.push((
              payment_info.payment_idx.unwrap_or(0),
-@@ -3258,14 +3484,18 @@ pub(crate) async fn list_payments(
+@@ -3258,14 +3424,18 @@ pub(crate) async fn list_payments(
                  amt_msat: payment_info.amt_msat,
                  asset_amount,
                  asset_id,
@@ -6715,7 +7050,15 @@ index 975a67d..aebc1c6 100644
              },
          ));
      }
-@@ -3612,6 +3842,9 @@ pub(crate) async fn ln_invoice(
+@@ -3464,6 +3634,7 @@ pub(crate) async fn list_transfers(
+                 rgb_lib::wallet::TransferKind::Send => TransferKind::Send,
+                 rgb_lib::wallet::TransferKind::Inflation => TransferKind::Inflation,
+                 rgb_lib::wallet::TransferKind::Burn => TransferKind::Burn,
++                rgb_lib::wallet::TransferKind::Link => TransferKind::Link,
+             },
+             txid: transfer.txid,
+             recipient_id: transfer.recipient_id,
+@@ -3612,6 +3783,9 @@ pub(crate) async fn ln_invoice(
              None => Bolt11InvoiceDescription::Direct(Description::empty()),
          };
 
@@ -6725,7 +7068,7 @@ index 975a67d..aebc1c6 100644
          let invoice_params = Bolt11InvoiceParameters {
              amount_msats: payload.amt_msat,
              description,
-@@ -3657,6 +3890,11 @@ pub(crate) async fn ln_invoice(
+@@ -3657,6 +3831,11 @@ pub(crate) async fn ln_invoice(
                  payment_idx: None,
                  async_hash_index: None,
                  async_host_node_id: None,
@@ -6737,7 +7080,7 @@ index 975a67d..aebc1c6 100644
              },
          );
 
-@@ -4744,6 +4982,7 @@ pub(crate) async fn send_payment(
+@@ -4744,6 +4923,7 @@ pub(crate) async fn send_payment(
          let unlocked_state = guard.as_ref().unwrap();
 
          let mut status = HTLCStatus::Pending;
@@ -6745,7 +7088,7 @@ index 975a67d..aebc1c6 100644
          let created_at = get_current_timestamp();
 
          let (payment_id, payment_hash, payment_secret) = if let Ok(offer) = Offer::from_str(&payload.invoice) {
-@@ -4786,6 +5025,11 @@ pub(crate) async fn send_payment(
+@@ -4786,6 +4966,11 @@ pub(crate) async fn send_payment(
                      payment_idx: None,
                      async_hash_index: None,
                      async_host_node_id: None,
@@ -6757,7 +7100,7 @@ index 975a67d..aebc1c6 100644
                  },
              )?;
 
-@@ -4799,9 +5043,10 @@ pub(crate) async fn send_payment(
+@@ -4799,9 +4984,10 @@ pub(crate) async fn send_payment(
                  .pay_for_offer(&offer, Some(amt_msat), payment_id, params);
              if pay.is_err() {
                  tracing::error!("ERROR: failed to pay: {:?}", pay);
@@ -6770,7 +7113,7 @@ index 975a67d..aebc1c6 100644
              }
              (payment_id, None, secret)
          } else {
-@@ -4885,6 +5130,9 @@ pub(crate) async fn send_payment(
+@@ -4885,6 +5071,9 @@ pub(crate) async fn send_payment(
              }
 
              let secret = payment_secret;
@@ -6780,7 +7123,7 @@ index 975a67d..aebc1c6 100644
              unlocked_state.add_outbound_payment(
                  payment_id,
                  PaymentInfo {
-@@ -4902,6 +5150,11 @@ pub(crate) async fn send_payment(
+@@ -4902,6 +5091,11 @@ pub(crate) async fn send_payment(
                      payment_idx: None,
                      async_hash_index: None,
                      async_host_node_id: None,
@@ -6792,7 +7135,7 @@ index 975a67d..aebc1c6 100644
                  },
              )?;
              let payment_hash = PaymentHash(invoice.payment_hash().to_byte_array());
-@@ -4936,8 +5189,10 @@ pub(crate) async fn send_payment(
+@@ -4936,8 +5130,10 @@ pub(crate) async fn send_payment(
                  Err(e) => {
                      tracing::error!("ERROR: failed to send payment: {:?}", e);
                      clear_rgb_payment_pending(&payment_hash, false, unlocked_state.kv_store.as_ref());
@@ -6804,7 +7147,7 @@ index 975a67d..aebc1c6 100644
                  },
              };
 
-@@ -4949,6 +5204,7 @@ pub(crate) async fn send_payment(
+@@ -4949,6 +5145,7 @@ pub(crate) async fn send_payment(
              payment_hash: payment_hash.map(|h| hex_str(&h.0)),
              payment_secret: payment_secret.map(|s| hex_str(&s.0)),
              status,
@@ -6813,10 +7156,10 @@ index 975a67d..aebc1c6 100644
      })
      .await
 diff --git a/src/sdk/mod.rs b/src/sdk/mod.rs
-index 3ef5ebc..f0132a5 100644
+index 3ef5ebc..86e3916 100644
 --- a/src/sdk/mod.rs
 +++ b/src/sdk/mod.rs
-@@ -11,8 +11,8 @@ use crate::core_types::async_order::{
+@@ -11,12 +11,13 @@ use crate::core_types::async_order::{
  };
  use crate::error::APIError;
  use crate::ldk::{
@@ -6827,7 +7170,12 @@ index 3ef5ebc..f0132a5 100644
  };
  #[cfg(feature = "vss")]
  use crate::ldk::{derive_vss_identity, derive_vss_identity_from_key_source};
-@@ -28,19 +28,22 @@ use crate::utils::{
+ use crate::rgb::{check_rgb_proxy_endpoint, get_rgb_channel_info_optional};
++use crate::rgb_import;
+ use crate::signer::{
+     read_key_source_file, validate_bootstrap_payload, validate_key_source_matches_bootstrap,
+     write_key_source_file, BootstrapData, KeySourceFile, SUPPORTED_SIGNER_API_LEVEL,
+@@ -28,19 +29,21 @@ use crate::utils::{
      get_max_local_rgb_amount, get_route, hex_str, hex_str_to_compressed_pubkey, hex_str_to_vec,
      is_external_signer_mode_configured, new_jsonrpc_request_id, parse_peer_info,
      validate_and_parse_description_hash, validate_and_parse_payment_hash,
@@ -6835,7 +7183,6 @@ index 3ef5ebc..f0132a5 100644
 +    validate_and_parse_payment_preimage, AppState, UnlockedAppState, UserOnionMessageContents,
  };
  use amplify::{map, s};
-+use base64::{engine::general_purpose, Engine as _};
  use bitcoin::hashes::sha256::Hash as Sha256;
  use bitcoin::hashes::Hash;
  use bitcoin::hex::DisplayHex;
@@ -6860,13 +7207,12 @@ index 3ef5ebc..f0132a5 100644
  use lightning::util::IS_SWAP_SCID;
  use lightning::{
      onion_message::messenger::Destination, onion_message::messenger::MessageSendInstructions,
-@@ -73,9 +77,14 @@ use rgb_lib::wallet::{
+@@ -73,9 +77,13 @@ use rgb_lib::wallet::{
  use rgb_lib::{
      bdk_wallet::keys::bip39::Mnemonic,
      keys::{generate_keys, WitnessVersion},
 -    ContractId, RgbTransport,
-+    ConsignmentExt, ContractId, Error as RgbLibError, FileContent, RgbContract, RgbTransfer,
-+    RgbTransport,
++    ContractId, Error as RgbLibError, FileContent, RgbTransport,
 +    TransactionType as RgbLibTransactionType, TransferStatus as RgbLibTransferStatus,
 +    WalletTransactionType,
  };
@@ -6877,7 +7223,7 @@ index 3ef5ebc..f0132a5 100644
  use std::net::ToSocketAddrs;
  use std::str::FromStr;
  use std::sync::Arc;
-@@ -89,13 +98,156 @@ use rgb_lib::wallet::RecipientType as RgbLibRecipientType;
+@@ -89,13 +97,156 @@ use rgb_lib::wallet::RecipientType as RgbLibRecipientType;
  use rgb_lib::wallet::{
      AssetCFA as RgbLibAssetCFA, AssetIFA as RgbLibAssetIFA, AssetNIA as RgbLibAssetNIA,
      AssetUDA as RgbLibAssetUDA, EmbeddedMedia as RgbLibEmbeddedMedia, Media as RgbLibMedia,
@@ -7035,7 +7381,7 @@ index 3ef5ebc..f0132a5 100644
 
  struct OpenChannelVirtualIntentGuard {
      unlocked_state: Arc<crate::utils::UnlockedAppState>,
-@@ -204,6 +356,7 @@ pub(crate) struct NodeInfoData {
+@@ -204,6 +355,7 @@ pub(crate) struct NodeInfoData {
  pub(crate) struct NetworkInfoData {
      pub(crate) network: RgbBitcoinNetwork,
      pub(crate) height: u32,
@@ -7043,7 +7389,7 @@ index 3ef5ebc..f0132a5 100644
  }
 
  pub(crate) struct AddressData {
-@@ -231,6 +384,42 @@ pub(crate) struct AssetMetadataData {
+@@ -231,6 +383,29 @@ pub(crate) struct AssetMetadataData {
      pub(crate) token: Option<Token>,
  }
 
@@ -7070,23 +7416,10 @@ index 3ef5ebc..f0132a5 100644
 +    pub(crate) metadata: AssetMetadataData,
 +}
 +
-+const MAX_RGB_BASE64_CHARACTERS: usize = 16 * 1024 * 1024;
-+
-+fn decode_rgb_base64(value: String, kind: &str) -> Result<Vec<u8>, APIError> {
-+    if value.is_empty() || value.len() > MAX_RGB_BASE64_CHARACTERS {
-+        return Err(APIError::InvalidRgbContract(format!(
-+            "{kind} payload size is invalid"
-+        )));
-+    }
-+    general_purpose::STANDARD
-+        .decode(value)
-+        .map_err(|error| APIError::InvalidRgbContract(format!("invalid base64: {error}")))
-+}
-+
  pub(crate) struct BtcBalance {
      pub(crate) settled: u64,
      pub(crate) future: u64,
-@@ -295,6 +484,36 @@ pub(crate) struct SendRgbData {
+@@ -295,6 +470,36 @@ pub(crate) struct SendRgbData {
      pub(crate) batch_transfer_idx: i32,
  }
 
@@ -7123,7 +7456,7 @@ index 3ef5ebc..f0132a5 100644
  pub(crate) enum AssignmentKindData {
      Fungible,
      NonFungible,
-@@ -410,6 +629,7 @@ pub(crate) struct SendPaymentRequestData {
+@@ -410,6 +615,7 @@ pub(crate) struct SendPaymentRequestData {
      pub(crate) amt_msat: Option<u64>,
      pub(crate) asset_id: Option<String>,
      pub(crate) asset_amount: Option<u64>,
@@ -7131,7 +7464,7 @@ index 3ef5ebc..f0132a5 100644
  }
 
  pub(crate) struct SendPaymentData {
-@@ -417,6 +637,7 @@ pub(crate) struct SendPaymentData {
+@@ -417,6 +623,7 @@ pub(crate) struct SendPaymentData {
      pub(crate) payment_hash: Option<String>,
      pub(crate) payment_secret: Option<String>,
      pub(crate) status: HtlcStatus,
@@ -7139,7 +7472,7 @@ index 3ef5ebc..f0132a5 100644
  }
 
  pub(crate) struct RefreshTransfersRequestData {
-@@ -441,6 +662,12 @@ pub(crate) struct CreateUtxosRequestData {
+@@ -441,6 +648,12 @@ pub(crate) struct CreateUtxosRequestData {
      pub(crate) skip_sync: bool,
  }
 
@@ -7152,7 +7485,7 @@ index 3ef5ebc..f0132a5 100644
  pub(crate) struct IssueAssetNiaRequestData {
      pub(crate) amounts: Vec<u64>,
      pub(crate) ticker: String,
-@@ -498,6 +725,18 @@ pub(crate) struct SendBtcData {
+@@ -498,6 +711,18 @@ pub(crate) struct SendBtcData {
      pub(crate) txid: String,
  }
 
@@ -7171,7 +7504,7 @@ index 3ef5ebc..f0132a5 100644
  pub(crate) struct MakerInitRequestData {
      pub(crate) qty_from: u64,
      pub(crate) qty_to: u64,
-@@ -563,14 +802,18 @@ pub(crate) struct PaymentData {
+@@ -563,14 +788,18 @@ pub(crate) struct PaymentData {
      pub(crate) amt_msat: Option<u64>,
      pub(crate) asset_amount: Option<u64>,
      pub(crate) asset_id: Option<String>,
@@ -7190,7 +7523,7 @@ index 3ef5ebc..f0132a5 100644
  }
 
  pub(crate) struct CancelHodlInvoiceRequestData {
-@@ -703,6 +946,22 @@ pub(crate) enum ChannelStatus {
+@@ -703,6 +932,22 @@ pub(crate) enum ChannelStatus {
 
  pub(crate) type HtlcStatus = crate::core_types::HTLCStatus;
 
@@ -7213,7 +7546,15 @@ index 3ef5ebc..f0132a5 100644
  #[derive(Clone, Copy, Debug, PartialEq, Eq)]
  pub(crate) enum PaymentType {
      Outbound,
-@@ -1123,11 +1382,15 @@ pub(crate) async fn node_info(state: Arc<AppState>) -> Result<NodeInfoData, APIE
+@@ -746,6 +991,7 @@ pub(crate) enum TransferKind {
+     Send,
+     Inflation,
+     Burn,
++    Link,
+ }
+
+ #[derive(Debug, PartialEq)]
+@@ -1123,11 +1369,15 @@ pub(crate) async fn node_info(state: Arc<AppState>) -> Result<NodeInfoData, APIE
  pub(crate) async fn network_info(state: Arc<AppState>) -> Result<NetworkInfoData, APIError> {
      let guard = check_unlocked(&state).await?;
      let unlocked_state = guard.as_ref().unwrap();
@@ -7231,7 +7572,7 @@ index 3ef5ebc..f0132a5 100644
      })
  }
 
-@@ -1576,7 +1839,11 @@ pub(crate) async fn asset_metadata(
+@@ -1576,7 +1826,11 @@ pub(crate) async fn asset_metadata(
          .unwrap()
          .rgb_get_asset_metadata(contract_id)?;
 
@@ -7244,7 +7585,7 @@ index 3ef5ebc..f0132a5 100644
          asset_schema: metadata.asset_schema,
          initial_supply: metadata.initial_supply,
          max_supply: metadata.max_supply,
-@@ -1587,6 +1854,88 @@ pub(crate) async fn asset_metadata(
+@@ -1587,6 +1841,47 @@ pub(crate) async fn asset_metadata(
          ticker: metadata.ticker,
          details: metadata.details,
          token: metadata.token.map(Into::into),
@@ -7255,44 +7596,20 @@ index 3ef5ebc..f0132a5 100644
 +    state: Arc<AppState>,
 +    request: ImportRgbTransferConsignmentRequestData,
 +) -> Result<ImportRgbTransferConsignmentData, APIError> {
-+    if request.consignment_base64.is_empty()
-+        || request.consignment_base64.len() > MAX_RGB_BASE64_CHARACTERS
-+    {
-+        return Err(APIError::InvalidRgbConsignment(
-+            "transfer consignment payload size is invalid".to_string(),
-+        ));
-+    }
-+    let consignment_bytes = general_purpose::STANDARD
-+        .decode(request.consignment_base64)
-+        .map_err(|error| APIError::InvalidRgbConsignment(format!("invalid base64: {error}")))?;
-+    let consignment = RgbTransfer::load(&consignment_bytes[..])
-+        .map_err(|error| APIError::InvalidRgbConsignment(error.to_string()))?;
-+    let asset_id = consignment.contract_id().to_string();
-+
-+    if let Some(expected_asset_id) = request.expected_asset_id {
-+        let expected_contract_id = ContractId::from_str(&expected_asset_id)
-+            .map_err(|_| APIError::InvalidAssetID(expected_asset_id.clone()))?;
-+        if expected_contract_id != consignment.contract_id() {
-+            return Err(APIError::InvalidRgbConsignment(format!(
-+                "expected asset id {expected_asset_id}, got {asset_id}"
-+            )));
-+        }
-+    }
-+
-+    let guard = check_unlocked(&state).await?;
-+    let unlocked_state = guard.as_ref().unwrap();
-+    let unlocked_state_copy = unlocked_state.clone();
-+    let offchain_txid = request.offchain_txid;
-+    let (metadata, already_imported) = tokio::task::spawn_blocking(move || {
-+        unlocked_state_copy.rgb_import_transfer_consignment(consignment, offchain_txid)
-+    })
-+    .await
-+    .map_err(|error| APIError::Unexpected(format!("transfer import task failed: {error}")))??;
++    let imported = rgb_import::import_rgb_transfer_consignment(
++        state,
++        rgb_import::ImportRgbTransferConsignmentRequestData {
++            consignment_base64: request.consignment_base64,
++            offchain_txid: request.offchain_txid,
++            expected_asset_id: request.expected_asset_id,
++        },
++    )
++    .await?;
 +
 +    Ok(ImportRgbTransferConsignmentData {
-+        asset_id,
-+        already_imported,
-+        metadata: asset_metadata_data_from_metadata(metadata),
++        asset_id: imported.asset_id,
++        already_imported: imported.already_imported,
++        metadata: asset_metadata_data_from_metadata(imported.metadata),
 +    })
 +}
 +
@@ -7300,40 +7617,23 @@ index 3ef5ebc..f0132a5 100644
 +    state: Arc<AppState>,
 +    request: ImportRgbContractRequestData,
 +) -> Result<ImportRgbContractData, APIError> {
-+    let expected_contract_id = ContractId::from_str(&request.expected_asset_id)
-+        .map_err(|_| APIError::InvalidAssetID(request.expected_asset_id.clone()))?;
-+    let contract_bytes = decode_rgb_base64(request.contract_base64, "contract")?;
-+    let contract = RgbContract::load(&contract_bytes[..])
-+        .map_err(|error| APIError::InvalidRgbContract(error.to_string()))?;
-+    let asset_id = contract.contract_id().to_string();
-+    if expected_contract_id != contract.contract_id() {
-+        return Err(APIError::InvalidRgbContract(format!(
-+            "expected asset id {}, got {asset_id}",
-+            request.expected_asset_id
-+        )));
-+    }
-+
-+    let guard = check_unlocked(&state).await?;
-+    let unlocked_state = guard.as_ref().unwrap().clone();
-+    let (metadata, already_imported) =
-+        tokio::task::spawn_blocking(move || unlocked_state.rgb_import_asset_contract(contract))
-+            .await
-+            .map_err(|error| APIError::Unexpected(format!("contract import task failed: {error}")))?
-+            .map_err(|error| match error {
-+                RgbLibError::InvalidConsignment => {
-+                    APIError::InvalidRgbContract("contract validation failed".to_string())
-+                }
-+                other => APIError::from(other),
-+            })?;
++    let imported = rgb_import::import_rgb_contract(
++        state,
++        rgb_import::ImportRgbContractRequestData {
++            contract_base64: request.contract_base64,
++            expected_asset_id: request.expected_asset_id,
++        },
++    )
++    .await?;
 +
 +    Ok(ImportRgbContractData {
-+        asset_id,
-+        already_imported,
-+        metadata: asset_metadata_data_from_metadata(metadata),
++        asset_id: imported.asset_id,
++        already_imported: imported.already_imported,
++        metadata: asset_metadata_data_from_metadata(imported.metadata),
      })
  }
 
-@@ -1751,18 +2100,10 @@ pub(crate) async fn send_rgb(
+@@ -1751,18 +2046,10 @@ pub(crate) async fn send_rgb(
      })
  }
 
@@ -7356,7 +7656,7 @@ index 3ef5ebc..f0132a5 100644
          .into_iter()
          .map(|group| {
              let recipients = group
-@@ -1785,7 +2126,20 @@ pub(crate) async fn send_rgb_from_groups(
+@@ -1785,7 +2072,20 @@ pub(crate) async fn send_rgb_from_groups(
                  .collect::<Result<Vec<_>, APIError>>()?;
              Ok((group.asset_id, recipients))
          })
@@ -7378,7 +7678,7 @@ index 3ef5ebc..f0132a5 100644
 
      send_rgb(
          state,
-@@ -1797,6 +2151,294 @@ pub(crate) async fn send_rgb_from_groups(
+@@ -1797,6 +2097,294 @@ pub(crate) async fn send_rgb_from_groups(
      .await
  }
 
@@ -7673,24 +7973,19 @@ index 3ef5ebc..f0132a5 100644
  pub(crate) async fn init(
      state: Arc<AppState>,
      password: String,
-@@ -1876,17 +2518,79 @@ pub(crate) async fn vss_backup(state: Arc<AppState>) -> Result<i64, APIError> {
+@@ -1940,6 +2528,57 @@ pub(crate) async fn vss_clear_fence(
      }
  }
 
--/// Clears the VSS single-writer fence so a fresh instance can take over a
--/// store whose previous owner did not release it (the normal case after any
--/// shutdown — `acquire_fence` writes the fence but no code path deletes it).
-+/// Clears the VSS single-writer fence so a fresh instance can take over a
-+/// store whose previous owner did not release it (the normal case after any
-+/// shutdown — `acquire_fence` writes the fence but no code path deletes it).
++/// Permanently deletes every object in the authenticated VSS store.
 +///
-+/// Must be called on a locked node (the unlock path acquires the fence
-+/// itself, so clearing it while unlocked would race against the periodic
-+/// re-check and panic the running instance).
-+pub(crate) async fn vss_clear_fence(
++/// The node must be locked so no local persistence task can race the remote
++/// deletion. External-signer mode derives the VSS identity from key_source.json;
++/// internal-mnemonic mode authenticates with the supplied wallet password.
++pub(crate) async fn vss_delete_all(
 +    state: Arc<AppState>,
 +    request: VssClearFenceRequest,
-+) -> Result<(), APIError> {
++) -> Result<usize, APIError> {
 +    let _locked_state = check_locked(&state).await?;
 +
 +    #[cfg(not(feature = "vss"))]
@@ -7708,16 +8003,8 @@ index 3ef5ebc..f0132a5 100644
 +            .vss_url
 +            .clone()
 +            .ok_or_else(|| APIError::FailedVssInit("VSS is not configured".to_string()))?;
-+
-+        // Internal-mnemonic mode authenticates with the password and derives
-+        // the `m/535'/1'` identity. External-signer mode holds no mnemonic, so
-+        // it reconstructs the bootstrap identity from the persisted
-+        // key_source.json — the same store id start_ldk acquired the fence
-+        // under. Without this branch, external-signer nodes could never clear
-+        // a leftover fence and would be wedged after their first shutdown.
-+        // [[derive_vss_identity_from_key_source]]
 +        let identity = match read_key_source_file(&state.static_state.storage_dir_path)
-+            .map_err(|e| APIError::ExternalSignerProtocolError(e.to_string()))?
++            .map_err(|error| APIError::ExternalSignerProtocolError(error.to_string()))?
 +        {
 +            Some(key_source) => derive_vss_identity_from_key_source(&key_source)?,
 +            None => {
@@ -7725,7 +8012,6 @@ index 3ef5ebc..f0132a5 100644
 +                derive_vss_identity(&mnemonic, state.static_state.network.into())?
 +            }
 +        };
-+
 +        let vss_retry = state.static_state.config.vss.clone();
 +        tokio::task::spawn_blocking(move || {
 +            let store = crate::vss_kv_store::VssKvStore::new_with_retry(
@@ -7734,77 +8020,18 @@ index 3ef5ebc..f0132a5 100644
 +                identity.signing_key,
 +                &vss_retry,
 +            )?;
-+            store.delete_fence()
++            store.delete_all()
 +        })
 +        .await
-+        .map_err(|e| APIError::Unexpected(format!("vss_clear_fence task failed: {e}")))?
-+        .map_err(|e| APIError::FailedVssInit(format!("vss_clear_fence failed: {e}")))?;
-+
-+        Ok(())
++        .map_err(|error| APIError::Unexpected(format!("vss_delete_all task failed: {error}")))?
++        .map_err(|error| APIError::FailedVssInit(format!("vss_delete_all failed: {error}")))
 +    }
 +}
 +
-+/// Permanently deletes every object in the authenticated VSS store.
- ///
--/// Must be called on a locked node (the unlock path acquires the fence
--/// itself, so clearing it while unlocked would race against the periodic
--/// re-check and panic the running instance).
--pub(crate) async fn vss_clear_fence(
-+/// The node must be locked so no local persistence task can race the remote
-+/// deletion. External-signer mode derives the VSS identity from key_source.json;
-+/// internal-mnemonic mode authenticates with the supplied wallet password.
-+pub(crate) async fn vss_delete_all(
-     state: Arc<AppState>,
-     request: VssClearFenceRequest,
--) -> Result<(), APIError> {
-+) -> Result<usize, APIError> {
-     let _locked_state = check_locked(&state).await?;
-
-     #[cfg(not(feature = "vss"))]
-@@ -1904,16 +2608,8 @@ pub(crate) async fn vss_clear_fence(
-             .vss_url
-             .clone()
-             .ok_or_else(|| APIError::FailedVssInit("VSS is not configured".to_string()))?;
--
--        // Internal-mnemonic mode authenticates with the password and derives
--        // the `m/535'/1'` identity. External-signer mode holds no mnemonic, so
--        // it reconstructs the bootstrap identity from the persisted
--        // key_source.json — the same store id start_ldk acquired the fence
--        // under. Without this branch, external-signer nodes could never clear
--        // a leftover fence and would be wedged after their first shutdown.
--        // [[derive_vss_identity_from_key_source]]
-         let identity = match read_key_source_file(&state.static_state.storage_dir_path)
--            .map_err(|e| APIError::ExternalSignerProtocolError(e.to_string()))?
-+            .map_err(|error| APIError::ExternalSignerProtocolError(error.to_string()))?
-         {
-             Some(key_source) => derive_vss_identity_from_key_source(&key_source)?,
-             None => {
-@@ -1921,7 +2617,6 @@ pub(crate) async fn vss_clear_fence(
-                 derive_vss_identity(&mnemonic, state.static_state.network.into())?
-             }
-         };
--
-         let vss_retry = state.static_state.config.vss.clone();
-         tokio::task::spawn_blocking(move || {
-             let store = crate::vss_kv_store::VssKvStore::new_with_retry(
-@@ -1930,13 +2625,11 @@ pub(crate) async fn vss_clear_fence(
-                 identity.signing_key,
-                 &vss_retry,
-             )?;
--            store.delete_fence()
-+            store.delete_all()
-         })
-         .await
--        .map_err(|e| APIError::Unexpected(format!("vss_clear_fence task failed: {e}")))?
--        .map_err(|e| APIError::FailedVssInit(format!("vss_clear_fence failed: {e}")))?;
--
--        Ok(())
-+        .map_err(|error| APIError::Unexpected(format!("vss_delete_all task failed: {error}")))?
-+        .map_err(|error| APIError::FailedVssInit(format!("vss_delete_all failed: {error}")))
-     }
- }
-
-@@ -2222,10 +2915,18 @@ pub(crate) async fn close_channel(
+ pub(crate) async fn unlock(state: Arc<AppState>, request: UnlockRequest) -> Result<(), APIError> {
+     tracing::info!("Unlock started");
+     if is_external_signer_mode_configured(&state)? {
+@@ -2222,10 +2861,18 @@ pub(crate) async fn close_channel(
      } else {
          if let Some(session) = virtual_session.as_ref() {
              if !matches!(session.status, VirtualChannelSessionStatus::Abandoned) {
@@ -7827,7 +8054,7 @@ index 3ef5ebc..f0132a5 100644
              }
              return Ok(());
          }
-@@ -2402,6 +3103,144 @@ pub(crate) async fn create_utxos(
+@@ -2402,6 +3049,144 @@ pub(crate) async fn create_utxos(
      Ok(())
  }
 
@@ -7972,7 +8199,7 @@ index 3ef5ebc..f0132a5 100644
  pub(crate) async fn issue_asset_nia(
      state: Arc<AppState>,
      request: IssueAssetNiaRequestData,
-@@ -2563,6 +3402,9 @@ pub(crate) async fn keysend(
+@@ -2563,6 +3348,9 @@ pub(crate) async fn keysend(
          amt_msat,
          rgb_payment,
      );
@@ -7982,7 +8209,7 @@ index 3ef5ebc..f0132a5 100644
      let created_at = get_current_timestamp();
      unlocked_state.add_outbound_payment(
          payment_id,
-@@ -2581,6 +3423,11 @@ pub(crate) async fn keysend(
+@@ -2581,6 +3369,11 @@ pub(crate) async fn keysend(
              payment_idx: None,
              async_hash_index: None,
              async_host_node_id: None,
@@ -7994,7 +8221,7 @@ index 3ef5ebc..f0132a5 100644
          },
      )?;
      if let Some((contract_id, rgb_amount)) = rgb_payment {
-@@ -2651,6 +3498,181 @@ pub(crate) async fn send_btc(
+@@ -2651,6 +3444,181 @@ pub(crate) async fn send_btc(
      Ok(SendBtcData { txid })
  }
 
@@ -8176,7 +8403,7 @@ index 3ef5ebc..f0132a5 100644
  pub(crate) async fn post_asset_media(
      state: Arc<AppState>,
      file_bytes: Vec<u8>,
-@@ -3077,6 +4099,7 @@ pub(crate) async fn send_payment(
+@@ -3077,6 +4045,7 @@ pub(crate) async fn send_payment(
      let unlocked_state = guard.as_ref().unwrap();
 
      let mut status = HtlcStatus::Pending;
@@ -8184,7 +8411,7 @@ index 3ef5ebc..f0132a5 100644
      let created_at = get_current_timestamp();
 
      let (payment_id, payment_hash, payment_secret) = if let Ok(offer) =
-@@ -3120,10 +4143,19 @@ pub(crate) async fn send_payment(
+@@ -3120,10 +4089,19 @@ pub(crate) async fn send_payment(
                  payment_idx: None,
                  async_hash_index: None,
                  async_host_node_id: None,
@@ -8204,7 +8431,7 @@ index 3ef5ebc..f0132a5 100644
              retry_strategy: Retry::Timeout(Duration::from_secs(10)),
              ..Default::default()
          };
-@@ -3135,9 +4167,10 @@ pub(crate) async fn send_payment(
+@@ -3135,9 +4113,10 @@ pub(crate) async fn send_payment(
          );
          if pay.is_err() {
              tracing::error!("ERROR: failed to pay: {:?}", pay);
@@ -8217,7 +8444,7 @@ index 3ef5ebc..f0132a5 100644
          }
          (payment_id, None, secret)
      } else {
-@@ -3205,6 +4238,9 @@ pub(crate) async fn send_payment(
+@@ -3205,6 +4184,9 @@ pub(crate) async fn send_payment(
          };
 
          let secret = payment_secret;
@@ -8227,7 +8454,7 @@ index 3ef5ebc..f0132a5 100644
          unlocked_state.add_outbound_payment(
              payment_id,
              PaymentInfo {
-@@ -3222,6 +4258,11 @@ pub(crate) async fn send_payment(
+@@ -3222,6 +4204,11 @@ pub(crate) async fn send_payment(
                  payment_idx: None,
                  async_hash_index: None,
                  async_host_node_id: None,
@@ -8239,7 +8466,7 @@ index 3ef5ebc..f0132a5 100644
              },
          )?;
          let payment_hash = PaymentHash(invoice.payment_hash().to_byte_array());
-@@ -3245,7 +4286,10 @@ pub(crate) async fn send_payment(
+@@ -3245,7 +4232,10 @@ pub(crate) async fn send_payment(
              &invoice,
              payment_id,
              Some(amt_msat),
@@ -8251,7 +8478,7 @@ index 3ef5ebc..f0132a5 100644
              bolt11_retry,
          ) {
              Ok(_) => {
-@@ -3259,8 +4303,10 @@ pub(crate) async fn send_payment(
+@@ -3259,8 +4249,10 @@ pub(crate) async fn send_payment(
              Err(e) => {
                  tracing::error!("ERROR: failed to send payment: {:?}", e);
                  clear_rgb_payment_pending(&payment_hash, false, unlocked_state.kv_store.as_ref());
@@ -8263,7 +8490,7 @@ index 3ef5ebc..f0132a5 100644
              }
          };
 
-@@ -3272,6 +4318,7 @@ pub(crate) async fn send_payment(
+@@ -3272,6 +4264,7 @@ pub(crate) async fn send_payment(
          payment_hash: payment_hash.map(|h| hex_str(&h.0)),
          payment_secret: payment_secret.map(|s| hex_str(&s.0)),
          status,
@@ -8271,7 +8498,7 @@ index 3ef5ebc..f0132a5 100644
      })
  }
 
-@@ -3663,6 +4710,176 @@ pub(crate) async fn sync(state: Arc<AppState>) -> Result<(), APIError> {
+@@ -3663,6 +4656,156 @@ pub(crate) async fn sync(state: Arc<AppState>) -> Result<(), APIError> {
      Ok(())
  }
 
@@ -8409,26 +8636,6 @@ index 3ef5ebc..f0132a5 100644
 +    use super::*;
 +
 +    #[test]
-+    fn rgb_contract_base64_validation_rejects_empty_malformed_and_oversized_payloads() {
-+        assert!(matches!(
-+            decode_rgb_base64(String::new(), "contract"),
-+            Err(APIError::InvalidRgbContract(_))
-+        ));
-+        assert!(matches!(
-+            decode_rgb_base64("not base64".to_string(), "contract"),
-+            Err(APIError::InvalidRgbContract(_))
-+        ));
-+        assert!(matches!(
-+            decode_rgb_base64("A".repeat(MAX_RGB_BASE64_CHARACTERS + 1), "contract"),
-+            Err(APIError::InvalidRgbContract(_))
-+        ));
-+        assert_eq!(
-+            decode_rgb_base64("YWJj".to_string(), "contract").unwrap(),
-+            b"abc"
-+        );
-+    }
-+
-+    #[test]
 +    fn routine_syncs_every_revealed_script_on_both_keychains() {
 +        assert_eq!(
 +            sync_strategy_for_mode(WalletSyncModeData::Routine),
@@ -8448,7 +8655,7 @@ index 3ef5ebc..f0132a5 100644
  pub(crate) async fn decode_ln_invoice(
      state: Arc<AppState>,
      invoice: String,
-@@ -3797,6 +5014,9 @@ pub(crate) async fn create_ln_invoice(
+@@ -3797,6 +4940,9 @@ pub(crate) async fn create_ln_invoice(
          None => Bolt11InvoiceDescription::Direct(Description::empty()),
      };
 
@@ -8458,7 +8665,7 @@ index 3ef5ebc..f0132a5 100644
      let invoice_params = Bolt11InvoiceParameters {
          amount_msats: amt_msat,
          description,
-@@ -3844,6 +5064,11 @@ pub(crate) async fn create_ln_invoice(
+@@ -3844,6 +4990,11 @@ pub(crate) async fn create_ln_invoice(
              payment_idx: None,
              async_hash_index: None,
              async_host_node_id: None,
@@ -8470,7 +8677,7 @@ index 3ef5ebc..f0132a5 100644
          },
      );
 
-@@ -3859,6 +5084,41 @@ fn payment_type_from_invoice(invoice_type: Option<InvoiceType>) -> PaymentType {
+@@ -3859,6 +5010,41 @@ fn payment_type_from_invoice(invoice_type: Option<InvoiceType>) -> PaymentType {
      }
  }
 
@@ -8512,7 +8719,7 @@ index 3ef5ebc..f0132a5 100644
  pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentData>, APIError> {
      let guard = check_unlocked(&state).await?;
      let unlocked_state = guard.as_ref().unwrap();
-@@ -3869,50 +5129,50 @@ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentDat
+@@ -3869,50 +5055,50 @@ pub(crate) async fn list_payments(state: Arc<AppState>) -> Result<Vec<PaymentDat
      let mut payments = vec![];
 
      for (payment_hash, payment_info) in &inbound_payments {
@@ -8575,7 +8782,7 @@ index 3ef5ebc..f0132a5 100644
          });
      }
 
-@@ -3940,25 +5200,25 @@ pub(crate) async fn get_payment(
+@@ -3940,25 +5126,25 @@ pub(crate) async fn get_payment(
                  if payment_hash == &requested_ph
                      && payment_type_from_invoice(payment_info.invoice_type) == payment_type
                  {
@@ -8607,7 +8814,7 @@ index 3ef5ebc..f0132a5 100644
                      });
                  }
              }
-@@ -3968,25 +5228,25 @@ pub(crate) async fn get_payment(
+@@ -3968,25 +5154,25 @@ pub(crate) async fn get_payment(
              for (payment_id, payment_info) in &outbound_payments {
                  let payment_hash = &PaymentHash(payment_id.0);
                  if payment_hash == &requested_ph {
@@ -8639,7 +8846,7 @@ index 3ef5ebc..f0132a5 100644
                      });
                  }
              }
-@@ -4020,8 +5280,11 @@ pub(crate) async fn cancel_hodl_invoice(
+@@ -4020,8 +5206,11 @@ pub(crate) async fn cancel_hodl_invoice(
          _ => return Err(APIError::InvoiceNotClaimable),
      }
 
@@ -8653,7 +8860,7 @@ index 3ef5ebc..f0132a5 100644
      Ok(())
  }
 
-@@ -4094,8 +5357,15 @@ pub(crate) async fn claim_hodl_invoice(
+@@ -4094,8 +5283,15 @@ pub(crate) async fn claim_hodl_invoice(
      };
 
      if let Some(terminal_error) = terminal_error {
@@ -8671,7 +8878,15 @@ index 3ef5ebc..f0132a5 100644
          return Err(terminal_error);
      }
 
-@@ -4390,6 +5660,26 @@ mod tests {
+@@ -4259,6 +5455,7 @@ fn to_transfer_data(transfer: rgb_lib::wallet::Transfer) -> TransferData {
+             rgb_lib::wallet::TransferKind::Send => TransferKind::Send,
+             rgb_lib::wallet::TransferKind::Inflation => TransferKind::Inflation,
+             rgb_lib::wallet::TransferKind::Burn => TransferKind::Burn,
++            rgb_lib::wallet::TransferKind::Link => TransferKind::Link,
+         },
+         txid: transfer.txid,
+         recipient_id: transfer.recipient_id,
+@@ -4390,6 +5587,26 @@ mod tests {
      use tokio::sync::Mutex as TokioMutex;
      use tokio_util::sync::CancellationToken;
 
@@ -8698,7 +8913,7 @@ index 3ef5ebc..f0132a5 100644
      #[test]
      fn verify_message_signature_accepts_known_lightning_vector_and_rejects_tampering() {
          let message = b"is this compatible?";
-@@ -4451,13 +5741,7 @@ mod tests {
+@@ -4451,13 +5668,7 @@ mod tests {
      }
 
      fn mock_locked_state() -> Arc<AppState> {
@@ -9395,7 +9610,7 @@ index ab7e5f4..4fc2e95 100644
      #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
      async fn vss_lock_releases_fence_for_next_unlock() {
 diff --git a/src/uniffi_api/mod.rs b/src/uniffi_api/mod.rs
-index c6173a3..ace6378 100644
+index c6173a3..a8bb039 100644
 --- a/src/uniffi_api/mod.rs
 +++ b/src/uniffi_api/mod.rs
 @@ -115,11 +115,8 @@ fn handle_from_request(request: SdkInitRequest) -> Result<NodeHandle, RlnError>
@@ -9473,7 +9688,7 @@ index c6173a3..ace6378 100644
  fn map_media(data: crate::sdk::Media) -> Media {
      Media {
          file_path: data.file_path,
-@@ -312,11 +336,34 @@ fn map_transaction(tx: crate::sdk::TransactionData) -> Result<Transaction, RlnEr
+@@ -312,11 +336,38 @@ fn map_transaction(tx: crate::sdk::TransactionData) -> Result<Transaction, RlnEr
      })
  }
 
@@ -9495,6 +9710,10 @@ index c6173a3..ace6378 100644
 +            kind: "Any".to_string(),
 +            amount: None,
 +        },
++        rgb_lib::Assignment::LinkRight => RgbAssignmentInfo {
++            kind: "LinkRight".to_string(),
++            amount: None,
++        },
 +    }
 +}
 +
@@ -9508,7 +9727,7 @@ index c6173a3..ace6378 100644
      Ok(Transfer {
          idx: t.idx,
          created_at: t.created_at,
-@@ -328,6 +375,8 @@ fn map_transfer(t: crate::sdk::TransferData) -> Result<Transfer, RlnError> {
+@@ -328,6 +379,8 @@ fn map_transfer(t: crate::sdk::TransferData) -> Result<Transfer, RlnError> {
              .into_iter()
              .map(|a| format!("{:?}", a))
              .collect(),
@@ -9517,7 +9736,7 @@ index c6173a3..ace6378 100644
          kind: format!("{:?}", t.kind),
          txid,
          recipient_id: t.recipient_id,
-@@ -415,6 +464,22 @@ impl SdkNode {
+@@ -415,6 +468,22 @@ impl SdkNode {
          Ok(version)
      }
 
@@ -9540,7 +9759,7 @@ index c6173a3..ace6378 100644
      pub fn connectpeer(&self, peer_pubkey_and_addr: String) -> Result<(), RlnError> {
          let state = self.handle.app_state();
          block_on_sdk(sdk::connect_peer(state, peer_pubkey_and_addr))?;
-@@ -460,6 +525,61 @@ impl SdkNode {
+@@ -460,6 +529,61 @@ impl SdkNode {
          Ok(())
      }
 
@@ -9602,7 +9821,7 @@ index c6173a3..ace6378 100644
      pub fn issueassetnia(&self, request: SdkIssueAssetNiaRequest) -> Result<AssetNia, RlnError> {
          let state = self.handle.app_state();
          let asset = block_on_sdk(sdk::issue_asset_nia(
-@@ -673,6 +793,91 @@ impl SdkNode {
+@@ -673,6 +797,91 @@ impl SdkNode {
          Ok(SdkSendBtcResponse { txid })
      }
 
@@ -9694,7 +9913,7 @@ index c6173a3..ace6378 100644
      pub fn makerinit(
          &self,
          request: SdkMakerInitRequest,
-@@ -787,6 +992,7 @@ impl SdkNode {
+@@ -787,6 +996,7 @@ impl SdkNode {
                  amt_msat: request.amt_msat,
                  asset_id: request.asset_id.map(|id| id.to_string()),
                  asset_amount: request.asset_amount,
@@ -9702,7 +9921,7 @@ index c6173a3..ace6378 100644
              },
          ))?;
          let status = match response.status {
-@@ -809,6 +1015,7 @@ impl SdkNode {
+@@ -809,6 +1019,7 @@ impl SdkNode {
              payment_hash,
              payment_secret: response.payment_secret,
              status,
@@ -9710,7 +9929,7 @@ index c6173a3..ace6378 100644
          })
      }
 
-@@ -847,6 +1054,35 @@ impl SdkNode {
+@@ -847,6 +1058,35 @@ impl SdkNode {
          Ok(())
      }
 
@@ -9746,7 +9965,7 @@ index c6173a3..ace6378 100644
      pub fn node_info(&self) -> Result<NodeInfo, RlnError> {
          let state = self.handle.app_state();
          let data = block_on_sdk(sdk::node_info(state))?;
-@@ -1029,6 +1265,7 @@ impl SdkNode {
+@@ -1029,6 +1269,7 @@ impl SdkNode {
          Ok(NetworkInfo {
              network: format!("{:?}", info.network),
              height: info.height,
@@ -9754,7 +9973,7 @@ index c6173a3..ace6378 100644
          })
      }
 
-@@ -1115,17 +1352,47 @@ impl SdkNode {
+@@ -1115,17 +1356,47 @@ impl SdkNode {
      pub fn asset_metadata(&self, asset_id: ContractId) -> Result<AssetMetadataInfo, RlnError> {
          let state = self.handle.app_state();
          let resp = block_on_sdk(sdk::asset_metadata(state, asset_id.to_string()))?;
@@ -9813,7 +10032,7 @@ index c6173a3..ace6378 100644
          })
      }
 
-@@ -1441,6 +1708,67 @@ impl SdkNode {
+@@ -1441,6 +1712,67 @@ impl SdkNode {
          send_rgb_from_state(self.handle.app_state(), request)
      }
 
@@ -9881,7 +10100,7 @@ index c6173a3..ace6378 100644
      pub fn apay_new(&self, host_node_id: String) -> Result<AsyncOrderNewResponse, RlnError> {
          let state = self.handle.app_state();
          let response = block_on_sdk(sdk::async_order_new(
-@@ -1699,6 +2027,20 @@ pub fn sdk_asset_metadata(asset_id: ContractId) -> Result<AssetMetadataInfo, Rln
+@@ -1699,6 +2031,20 @@ pub fn sdk_asset_metadata(asset_id: ContractId) -> Result<AssetMetadataInfo, Rln
      SdkNode { handle }.asset_metadata(asset_id)
  }
 
@@ -10088,10 +10307,21 @@ index 59faef0..4689ac2 100644
              RlnError::InvalidRequest(msg)
          }
 diff --git a/src/uniffi_api/tests.rs b/src/uniffi_api/tests.rs
-index 4f37a95..afea3a2 100644
+index 4f37a95..1930205 100644
 --- a/src/uniffi_api/tests.rs
 +++ b/src/uniffi_api/tests.rs
-@@ -412,11 +412,15 @@ mod uniffi_smoke_tests {
+@@ -403,20 +403,26 @@ mod uniffi_smoke_tests {
+             amt_msat: Some(1000),
+             asset_amount: None,
+             asset_id: None,
++            carrier_msat: None,
+             payment_hash: payment_hash_hex.clone(),
+             payment_type: crate::sdk::PaymentType::InboundHodl,
+             status: crate::sdk::HtlcStatus::Succeeded,
+             created_at: 1,
+             updated_at: 2,
++            expires_at: None,
+             payee_pubkey: "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
                  .to_string(),
              preimage: expected_preimage.clone(),
              description_hash: None,
@@ -10649,29 +10879,3 @@ index b956bd1..e27d99a 100644
 +        );
 +    }
 +}
-diff --git a/rust-lightning/lightning-invoice/Cargo.toml b/rust-lightning/lightning-invoice/Cargo.toml
-index 3b4d5fe27..75a4532e0 100644
---- a/rust-lightning/lightning-invoice/Cargo.toml
-+++ b/rust-lightning/lightning-invoice/Cargo.toml
-@@ -24,7 +24,7 @@ serde = { version = "1.0", optional = true, default-features = false, features =
- bitcoin = { version = "0.32.2", default-features = false, features = ["secp-recovery"] }
-
- # RGB and related
--rgb-lib = { git = "https://github.com/UTEXO-Protocol/rgb-lib.git", tag = "v0.3.0-beta.27", features = [
-+rgb-lib = { git = "https://github.com/UTEXO-Protocol/rgb-lib.git", rev = "2e1026e9b15fffdbc2ea8b0f7f23a10ffe1f11ca", features = [
-     "electrum",
-     "esplora",
- ] }
-diff --git a/rust-lightning/lightning/Cargo.toml b/rust-lightning/lightning/Cargo.toml
-index 8cc1a7f3e..2bf24433c 100644
---- a/rust-lightning/lightning/Cargo.toml
-+++ b/rust-lightning/lightning/Cargo.toml
-@@ -54,7 +54,7 @@ inventory = { version = "0.3", optional = true  }
- # RGB and related
- bincode = "1.3"
- futures = "0.3"
--rgb-lib = { git = "https://github.com/UTEXO-Protocol/rgb-lib.git", tag = "v0.3.0-beta.27", features = [
-+rgb-lib = { git = "https://github.com/UTEXO-Protocol/rgb-lib.git", rev = "2e1026e9b15fffdbc2ea8b0f7f23a10ffe1f11ca", features = [
-     "electrum",
-     "esplora",
- ] }
