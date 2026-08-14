@@ -17,7 +17,7 @@ test('package overlay metadata is exact and checksum-pinned', () => {
   assert.equal(config.commit, '0bfa66fa256a6c36f3737d5b6402eacea40c68fc')
   assert.equal(
     config.patchSha256,
-    '9d8a3e76a099422106e679cb704b0b76cf9758cc79c0948da997d1620eef985f'
+    '3b6bcbf9a8f966def4a7ce43e9543e248c0b5dc4942156624e6015d7b98c3221'
   )
   assert.equal(config.rustToolchain, '1.88.0')
 })
@@ -55,7 +55,7 @@ test('overlay contains the hardened shared RGB import implementation', () => {
   assert.match(patch, /RgbTxid::from_str/)
   assert.match(patch, /let task = tokio::spawn/)
   assert.match(patch, /save_new_asset\(consignment, offchain_txid\)\?;/)
-  assert.match(patch, /b33aac2188c386a2addc8feb1a99663033c32c07/)
+  assert.match(patch, /95332c41fd715939ac6e078ad859d474b1f6fa9b/)
 })
 
 test('wrapper lockfile resolves the same hardened rgb-lib revision as the overlay', () => {
@@ -63,7 +63,7 @@ test('wrapper lockfile resolves the same hardened rgb-lib revision as the overla
 
   assert.match(
     lockfile,
-    /git\+https:\/\/github\.com\/UTEXO-Protocol\/rgb-lib\.git\?rev=b33aac2188c386a2addc8feb1a99663033c32c07#b33aac2188c386a2addc8feb1a99663033c32c07/
+    /git\+https:\/\/github\.com\/UTEXO-Protocol\/rgb-lib\.git\?rev=95332c41fd715939ac6e078ad859d474b1f6fa9b#95332c41fd715939ac6e078ad859d474b1f6fa9b/
   )
   assert.doesNotMatch(
     lockfile,
