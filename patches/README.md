@@ -14,7 +14,7 @@ matching file are built directly from upstream.
 
 [bare]: https://github.com/UTEXO-Protocol/rgb-lightning-node-bare
 
-## c-ffi-utexo-patches-v0.10.0-beta.3.patch
+## c-ffi-utexo-patches-v0.11.0-beta.3.patch
 
 This overlay includes transactional orphaned virtual-channel recovery so a
 failed RGB channel open cannot permanently reserve inventory or block the peer.
@@ -28,7 +28,7 @@ snapshot contract v3. Address rotation reveals the new script before returning.
 
 Adds versioned dual-keychain synchronization, bounded decimal-safe wallet
 snapshots, explicit Lightning routing-fee caps, and persisted actual routing
-fees to the pinned v0.10 native source. It preserves complete Lightning
+fees to the pinned v0.11 native source. It preserves complete Lightning
 invoice decode metadata and stable tagged RGB assignments across C-FFI, and
 also adds deterministic BTC/RGB prepare-and-commit plans, BTC plan
 cancellation, pending vanilla transaction inspection, and RGB UTXO setup

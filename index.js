@@ -281,6 +281,9 @@ class SdkNode {
   assetBalance (assetId) {
     return JSON.parse(this._inner.getAssetBalance(assetId))
   }
+  assetLinkCreate (request) {
+    return JSON.parse(this._inner.assetLinkCreate(JSON.stringify(request)))
+  }
   assetMetadata (assetId) {
     return JSON.parse(this._inner.assetMetadata(assetId))
   }

@@ -1,18 +1,5 @@
 # Changelog
 
-## Unreleased
-
-- Publish the persisted local VSS writer identity with an Android-safe
-  exclusive-create protocol, bounded concurrent-reader retry, and fail-closed
-  corruption handling.
-
-## 0.1.0-beta.15
-
-- Expose the disk-backed native VLS signer needed for channel operation after
-  process restarts.
-- Build branch installs from the exact checksum-pinned native overlay instead
-  of downloading a stale release addon.
-
 All notable changes to `@utexo/rgb-lightning-node-nodejs` are
 documented here.
 
@@ -46,10 +33,12 @@ while pre-`1.0`.
   inspection, allowing consumers to release abandoned send reservations
   without touching channel or UTXO-management operations.
 - `SdkNode.syncWallet()` and `SdkNode.walletSnapshot()` with a shared
-  v0.9.0-beta.3 native overlay: dual-keychain FullSync/FullScan modes,
+  v0.11.0-beta.3 native overlay: dual-keychain FullSync/FullScan modes,
   bounded activity, coherent tip evidence, and decimal-string amounts.
 - Pull-request CI that applies the pinned native overlay, runs its contract
   tests, builds the host addon, and executes the package canary.
+- `SdkNode.assetLinkCreate(request)` for the RLN v0.11 parent/child RGB
+  asset-link contract.
 - `SdkNode.verifyMessage(message, signature)` with canonical Lightning
   zbase32 verification, including locked external-signer nodes.
 - `rotateAddress()`, `listTransactionsByTxid()`, and
@@ -60,6 +49,12 @@ while pre-`1.0`.
   order documented by the native SDK release workflow.
 
 ### Changed
+- Publish the persisted local VSS writer identity with an Android-safe
+  exclusive-create protocol, bounded concurrent-reader retry, and fail-closed
+  corruption handling.
+- Updated the transaction and transfer query bindings for the consolidated
+  RLN v0.11 C-FFI filter signatures while retaining the existing JavaScript
+  convenience methods.
 - The published TypeScript declarations now describe the parsed object-based
   JavaScript facade instead of the internal JSON-string N-API layer, and cover
   the complete facade surface.
@@ -92,6 +87,16 @@ while pre-`1.0`.
   revision required by the patched C-FFI source, restoring reproducible
   release builds for contributors and CI.
 - Release version commits now include `package-lock.json`.
+
+## [0.1.0-beta.15]
+
+### Added
+- Expose the disk-backed native VLS signer needed for channel operation after
+  process restarts.
+
+### Changed
+- Build branch installs from the exact checksum-pinned native overlay instead
+  of downloading a stale release addon.
 
 ## [0.1.0-beta.8] — 2026-06-01
 

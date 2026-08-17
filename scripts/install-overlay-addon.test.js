@@ -14,10 +14,11 @@ const {
 test('package overlay metadata is exact and checksum-pinned', () => {
   const config = readConfig()
 
-  assert.equal(config.commit, '0bfa66fa256a6c36f3737d5b6402eacea40c68fc')
+  assert.equal(config.ref, 'v0.11.0-beta.3')
+  assert.equal(config.commit, 'f30a5393268de67c6bb5a1c525bc790c5b11afa2')
   assert.equal(
     config.patchSha256,
-    '90893cf5c1300699566bf4d8a01cb98184c96695215a3dbe9f12986f69246823'
+    'a765ad577bb0e0a88cd15136074357babffd61e2c3dffde624017a2a3cc8983d'
   )
   assert.equal(config.rustToolchain, '1.88.0')
 })
@@ -67,7 +68,7 @@ test('wrapper lockfile resolves the same hardened rgb-lib revision as the overla
   )
   assert.doesNotMatch(
     lockfile,
-    /git\+https:\/\/github\.com\/UTEXO-Protocol\/rgb-lib\.git\?tag=v0\.3\.0-beta\.27/
+    /git\+https:\/\/github\.com\/UTEXO-Protocol\/rgb-lib\.git\?tag=/
   )
 })
 

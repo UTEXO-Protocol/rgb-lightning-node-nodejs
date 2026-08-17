@@ -25,9 +25,12 @@ const node = SdkNode.create({
 })
 
 try {
-  for (const method of [
-    'rotateAddress',
-    'syncWallet',
+    for (const method of [
+      'rotateAddress',
+      'assetLinkCreate',
+      'listTransactions',
+      'listTransfers',
+      'syncWallet',
     'walletSnapshot',
     'prepareBtcSend',
     'commitPreparedBtcSend',
@@ -39,10 +42,10 @@ try {
     'listAddressReceipts',
     'prepareRgbSend',
     'commitPreparedRgbSend',
-    'cancelRgbSendPlan',
-    'listPendingRgbSendPlans',
-    'listTransactionsByTxid',
-    'listTransfersByTxid',
+      'cancelRgbSendPlan',
+      'listPendingRgbSendPlans',
+      'listTransactionsByTxid',
+      'listTransfersByTxid',
     'importRgbTransferConsignment',
     'importRgbContract',
     'verifyMessage'

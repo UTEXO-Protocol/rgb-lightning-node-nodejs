@@ -282,7 +282,7 @@ export interface WalletSnapshotAssetTransfers {
 
 export interface WalletSnapshotResponse {
   contract_version: 2
-  native_source: 'rgb-lightning-node-v0.10.0-beta.3+utexo-wallet-v2'
+  native_source: 'rgb-lightning-node-v0.11.0-beta.3+utexo-wallet-v3'
   capture_sequence: DecimalString
   capture_attempts: 2 | 3
   stable_capture_count: 2
@@ -374,6 +374,19 @@ export interface AddressReceipt {
   amount_sat: DecimalString
   confirmations: number
   block_height: number | null
+}
+
+export interface AssetLinkCreateRequest {
+  parent_asset_id: string
+  child_asset_id: string
+  min_confirmations: number
+}
+
+export interface AssetLinkRecord {
+  parent_asset_id: string
+  child_asset_id: string | null
+  created_at: number | null
+  txid: string | null
 }
 
 export class NativeExternalSigner {
@@ -480,6 +493,7 @@ export class SdkNode {
   issueAssetIfa(request: JsonRequest): JsonValue
   listAssets(filterAssetSchemas?: string[]): JsonValue
   assetBalance(assetId: string): JsonObject
+  assetLinkCreate(request: AssetLinkCreateRequest): AssetLinkRecord
   assetMetadata(assetId: string): JsonObject
 
   // RGB invoices / transfers
