@@ -10,6 +10,8 @@ while pre-`1.0`.
 ## [Unreleased]
 
 ### Added
+- `SdkNode.assetLinkCreate(request)` for the RLN v0.11 parent/child RGB
+  asset-link contract.
 - `SdkNode.verifyMessage(message, signature)` with canonical Lightning
   zbase32 verification, including locked external-signer nodes.
 - `rotateAddress()`, `listTransactionsByTxid()`, and
@@ -20,6 +22,9 @@ while pre-`1.0`.
   order documented by the native SDK release workflow.
 
 ### Changed
+- Updated the transaction and transfer query bindings for the consolidated
+  RLN v0.11 C-FFI filter signatures while retaining the existing JavaScript
+  convenience methods.
 - The published TypeScript declarations now describe the parsed object-based
   JavaScript facade instead of the internal JSON-string N-API layer, and cover
   the complete facade surface.

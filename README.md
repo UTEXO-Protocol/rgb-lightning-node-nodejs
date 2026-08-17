@@ -170,7 +170,7 @@ throw `napi::Error` on the C-FFI `Err` branch).
 | Payments | `sendPayment`, `keysend`, `listPayments`, `getPayment` |
 | Swaps | `makerInit`, `makerExecute`, `taker`, `listSwaps`, `getSwap` |
 | RGB issuance | `issueAssetNia`, `issueAssetUda`, `issueAssetCfa`, `issueAssetIfa` |
-| RGB assets | `listAssets`, `assetBalance`, `assetMetadata`, `sendRgb`, `inflate`, `listTransfers`, `listTransfersByTxid`, `refreshTransfers`, `failTransfers`, `getAssetMedia`, `postAssetMedia` |
+| RGB assets | `listAssets`, `assetBalance`, `assetLinkCreate`, `assetMetadata`, `sendRgb`, `inflate`, `listTransfers`, `listTransfersByTxid`, `refreshTransfers`, `failTransfers`, `getAssetMedia`, `postAssetMedia` |
 | BTC | `btcBalance`, `sendBtc`, `listTransactions`, `listTransactionsByTxid`, `listUnspents`, `createUtxos`, `estimateFee` |
 | VSS | `vssClearFence`, `vssBackup` |
 | APay | `apayNew` |

@@ -23,7 +23,7 @@ use napi_derive::napi;
 
 use rlncffi::{
     free_native_external_signer, free_sdk_node, rln_address, rln_asset_balance,
-    rln_asset_metadata, rln_btc_balance, rln_cancel_hodl_invoice,
+    rln_asset_link_create, rln_asset_metadata, rln_btc_balance, rln_cancel_hodl_invoice,
     rln_check_indexer_url, rln_check_proxy_endpoint, rln_claim_hodl_invoice,
     rln_close_channel, rln_connect_peer, rln_create_utxos,
     rln_decode_ln_invoice, rln_decode_rgb_invoice, rln_disconnect_peer,
@@ -32,8 +32,7 @@ use rlncffi::{
     rln_inflate, rln_invoice_status, rln_issue_asset_cfa, rln_issue_asset_ifa,
     rln_issue_asset_nia, rln_issue_asset_uda, rln_keysend, rln_list_assets,
     rln_list_channels, rln_list_payments, rln_list_peers, rln_list_swaps,
-    rln_list_transactions, rln_list_transactions_by_txid, rln_list_transfers,
-    rln_list_transfers_by_txid, rln_list_unspents,
+    rln_list_transactions, rln_list_transfers, rln_list_unspents,
     rln_ln_invoice, rln_maker_execute, rln_maker_init,
     rln_native_external_signer_bootstrap, rln_native_external_signer_new,
     rln_network_info, rln_node_info, rln_open_channel, rln_post_asset_media,
@@ -392,16 +391,14 @@ impl SdkNode {
     }
     #[napi]
     pub fn list_transactions(&self, skip_sync: bool) -> Result<String> {
-        let res = unsafe { rln_list_transactions(&self.handle, skip_sync) };
+        let res = unsafe { rln_list_transactions(&self.handle, skip_sync, std::ptr::null()) };
         take_cresult_string(res)
     }
 
     #[napi]
     pub fn list_transactions_by_txid(&self, txid: String, skip_sync: bool) -> Result<String> {
         let txid_c = cstring(&txid)?;
-        let res = unsafe {
-            rln_list_transactions_by_txid(&self.handle, txid_c.as_ptr(), skip_sync)
-        };
+        let res = unsafe { rln_list_transactions(&self.handle, skip_sync, txid_c.as_ptr()) };
         take_cresult_string(res)
     }
     /// `blocks` ∈ [1..=65535]; returned JSON has `fee_rate` in sat/vB.
@@ -491,6 +488,10 @@ impl SdkNode {
         fwd_str_arg!(self, rln_asset_balance, asset_id)
     }
     #[napi]
+    pub fn asset_link_create(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_asset_link_create, request_json)
+    }
+    #[napi]
     pub fn asset_metadata(&self, asset_id: String) -> Result<String> {
         fwd_str_arg!(self, rln_asset_metadata, asset_id)
     }
@@ -524,11 +525,19 @@ impl SdkNode {
     }
     #[napi]
     pub fn list_transfers(&self, asset_id: String) -> Result<String> {
-        fwd_str_arg!(self, rln_list_transfers, asset_id)
+        let asset_id_c = cstring(&asset_id)?;
+        let res = unsafe {
+            rln_list_transfers(&self.handle, asset_id_c.as_ptr(), std::ptr::null())
+        };
+        take_cresult_string(res)
     }
     #[napi]
     pub fn list_transfers_by_txid(&self, txid: String) -> Result<String> {
-        fwd_str_arg!(self, rln_list_transfers_by_txid, txid)
+        let txid_c = cstring(&txid)?;
+        let res = unsafe {
+            rln_list_transfers(&self.handle, std::ptr::null(), txid_c.as_ptr())
+        };
+        take_cresult_string(res)
     }
 
     // -- Asset media ------------------------------------------------------

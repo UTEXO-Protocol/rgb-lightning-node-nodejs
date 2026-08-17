@@ -21,7 +21,10 @@ const node = SdkNode.create({
 try {
   for (const method of [
     'rotateAddress',
+    'assetLinkCreate',
+    'listTransactions',
     'listTransactionsByTxid',
+    'listTransfers',
     'listTransfersByTxid',
     'verifyMessage'
   ]) {

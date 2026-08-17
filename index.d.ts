@@ -9,6 +9,19 @@ export type JsonValue = JsonPrimitive | JsonObject | JsonValue[]
 export interface JsonObject { [key: string]: JsonValue }
 export type JsonRequest = Record<string, unknown>
 
+export interface AssetLinkCreateRequest {
+  parent_asset_id: string
+  child_asset_id: string
+  min_confirmations: number
+}
+
+export interface AssetLinkRecord {
+  parent_asset_id: string
+  child_asset_id: string | null
+  created_at: number | null
+  txid: string | null
+}
+
 export class NativeExternalSigner {
   static create(
     seedHex: string,
@@ -88,6 +101,7 @@ export class SdkNode {
   issueAssetIfa(request: JsonRequest): JsonValue
   listAssets(filterAssetSchemas?: string[]): JsonValue
   assetBalance(assetId: string): JsonObject
+  assetLinkCreate(request: AssetLinkCreateRequest): AssetLinkRecord
   assetMetadata(assetId: string): JsonObject
 
   // RGB invoices / transfers
