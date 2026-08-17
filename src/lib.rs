@@ -23,33 +23,33 @@ use napi_derive::napi;
 
 use rlncffi::{
     free_native_external_signer, free_sdk_node, rln_address, rln_asset_balance,
-    rln_asset_link_create, rln_asset_metadata, rln_btc_balance, rln_cancel_hodl_invoice,
-    rln_check_indexer_url, rln_check_proxy_endpoint, rln_claim_hodl_invoice,
-    rln_close_channel, rln_connect_peer, rln_create_utxos,
-    rln_decode_ln_invoice, rln_decode_rgb_invoice, rln_disconnect_peer,
-    rln_estimate_fee, rln_fail_transfers, rln_free_string,
+    rln_asset_link_create, rln_asset_metadata, rln_btc_balance, rln_cancel_btc_send_plan,
+    rln_cancel_create_utxos_plan, rln_cancel_hodl_invoice, rln_cancel_rgb_send_plan,
+    rln_check_indexer_url, rln_check_proxy_endpoint, rln_claim_hodl_invoice, rln_close_channel,
+    rln_commit_prepared_btc_send, rln_commit_prepared_create_utxos, rln_commit_prepared_rgb_send,
+    rln_connect_peer, rln_create_utxos, rln_decode_ln_invoice, rln_decode_rgb_invoice,
+    rln_disconnect_peer, rln_estimate_fee, rln_fail_transfers, rln_free_string,
     rln_get_asset_media, rln_get_channel_id, rln_get_payment, rln_get_swap,
-    rln_inflate, rln_invoice_status, rln_issue_asset_cfa, rln_issue_asset_ifa,
-    rln_issue_asset_nia, rln_issue_asset_uda, rln_keysend, rln_list_assets,
-    rln_list_channels, rln_list_payments, rln_list_peers, rln_list_swaps,
-    rln_list_transactions, rln_list_transfers, rln_list_unspents,
-    rln_ln_invoice, rln_maker_execute, rln_maker_init,
-    rln_native_external_signer_bootstrap, rln_native_external_signer_new,
-    rln_network_info, rln_node_info, rln_open_channel, rln_post_asset_media,
-    rln_refresh_transfers, rln_rgb_invoice, rln_rotate_address,
-    rln_sdk_node_attach_native_external_signer,
-    rln_sdk_node_detach_external_signer,
-    rln_sdk_node_init_with_external_signer,
-    rln_sdk_node_init_with_native_external_signer, rln_sdk_node_new,
-    rln_sdk_node_apay_new,
-    rln_sdk_node_shutdown,
-    rln_sdk_node_vss_clear_fence,
-    rln_sdk_node_vss_backup,
+    rln_import_rgb_contract, rln_import_rgb_transfer_consignment, rln_inflate, rln_invoice_status,
+    rln_issue_asset_cfa, rln_issue_asset_ifa, rln_issue_asset_nia, rln_issue_asset_uda,
+    rln_keysend, rln_list_address_receipts, rln_list_assets, rln_list_channels, rln_list_payments,
+    rln_list_peers, rln_list_pending_rgb_send_plans, rln_list_pending_vanilla_transactions,
+    rln_list_swaps, rln_list_transactions, rln_list_transfers, rln_list_unspents, rln_ln_invoice,
+    rln_maker_execute, rln_maker_init, rln_native_external_signer_bootstrap,
+    rln_native_external_signer_new, rln_native_external_signer_new_with_storage, rln_network_info,
+    rln_node_info, rln_open_channel, rln_post_asset_media, rln_prepare_btc_send,
+    rln_prepare_create_utxos, rln_prepare_rgb_send, rln_refresh_transfers, rln_rgb_invoice,
+    rln_rotate_address, rln_sdk_node_adopt_native_operation, rln_sdk_node_apay_new,
+    rln_sdk_node_attach_native_external_signer, rln_sdk_node_cancel_native_operation,
+    rln_sdk_node_detach_external_signer, rln_sdk_node_init_with_external_signer,
+    rln_sdk_node_init_with_native_external_signer, rln_sdk_node_native_operation_status,
+    rln_sdk_node_new, rln_sdk_node_shutdown, rln_sdk_node_start_unlock_with_native_external_signer,
     rln_sdk_node_unlock_with_attached_external_signer,
-    rln_sdk_node_unlock_with_native_external_signer, rln_send_btc,
-    rln_send_onion_message, rln_send_payment, rln_send_rgb, rln_sign_message,
-    rln_verify_message,
-    rln_sync, rln_taker, COpaqueStruct, CResultString, CResultValue,
+    rln_sdk_node_unlock_with_native_external_signer, rln_sdk_node_vss_backup,
+    rln_sdk_node_vss_clear_fence, rln_sdk_node_vss_delete_all, rln_send_btc,
+    rln_send_onion_message, rln_send_payment, rln_send_rgb, rln_sign_message, rln_sync,
+    rln_sync_wallet, rln_taker, rln_verify_message, rln_wallet_snapshot, COpaqueStruct,
+    CResultString, CResultValue,
 };
 
 // ---------------------------------------------------------------------------
@@ -94,12 +94,7 @@ pub struct NativeExternalSigner {
 
 impl Drop for NativeExternalSigner {
     fn drop(&mut self) {
-        unsafe {
-            free_native_external_signer(std::mem::replace(
-                &mut self.handle,
-                COpaqueStruct::null(),
-            ));
-        }
+        free_native_external_signer(std::mem::replace(&mut self.handle, COpaqueStruct::null()));
     }
 }
 
@@ -115,9 +110,11 @@ impl NativeExternalSigner {
     ) -> Result<Self> {
         let seed_c = cstring(&seed_hex)?;
         let net_c = cstring(&network)?;
-        let res = unsafe {
-            rln_native_external_signer_new(seed_c.as_ptr(), net_c.as_ptr(), permissive_signer_policy)
-        };
+        let res = rln_native_external_signer_new(
+            seed_c.as_ptr(),
+            net_c.as_ptr(),
+            permissive_signer_policy,
+        );
         match res.result {
             CResultValue::Ok => Ok(Self { handle: res.inner }),
             CResultValue::Err => {
@@ -133,11 +130,44 @@ impl NativeExternalSigner {
         }
     }
 
+    /// Production constructor for a disk-backed VLS signer. The storage
+    /// directory must be stable for the wallet identity so commitment state
+    /// survives process restarts.
+    #[napi(factory)]
+    pub fn create_with_storage(
+        seed_hex: String,
+        network: String,
+        storage_dir_path: String,
+        permissive_signer_policy: bool,
+    ) -> Result<Self> {
+        let seed_c = cstring(&seed_hex)?;
+        let net_c = cstring(&network)?;
+        let storage_c = cstring(&storage_dir_path)?;
+        let res = rln_native_external_signer_new_with_storage(
+            seed_c.as_ptr(),
+            net_c.as_ptr(),
+            permissive_signer_policy,
+            storage_c.as_ptr(),
+        );
+        match res.result {
+            CResultValue::Ok => Ok(Self { handle: res.inner }),
+            CResultValue::Err => {
+                let msg = unsafe {
+                    let p = res.inner.as_err_string_ptr();
+                    let s = CStr::from_ptr(p).to_string_lossy().into_owned();
+                    rln_free_string(p);
+                    s
+                };
+                Err(NapiError::from_reason(msg))
+            }
+        }
+    }
+
     /// Returns the bootstrap dictionary (node_id, xpubs, master fingerprint)
     /// as a JSON string. JS callers `JSON.parse` it.
     #[napi]
     pub fn bootstrap(&self) -> Result<String> {
-        let res = unsafe { rln_native_external_signer_bootstrap(&self.handle) };
+        let res = rln_native_external_signer_bootstrap(&self.handle);
         take_cresult_string(res)
     }
 
@@ -145,12 +175,7 @@ impl NativeExternalSigner {
     /// for tests — Rust's `Drop` impl handles normal cleanup.
     #[napi]
     pub fn destroy(&mut self) {
-        unsafe {
-            free_native_external_signer(std::mem::replace(
-                &mut self.handle,
-                COpaqueStruct::null(),
-            ));
-        }
+        free_native_external_signer(std::mem::replace(&mut self.handle, COpaqueStruct::null()));
     }
 }
 
@@ -165,9 +190,7 @@ pub struct SdkNode {
 
 impl Drop for SdkNode {
     fn drop(&mut self) {
-        unsafe {
-            free_sdk_node(std::mem::replace(&mut self.handle, COpaqueStruct::null()));
-        }
+        free_sdk_node(std::mem::replace(&mut self.handle, COpaqueStruct::null()));
     }
 }
 
@@ -176,7 +199,7 @@ impl Drop for SdkNode {
 macro_rules! fwd_json_req {
     ($self:ident, $func:ident, $req:ident) => {{
         let req_c = cstring(&$req)?;
-        let res = unsafe { $func(&$self.handle, req_c.as_ptr()) };
+        let res = $func(&$self.handle, req_c.as_ptr());
         take_cresult_string(res)
     }};
 }
@@ -184,7 +207,7 @@ macro_rules! fwd_json_req {
 /// `fn(&COpaqueStruct) -> CResultString` — no request argument.
 macro_rules! fwd_noarg {
     ($self:ident, $func:ident) => {{
-        let res = unsafe { $func(&$self.handle) };
+        let res = $func(&$self.handle);
         take_cresult_string(res)
     }};
 }
@@ -196,7 +219,7 @@ macro_rules! fwd_noarg {
 macro_rules! fwd_str_arg {
     ($self:ident, $func:ident, $arg:ident) => {{
         let arg_c = cstring(&$arg)?;
-        let res = unsafe { $func(&$self.handle, arg_c.as_ptr()) };
+        let res = $func(&$self.handle, arg_c.as_ptr());
         take_cresult_string(res)
     }};
 }
@@ -208,7 +231,7 @@ impl SdkNode {
     #[napi(factory)]
     pub fn create(request_json: String) -> Result<Self> {
         let req_c = cstring(&request_json)?;
-        let res = unsafe { rln_sdk_node_new(req_c.as_ptr()) };
+        let res = rln_sdk_node_new(req_c.as_ptr());
         match res.result {
             CResultValue::Ok => Ok(Self { handle: res.inner }),
             CResultValue::Err => {
@@ -227,9 +250,7 @@ impl SdkNode {
 
     #[napi]
     pub fn init_with_native_external_signer(&self, signer: &NativeExternalSigner) -> Result<()> {
-        let res = unsafe {
-            rln_sdk_node_init_with_native_external_signer(&self.handle, &signer.handle)
-        };
+        let res = rln_sdk_node_init_with_native_external_signer(&self.handle, &signer.handle);
         take_cresult_string(res).map(|_| ())
     }
 
@@ -240,50 +261,87 @@ impl SdkNode {
         request_json: String,
     ) -> Result<()> {
         let req_c = cstring(&request_json)?;
-        let res = unsafe {
-            rln_sdk_node_unlock_with_native_external_signer(
-                &self.handle,
-                &signer.handle,
-                req_c.as_ptr(),
-            )
-        };
+        let res = rln_sdk_node_unlock_with_native_external_signer(
+            &self.handle,
+            &signer.handle,
+            req_c.as_ptr(),
+        );
         take_cresult_string(res).map(|_| ())
+    }
+
+    #[napi]
+    pub fn start_unlock_with_native_external_signer(
+        &self,
+        signer: &NativeExternalSigner,
+        request_json: String,
+    ) -> Result<String> {
+        let req_c = cstring(&request_json)?;
+        take_cresult_string(rln_sdk_node_start_unlock_with_native_external_signer(
+            &self.handle,
+            &signer.handle,
+            req_c.as_ptr(),
+        ))
+    }
+
+    #[napi]
+    pub fn native_operation_status(&self, operation_id: String) -> Result<String> {
+        let operation_id = cstring(&operation_id)?;
+        take_cresult_string(rln_sdk_node_native_operation_status(
+            &self.handle,
+            operation_id.as_ptr(),
+        ))
+    }
+
+    #[napi]
+    pub fn adopt_native_operation(&self, operation_id: String) -> Result<String> {
+        let operation_id = cstring(&operation_id)?;
+        take_cresult_string(rln_sdk_node_adopt_native_operation(
+            &self.handle,
+            operation_id.as_ptr(),
+        ))
+    }
+
+    #[napi]
+    pub fn cancel_native_operation(&self, operation_id: String) -> Result<String> {
+        let operation_id = cstring(&operation_id)?;
+        take_cresult_string(rln_sdk_node_cancel_native_operation(
+            &self.handle,
+            operation_id.as_ptr(),
+        ))
     }
 
     #[napi]
     pub fn init_with_external_signer(&self, request_json: String) -> Result<()> {
         let req_c = cstring(&request_json)?;
-        let res = unsafe { rln_sdk_node_init_with_external_signer(&self.handle, req_c.as_ptr()) };
+        let res = rln_sdk_node_init_with_external_signer(&self.handle, req_c.as_ptr());
         take_cresult_string(res).map(|_| ())
     }
 
     #[napi]
     pub fn attach_native_external_signer(&self, signer: &NativeExternalSigner) -> Result<()> {
-        let res = unsafe {
-            rln_sdk_node_attach_native_external_signer(&self.handle, &signer.handle)
-        };
+        let res = rln_sdk_node_attach_native_external_signer(&self.handle, &signer.handle);
         take_cresult_string(res).map(|_| ())
     }
 
     #[napi]
     pub fn unlock_with_attached_external_signer(&self, request_json: String) -> Result<()> {
         let req_c = cstring(&request_json)?;
-        let res = unsafe {
-            rln_sdk_node_unlock_with_attached_external_signer(&self.handle, req_c.as_ptr())
-        };
+        let res = rln_sdk_node_unlock_with_attached_external_signer(&self.handle, req_c.as_ptr());
         take_cresult_string(res).map(|_| ())
     }
 
     #[napi]
     pub fn detach_external_signer(&self) -> Result<()> {
-        let res = unsafe { rln_sdk_node_detach_external_signer(&self.handle) };
+        let res = rln_sdk_node_detach_external_signer(&self.handle);
         take_cresult_string(res).map(|_| ())
     }
 
     #[napi]
-    pub fn shutdown(&self) -> Result<()> {
-        let res = unsafe { rln_sdk_node_shutdown(&self.handle) };
-        take_cresult_string(res).map(|_| ())
+    pub fn shutdown(&mut self) -> Result<()> {
+        let res = rln_sdk_node_shutdown(&self.handle);
+        let result = take_cresult_string(res).map(|_| ());
+        free_sdk_node(std::mem::replace(&mut self.handle, COpaqueStruct::null()));
+        result
     }
 
     /// Take over a stale VSS ownership fence after the previous node died
@@ -293,7 +351,7 @@ impl SdkNode {
     pub fn vss_clear_fence(&self, request_json: String) -> Result<()> {
         let c = std::ffi::CString::new(request_json)
             .map_err(|_| napi::Error::from_reason("request contains null byte"))?;
-        let res = unsafe { rln_sdk_node_vss_clear_fence(&self.handle, c.as_ptr()) };
+        let res = rln_sdk_node_vss_clear_fence(&self.handle, c.as_ptr());
         take_cresult_string(res).map(|_| ())
     }
 
@@ -304,8 +362,16 @@ impl SdkNode {
     /// suspend) rather than relying on the implicit on-write flush.
     #[napi]
     pub fn vss_backup(&self) -> Result<String> {
-        let res = unsafe { rln_sdk_node_vss_backup(&self.handle) };
+        let res = rln_sdk_node_vss_backup(&self.handle);
         take_cresult_string(res)
+    }
+
+    #[napi]
+    pub fn vss_delete_all(&self, request_json: String) -> Result<String> {
+        let request = std::ffi::CString::new(request_json)
+            .map_err(|_| napi::Error::from_reason("request contains null byte"))?;
+        let result = rln_sdk_node_vss_delete_all(&self.handle, request.as_ptr());
+        take_cresult_string(result)
     }
 
     /// APay receiver-side registration with an LSP. Pass the LSP's node_id
@@ -315,18 +381,38 @@ impl SdkNode {
     pub fn apay_new(&self, host_node_id: String) -> Result<String> {
         let c = std::ffi::CString::new(host_node_id)
             .map_err(|_| napi::Error::from_reason("host_node_id contains null byte"))?;
-        let res = unsafe { rln_sdk_node_apay_new(&self.handle, c.as_ptr()) };
+        let res = rln_sdk_node_apay_new(&self.handle, c.as_ptr());
         take_cresult_string(res)
     }
 
     // -- Node info / sync --------------------------------------------------
 
     #[napi]
-    pub fn node_info(&self) -> Result<String> { fwd_noarg!(self, rln_node_info) }
+    pub fn node_info(&self) -> Result<String> {
+        fwd_noarg!(self, rln_node_info)
+    }
     #[napi]
-    pub fn network_info(&self) -> Result<String> { fwd_noarg!(self, rln_network_info) }
+    pub fn network_info(&self) -> Result<String> {
+        fwd_noarg!(self, rln_network_info)
+    }
     #[napi]
-    pub fn sync(&self) -> Result<String> { fwd_noarg!(self, rln_sync) }
+    pub fn sync(&self) -> Result<String> {
+        fwd_noarg!(self, rln_sync)
+    }
+
+    /// Synchronize both Vanilla BTC and Colored RGB keychains. Routine mode
+    /// uses FullSync; recovery mode uses FullScan for address discovery.
+    #[napi]
+    pub fn sync_wallet(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_sync_wallet, request_json)
+    }
+
+    /// Capture a versioned, bounded, decimal-safe wallet snapshot from the
+    /// native runtime without triggering an implicit synchronization.
+    #[napi]
+    pub fn wallet_snapshot(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_wallet_snapshot, request_json)
+    }
 
     // -- Peers / channels --------------------------------------------------
 
@@ -339,7 +425,9 @@ impl SdkNode {
         fwd_json_req!(self, rln_disconnect_peer, request_json)
     }
     #[napi]
-    pub fn list_peers(&self) -> Result<String> { fwd_noarg!(self, rln_list_peers) }
+    pub fn list_peers(&self) -> Result<String> {
+        fwd_noarg!(self, rln_list_peers)
+    }
 
     #[napi]
     pub fn open_channel(&self, request_json: String) -> Result<String> {
@@ -350,7 +438,9 @@ impl SdkNode {
         fwd_json_req!(self, rln_close_channel, request_json)
     }
     #[napi]
-    pub fn list_channels(&self) -> Result<String> { fwd_noarg!(self, rln_list_channels) }
+    pub fn list_channels(&self) -> Result<String> {
+        fwd_noarg!(self, rln_list_channels)
+    }
     /// `temporaryChannelIdHex` is the 64-char hex temp id returned by
     /// `openChannel`; this resolves it to the permanent channel id once
     /// the funding tx confirms.
@@ -362,22 +452,26 @@ impl SdkNode {
     // -- BTC + UTXOs ------------------------------------------------------
 
     #[napi]
-    pub fn get_address(&self) -> Result<String> { fwd_noarg!(self, rln_address) }
+    pub fn get_address(&self) -> Result<String> {
+        fwd_noarg!(self, rln_address)
+    }
 
     #[napi]
-    pub fn rotate_address(&self) -> Result<String> { fwd_noarg!(self, rln_rotate_address) }
+    pub fn rotate_address(&self) -> Result<String> {
+        fwd_noarg!(self, rln_rotate_address)
+    }
 
     /// `skipSync` mirrors the C-FFI `skip_sync` bool — `true` returns
     /// the cached balance without re-scanning electrum.
     #[napi]
     pub fn get_btc_balance(&self, skip_sync: bool) -> Result<String> {
-        let res = unsafe { rln_btc_balance(&self.handle, skip_sync) };
+        let res = rln_btc_balance(&self.handle, skip_sync);
         take_cresult_string(res)
     }
 
     #[napi]
     pub fn list_unspents(&self, skip_sync: bool) -> Result<String> {
-        let res = unsafe { rln_list_unspents(&self.handle, skip_sync) };
+        let res = rln_list_unspents(&self.handle, skip_sync);
         take_cresult_string(res)
     }
 
@@ -385,20 +479,63 @@ impl SdkNode {
     pub fn send_btc(&self, request_json: String) -> Result<String> {
         fwd_json_req!(self, rln_send_btc, request_json)
     }
+
+    #[napi]
+    pub fn prepare_btc_send(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_prepare_btc_send, request_json)
+    }
+
+    #[napi]
+    pub fn commit_prepared_btc_send(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_commit_prepared_btc_send, request_json)
+    }
+
+    #[napi]
+    pub fn cancel_btc_send_plan(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_cancel_btc_send_plan, request_json)
+    }
+
+    #[napi]
+    pub fn prepare_create_utxos(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_prepare_create_utxos, request_json)
+    }
+
+    #[napi]
+    pub fn commit_prepared_create_utxos(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_commit_prepared_create_utxos, request_json)
+    }
+
+    #[napi]
+    pub fn cancel_create_utxos_plan(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_cancel_create_utxos_plan, request_json)
+    }
+
+    #[napi]
+    pub fn list_pending_vanilla_transactions(&self) -> Result<String> {
+        fwd_noarg!(self, rln_list_pending_vanilla_transactions)
+    }
+
+    #[napi]
+    pub fn list_address_receipts(&self, address: String) -> Result<String> {
+        let address_c = cstring(&address)?;
+        let res = rln_list_address_receipts(&self.handle, address_c.as_ptr());
+        take_cresult_string(res)
+    }
+
     #[napi]
     pub fn create_utxos(&self, request_json: String) -> Result<String> {
         fwd_json_req!(self, rln_create_utxos, request_json)
     }
     #[napi]
     pub fn list_transactions(&self, skip_sync: bool) -> Result<String> {
-        let res = unsafe { rln_list_transactions(&self.handle, skip_sync, std::ptr::null()) };
+        let res = rln_list_transactions(&self.handle, skip_sync, std::ptr::null());
         take_cresult_string(res)
     }
 
     #[napi]
     pub fn list_transactions_by_txid(&self, txid: String, skip_sync: bool) -> Result<String> {
         let txid_c = cstring(&txid)?;
-        let res = unsafe { rln_list_transactions(&self.handle, skip_sync, txid_c.as_ptr()) };
+        let res = rln_list_transactions(&self.handle, skip_sync, txid_c.as_ptr());
         take_cresult_string(res)
     }
     /// `blocks` ∈ [1..=65535]; returned JSON has `fee_rate` in sat/vB.
@@ -407,7 +544,7 @@ impl SdkNode {
         let blocks_u16 = u16::try_from(blocks).map_err(|_| {
             NapiError::from_reason("estimateFee: blocks must fit in u16 (1..=65535)")
         })?;
-        let res = unsafe { rln_estimate_fee(&self.handle, blocks_u16) };
+        let res = rln_estimate_fee(&self.handle, blocks_u16);
         take_cresult_string(res)
     }
 
@@ -443,17 +580,15 @@ impl SdkNode {
         fwd_json_req!(self, rln_keysend, request_json)
     }
     #[napi]
-    pub fn list_payments(&self) -> Result<String> { fwd_noarg!(self, rln_list_payments) }
+    pub fn list_payments(&self) -> Result<String> {
+        fwd_noarg!(self, rln_list_payments)
+    }
     /// `paymentType` is one of `"sent"` / `"received"` / `"swap"`.
     #[napi]
-    pub fn get_payment(
-        &self,
-        payment_hash_hex: String,
-        payment_type: String,
-    ) -> Result<String> {
+    pub fn get_payment(&self, payment_hash_hex: String, payment_type: String) -> Result<String> {
         let hash_c = cstring(&payment_hash_hex)?;
         let type_c = cstring(&payment_type)?;
-        let res = unsafe { rln_get_payment(&self.handle, hash_c.as_ptr(), type_c.as_ptr()) };
+        let res = rln_get_payment(&self.handle, hash_c.as_ptr(), type_c.as_ptr());
         take_cresult_string(res)
     }
 
@@ -507,12 +642,42 @@ impl SdkNode {
     pub fn send_rgb(&self, request_json: String) -> Result<String> {
         fwd_json_req!(self, rln_send_rgb, request_json)
     }
+
+    #[napi]
+    pub fn import_rgb_transfer_consignment(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_import_rgb_transfer_consignment, request_json)
+    }
+
+    #[napi]
+    pub fn import_rgb_contract(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_import_rgb_contract, request_json)
+    }
+
+    #[napi]
+    pub fn prepare_rgb_send(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_prepare_rgb_send, request_json)
+    }
+
+    #[napi]
+    pub fn commit_prepared_rgb_send(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_commit_prepared_rgb_send, request_json)
+    }
+
+    #[napi]
+    pub fn cancel_rgb_send_plan(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_cancel_rgb_send_plan, request_json)
+    }
+
+    #[napi]
+    pub fn list_pending_rgb_send_plans(&self) -> Result<String> {
+        fwd_noarg!(self, rln_list_pending_rgb_send_plans)
+    }
     /// Forces an electrum re-scan + rgb-lib reconciliation. Returns
     /// nothing — callers re-poll `get_asset_balance` afterwards.
     #[napi]
     pub fn refresh_transfers(&self, request_json: String) -> Result<()> {
         let req_c = cstring(&request_json)?;
-        let res = unsafe { rln_refresh_transfers(&self.handle, req_c.as_ptr()) };
+        let res = rln_refresh_transfers(&self.handle, req_c.as_ptr());
         take_cresult_string(res).map(|_| ())
     }
     #[napi]
@@ -526,17 +691,13 @@ impl SdkNode {
     #[napi]
     pub fn list_transfers(&self, asset_id: String) -> Result<String> {
         let asset_id_c = cstring(&asset_id)?;
-        let res = unsafe {
-            rln_list_transfers(&self.handle, asset_id_c.as_ptr(), std::ptr::null())
-        };
+        let res = rln_list_transfers(&self.handle, asset_id_c.as_ptr(), std::ptr::null());
         take_cresult_string(res)
     }
     #[napi]
     pub fn list_transfers_by_txid(&self, txid: String) -> Result<String> {
         let txid_c = cstring(&txid)?;
-        let res = unsafe {
-            rln_list_transfers(&self.handle, std::ptr::null(), txid_c.as_ptr())
-        };
+        let res = rln_list_transfers(&self.handle, std::ptr::null(), txid_c.as_ptr());
         take_cresult_string(res)
     }
 
@@ -562,9 +723,7 @@ impl SdkNode {
     pub fn verify_message(&self, message: String, signature: String) -> Result<String> {
         let message_c = cstring(&message)?;
         let signature_c = cstring(&signature)?;
-        let res = unsafe {
-            rln_verify_message(&self.handle, message_c.as_ptr(), signature_c.as_ptr())
-        };
+        let res = rln_verify_message(&self.handle, message_c.as_ptr(), signature_c.as_ptr());
         take_cresult_string(res)
     }
     #[napi]
@@ -595,11 +754,13 @@ impl SdkNode {
         fwd_json_req!(self, rln_taker, request_json)
     }
     #[napi]
-    pub fn list_swaps(&self) -> Result<String> { fwd_noarg!(self, rln_list_swaps) }
+    pub fn list_swaps(&self) -> Result<String> {
+        fwd_noarg!(self, rln_list_swaps)
+    }
     #[napi]
     pub fn get_swap(&self, payment_hash: String, taker_flag: bool) -> Result<String> {
         let hash_c = cstring(&payment_hash)?;
-        let res = unsafe { rln_get_swap(&self.handle, hash_c.as_ptr(), taker_flag) };
+        let res = rln_get_swap(&self.handle, hash_c.as_ptr(), taker_flag);
         take_cresult_string(res)
     }
 }

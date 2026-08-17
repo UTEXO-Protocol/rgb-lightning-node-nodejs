@@ -1,0 +1,950 @@
+diff --git a/bindings/c-ffi/rln.h b/bindings/c-ffi/rln.h
+index eb7e572..17acb5f 100644
+--- a/bindings/c-ffi/rln.h
++++ b/bindings/c-ffi/rln.h
+@@ -237,6 +237,8 @@ struct CResultString rln_sign_message(const struct COpaqueStruct *node, const ch
+ 
+ struct CResultString rln_sync(const struct COpaqueStruct *node);
+ 
++struct CResultString rln_sync_wallet(const struct COpaqueStruct *node, const char *request_json);
++
+ struct CResultString rln_taker(const struct COpaqueStruct *node, const char *request_json);
+ 
+ struct CResultString rln_uniffi_healthcheck(void);
+@@ -246,3 +248,6 @@ struct CResultString rln_uniffi_is_initialized(void);
+ struct CResultString rln_verify_message(const struct COpaqueStruct *node,
+                                         const char *message,
+                                         const char *signature);
++
++struct CResultString rln_wallet_snapshot(const struct COpaqueStruct *node,
++                                         const char *request_json);
+diff --git a/bindings/c-ffi/rln.hpp b/bindings/c-ffi/rln.hpp
+index 64266ec..82c1bd9 100644
+--- a/bindings/c-ffi/rln.hpp
++++ b/bindings/c-ffi/rln.hpp
+@@ -211,6 +211,8 @@ CResultString rln_sign_message(const COpaqueStruct *node, const char *message);
+ 
+ CResultString rln_sync(const COpaqueStruct *node);
+ 
++CResultString rln_sync_wallet(const COpaqueStruct *node, const char *request_json);
++
+ CResultString rln_taker(const COpaqueStruct *node, const char *request_json);
+ 
+ CResultString rln_uniffi_healthcheck();
+@@ -221,4 +223,6 @@ CResultString rln_verify_message(const COpaqueStruct *node,
+                                  const char *message,
+                                  const char *signature);
+ 
++CResultString rln_wallet_snapshot(const COpaqueStruct *node, const char *request_json);
++
+ }  // extern "C"
+diff --git a/bindings/c-ffi/src/api.rs b/bindings/c-ffi/src/api.rs
+index edb35ed..464ee46 100644
+--- a/bindings/c-ffi/src/api.rs
++++ b/bindings/c-ffi/src/api.rs
+@@ -3,9 +3,12 @@
+ //! zero or more JSON request strings, do the conversion to UniFFI types,
+ //! dispatch to [`SdkNode`], and serialize the response back to JSON.
+ 
++use std::collections::HashSet;
+ use std::ffi::c_char;
+ use std::str::FromStr;
++use std::sync::atomic::{AtomicU64, Ordering};
+ use std::sync::Arc;
++use std::time::{SystemTime, UNIX_EPOCH};
+ 
+ use hex::DisplayHex;
+ use hex::FromHex;
+@@ -16,6 +19,11 @@ use crate::json_types::*;
+ use crate::utils::{convert_optional_string, ptr_to_string, require_handle, require_signer, Error};
+ use crate::COpaqueStruct;
+ 
++const MAX_WALLET_SNAPSHOT_ASSETS: usize = 128;
++const MAX_WALLET_SNAPSHOT_CHANNELS: usize = 512;
++const MAX_WALLET_SNAPSHOT_ACTIVITY_ITEMS: usize = 5_000;
++static WALLET_SNAPSHOT_SEQUENCE: AtomicU64 = AtomicU64::new(0);
++
+ // ---------------------------------------------------------------------------
+ // String-parse helpers
+ // ---------------------------------------------------------------------------
+@@ -60,6 +68,38 @@ fn json<T: serde::Serialize>(t: T) -> Result<String, Error> {
+     Ok(serde_json::to_string(&t)?)
+ }
+ 
++fn unix_time_ms() -> Result<u64, Error> {
++    let millis = SystemTime::now()
++        .duration_since(UNIX_EPOCH)
++        .map_err(|_| Error::StringParse("system clock is before Unix epoch".to_string()))?
++        .as_millis();
++    u64::try_from(millis)
++        .map_err(|_| Error::StringParse("system clock exceeds u64 milliseconds".to_string()))
++}
++
++fn next_wallet_snapshot_sequence() -> Result<u64, Error> {
++    WALLET_SNAPSHOT_SEQUENCE
++        .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |current| {
++            current.checked_add(1)
++        })
++        .map(|previous| previous + 1)
++        .map_err(|_| Error::StringParse("wallet snapshot sequence exhausted".to_string()))
++}
++
++fn validate_snapshot_limit(
++    name: &str,
++    requested: u16,
++    maximum: usize,
++) -> Result<usize, Error> {
++    let requested = usize::from(requested);
++    if requested == 0 || requested > maximum {
++        return Err(Error::StringParse(format!(
++            "{name} must be between 1 and {maximum}"
++        )));
++    }
++    Ok(requested)
++}
++
+ // ---------------------------------------------------------------------------
+ // Lifecycle
+ // ---------------------------------------------------------------------------
+@@ -610,6 +650,139 @@ pub(crate) fn sync(node: &COpaqueStruct) -> Result<String, Error> {
+     ok_void()
+ }
+ 
++pub(crate) fn sync_wallet(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> Result<String, Error> {
++    let node = require_handle(node)?;
++    let request: JsonSyncWalletRequest = parse_req(request_json)?;
++    let response = node.sync_wallet(request.mode.into())?;
++    json(JsonWalletSyncResponse::from(response))
++}
++
++pub(crate) fn wallet_snapshot(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> Result<String, Error> {
++    let node = require_handle(node)?;
++    let request: JsonWalletSnapshotRequest = parse_req(request_json)?;
++    let max_assets = validate_snapshot_limit(
++        "max_assets",
++        request.max_assets,
++        MAX_WALLET_SNAPSHOT_ASSETS,
++    )?;
++    let max_channels = validate_snapshot_limit(
++        "max_channels",
++        request.max_channels,
++        MAX_WALLET_SNAPSHOT_CHANNELS,
++    )?;
++    let max_activity_items = validate_snapshot_limit(
++        "max_activity_items",
++        request.max_activity_items,
++        MAX_WALLET_SNAPSHOT_ACTIVITY_ITEMS,
++    )?;
++    if request.asset_ids.len() > max_assets {
++        return Err(Error::StringParse(format!(
++            "asset_ids contains {} entries, exceeding max_assets {max_assets}",
++            request.asset_ids.len()
++        )));
++    }
++    let unique_asset_ids = request.asset_ids.iter().collect::<HashSet<_>>();
++    if unique_asset_ids.len() != request.asset_ids.len() {
++        return Err(Error::StringParse(
++            "asset_ids must not contain duplicates".to_string(),
++        ));
++    }
++    for asset_id in &request.asset_ids {
++        parse_contract_id(asset_id)?;
++    }
++
++    let started_at_ms = unix_time_ms()?;
++    let capture_sequence = next_wallet_snapshot_sequence()?;
++    let network_before = node.network_info()?;
++    let node_info = node.node_info()?;
++    let btc = node.btc_balance(true)?;
++    let listed_assets = node.list_assets(vec!["Nia".to_string()])?;
++    let assets = listed_assets.nia.unwrap_or_default();
++    if assets.len() > max_assets {
++        return Err(Error::StringParse(format!(
++            "native NIA inventory contains {} entries, exceeding max_assets {max_assets}",
++            assets.len()
++        )));
++    }
++    let known_asset_ids = assets
++        .iter()
++        .map(|asset| asset.asset_id.to_string())
++        .collect::<HashSet<_>>();
++
++    let channels = node.list_channels()?;
++    if channels.len() > max_channels {
++        return Err(Error::StringParse(format!(
++            "native channel inventory contains {} entries, exceeding max_channels {max_channels}",
++            channels.len()
++        )));
++    }
++
++    let (transactions, payments, transfers) = if request.include_activity {
++        let transactions = node.list_transactions(true)?;
++        let payments = node.list_payments()?;
++        if transactions.len() > max_activity_items || payments.len() > max_activity_items {
++            return Err(Error::StringParse(format!(
++                "native activity exceeds max_activity_items {max_activity_items}"
++            )));
++        }
++
++        let mut transfer_count = 0usize;
++        let mut transfers = Vec::new();
++        for asset_id in request
++            .asset_ids
++            .iter()
++            .filter(|asset_id| known_asset_ids.contains(*asset_id))
++        {
++            let rows = node.list_transfers(parse_contract_id(asset_id)?)?;
++            transfer_count = transfer_count.checked_add(rows.len()).ok_or_else(|| {
++                Error::StringParse("native transfer count overflow".to_string())
++            })?;
++            if transfer_count > max_activity_items {
++                return Err(Error::StringParse(format!(
++                    "native transfers exceed max_activity_items {max_activity_items}"
++                )));
++            }
++            transfers.push(JsonWalletSnapshotAssetTransfers {
++                asset_id: asset_id.clone(),
++                transfers: rows.into_iter().map(Into::into).collect(),
++            });
++        }
++
++        (
++            Some(transactions.into_iter().map(Into::into).collect()),
++            Some(payments.into_iter().map(Into::into).collect()),
++            Some(transfers),
++        )
++    } else {
++        (None, None, None)
++    };
++
++    let network_after = node.network_info()?;
++    let completed_at_ms = unix_time_ms()?;
++    json(JsonWalletSnapshotResponse {
++        contract_version: 1,
++        native_source: "rgb-lightning-node-v0.9.0-beta.3+utexo-wallet-v1",
++        capture_sequence: capture_sequence.to_string(),
++        started_at_ms: started_at_ms.to_string(),
++        completed_at_ms: completed_at_ms.to_string(),
++        network_before: network_before.into(),
++        network_after: network_after.into(),
++        node: node_info.into(),
++        btc: btc.into(),
++        assets: assets.into_iter().map(Into::into).collect(),
++        channels: channels.into_iter().map(Into::into).collect(),
++        transactions,
++        payments,
++        transfers,
++    })
++}
++
+ // ---------------------------------------------------------------------------
+ // Swaps / onion
+ // ---------------------------------------------------------------------------
+@@ -804,3 +977,23 @@ pub(crate) fn sdk_node_unlock_with_attached_external_signer(
+     )?;
+     ok_void()
+ }
++
++#[cfg(test)]
++mod wallet_snapshot_api_tests {
++    use super::*;
++
++    #[test]
++    fn snapshot_limits_accept_only_positive_bounded_values() {
++        assert_eq!(validate_snapshot_limit("items", 1, 8).unwrap(), 1);
++        assert_eq!(validate_snapshot_limit("items", 8, 8).unwrap(), 8);
++        assert!(validate_snapshot_limit("items", 0, 8).is_err());
++        assert!(validate_snapshot_limit("items", 9, 8).is_err());
++    }
++
++    #[test]
++    fn snapshot_sequence_is_monotonic() {
++        let first = next_wallet_snapshot_sequence().expect("first sequence");
++        let second = next_wallet_snapshot_sequence().expect("second sequence");
++        assert!(second > first);
++    }
++}
+diff --git a/bindings/c-ffi/src/json_types.rs b/bindings/c-ffi/src/json_types.rs
+index fc570e0..26bb161 100644
+--- a/bindings/c-ffi/src/json_types.rs
++++ b/bindings/c-ffi/src/json_types.rs
+@@ -33,7 +33,7 @@ use rgb_lightning_node::{
+     AssetRecipients, RgbRecipient,
+     SignMessageResponse, Swap, SwapList, SwapStatus, Token, TokenLight, Transaction,
+     TransactionType, Transfer, TransferTransportEndpoint, TransportEndpoint, Txid, Unspent, Utxo,
+-    VerifyMessageResponse, WitnessData,
++    VerifyMessageResponse, WalletSyncKeychainResult, WalletSyncMode, WalletSyncResult, WitnessData,
+ };
+ use serde::{Deserialize, Serialize};
+ 
+@@ -1532,7 +1532,7 @@ pub(crate) struct JsonNetworkInfo {
+ impl From<NetworkInfo> for JsonNetworkInfo {
+     fn from(n: NetworkInfo) -> Self {
+         JsonNetworkInfo {
+-            network: n.network,
++            network: n.network.to_ascii_lowercase(),
+             height: n.height,
+         }
+     }
+@@ -1581,6 +1581,452 @@ impl From<BtcBalanceInfo> for JsonBtcBalanceInfo {
+     }
+ }
+ 
++// ---------------------------------------------------------------------------
++// Versioned wallet synchronization + exact wallet snapshot
++// ---------------------------------------------------------------------------
++
++#[derive(Debug, Clone, Copy, Deserialize, Serialize)]
++#[serde(rename_all = "snake_case")]
++pub(crate) enum JsonWalletSyncMode {
++    Routine,
++    Recovery,
++}
++
++impl From<JsonWalletSyncMode> for WalletSyncMode {
++    fn from(mode: JsonWalletSyncMode) -> Self {
++        match mode {
++            JsonWalletSyncMode::Routine => WalletSyncMode::Routine,
++            JsonWalletSyncMode::Recovery => WalletSyncMode::Recovery,
++        }
++    }
++}
++
++impl From<WalletSyncMode> for JsonWalletSyncMode {
++    fn from(mode: WalletSyncMode) -> Self {
++        match mode {
++            WalletSyncMode::Routine => JsonWalletSyncMode::Routine,
++            WalletSyncMode::Recovery => JsonWalletSyncMode::Recovery,
++        }
++    }
++}
++
++#[derive(Debug, Deserialize)]
++#[serde(deny_unknown_fields)]
++pub(crate) struct JsonSyncWalletRequest {
++    pub mode: JsonWalletSyncMode,
++}
++
++#[derive(Debug, Serialize)]
++pub(crate) struct JsonWalletSyncKeychainResult {
++    pub status: &'static str,
++    #[serde(skip_serializing_if = "Option::is_none")]
++    pub error_code: Option<String>,
++}
++
++impl From<WalletSyncKeychainResult> for JsonWalletSyncKeychainResult {
++    fn from(result: WalletSyncKeychainResult) -> Self {
++        Self {
++            status: if result.succeeded { "succeeded" } else { "failed" },
++            error_code: result.error_code,
++        }
++    }
++}
++
++#[derive(Debug, Serialize)]
++pub(crate) struct JsonWalletSyncResponse {
++    pub contract_version: u16,
++    pub mode: JsonWalletSyncMode,
++    pub vanilla: JsonWalletSyncKeychainResult,
++    pub colored: JsonWalletSyncKeychainResult,
++}
++
++impl From<WalletSyncResult> for JsonWalletSyncResponse {
++    fn from(result: WalletSyncResult) -> Self {
++        Self {
++            contract_version: 1,
++            mode: result.mode.into(),
++            vanilla: result.vanilla.into(),
++            colored: result.colored.into(),
++        }
++    }
++}
++
++fn default_snapshot_max_assets() -> u16 {
++    32
++}
++
++fn default_snapshot_max_channels() -> u16 {
++    128
++}
++
++fn default_snapshot_max_activity_items() -> u16 {
++    1_000
++}
++
++#[derive(Debug, Deserialize)]
++#[serde(deny_unknown_fields)]
++pub(crate) struct JsonWalletSnapshotRequest {
++    #[serde(default)]
++    pub asset_ids: Vec<String>,
++    #[serde(default = "default_snapshot_max_assets")]
++    pub max_assets: u16,
++    #[serde(default = "default_snapshot_max_channels")]
++    pub max_channels: u16,
++    #[serde(default = "default_snapshot_max_activity_items")]
++    pub max_activity_items: u16,
++    #[serde(default)]
++    pub include_activity: bool,
++}
++
++#[derive(Debug, Serialize)]
++pub(crate) struct JsonExactBalance {
++    pub settled: String,
++    pub future: String,
++    pub spendable: String,
++}
++
++impl From<BtcBalance> for JsonExactBalance {
++    fn from(balance: BtcBalance) -> Self {
++        Self {
++            settled: balance.settled.to_string(),
++            future: balance.future.to_string(),
++            spendable: balance.spendable.to_string(),
++        }
++    }
++}
++
++#[derive(Debug, Serialize)]
++pub(crate) struct JsonExactBtcBalanceInfo {
++    pub vanilla: JsonExactBalance,
++    pub colored: JsonExactBalance,
++}
++
++impl From<BtcBalanceInfo> for JsonExactBtcBalanceInfo {
++    fn from(balance: BtcBalanceInfo) -> Self {
++        Self {
++            vanilla: balance.vanilla.into(),
++            colored: balance.colored.into(),
++        }
++    }
++}
++
++#[derive(Debug, Serialize)]
++pub(crate) struct JsonExactAssetBalance {
++    pub settled: String,
++    pub future: String,
++    pub spendable: String,
++    pub offchain_outbound: String,
++    pub offchain_inbound: String,
++}
++
++impl From<AssetBalanceInfo> for JsonExactAssetBalance {
++    fn from(balance: AssetBalanceInfo) -> Self {
++        Self {
++            settled: balance.settled.to_string(),
++            future: balance.future.to_string(),
++            spendable: balance.spendable.to_string(),
++            offchain_outbound: balance.offchain_outbound.to_string(),
++            offchain_inbound: balance.offchain_inbound.to_string(),
++        }
++    }
++}
++
++#[derive(Debug, Serialize)]
++pub(crate) struct JsonWalletSnapshotAsset {
++    pub asset_id: String,
++    pub ticker: String,
++    pub name: String,
++    pub precision: u8,
++    pub balance: JsonExactAssetBalance,
++}
++
++impl From<AssetNia> for JsonWalletSnapshotAsset {
++    fn from(asset: AssetNia) -> Self {
++        Self {
++            asset_id: fmt_contract_id(&asset.asset_id),
++            ticker: asset.ticker,
++            name: asset.name,
++            precision: asset.precision,
++            balance: asset.balance.into(),
++        }
++    }
++}
++
++#[derive(Debug, Serialize)]
++pub(crate) struct JsonWalletSnapshotNode {
++    pub pubkey: String,
++    pub num_channels: String,
++    pub num_usable_channels: String,
++    pub claimable_onchain_sat: String,
++    pub eventual_close_fees_sat: String,
++    pub pending_outbound_payments_sat: String,
++    pub num_peers: String,
++    pub latest_rgs_snapshot_timestamp: Option<String>,
++}
++
++impl From<NodeInfo> for JsonWalletSnapshotNode {
++    fn from(node: NodeInfo) -> Self {
++        Self {
++            pubkey: fmt_pubkey(&node.pubkey),
++            num_channels: node.num_channels.to_string(),
++            num_usable_channels: node.num_usable_channels.to_string(),
++            claimable_onchain_sat: node.local_balance_sat.to_string(),
++            eventual_close_fees_sat: node.eventual_close_fees_sat.to_string(),
++            pending_outbound_payments_sat: node.pending_outbound_payments_sat.to_string(),
++            num_peers: node.num_peers.to_string(),
++            latest_rgs_snapshot_timestamp: node
++                .latest_rgs_snapshot_timestamp
++                .map(|value| value.to_string()),
++        }
++    }
++}
++
++#[derive(Debug, Serialize)]
++pub(crate) struct JsonWalletSnapshotChannel {
++    pub channel_id: String,
++    pub peer_pubkey: String,
++    pub status: ChannelStatusStr,
++    pub ready: bool,
++    pub capacity_sat: String,
++    pub claimable_onchain_sat: String,
++    pub outbound_capacity_msat: String,
++    pub inbound_capacity_msat: String,
++    pub next_outbound_htlc_limit_msat: String,
++    pub next_outbound_htlc_minimum_msat: String,
++    pub is_usable: bool,
++    pub public: bool,
++    pub funding_txid: Option<String>,
++    pub peer_alias: Option<String>,
++    pub short_channel_id: Option<String>,
++    pub asset_id: Option<String>,
++    pub asset_local_amount: Option<String>,
++    pub asset_remote_amount: Option<String>,
++    pub virtual_open_mode: Option<String>,
++}
++
++impl From<Channel> for JsonWalletSnapshotChannel {
++    fn from(channel: Channel) -> Self {
++        Self {
++            channel_id: fmt_channel_id(&channel.channel_id),
++            peer_pubkey: fmt_pubkey(&channel.peer_pubkey),
++            status: channel.status.into(),
++            ready: channel.ready,
++            capacity_sat: channel.capacity_sat.to_string(),
++            claimable_onchain_sat: channel.local_balance_sat.to_string(),
++            outbound_capacity_msat: channel.outbound_balance_msat.to_string(),
++            inbound_capacity_msat: channel.inbound_balance_msat.to_string(),
++            next_outbound_htlc_limit_msat: channel.next_outbound_htlc_limit_msat.to_string(),
++            next_outbound_htlc_minimum_msat: channel
++                .next_outbound_htlc_minimum_msat
++                .to_string(),
++            is_usable: channel.is_usable,
++            public: channel.public,
++            funding_txid: channel.funding_txid.as_ref().map(fmt_txid),
++            peer_alias: channel.peer_alias,
++            short_channel_id: channel.short_channel_id.map(|value| value.to_string()),
++            asset_id: channel.asset_id.as_ref().map(fmt_contract_id),
++            asset_local_amount: channel.asset_local_amount.map(|value| value.to_string()),
++            asset_remote_amount: channel.asset_remote_amount.map(|value| value.to_string()),
++            virtual_open_mode: channel.virtual_open_mode,
++        }
++    }
++}
++
++#[derive(Debug, Serialize)]
++pub(crate) struct JsonWalletSnapshotBlockTime {
++    pub height: u32,
++    pub timestamp: String,
++}
++
++impl From<BlockTime> for JsonWalletSnapshotBlockTime {
++    fn from(block: BlockTime) -> Self {
++        Self {
++            height: block.height,
++            timestamp: block.timestamp.to_string(),
++        }
++    }
++}
++
++#[derive(Debug, Serialize)]
++pub(crate) struct JsonWalletSnapshotTransaction {
++    pub transaction_type: TransactionTypeStr,
++    pub txid: String,
++    pub received: String,
++    pub sent: String,
++    pub fee: String,
++    pub confirmation_time: Option<JsonWalletSnapshotBlockTime>,
++}
++
++impl From<Transaction> for JsonWalletSnapshotTransaction {
++    fn from(transaction: Transaction) -> Self {
++        Self {
++            transaction_type: transaction.transaction_type.into(),
++            txid: fmt_txid(&transaction.txid),
++            received: transaction.received.to_string(),
++            sent: transaction.sent.to_string(),
++            fee: transaction.fee.to_string(),
++            confirmation_time: transaction.confirmation_time.map(Into::into),
++        }
++    }
++}
++
++#[derive(Debug, Serialize)]
++pub(crate) struct JsonWalletSnapshotPayment {
++    pub amt_msat: Option<String>,
++    pub asset_amount: Option<String>,
++    pub asset_id: Option<String>,
++    pub payment_hash: String,
++    pub payment_type: PaymentTypeStr,
++    pub status: HtlcStatusStr,
++    pub created_at: String,
++    pub updated_at: String,
++    pub payee_pubkey: String,
++}
++
++impl From<Payment> for JsonWalletSnapshotPayment {
++    fn from(payment: Payment) -> Self {
++        Self {
++            amt_msat: payment.amt_msat.map(|value| value.to_string()),
++            asset_amount: payment.asset_amount.map(|value| value.to_string()),
++            asset_id: payment.asset_id.as_ref().map(fmt_contract_id),
++            payment_hash: fmt_payment_hash(&payment.payment_hash),
++            payment_type: payment.payment_type.into(),
++            status: payment.status.into(),
++            created_at: payment.created_at.to_string(),
++            updated_at: payment.updated_at.to_string(),
++            payee_pubkey: fmt_pubkey(&payment.payee_pubkey),
++        }
++    }
++}
++
++#[derive(Debug, Serialize)]
++pub(crate) struct JsonWalletSnapshotTransfer {
++    pub idx: i32,
++    pub created_at: String,
++    pub updated_at: String,
++    pub status: String,
++    pub requested_assignment: Option<String>,
++    pub assignments: Vec<String>,
++    pub kind: String,
++    pub txid: Option<String>,
++    pub recipient_id: Option<String>,
++    pub receive_utxo: Option<String>,
++    pub change_utxo: Option<String>,
++    pub expiration: Option<String>,
++    pub transport_endpoints: Vec<JsonTransferTransportEndpoint>,
++}
++
++impl From<Transfer> for JsonWalletSnapshotTransfer {
++    fn from(transfer: Transfer) -> Self {
++        Self {
++            idx: transfer.idx,
++            created_at: transfer.created_at.to_string(),
++            updated_at: transfer.updated_at.to_string(),
++            status: transfer.status,
++            requested_assignment: transfer.requested_assignment,
++            assignments: transfer.assignments,
++            kind: transfer.kind,
++            txid: transfer.txid.as_ref().map(fmt_txid),
++            recipient_id: transfer.recipient_id,
++            receive_utxo: transfer.receive_utxo,
++            change_utxo: transfer.change_utxo,
++            expiration: transfer.expiration.map(|value| value.to_string()),
++            transport_endpoints: transfer
++                .transport_endpoints
++                .into_iter()
++                .map(Into::into)
++                .collect(),
++        }
++    }
++}
++
++#[derive(Debug, Serialize)]
++pub(crate) struct JsonWalletSnapshotAssetTransfers {
++    pub asset_id: String,
++    pub transfers: Vec<JsonWalletSnapshotTransfer>,
++}
++
++#[derive(Debug, Serialize)]
++pub(crate) struct JsonWalletSnapshotResponse {
++    pub contract_version: u16,
++    pub native_source: &'static str,
++    pub capture_sequence: String,
++    pub started_at_ms: String,
++    pub completed_at_ms: String,
++    pub network_before: JsonNetworkInfo,
++    pub network_after: JsonNetworkInfo,
++    pub node: JsonWalletSnapshotNode,
++    pub btc: JsonExactBtcBalanceInfo,
++    pub assets: Vec<JsonWalletSnapshotAsset>,
++    pub channels: Vec<JsonWalletSnapshotChannel>,
++    #[serde(skip_serializing_if = "Option::is_none")]
++    pub transactions: Option<Vec<JsonWalletSnapshotTransaction>>,
++    #[serde(skip_serializing_if = "Option::is_none")]
++    pub payments: Option<Vec<JsonWalletSnapshotPayment>>,
++    #[serde(skip_serializing_if = "Option::is_none")]
++    pub transfers: Option<Vec<JsonWalletSnapshotAssetTransfers>>,
++}
++
++#[cfg(test)]
++mod wallet_snapshot_contract_tests {
++    use super::*;
++
++    #[test]
++    fn network_info_uses_canonical_lowercase_names() {
++        let value = JsonNetworkInfo::from(NetworkInfo {
++            network: "Regtest".to_string(),
++            height: 42,
++        });
++        let json = serde_json::to_value(value).expect("serialize network info");
++
++        assert_eq!(json["network"], "regtest");
++        assert_eq!(json["height"], 42);
++    }
++
++    #[test]
++    fn sync_request_rejects_unknown_fields() {
++        let error = serde_json::from_str::<JsonSyncWalletRequest>(
++            r#"{"mode":"routine","typo":true}"#,
++        )
++        .expect_err("unknown request fields must fail closed");
++
++        assert!(error.to_string().contains("unknown field"));
++    }
++
++    #[test]
++    fn snapshot_request_has_bounded_documented_defaults() {
++        let request = serde_json::from_str::<JsonWalletSnapshotRequest>("{}")
++            .expect("empty snapshot request");
++
++        assert!(request.asset_ids.is_empty());
++        assert_eq!(request.max_assets, 32);
++        assert_eq!(request.max_channels, 128);
++        assert_eq!(request.max_activity_items, 1_000);
++        assert!(!request.include_activity);
++    }
++
++    #[test]
++    fn exact_btc_balance_serializes_every_amount_as_decimal_text() {
++        let value = JsonExactBtcBalanceInfo::from(BtcBalanceInfo {
++            vanilla: BtcBalance {
++                settled: u64::MAX,
++                future: 2,
++                spendable: 1,
++            },
++            colored: BtcBalance {
++                settled: 3,
++                future: 4,
++                spendable: 5,
++            },
++        });
++
++        let json = serde_json::to_value(value).expect("serialize exact balance");
++        assert_eq!(json["vanilla"]["settled"], u64::MAX.to_string());
++        assert_eq!(json["colored"]["spendable"], "5");
++        assert!(json["vanilla"]["settled"].is_string());
++    }
++}
++
+ #[derive(Debug, Serialize)]
+ pub(crate) struct JsonSignMessageResponse {
+     pub signed_message: String,
+diff --git a/bindings/c-ffi/src/lib.rs b/bindings/c-ffi/src/lib.rs
+index 24c3371..8c9441d 100644
+--- a/bindings/c-ffi/src/lib.rs
++++ b/bindings/c-ffi/src/lib.rs
+@@ -547,6 +547,28 @@ pub extern "C" fn rln_sync(node: &COpaqueStruct) -> CResultString {
+     ffi_call!("rln_sync", api::sync(node))
+ }
+ 
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_sync_wallet(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> CResultString {
++    ffi_call!(
++        "rln_sync_wallet",
++        api::sync_wallet(node, request_json)
++    )
++}
++
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_wallet_snapshot(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> CResultString {
++    ffi_call!(
++        "rln_wallet_snapshot",
++        api::wallet_snapshot(node, request_json)
++    )
++}
++
+ // ---------------------------------------------------------------------------
+ // Swaps / onion
+ // ---------------------------------------------------------------------------
+diff --git a/src/sdk/mod.rs b/src/sdk/mod.rs
+index ebdf050..7a45021 100644
+--- a/src/sdk/mod.rs
++++ b/src/sdk/mod.rs
+@@ -3648,6 +3648,102 @@ pub(crate) async fn sync(state: Arc<AppState>) -> Result<(), APIError> {
+     Ok(())
+ }
+ 
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub(crate) enum WalletSyncModeData {
++    Routine,
++    Recovery,
++}
++
++pub(crate) struct WalletSyncKeychainData {
++    pub succeeded: bool,
++    pub error_code: Option<String>,
++}
++
++pub(crate) struct WalletSyncData {
++    pub mode: WalletSyncModeData,
++    pub vanilla: WalletSyncKeychainData,
++    pub colored: WalletSyncKeychainData,
++}
++
++fn sync_keychain(
++    unlocked_state: &crate::utils::UnlockedAppState,
++    keychain: rgb_lib::wallet::SyncKeychain,
++    strategy: rgb_lib::wallet::SyncStrategy,
++) -> WalletSyncKeychainData {
++    match unlocked_state.rgb_sync(rgb_lib::wallet::SyncOptions { keychain, strategy }) {
++        Ok(()) => WalletSyncKeychainData {
++            succeeded: true,
++            error_code: None,
++        },
++        Err(_) => WalletSyncKeychainData {
++            succeeded: false,
++            error_code: Some("FAILED_BDK_SYNC".to_string()),
++        },
++    }
++}
++
++fn sync_strategy_for_mode(mode: WalletSyncModeData) -> rgb_lib::wallet::SyncStrategy {
++    match mode {
++        WalletSyncModeData::Routine => rgb_lib::wallet::SyncStrategy::FullSync,
++        WalletSyncModeData::Recovery => rgb_lib::wallet::SyncStrategy::FullScan,
++    }
++}
++
++/// Synchronize both RGB-lib keychains using an explicit production mode.
++///
++/// Routine refresh uses `FullSync`, which updates every script already known
++/// to the wallet. Recovery uses `FullScan`, which performs address discovery
++/// and must therefore be reserved for create/restore/migration boundaries.
++/// Both keychains are attempted so callers receive structured partial-failure
++/// evidence instead of losing the first successful result when the second
++/// keychain fails.
++pub(crate) async fn sync_wallet(
++    state: Arc<AppState>,
++    mode: WalletSyncModeData,
++) -> Result<WalletSyncData, APIError> {
++    let guard = check_unlocked(&state).await?;
++    let unlocked_state = guard.as_ref().unwrap();
++    let strategy = sync_strategy_for_mode(mode);
++
++    let vanilla = sync_keychain(
++        unlocked_state,
++        rgb_lib::wallet::SyncKeychain::Vanilla { lookback: 0 },
++        strategy,
++    );
++    let colored = sync_keychain(
++        unlocked_state,
++        rgb_lib::wallet::SyncKeychain::Colored,
++        strategy,
++    );
++
++    Ok(WalletSyncData {
++        mode,
++        vanilla,
++        colored,
++    })
++}
++
++#[cfg(test)]
++mod wallet_sync_mode_tests {
++    use super::*;
++
++    #[test]
++    fn routine_syncs_every_revealed_script_on_both_keychains() {
++        assert_eq!(
++            sync_strategy_for_mode(WalletSyncModeData::Routine),
++            rgb_lib::wallet::SyncStrategy::FullSync
++        );
++    }
++
++    #[test]
++    fn recovery_performs_address_discovery_on_both_keychains() {
++        assert_eq!(
++            sync_strategy_for_mode(WalletSyncModeData::Recovery),
++            rgb_lib::wallet::SyncStrategy::FullScan
++        );
++    }
++}
++
+ pub(crate) async fn decode_ln_invoice(
+     state: Arc<AppState>,
+     invoice: String,
+diff --git a/src/uniffi_api/mod.rs b/src/uniffi_api/mod.rs
+index e624ae1..5ffa321 100644
+--- a/src/uniffi_api/mod.rs
++++ b/src/uniffi_api/mod.rs
+@@ -843,6 +843,30 @@ impl SdkNode {
+         Ok(())
+     }
+ 
++    pub fn sync_wallet(&self, mode: WalletSyncMode) -> Result<WalletSyncResult, RlnError> {
++        let state = self.handle.app_state();
++        let data = block_on_sdk(sdk::sync_wallet(
++            state,
++            match mode {
++                WalletSyncMode::Routine => sdk::WalletSyncModeData::Routine,
++                WalletSyncMode::Recovery => sdk::WalletSyncModeData::Recovery,
++            },
++        ))?;
++
++        let map_keychain = |result: sdk::WalletSyncKeychainData| WalletSyncKeychainResult {
++            succeeded: result.succeeded,
++            error_code: result.error_code,
++        };
++        Ok(WalletSyncResult {
++            mode: match data.mode {
++                sdk::WalletSyncModeData::Routine => WalletSyncMode::Routine,
++                sdk::WalletSyncModeData::Recovery => WalletSyncMode::Recovery,
++            },
++            vanilla: map_keychain(data.vanilla),
++            colored: map_keychain(data.colored),
++        })
++    }
++
+     pub fn node_info(&self) -> Result<NodeInfo, RlnError> {
+         let state = self.handle.app_state();
+         let data = block_on_sdk(sdk::node_info(state))?;
+diff --git a/src/uniffi_api/types.rs b/src/uniffi_api/types.rs
+index 3cd9097..880851b 100644
+--- a/src/uniffi_api/types.rs
++++ b/src/uniffi_api/types.rs
+@@ -102,6 +102,23 @@ pub struct BtcBalanceInfo {
+     pub colored: BtcBalance,
+ }
+ 
++#[derive(Clone, Copy)]
++pub enum WalletSyncMode {
++    Routine,
++    Recovery,
++}
++
++pub struct WalletSyncKeychainResult {
++    pub succeeded: bool,
++    pub error_code: Option<String>,
++}
++
++pub struct WalletSyncResult {
++    pub mode: WalletSyncMode,
++    pub vanilla: WalletSyncKeychainResult,
++    pub colored: WalletSyncKeychainResult,
++}
++
+ pub struct SignMessageResponse {
+     pub signed_message: String,
+ }

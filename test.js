@@ -7,7 +7,13 @@ const path = require('path')
 const { NativeExternalSigner, SdkNode } = require('./index')
 
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rln-node-canary-'))
-const signer = NativeExternalSigner.create('01'.repeat(32), 'regtest')
+const signerDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rln-node-vls-canary-'))
+const signer = NativeExternalSigner.createWithStorage(
+  '01'.repeat(32),
+  'regtest',
+  signerDataDir,
+  true
+)
 const node = SdkNode.create({
   storage_dir_path: dataDir,
   daemon_listening_port: 0,
@@ -19,16 +25,52 @@ const node = SdkNode.create({
 })
 
 try {
-  for (const method of [
-    'rotateAddress',
-    'assetLinkCreate',
-    'listTransactions',
-    'listTransactionsByTxid',
-    'listTransfers',
-    'listTransfersByTxid',
+    for (const method of [
+      'rotateAddress',
+      'assetLinkCreate',
+      'listTransactions',
+      'listTransfers',
+      'syncWallet',
+    'walletSnapshot',
+    'prepareBtcSend',
+    'commitPreparedBtcSend',
+    'cancelBtcSendPlan',
+    'prepareCreateUtxos',
+    'commitPreparedCreateUtxos',
+    'cancelCreateUtxosPlan',
+    'listPendingVanillaTransactions',
+    'listAddressReceipts',
+    'prepareRgbSend',
+    'commitPreparedRgbSend',
+      'cancelRgbSendPlan',
+      'listPendingRgbSendPlans',
+      'listTransactionsByTxid',
+      'listTransfersByTxid',
+    'importRgbTransferConsignment',
+    'importRgbContract',
     'verifyMessage'
   ]) {
     if (typeof node[method] !== 'function') throw new Error(`SdkNode.${method} is missing`)
+  }
+
+  let invalidSyncRequest
+  try {
+    node.syncWallet({ mode: 'routine', typo: true })
+  } catch (error) {
+    invalidSyncRequest = error
+  }
+  if (!String(invalidSyncRequest?.message ?? invalidSyncRequest).includes('unknown field')) {
+    throw new Error(`syncWallet accepted an unknown request field: ${invalidSyncRequest}`)
+  }
+
+  let invalidSnapshotLimit
+  try {
+    node.walletSnapshot({ max_assets: 0 })
+  } catch (error) {
+    invalidSnapshotLimit = error
+  }
+  if (!String(invalidSnapshotLimit?.message ?? invalidSnapshotLimit).includes('max_assets')) {
+    throw new Error(`walletSnapshot accepted max_assets=0: ${invalidSnapshotLimit}`)
   }
 
   node.initWithNativeExternalSigner(signer)
@@ -60,7 +102,15 @@ try {
 } finally {
   node.shutdown()
   signer.destroy()
+  const reopenedSigner = NativeExternalSigner.createWithStorage(
+    '01'.repeat(32),
+    'regtest',
+    signerDataDir,
+    true
+  )
+  reopenedSigner.destroy()
   fs.rmSync(dataDir, { recursive: true, force: true })
+  fs.rmSync(signerDataDir, { recursive: true, force: true })
 }
 
 console.log('Node binding canary passed')

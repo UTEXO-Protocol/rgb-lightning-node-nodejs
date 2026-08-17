@@ -70,6 +70,20 @@ class SdkNode {
   unlockWithNativeExternalSigner (signer, request) {
     this._inner.unlockWithNativeExternalSigner(signer._inner, JSON.stringify(request))
   }
+  startUnlockWithNativeExternalSigner (signer, request) {
+    return JSON.parse(
+      this._inner.startUnlockWithNativeExternalSigner(signer._inner, JSON.stringify(request))
+    )
+  }
+  nativeOperationStatus (operationId) {
+    return JSON.parse(this._inner.nativeOperationStatus(operationId))
+  }
+  adoptNativeOperation (operationId) {
+    return JSON.parse(this._inner.adoptNativeOperation(operationId))
+  }
+  cancelNativeOperation (operationId) {
+    return JSON.parse(this._inner.cancelNativeOperation(operationId))
+  }
   initWithExternalSigner (bootstrap) {
     this._inner.initWithExternalSigner(JSON.stringify(bootstrap))
   }
@@ -80,8 +94,12 @@ class SdkNode {
 
   shutdown () {
     if (this._closed) return
-    this._inner.shutdown()
-    this._closed = true
+    try {
+      this._inner.shutdown()
+    } finally {
+      this._inner = null
+      this._closed = true
+    }
   }
 
   // Forces takeover of a stale VSS ownership fence after a previous node
@@ -95,6 +113,10 @@ class SdkNode {
   // configured / the flush fails. Backed by upstream vss_backup() PR.
   vssBackup () { return JSON.parse(this._inner.vssBackup()) }
 
+  vssDeleteAll (request) {
+    return JSON.parse(this._inner.vssDeleteAll(JSON.stringify(request)))
+  }
+
   // APay receiver-side: register this node with an LSP as an async-order
   // recipient. Pass the LSP's node_id (hex). Returns the parsed
   // AsyncOrderNewResponse (request_id, host_node_id, protocol_version,
@@ -106,6 +128,12 @@ class SdkNode {
   nodeInfo () { return JSON.parse(this._inner.nodeInfo()) }
   networkInfo () { return JSON.parse(this._inner.networkInfo()) }
   sync () { return JSON.parse(this._inner.sync()) }
+  syncWallet (request) {
+    return JSON.parse(this._inner.syncWallet(JSON.stringify(request)))
+  }
+  walletSnapshot (request = {}) {
+    return JSON.parse(this._inner.walletSnapshot(JSON.stringify(request)))
+  }
   rotateAddress () { return JSON.parse(this._inner.rotateAddress()) }
 
   // Peers / channels
@@ -148,6 +176,39 @@ class SdkNode {
   sendBtc (request) {
     return JSON.parse(this._inner.sendBtc(JSON.stringify(request)))
   }
+
+  prepareBtcSend (request) {
+    return JSON.parse(this._inner.prepareBtcSend(JSON.stringify(request)))
+  }
+
+  commitPreparedBtcSend (request) {
+    return JSON.parse(this._inner.commitPreparedBtcSend(JSON.stringify(request)))
+  }
+
+  cancelBtcSendPlan (request) {
+    return JSON.parse(this._inner.cancelBtcSendPlan(JSON.stringify(request)))
+  }
+
+  prepareCreateUtxos (request) {
+    return JSON.parse(this._inner.prepareCreateUtxos(JSON.stringify(request)))
+  }
+
+  commitPreparedCreateUtxos (request) {
+    return JSON.parse(this._inner.commitPreparedCreateUtxos(JSON.stringify(request)))
+  }
+
+  cancelCreateUtxosPlan (request) {
+    return JSON.parse(this._inner.cancelCreateUtxosPlan(JSON.stringify(request)))
+  }
+
+  listPendingVanillaTransactions () {
+    return JSON.parse(this._inner.listPendingVanillaTransactions())
+  }
+
+  listAddressReceipts (address) {
+    return JSON.parse(this._inner.listAddressReceipts(address))
+  }
+
   createUtxos (request) {
     return JSON.parse(this._inner.createUtxos(JSON.stringify(request)))
   }
@@ -237,6 +298,28 @@ class SdkNode {
   sendRgb (request) {
     return JSON.parse(this._inner.sendRgb(JSON.stringify(request)))
   }
+
+  importRgbTransferConsignment (request) {
+    return JSON.parse(this._inner.importRgbTransferConsignment(JSON.stringify(request)))
+  }
+
+  importRgbContract (request) {
+    return JSON.parse(this._inner.importRgbContract(JSON.stringify(request)))
+  }
+
+  prepareRgbSend (request) {
+    return JSON.parse(this._inner.prepareRgbSend(JSON.stringify(request)))
+  }
+
+  commitPreparedRgbSend (request) {
+    return JSON.parse(this._inner.commitPreparedRgbSend(JSON.stringify(request)))
+  }
+  cancelRgbSendPlan (request) {
+    return JSON.parse(this._inner.cancelRgbSendPlan(JSON.stringify(request)))
+  }
+  listPendingRgbSendPlans () {
+    return JSON.parse(this._inner.listPendingRgbSendPlans())
+  }
   refreshTransfers (request) {
     this._inner.refreshTransfers(JSON.stringify(request))
     return { ok: true }
@@ -294,6 +377,23 @@ class NativeExternalSigner {
     }
     return new NativeExternalSigner(
       napi.NativeExternalSigner.create(seedHex, network, !!permissivePolicy)
+    )
+  }
+
+  static createWithStorage (seedHex, network, storageDirPath, permissivePolicy = false) {
+    if (typeof seedHex !== 'string' || seedHex.length !== 64) {
+      throw new Error('NativeExternalSigner.createWithStorage: seedHex must be a 64-char hex string')
+    }
+    if (typeof storageDirPath !== 'string' || storageDirPath.length === 0) {
+      throw new Error('NativeExternalSigner.createWithStorage: storageDirPath is required')
+    }
+    return new NativeExternalSigner(
+      napi.NativeExternalSigner.createWithStorage(
+        seedHex,
+        network,
+        storageDirPath,
+        !!permissivePolicy
+      )
     )
   }
 

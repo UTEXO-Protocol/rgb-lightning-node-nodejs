@@ -163,16 +163,16 @@ throw `napi::Error` on the C-FFI `Err` branch).
 
 | Group | Methods |
 |-------|---------|
-| Info / sync | `nodeInfo`, `networkInfo`, `sync`, `address` / `getAddress`, `rotateAddress` |
+| Info / sync | `nodeInfo`, `networkInfo`, `sync` (legacy), `syncWallet`, `walletSnapshot`, `address` / `getAddress`, `rotateAddress`, `startUnlockWithNativeExternalSigner`, `nativeOperationStatus`, `adoptNativeOperation`, `cancelNativeOperation` |
 | Peers | `connectPeer`, `disconnectPeer`, `listPeers` |
 | Channels | `openChannel`, `closeChannel`, `listChannels`, `getChannelId` |
 | Invoices | `lnInvoice`, `decodeLnInvoice`, `invoiceStatus`, `rgbInvoice`, `decodeRgbInvoice`, `cancelHodlInvoice`, `claimHodlInvoice` |
 | Payments | `sendPayment`, `keysend`, `listPayments`, `getPayment` |
 | Swaps | `makerInit`, `makerExecute`, `taker`, `listSwaps`, `getSwap` |
 | RGB issuance | `issueAssetNia`, `issueAssetUda`, `issueAssetCfa`, `issueAssetIfa` |
-| RGB assets | `listAssets`, `assetBalance`, `assetLinkCreate`, `assetMetadata`, `sendRgb`, `inflate`, `listTransfers`, `listTransfersByTxid`, `refreshTransfers`, `failTransfers`, `getAssetMedia`, `postAssetMedia` |
-| BTC | `btcBalance`, `sendBtc`, `listTransactions`, `listTransactionsByTxid`, `listUnspents`, `createUtxos`, `estimateFee` |
-| VSS | `vssClearFence`, `vssBackup` |
+| RGB assets | `listAssets`, `assetBalance`, `assetLinkCreate`, `assetMetadata`, `sendRgb`, `importRgbTransferConsignment`, `importRgbContract`, `prepareRgbSend`, `commitPreparedRgbSend`, `cancelRgbSendPlan`, `listPendingRgbSendPlans`, `inflate`, `listTransfers`, `listTransfersByTxid`, `refreshTransfers`, `failTransfers`, `getAssetMedia`, `postAssetMedia` |
+| BTC | `btcBalance`, `sendBtc`, `prepareBtcSend`, `commitPreparedBtcSend`, `cancelBtcSendPlan`, `listPendingVanillaTransactions`, `listAddressReceipts`, `listTransactions`, `listTransactionsByTxid`, `listUnspents`, `createUtxos`, `prepareCreateUtxos`, `commitPreparedCreateUtxos`, `cancelCreateUtxosPlan`, `estimateFee` |
+| VSS | `vssClearFence`, `vssBackup`, `vssDeleteAll` |
 | APay | `apayNew` |
 | Signing / onion / diagnostics | `signMessage`, `verifyMessage`, `sendOnionMessage`, `checkIndexerUrl`, `checkProxyEndpoint` |
 
@@ -181,6 +181,14 @@ throw `napi::Error` on the C-FFI `Err` branch).
 bare addon (which uses them to manage a process-global tokio runtime). In
 the Node binding the runtime is per-`SdkNode`, so these are stubs/no-ops;
 they're safe to call.
+
+`syncWallet({ mode })` is the production synchronization contract. `routine`
+updates every revealed Vanilla and Colored script with `FullSync`; `recovery`
+discovers both keychains with `FullScan`. It reports each keychain separately
+instead of hiding a partial failure. `walletSnapshot(request)` then reads a
+versioned, bounded snapshot without another implicit sync. Every monetary
+amount is base-10 text, and Lightning claimable balances remain distinct from
+inbound/outbound routing capacities.
 
 See [`index.js`](./index.js) for the authoritative method list and
 [`index.d.ts`](./index.d.ts) for type signatures.
@@ -193,8 +201,11 @@ key-source file written by `initWithNativeExternalSigner` records only
 public identifying data (xpubs, node id, master fingerprint). Re-deriving
 from the same mnemonic on a later launch reproduces the same `seedHex`,
 which matches the on-disk key-source — so the LDK node identity stays
-stable across restarts. All channel-state cryptography runs in-process via
-the VLS signer.
+stable across restarts. Production channel wallets use
+`NativeExternalSigner.createWithStorage`, which persists VLS commitment
+validation state in a private caller-provided directory while keeping the
+seed host-owned. All channel-state cryptography runs in-process via the VLS
+signer.
 
 ## Architecture
 

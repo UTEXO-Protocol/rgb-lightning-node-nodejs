@@ -7,8 +7,8 @@ name: Build and Release (Node)
 #
 # Same optional overlay model as @utexo/rgb-lightning-node-bare: clone
 # rgb-lightning-node at the pinned tag, apply a tag-specific C-FFI patch when
-# one exists, then `napi build`. The path-dep layout in
-# Cargo.toml (`../../rgb-lightning-node/...`) drives where the clone lands.
+# one exists, then `napi build`. Native source is staged inside the package at
+# `.native-source`, matching the exact path dependencies in Cargo.toml.
 #
 # Produced assets are named `index-<suffix>.node` to match the suffixes
 # resolved in index.js / download-libs.sh:
@@ -72,9 +72,7 @@ jobs:
           RLN_VERSION: ${{ steps.version.outputs.rln }}
         run: |
           set -euo pipefail
-          # Cargo.toml path deps point at ../../rgb-lightning-node relative
-          # to the repo root, so the clone must land exactly there.
-          RLN_DIR="$(cd "$GITHUB_WORKSPACE/../.." && pwd)/rgb-lightning-node"
+          RLN_DIR="$GITHUB_WORKSPACE/.native-source"
           git clone --recurse-submodules --shallow-submodules --depth 1 \
             --branch "$RLN_VERSION" \
             "https://github.com/UTEXO-Protocol/rgb-lightning-node.git" "$RLN_DIR"
@@ -94,17 +92,6 @@ jobs:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           target: ${{ matrix.target }}
           rustflags: ''
-
-      - name: Pin signer-external to RLN-compatible commit
-        run: |
-          set -euo pipefail
-          # RLN tags use a branch dependency for signer-external. Keep release
-          # builds pinned to the signer revision expected by the cloned RLN tag,
-          # so a moving branch cannot break historical native builds.
-          if grep -q 'rln-external-signer.git?branch=main#594d8c08' Cargo.lock 2>/dev/null; then
-            echo "Pinning signer-external -> 59e2932"
-            cargo update -p signer-external --precise 59e2932eb5d3d40ac5ded2b8951a43ecdb7ad865
-          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -187,7 +174,7 @@ jobs:
         run: |
           set -euo pipefail
           git config --global --add safe.directory '*'
-          RLN_DIR="$(cd "$GITHUB_WORKSPACE/../.." && pwd)/rgb-lightning-node"
+          RLN_DIR="$GITHUB_WORKSPACE/.native-source"
           git clone --recurse-submodules --shallow-submodules --depth 1 \
             --branch "$RLN_VERSION" \
             "https://github.com/UTEXO-Protocol/rgb-lightning-node.git" "$RLN_DIR"
@@ -215,18 +202,6 @@ jobs:
         run: |
           rustup default "${RUST_TOOLCHAIN}"
           rustup target add x86_64-unknown-linux-musl
-
-      - name: Pin signer-external to RLN-compatible commit
-        shell: bash
-        run: |
-          set -euo pipefail
-          # RLN tags use a branch dependency for signer-external. Keep release
-          # builds pinned to the signer revision expected by the cloned RLN tag,
-          # so a moving branch cannot break historical native builds.
-          if grep -q 'rln-external-signer.git?branch=main#594d8c08' Cargo.lock 2>/dev/null; then
-            echo "Pinning signer-external -> 59e2932"
-            cargo update -p signer-external --precise 59e2932eb5d3d40ac5ded2b8951a43ecdb7ad865
-          fi
 
       - name: Build napi addon (musl)
         shell: bash

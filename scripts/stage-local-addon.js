@@ -2,6 +2,10 @@
 
 const fs = require('fs')
 const path = require('path')
+const {
+  readConfig,
+  recordAddonProvenance
+} = require('./install-overlay-addon')
 
 const root = path.resolve(__dirname, '..')
 const generated = fs.readdirSync(root)
@@ -21,4 +25,5 @@ const suffix = source.slice('index.'.length, -'.node'.length)
 const destination = `index-${suffix}.node`
 
 fs.copyFileSync(path.join(root, source), path.join(root, destination))
+recordAddonProvenance(readConfig())
 process.stdout.write(`Staged ${destination}\n`)

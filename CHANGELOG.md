@@ -10,6 +10,33 @@ while pre-`1.0`.
 ## [Unreleased]
 
 ### Added
+- Authoritative `listAddressReceipts(address)` settlement evidence backed by
+  the configured Electrum or Esplora indexer, including exact received
+  satoshis, transaction IDs, block heights, and confirmation counts.
+- Deterministic BTC and RGB on-chain send plans. `prepareBtcSend()` and
+  `prepareRgbSend()` reserve the exact unsigned plan inside the native wallet
+  and return only its opaque transaction identity, fee, input/output totals,
+  virtual size, and RGB batch identity. `commitPreparedBtcSend()` and
+  `commitPreparedRgbSend()` idempotently validate and submit that exact
+  native plan without exposing PSBT material to JavaScript.
+- Explicit RGB wallet UTXO setup plans. `prepareCreateUtxos()` reserves an
+  exact native transaction and returns only review-safe fee, input, output,
+  virtual-size, target-count, and output-size data.
+  `commitPreparedCreateUtxos()` signs and broadcasts that exact plan, while
+  `cancelCreateUtxosPlan()` releases only a matching setup reservation.
+- Preserve `pending_blinded` in every `listUnspents()` item so callers can
+  distinguish a genuinely free RGB allocation slot from a receive-reserved
+  colorable UTXO.
+- Include `Cargo.lock` in the npm package so Git-branch installs can honor the
+  native installer's `cargo build --locked` reproducibility contract.
+- Idempotent BTC and RGB plan cancellation plus bounded pending-plan
+  inspection, allowing consumers to release abandoned send reservations
+  without touching channel or UTXO-management operations.
+- `SdkNode.syncWallet()` and `SdkNode.walletSnapshot()` with a shared
+  v0.11.0-beta.3 native overlay: dual-keychain FullSync/FullScan modes,
+  bounded activity, coherent tip evidence, and decimal-string amounts.
+- Pull-request CI that applies the pinned native overlay, runs its contract
+  tests, builds the host addon, and executes the package canary.
 - `SdkNode.assetLinkCreate(request)` for the RLN v0.11 parent/child RGB
   asset-link contract.
 - `SdkNode.verifyMessage(message, signature)` with canonical Lightning
@@ -22,6 +49,9 @@ while pre-`1.0`.
   order documented by the native SDK release workflow.
 
 ### Changed
+- Publish the persisted local VSS writer identity with an Android-safe
+  exclusive-create protocol, bounded concurrent-reader retry, and fail-closed
+  corruption handling.
 - Updated the transaction and transfer query bindings for the consolidated
   RLN v0.11 C-FFI filter signatures while retaining the existing JavaScript
   convenience methods.
@@ -35,7 +65,38 @@ while pre-`1.0`.
   directory, preserving the committed object-based facade and its types.
 
 ### Fixed
+- Prepared RGB UTXO setup atomically isolates allocation outputs on a fresh
+  colored address and advances the receive address again before returning the
+  plan. Existing and future witness invoices can no longer quarantine setup
+  outputs as `pending_witness`.
+- Explicit node shutdown now releases its native handle immediately, including
+  persistent signer database locks once the signer is destroyed, instead of
+  waiting for nondeterministic garbage collection.
+- Reopening a trusted virtual channel no longer fails after the previous
+  channel was safely abandoned. Active and abandon-pending sessions still
+  block duplicate opens; only the terminal abandoned state is reusable.
+- `decodeRgbInvoice()` now returns a stable tagged assignment object instead
+  of an implementation-defined Rust `Debug` string. The exact blind/witness
+  recipient type and nullable expiration remain preserved.
+- `decodeLnInvoice()` now preserves `min_final_cltv_expiry_delta` across the
+  C-FFI JSON boundary. A native contract test guards the complete NodeJS
+  response shape against future DTO drift.
+- C-FFI network information now emits canonical lowercase network names,
+  matching the public TypeScript contract and wallet snapshot contract v1.
+- The local native-build lock graph now pins `rln-external-signer` to the
+  revision required by the patched C-FFI source, restoring reproducible
+  release builds for contributors and CI.
 - Release version commits now include `package-lock.json`.
+
+## [0.1.0-beta.15]
+
+### Added
+- Expose the disk-backed native VLS signer needed for channel operation after
+  process restarts.
+
+### Changed
+- Build branch installs from the exact checksum-pinned native overlay instead
+  of downloading a stale release addon.
 
 ## [0.1.0-beta.8] — 2026-06-01
 
