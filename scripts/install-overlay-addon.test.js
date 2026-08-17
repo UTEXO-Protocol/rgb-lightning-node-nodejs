@@ -17,7 +17,7 @@ test('package overlay metadata is exact and checksum-pinned', () => {
   assert.equal(config.commit, '0bfa66fa256a6c36f3737d5b6402eacea40c68fc')
   assert.equal(
     config.patchSha256,
-    '4ed9b5b1fbe45948c71e97c5bb18be090b6e5bd17e17b7772d57329b06684086'
+    '90893cf5c1300699566bf4d8a01cb98184c96695215a3dbe9f12986f69246823'
   )
   assert.equal(config.rustToolchain, '1.88.0')
 })
@@ -43,6 +43,32 @@ test('overlay contains the complete native operation registry source', () => {
   assert.ok(joinTasks >= 0, 'overlay must join aborted service tasks')
   assert.ok(disconnectPeers > joinTasks, 'final peer disconnect must follow task quiescence')
   assert.ok(waitForPersistence > disconnectPeers, 'persistence flush must follow final disconnect')
+})
+
+test('overlay contains the hardened shared RGB import implementation', () => {
+  const config = readConfig()
+  const patch = fs.readFileSync(path.resolve(config.patchPath), 'utf8')
+
+  assert.match(patch, /diff --git a\/src\/rgb_import\.rs b\/src\/rgb_import\.rs/)
+  assert.match(patch, /MAX_RGB_IMPORT_BASE64_CHARACTERS/)
+  assert.match(patch, /MAX_RGB_IMPORT_BODY_BYTES/)
+  assert.match(patch, /RgbTxid::from_str/)
+  assert.match(patch, /let task = tokio::spawn/)
+  assert.match(patch, /save_new_asset\(consignment, offchain_txid\)\?;/)
+  assert.match(patch, /95332c41fd715939ac6e078ad859d474b1f6fa9b/)
+})
+
+test('wrapper lockfile resolves the same hardened rgb-lib revision as the overlay', () => {
+  const lockfile = fs.readFileSync(path.join(__dirname, '..', 'Cargo.lock'), 'utf8')
+
+  assert.match(
+    lockfile,
+    /git\+https:\/\/github\.com\/UTEXO-Protocol\/rgb-lib\.git\?rev=95332c41fd715939ac6e078ad859d474b1f6fa9b#95332c41fd715939ac6e078ad859d474b1f6fa9b/
+  )
+  assert.doesNotMatch(
+    lockfile,
+    /git\+https:\/\/github\.com\/UTEXO-Protocol\/rgb-lib\.git\?tag=v0\.3\.0-beta\.27/
+  )
 })
 
 test('overlay preserves wallet discovery, RGB payment identity, and inbound channel semantics', () => {
