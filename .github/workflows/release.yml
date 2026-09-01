@@ -124,6 +124,7 @@ jobs:
         if: matrix.suffix != 'darwin-x64'
         run: |
           cp "dist/index-${{ matrix.suffix }}.node" "index-${{ matrix.suffix }}.node"
+          node -e "const installer = require('./scripts/install-overlay-addon'); installer.recordAddonProvenance(installer.readConfig())"
           npm test
 
       - name: Upload addon artifact
@@ -239,6 +240,7 @@ jobs:
       - name: Smoke test native addon
         run: |
           cp dist/index-linux-x64-musl.node index-linux-x64-musl.node
+          node -e "const installer = require('./scripts/install-overlay-addon'); installer.recordAddonProvenance(installer.readConfig())"
           npm test
 
       - name: Upload addon artifact
