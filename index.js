@@ -124,6 +124,12 @@ class SdkNode {
   // unused_hashes, refill_batch_size, first_hash_index).
   apayNew (hostNodeId) { return JSON.parse(this._inner.apayNew(hostNodeId)) }
 
+  // Register the APay hash batch and bind a signed username@domain
+  // attestation to the wallet node identity.
+  apayNewWithAddress (hostNodeId, username, domain) {
+    return JSON.parse(this._inner.apayNewWithAddress(hostNodeId, username, domain))
+  }
+
   // Info / network / sync
   nodeInfo () { return JSON.parse(this._inner.nodeInfo()) }
   networkInfo () { return JSON.parse(this._inner.networkInfo()) }

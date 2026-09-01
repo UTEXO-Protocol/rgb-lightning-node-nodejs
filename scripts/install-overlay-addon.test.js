@@ -18,7 +18,7 @@ test('package overlay metadata is exact and checksum-pinned', () => {
   assert.equal(config.commit, 'f30a5393268de67c6bb5a1c525bc790c5b11afa2')
   assert.equal(
     config.patchSha256,
-    'a765ad577bb0e0a88cd15136074357babffd61e2c3dffde624017a2a3cc8983d'
+    'd0b6d4b057edd675e3d4385f2243b266020feeb1bee7714e7625e2f7bc0c945c'
   )
   assert.equal(config.rustToolchain, '1.88.0')
 })
@@ -44,6 +44,14 @@ test('overlay contains the complete native operation registry source', () => {
   assert.ok(joinTasks >= 0, 'overlay must join aborted service tasks')
   assert.ok(disconnectPeers > joinTasks, 'final peer disconnect must follow task quiescence')
   assert.ok(waitForPersistence > disconnectPeers, 'persistence flush must follow final disconnect')
+})
+
+test('overlay exposes address-attested APay through the C ABI', () => {
+  const config = readConfig()
+  const patch = fs.readFileSync(path.resolve(config.patchPath), 'utf8')
+
+  assert.match(patch, /pub\(crate\) fn sdk_node_apay_new_with_address\(/)
+  assert.match(patch, /pub extern "C" fn rln_sdk_node_apay_new_with_address\(/)
 })
 
 test('overlay contains the hardened shared RGB import implementation', () => {

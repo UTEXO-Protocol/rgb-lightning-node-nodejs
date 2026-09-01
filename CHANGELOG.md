@@ -10,6 +10,9 @@ while pre-`1.0`.
 ## [Unreleased]
 
 ### Added
+- `SdkNode.apayNewWithAddress(hostNodeId, username, domain)` with the generated
+  C-FFI entry point required for signed Lightning Address attestation. The
+  legacy `apayNew` method remains available for explicit compatibility use.
 - Authoritative `listAddressReceipts(address)` settlement evidence backed by
   the configured Electrum or Esplora indexer, including exact received
   satoshis, transaction IDs, block heights, and confirmation counts.

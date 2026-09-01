@@ -40,10 +40,11 @@ use rlncffi::{
     rln_node_info, rln_open_channel, rln_post_asset_media, rln_prepare_btc_send,
     rln_prepare_create_utxos, rln_prepare_rgb_send, rln_refresh_transfers, rln_rgb_invoice,
     rln_rotate_address, rln_sdk_node_adopt_native_operation, rln_sdk_node_apay_new,
-    rln_sdk_node_attach_native_external_signer, rln_sdk_node_cancel_native_operation,
-    rln_sdk_node_detach_external_signer, rln_sdk_node_init_with_external_signer,
-    rln_sdk_node_init_with_native_external_signer, rln_sdk_node_native_operation_status,
-    rln_sdk_node_new, rln_sdk_node_shutdown, rln_sdk_node_start_unlock_with_native_external_signer,
+    rln_sdk_node_apay_new_with_address, rln_sdk_node_attach_native_external_signer,
+    rln_sdk_node_cancel_native_operation, rln_sdk_node_detach_external_signer,
+    rln_sdk_node_init_with_external_signer, rln_sdk_node_init_with_native_external_signer,
+    rln_sdk_node_native_operation_status, rln_sdk_node_new, rln_sdk_node_shutdown,
+    rln_sdk_node_start_unlock_with_native_external_signer,
     rln_sdk_node_unlock_with_attached_external_signer,
     rln_sdk_node_unlock_with_native_external_signer, rln_sdk_node_vss_backup,
     rln_sdk_node_vss_clear_fence, rln_sdk_node_vss_delete_all, rln_send_btc,
@@ -382,6 +383,28 @@ impl SdkNode {
         let c = std::ffi::CString::new(host_node_id)
             .map_err(|_| napi::Error::from_reason("host_node_id contains null byte"))?;
         let res = rln_sdk_node_apay_new(&self.handle, c.as_ptr());
+        take_cresult_string(res)
+    }
+
+    /// Register an APay hash batch and attest a Lightning Address to the LSP.
+    /// The underlying SDK signs both the batch and `username@domain`
+    /// attestation with the wallet node key.
+    #[napi]
+    pub fn apay_new_with_address(
+        &self,
+        host_node_id: String,
+        username: String,
+        domain: String,
+    ) -> Result<String> {
+        let host_node_id = cstring(&host_node_id)?;
+        let username = cstring(&username)?;
+        let domain = cstring(&domain)?;
+        let res = rln_sdk_node_apay_new_with_address(
+            &self.handle,
+            host_node_id.as_ptr(),
+            username.as_ptr(),
+            domain.as_ptr(),
+        );
         take_cresult_string(res)
     }
 
