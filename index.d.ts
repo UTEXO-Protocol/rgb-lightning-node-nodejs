@@ -431,6 +431,7 @@ export class SdkNode {
   vssBackup(): JsonObject
   vssDeleteAll(request: { password: string }): { deleted_keys: number }
   apayNew(hostNodeId: string): JsonObject
+  apayNewWithAddress(hostNodeId: string, username: string, domain: string): JsonObject
 
   // Node info / network / sync
   nodeInfo(): JsonObject

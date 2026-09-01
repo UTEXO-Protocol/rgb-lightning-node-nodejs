@@ -173,7 +173,7 @@ throw `napi::Error` on the C-FFI `Err` branch).
 | RGB assets | `listAssets`, `assetBalance`, `assetLinkCreate`, `assetMetadata`, `sendRgb`, `importRgbTransferConsignment`, `importRgbContract`, `prepareRgbSend`, `commitPreparedRgbSend`, `cancelRgbSendPlan`, `listPendingRgbSendPlans`, `inflate`, `listTransfers`, `listTransfersByTxid`, `refreshTransfers`, `failTransfers`, `getAssetMedia`, `postAssetMedia` |
 | BTC | `btcBalance`, `sendBtc`, `prepareBtcSend`, `commitPreparedBtcSend`, `cancelBtcSendPlan`, `listPendingVanillaTransactions`, `listAddressReceipts`, `listTransactions`, `listTransactionsByTxid`, `listUnspents`, `createUtxos`, `prepareCreateUtxos`, `commitPreparedCreateUtxos`, `cancelCreateUtxosPlan`, `estimateFee` |
 | VSS | `vssClearFence`, `vssBackup`, `vssDeleteAll` |
-| APay | `apayNew` |
+| APay | `apayNew`, `apayNewWithAddress` |
 | Signing / onion / diagnostics | `signMessage`, `verifyMessage`, `sendOnionMessage`, `checkIndexerUrl`, `checkProxyEndpoint` |
 
 **Module-level helpers** — `uniffiHealthcheck()`, `uniffiIsInitialized()`,

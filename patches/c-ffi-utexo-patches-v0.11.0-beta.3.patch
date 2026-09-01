@@ -76,7 +76,7 @@ index de835da..e6ad18f 100644
  [build-dependencies]
  cbindgen = "0.29.0"
 diff --git a/bindings/c-ffi/rln.h b/bindings/c-ffi/rln.h
-index 7e44bcb..20197b7 100644
+index 7e44bcb..182c636 100644
 --- a/bindings/c-ffi/rln.h
 +++ b/bindings/c-ffi/rln.h
 @@ -26,8 +26,9 @@ typedef struct CResult {
@@ -198,7 +198,21 @@ index 7e44bcb..20197b7 100644
  /**
   * APay receiver-side registration with an LSP. Argument is the LSP's
   * node_id as a hex string (compressed secp256k1). Returns JSON of
-@@ -174,6 +223,9 @@ struct CResultString rln_sdk_node_apay_new(const struct COpaqueStruct *node,
+@@ -171,9 +220,23 @@ struct CResultString rln_sdk_initialize(const char *request_json);
+ struct CResultString rln_sdk_node_apay_new(const struct COpaqueStruct *node,
+                                            const char *host_node_id);
+ 
++/**
++ * APay receiver-side registration with Lightning Address attestation.
++ * Arguments are the LSP node id plus the address's username and domain.
++ * Returns JSON of `AsyncOrderNewResponse` using the same ownership contract
++ * as `rln_sdk_node_apay_new`.
++ */
++struct CResultString rln_sdk_node_apay_new_with_address(const struct COpaqueStruct *node,
++                                                        const char *host_node_id,
++                                                        const char *username,
++                                                        const char *domain);
++
  struct CResultString rln_sdk_node_attach_native_external_signer(const struct COpaqueStruct *node,
                                                                  const struct COpaqueStruct *signer);
  
@@ -208,7 +222,7 @@ index 7e44bcb..20197b7 100644
  struct CResultString rln_sdk_node_detach_external_signer(const struct COpaqueStruct *node);
  
  struct CResultString rln_sdk_node_init(const struct COpaqueStruct *node,
-@@ -186,10 +238,17 @@ struct CResultString rln_sdk_node_init_with_external_signer(const struct COpaque
+@@ -186,10 +249,17 @@ struct CResultString rln_sdk_node_init_with_external_signer(const struct COpaque
  struct CResultString rln_sdk_node_init_with_native_external_signer(const struct COpaqueStruct *node,
                                                                     const struct COpaqueStruct *signer);
  
@@ -226,7 +240,7 @@ index 7e44bcb..20197b7 100644
  struct CResultString rln_sdk_node_unlock(const struct COpaqueStruct *node,
                                           const char *request_json);
  
-@@ -223,6 +282,14 @@ struct CResultString rln_sdk_node_vss_backup(const struct COpaqueStruct *node);
+@@ -223,6 +293,14 @@ struct CResultString rln_sdk_node_vss_backup(const struct COpaqueStruct *node);
  struct CResultString rln_sdk_node_vss_clear_fence(const struct COpaqueStruct *node,
                                                    const char *request_json);
  
@@ -241,7 +255,7 @@ index 7e44bcb..20197b7 100644
  struct CResultString rln_sdk_shutdown(void);
  
  struct CResultString rln_send_btc(const struct COpaqueStruct *node, const char *request_json);
-@@ -238,6 +305,8 @@ struct CResultString rln_sign_message(const struct COpaqueStruct *node, const ch
+@@ -238,6 +316,8 @@ struct CResultString rln_sign_message(const struct COpaqueStruct *node, const ch
  
  struct CResultString rln_sync(const struct COpaqueStruct *node);
  
@@ -250,7 +264,7 @@ index 7e44bcb..20197b7 100644
  struct CResultString rln_taker(const struct COpaqueStruct *node, const char *request_json);
  
  struct CResultString rln_uniffi_healthcheck(void);
-@@ -247,3 +316,6 @@ struct CResultString rln_uniffi_is_initialized(void);
+@@ -247,3 +327,6 @@ struct CResultString rln_uniffi_is_initialized(void);
  struct CResultString rln_verify_message(const struct COpaqueStruct *node,
                                          const char *message,
                                          const char *signature);
@@ -258,7 +272,7 @@ index 7e44bcb..20197b7 100644
 +struct CResultString rln_wallet_snapshot(const struct COpaqueStruct *node,
 +                                         const char *request_json);
 diff --git a/bindings/c-ffi/rln.hpp b/bindings/c-ffi/rln.hpp
-index 7b06f67..4079885 100644
+index 7b06f67..4c7ca20 100644
 --- a/bindings/c-ffi/rln.hpp
 +++ b/bindings/c-ffi/rln.hpp
 @@ -29,8 +29,9 @@ struct CResult {
@@ -368,7 +382,19 @@ index 7b06f67..4079885 100644
  /// APay receiver-side registration with an LSP. Argument is the LSP's
  /// node_id as a hex string (compressed secp256k1). Returns JSON of
  /// `AsyncOrderNewResponse` (request_id, host_node_id, protocol_version,
-@@ -154,6 +192,9 @@ CResultString rln_sdk_node_apay_new(const COpaqueStruct *node, const char *host_
+@@ -151,9 +189,21 @@ CResultString rln_sdk_initialize(const char *request_json);
+ /// unused_hashes, refill_batch_size, first_hash_index). Upstream PR #51.
+ CResultString rln_sdk_node_apay_new(const COpaqueStruct *node, const char *host_node_id);
+ 
++/// APay receiver-side registration with Lightning Address attestation.
++/// Arguments are the LSP node id plus the address's username and domain.
++/// Returns JSON of `AsyncOrderNewResponse` using the same ownership contract
++/// as `rln_sdk_node_apay_new`.
++CResultString rln_sdk_node_apay_new_with_address(const COpaqueStruct *node,
++                                                 const char *host_node_id,
++                                                 const char *username,
++                                                 const char *domain);
++
  CResultString rln_sdk_node_attach_native_external_signer(const COpaqueStruct *node,
                                                           const COpaqueStruct *signer);
  
@@ -378,7 +404,7 @@ index 7b06f67..4079885 100644
  CResultString rln_sdk_node_detach_external_signer(const COpaqueStruct *node);
  
  CResultString rln_sdk_node_init(const COpaqueStruct *node,
-@@ -166,10 +207,17 @@ CResultString rln_sdk_node_init_with_external_signer(const COpaqueStruct *node,
+@@ -166,10 +216,17 @@ CResultString rln_sdk_node_init_with_external_signer(const COpaqueStruct *node,
  CResultString rln_sdk_node_init_with_native_external_signer(const COpaqueStruct *node,
                                                              const COpaqueStruct *signer);
  
@@ -396,7 +422,7 @@ index 7b06f67..4079885 100644
  CResultString rln_sdk_node_unlock(const COpaqueStruct *node, const char *request_json);
  
  CResultString rln_sdk_node_unlock_with_attached_external_signer(const COpaqueStruct *node,
-@@ -197,6 +245,11 @@ CResultString rln_sdk_node_vss_backup(const COpaqueStruct *node);
+@@ -197,6 +254,11 @@ CResultString rln_sdk_node_vss_backup(const COpaqueStruct *node);
  /// when you're certain the previous owner is gone.
  CResultString rln_sdk_node_vss_clear_fence(const COpaqueStruct *node, const char *request_json);
  
@@ -408,7 +434,7 @@ index 7b06f67..4079885 100644
  CResultString rln_sdk_shutdown();
  
  CResultString rln_send_btc(const COpaqueStruct *node, const char *request_json);
-@@ -211,6 +264,8 @@ CResultString rln_sign_message(const COpaqueStruct *node, const char *message);
+@@ -211,6 +273,8 @@ CResultString rln_sign_message(const COpaqueStruct *node, const char *message);
  
  CResultString rln_sync(const COpaqueStruct *node);
  
@@ -417,7 +443,7 @@ index 7b06f67..4079885 100644
  CResultString rln_taker(const COpaqueStruct *node, const char *request_json);
  
  CResultString rln_uniffi_healthcheck();
-@@ -221,4 +276,6 @@ CResultString rln_verify_message(const COpaqueStruct *node,
+@@ -221,4 +285,6 @@ CResultString rln_verify_message(const COpaqueStruct *node,
                                   const char *message,
                                   const char *signature);
  
@@ -425,7 +451,7 @@ index 7b06f67..4079885 100644
 +
  }  // extern "C"
 diff --git a/bindings/c-ffi/src/api.rs b/bindings/c-ffi/src/api.rs
-index 548b574..df83c23 100644
+index 548b574..f676740 100644
 --- a/bindings/c-ffi/src/api.rs
 +++ b/bindings/c-ffi/src/api.rs
 @@ -3,9 +3,12 @@
@@ -512,7 +538,33 @@ index 548b574..df83c23 100644
  // APay receiver-side: register this node with an LSP as an async-order
  // recipient. PR #51 upstream — returns AsyncOrderNewResponse (request_id,
  // host_node_id, protocol_version, order_id, status, accepted_through_index,
-@@ -288,7 +337,7 @@ pub(crate) fn decode_rgb_invoice(
+@@ -138,6 +187,25 @@ pub(crate) fn sdk_node_apay_new(
+     json(response)
+ }
+ 
++// APay receiver-side registration with Lightning Address attestation.
++// Delegates validation and signed request construction to the SDK so the C
++// boundary only transports the three required UTF-8 values and serialized
++// AsyncOrderNewResponse.
++pub(crate) fn sdk_node_apay_new_with_address(
++    node: &COpaqueStruct,
++    host_node_id: *const c_char,
++    username: *const c_char,
++    domain: *const c_char,
++) -> Result<String, Error> {
++    let node = require_handle(node)?;
++    let response = node.apay_new_with_address(
++        ptr_to_string(host_node_id),
++        ptr_to_string(username),
++        ptr_to_string(domain),
++    )?;
++    json(response)
++}
++
+ // ---------------------------------------------------------------------------
+ // Channels / peers
+ // ---------------------------------------------------------------------------
+@@ -288,7 +356,7 @@ pub(crate) fn decode_rgb_invoice(
  ) -> Result<String, Error> {
      let node = require_handle(node)?;
      let resp = node.decode_rgb_invoice(ptr_to_string(invoice))?;
@@ -521,7 +573,7 @@ index 548b574..df83c23 100644
  }
  
  pub(crate) fn get_payment(
-@@ -338,6 +387,67 @@ pub(crate) fn send_rgb(node: &COpaqueStruct, request_json: *const c_char) -> Res
+@@ -338,6 +406,67 @@ pub(crate) fn send_rgb(node: &COpaqueStruct, request_json: *const c_char) -> Res
      json(JsonSendRgbResponse::from(resp))
  }
  
@@ -589,7 +641,7 @@ index 548b574..df83c23 100644
  pub(crate) fn refresh_transfers(
      node: &COpaqueStruct,
      request_json: *const c_char,
-@@ -580,6 +690,61 @@ pub(crate) fn send_btc(node: &COpaqueStruct, request_json: *const c_char) -> Res
+@@ -580,6 +709,61 @@ pub(crate) fn send_btc(node: &COpaqueStruct, request_json: *const c_char) -> Res
      json(JsonSendBtcResponse::from(resp))
  }
  
@@ -651,7 +703,7 @@ index 548b574..df83c23 100644
  pub(crate) fn create_utxos(
      node: &COpaqueStruct,
      request_json: *const c_char,
-@@ -590,6 +755,36 @@ pub(crate) fn create_utxos(
+@@ -590,6 +774,36 @@ pub(crate) fn create_utxos(
      ok_void()
  }
  
@@ -688,7 +740,7 @@ index 548b574..df83c23 100644
  pub(crate) fn list_transactions(
      node: &COpaqueStruct,
      skip_sync: bool,
-@@ -611,6 +806,222 @@ pub(crate) fn sync(node: &COpaqueStruct) -> Result<String, Error> {
+@@ -611,6 +825,222 @@ pub(crate) fn sync(node: &COpaqueStruct) -> Result<String, Error> {
      ok_void()
  }
  
@@ -911,7 +963,7 @@ index 548b574..df83c23 100644
  // ---------------------------------------------------------------------------
  // Swaps / onion
  // ---------------------------------------------------------------------------
-@@ -716,6 +1127,23 @@ pub(crate) fn native_external_signer_new(
+@@ -716,6 +1146,23 @@ pub(crate) fn native_external_signer_new(
      )?)
  }
  
@@ -935,7 +987,7 @@ index 548b574..df83c23 100644
  pub(crate) fn native_external_signer_bootstrap(signer: &COpaqueStruct) -> Result<String, Error> {
      let signer = require_signer(signer)?;
      let bootstrap = signer.bootstrap()?;
-@@ -764,6 +1192,39 @@ pub(crate) fn sdk_node_unlock_with_native_external_signer(
+@@ -764,6 +1211,39 @@ pub(crate) fn sdk_node_unlock_with_native_external_signer(
      ok_void()
  }
  
@@ -975,7 +1027,7 @@ index 548b574..df83c23 100644
  pub(crate) fn sdk_node_init_with_external_signer(
      node: &COpaqueStruct,
      bootstrap_json: *const c_char,
-@@ -798,3 +1259,23 @@ pub(crate) fn sdk_node_unlock_with_attached_external_signer(
+@@ -798,3 +1278,23 @@ pub(crate) fn sdk_node_unlock_with_attached_external_signer(
      )?;
      ok_void()
  }
@@ -2301,7 +2353,7 @@ index aba9a35..2e40366 100644
      }
  }
 diff --git a/bindings/c-ffi/src/lib.rs b/bindings/c-ffi/src/lib.rs
-index dfc595a..08208e9 100644
+index dfc595a..23173f4 100644
 --- a/bindings/c-ffi/src/lib.rs
 +++ b/bindings/c-ffi/src/lib.rs
 @@ -9,6 +9,7 @@
@@ -2345,7 +2397,31 @@ index dfc595a..08208e9 100644
  /// APay receiver-side registration with an LSP. Argument is the LSP's
  /// node_id as a hex string (compressed secp256k1). Returns JSON of
  /// `AsyncOrderNewResponse` (request_id, host_node_id, protocol_version,
-@@ -342,6 +360,69 @@ pub extern "C" fn rln_send_rgb(node: &COpaqueStruct, request_json: *const c_char
+@@ -168,6 +186,23 @@ pub extern "C" fn rln_sdk_node_apay_new(
+     )
+ }
+ 
++/// APay receiver-side registration with Lightning Address attestation.
++/// Arguments are the LSP node id plus the address's username and domain.
++/// Returns JSON of `AsyncOrderNewResponse` using the same ownership contract
++/// as `rln_sdk_node_apay_new`.
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_sdk_node_apay_new_with_address(
++    node: &COpaqueStruct,
++    host_node_id: *const c_char,
++    username: *const c_char,
++    domain: *const c_char,
++) -> CResultString {
++    ffi_call!(
++        "rln_sdk_node_apay_new_with_address",
++        api::sdk_node_apay_new_with_address(node, host_node_id, username, domain)
++    )
++}
++
+ // ---------------------------------------------------------------------------
+ // Channels / peers
+ // ---------------------------------------------------------------------------
+@@ -342,6 +377,69 @@ pub extern "C" fn rln_send_rgb(node: &COpaqueStruct, request_json: *const c_char
      ffi_call!("rln_send_rgb", api::send_rgb(node, request_json))
  }
  
@@ -2415,7 +2491,7 @@ index dfc595a..08208e9 100644
  #[unsafe(no_mangle)]
  pub extern "C" fn rln_refresh_transfers(
      node: &COpaqueStruct,
-@@ -569,6 +650,58 @@ pub extern "C" fn rln_send_btc(node: &COpaqueStruct, request_json: *const c_char
+@@ -569,6 +667,58 @@ pub extern "C" fn rln_send_btc(node: &COpaqueStruct, request_json: *const c_char
      ffi_call!("rln_send_btc", api::send_btc(node, request_json))
  }
  
@@ -2474,7 +2550,7 @@ index dfc595a..08208e9 100644
  #[unsafe(no_mangle)]
  pub extern "C" fn rln_create_utxos(
      node: &COpaqueStruct,
-@@ -577,6 +710,39 @@ pub extern "C" fn rln_create_utxos(
+@@ -577,6 +727,39 @@ pub extern "C" fn rln_create_utxos(
      ffi_call!("rln_create_utxos", api::create_utxos(node, request_json))
  }
  
@@ -2514,7 +2590,7 @@ index dfc595a..08208e9 100644
  #[unsafe(no_mangle)]
  pub extern "C" fn rln_list_transactions(
      node: &COpaqueStruct,
-@@ -594,6 +760,25 @@ pub extern "C" fn rln_sync(node: &COpaqueStruct) -> CResultString {
+@@ -594,6 +777,25 @@ pub extern "C" fn rln_sync(node: &COpaqueStruct) -> CResultString {
      ffi_call!("rln_sync", api::sync(node))
  }
  
@@ -2540,7 +2616,7 @@ index dfc595a..08208e9 100644
  // ---------------------------------------------------------------------------
  // Swaps / onion
  // ---------------------------------------------------------------------------
-@@ -678,15 +863,17 @@ pub extern "C" fn rln_sdk_shutdown() -> CResultString {
+@@ -678,15 +880,17 @@ pub extern "C" fn rln_sdk_shutdown() -> CResultString {
  // External-signer surface
  // ---------------------------------------------------------------------------
  
@@ -2561,7 +2637,7 @@ index dfc595a..08208e9 100644
      }
  }
  
-@@ -713,6 +900,24 @@ pub extern "C" fn rln_native_external_signer_new(
+@@ -713,6 +917,24 @@ pub extern "C" fn rln_native_external_signer_new(
      )
  }
  
@@ -2586,7 +2662,7 @@ index dfc595a..08208e9 100644
  #[unsafe(no_mangle)]
  pub extern "C" fn rln_native_external_signer_bootstrap(signer: &COpaqueStruct) -> CResultString {
      ffi_call!(
-@@ -755,6 +960,51 @@ pub extern "C" fn rln_sdk_node_unlock_with_native_external_signer(
+@@ -755,6 +977,51 @@ pub extern "C" fn rln_sdk_node_unlock_with_native_external_signer(
      )
  }
  

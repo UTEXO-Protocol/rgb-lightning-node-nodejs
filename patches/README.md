@@ -18,6 +18,8 @@ matching file are built directly from upstream.
 
 This overlay includes transactional orphaned virtual-channel recovery so a
 failed RGB channel open cannot permanently reserve inventory or block the peer.
+It also exposes `rln_sdk_node_apay_new_with_address`, carrying RLN's existing
+signed Lightning Address attestation API through the generated C boundary.
 Lightning send responses and persisted payment records expose stable failure
 codes, and node shutdown releases native ownership before signer destruction.
 Shutdown now aborts and joins peer reconnect/listener tasks before its final

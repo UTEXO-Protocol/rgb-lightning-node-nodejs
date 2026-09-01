@@ -48,9 +48,23 @@ try {
       'listTransfersByTxid',
     'importRgbTransferConsignment',
     'importRgbContract',
+    'apayNew',
+    'apayNewWithAddress',
     'verifyMessage'
   ]) {
     if (typeof node[method] !== 'function') throw new Error(`SdkNode.${method} is missing`)
+  }
+
+  let lockedApayError
+  try {
+    node.apayNewWithAddress('02'.repeat(33), 'canary', 'example.com')
+  } catch (error) {
+    lockedApayError = error
+  }
+  if (!String(lockedApayError?.message ?? lockedApayError).includes('NotInitialized')) {
+    throw new Error(
+      `address-attested APay did not reach the locked native node: ${lockedApayError}`
+    )
   }
 
   let invalidSyncRequest
