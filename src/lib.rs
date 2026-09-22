@@ -396,12 +396,6 @@ impl SdkNode {
         fwd_noarg!(self, rln_sync)
     }
 
-    /// Synchronize both Vanilla BTC and Colored RGB keychains. Routine mode
-    /// uses FullSync; recovery mode uses FullScan for address discovery.
-
-    /// Capture a versioned, bounded, decimal-safe wallet snapshot from the
-    /// native runtime without triggering an implicit synchronization.
-
     // -- Peers / channels --------------------------------------------------
 
     #[napi]

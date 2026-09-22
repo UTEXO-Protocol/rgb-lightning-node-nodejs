@@ -29,6 +29,12 @@ identity before allowing node creation. Do not rename or reuse an old binary.
 Build assets uploaded by CI are review artifacts. This installer does not download
 unverified release binaries and makes no no-Rust installation promise.
 
+Use the default package-local Cargo target directory, or a dedicated cache per
+package/source checkout. Sharing `CARGO_TARGET_DIR` between the Node and Bare
+graphs caused Rust type/trait mismatches during qualification; an isolated Bare
+build passed with the same sources. Do not treat a shared-cache failure as a
+reason to patch or relax the approved dependency graph.
+
 ## Runtime Contract
 
 ```js

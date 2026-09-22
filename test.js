@@ -41,6 +41,7 @@ try {
     assert.throws(() => node[method]({}), { code: 'ERR_RLN_UNSUPPORTED_CAPABILITY' })
   }
   node.initWithNativeExternalSigner(signer)
+  assert.throws(() => node.initWithNativeExternalSigner(signer), /^Error: Rln\(Conflict\):/)
   assert.throws(() => node.unlockWithNativeExternalSigner(signer, {}), /ldk_chain_sync/)
   assert.throws(() => node.sendPayment({ invoice: 'unused', max_total_routing_fee_msat: 0 }), {
     code: 'ERR_RLN_UNSUPPORTED_CAPABILITY'
