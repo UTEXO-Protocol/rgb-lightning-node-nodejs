@@ -16,13 +16,13 @@ Status: implementation in progress. Draft PR, not release approval.
 | Work | Status | Required Evidence |
 | --- | --- | --- |
 | Dedicated upgrade branch | Done | `codex/rln-0.13.0-beta.3` |
-| Released native graph and bounded C-FFI adapter | In progress | Reviewed source, focused regression tests |
-| Wrapper types, unsupported capability rejection, exact numbers | In progress | No silent fallbacks; fail before mutation |
-| Source install/provenance/artifact workflow | Pending | Clean consumers and negative tests |
-| Unit/type/lint/package checks | Pending | Exact commands and results below |
-| Linked native/runtime conformance | Pending | Real artifacts, not only mocks |
-| Independent final diff review | Pending | Every plan item classified |
-| Cross-repository draft PR links | Pending | Add after creation |
+| Released native graph and bounded C-FFI adapter | Implemented | Eight binding/build files only; locked debug and optimized host builds passed |
+| Wrapper types, unsupported capability rejection, exact numbers | Verified locally | 12 JS/installer tests and declaration checks pass |
+| Source install/provenance/artifact workflow | Implemented | Exact graph, adapter, lock, wrapper, target and artifact identity; packed install pending |
+| Unit/type/lint/package checks | Verified locally | Type checks, JS tests and Rust formatting; package consumer next |
+| Linked native/runtime conformance | Partial | Optimized macOS arm64 offline canary passed; other targets/network remain gates |
+| Final diff review | In progress | Release graph, adapter equality, lifecycle and packaging reviewed; external maintainer review required |
+| Cross-repository draft PR links | Done | Links below |
 
 ## Explicit Release Gates
 
@@ -51,3 +51,19 @@ a weaker implementation.
 - Results below will distinguish mocked tests, linked host smoke, compile-only
   cross-builds, device tests and funded/network qualification.
 - No funded transaction or production wallet has been used.
+- `npm run check:types`: pass. `npm run test:unit`: 12 passed.
+- `npm run build`: optimized macOS arm64 build passed in 19m44s.
+- `npm test`: real optimized addon identity, offline init, error paths, disposal,
+  persistent signer restart/permissions and unsupported-capability checks passed.
+- Two C-FFI Rust adapter tests passed on the debug build.
+- Upstream release has an unused `stats` warning in rust-lightning; no behavior
+  patch was added. Explicit Apple C/C++ deployment flags fixed the mixed-floor warning.
+- `npm audit`: zero vulnerabilities after a targeted js-yaml lock update.
+- Source builds are intentional, not prebuilt/no-Rust installs. Candidate workflow
+  actions are SHA-pinned; no publish, tag-write or release-write permissions.
+
+## Coordinated Drafts
+
+- [Node #22](https://github.com/UTEXO-Protocol/rgb-lightning-node-nodejs/pull/22)
+- [Bare #20](https://github.com/UTEXO-Protocol/rgb-lightning-node-bare/pull/20)
+- [WDK #43](https://github.com/UTEXO-Protocol/wdk-rgb-lightning/pull/43)

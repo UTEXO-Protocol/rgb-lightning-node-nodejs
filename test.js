@@ -1,130 +1,63 @@
 'use strict'
 
-const fs = require('fs')
-const os = require('os')
-const path = require('path')
+const assert = require('node:assert/strict')
+const fs = require('node:fs')
+const os = require('node:os')
+const path = require('node:path')
+const { NativeExternalSigner, SdkNode, getRuntimeInfo } = require('./index')
+const { identity, readConfig } = require('./scripts/install-overlay-addon')
 
-const { NativeExternalSigner, SdkNode } = require('./index')
+const config = readConfig()
+const expected = identity(config)
+const info = getRuntimeInfo()
+assert.equal(info.rln_commit, config.commit)
+assert.equal(info.adapter_sha256, config.patchSha256)
+assert.equal(info.wrapper_sha256, expected.wrapperSha256)
+assert.equal(info.lock_sha256, expected.lockSha256)
+assert.ok(info.capabilities.includes('persistent-native-signer'))
 
-const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rln-node-canary-'))
-const signerDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rln-node-vls-canary-'))
-const signer = NativeExternalSigner.createWithStorage(
-  '01'.repeat(32),
-  'regtest',
-  signerDataDir,
-  true
-)
-const node = SdkNode.create({
-  storage_dir_path: dataDir,
-  daemon_listening_port: 0,
-  ldk_peer_listening_port: 0,
-  network: 'regtest',
-  max_media_upload_size_mb: 5,
-  enable_virtual_channels_v0: false,
-  reuse_addresses: true
-})
-
+const root = fs.mkdtempSync(path.join(os.tmpdir(), 'rln-node-release-canary-'))
+const signerDir = path.join(root, 'signer')
+const nodeDir = path.join(root, 'node')
+let signer
+let node
+let bootstrap
 try {
-    for (const method of [
-      'rotateAddress',
-      'assetLinkCreate',
-      'listTransactions',
-      'listTransfers',
-      'syncWallet',
-    'walletSnapshot',
-    'prepareBtcSend',
-    'commitPreparedBtcSend',
-    'cancelBtcSendPlan',
-    'prepareCreateUtxos',
-    'commitPreparedCreateUtxos',
-    'cancelCreateUtxosPlan',
-    'listPendingVanillaTransactions',
-    'listAddressReceipts',
-    'prepareRgbSend',
-    'commitPreparedRgbSend',
-      'cancelRgbSendPlan',
-      'listPendingRgbSendPlans',
-      'listTransactionsByTxid',
-      'listTransfersByTxid',
-    'importRgbTransferConsignment',
-    'importRgbContract',
-    'apayNew',
-    'apayNewWithAddress',
-    'verifyMessage'
-  ]) {
-    if (typeof node[method] !== 'function') throw new Error(`SdkNode.${method} is missing`)
+  // Public deterministic fixture seed: this wallet must never be funded.
+  signer = NativeExternalSigner.createWithStorage('01'.repeat(32), 'regtest', signerDir)
+  bootstrap = signer.bootstrap()
+  assert.match(bootstrap.node_id, /^(02|03)[a-f0-9]{64}$/)
+  node = SdkNode.create({
+    storage_dir_path: nodeDir,
+    daemon_listening_port: 0,
+    ldk_peer_listening_port: 0,
+    network: 'regtest',
+    max_media_upload_size_mb: 5,
+    enable_virtual_channels_v0: false,
+    reuse_addresses: true
+  })
+  assert.throws(() => node.apayNewWithAddress('02'.repeat(33), 'canary', 'example.com'), /NotInitialized/)
+  for (const method of ['syncWallet', 'walletSnapshot', 'prepareBtcSend', 'vssDeleteAll']) {
+    assert.throws(() => node[method]({}), { code: 'ERR_RLN_UNSUPPORTED_CAPABILITY' })
   }
-
-  let lockedApayError
-  try {
-    node.apayNewWithAddress('02'.repeat(33), 'canary', 'example.com')
-  } catch (error) {
-    lockedApayError = error
-  }
-  if (!String(lockedApayError?.message ?? lockedApayError).includes('NotInitialized')) {
-    throw new Error(
-      `address-attested APay did not reach the locked native node: ${lockedApayError}`
-    )
-  }
-
-  let invalidSyncRequest
-  try {
-    node.syncWallet({ mode: 'routine', typo: true })
-  } catch (error) {
-    invalidSyncRequest = error
-  }
-  if (!String(invalidSyncRequest?.message ?? invalidSyncRequest).includes('unknown field')) {
-    throw new Error(`syncWallet accepted an unknown request field: ${invalidSyncRequest}`)
-  }
-
-  let invalidSnapshotLimit
-  try {
-    node.walletSnapshot({ max_assets: 0 })
-  } catch (error) {
-    invalidSnapshotLimit = error
-  }
-  if (!String(invalidSnapshotLimit?.message ?? invalidSnapshotLimit).includes('max_assets')) {
-    throw new Error(`walletSnapshot accepted max_assets=0: ${invalidSnapshotLimit}`)
-  }
-
   node.initWithNativeExternalSigner(signer)
-  const wrongSigner = NativeExternalSigner.create('02'.repeat(32), 'regtest')
-  try {
-    let mismatch
-    try {
-      node.unlockWithNativeExternalSigner(wrongSigner, {})
-    } catch (error) {
-      mismatch = error
-    }
-    if (!String(mismatch?.message ?? mismatch).includes('Rln(ExternalSignerMismatch)')) {
-      throw new Error(`unexpected signer mismatch error: ${mismatch}`)
-    }
-  } finally {
-    wrongSigner.destroy()
-  }
-
-  const result = node.verifyMessage(
-    'is this compatible?',
-    'rbgfioj114mh48d8egqx8o9qxqw4fmhe8jbeeabdioxnjk8z3t1ma1hu1fiswpakgucwwzwo6ofycffbsqusqdimugbh41n1g698hr9t'
-  )
-  if (!result || typeof result.valid !== 'boolean') {
-    throw new Error('verifyMessage did not return { valid: boolean }')
-  }
-
-  const bootstrap = signer.bootstrap()
-  if (typeof bootstrap.node_id !== 'string') throw new Error('signer bootstrap is missing node_id')
-} finally {
+  assert.throws(() => node.unlockWithNativeExternalSigner(signer, {}), /ldk_chain_sync/)
+  assert.throws(() => node.sendPayment({ invoice: 'unused', max_total_routing_fee_msat: 0 }), {
+    code: 'ERR_RLN_UNSUPPORTED_CAPABILITY'
+  })
   node.shutdown()
+  node.shutdown()
+  node = undefined
   signer.destroy()
-  const reopenedSigner = NativeExternalSigner.createWithStorage(
-    '01'.repeat(32),
-    'regtest',
-    signerDataDir,
-    true
-  )
-  reopenedSigner.destroy()
-  fs.rmSync(dataDir, { recursive: true, force: true })
-  fs.rmSync(signerDataDir, { recursive: true, force: true })
+  signer.destroy()
+  assert.throws(() => signer.bootstrap(), /destroyed/)
+  signer = NativeExternalSigner.createWithStorage('01'.repeat(32), 'regtest', signerDir)
+  assert.deepEqual(signer.bootstrap(), bootstrap)
+  assert.equal(fs.statSync(signerDir).mode & 0o777, 0o700)
+  assert.throws(() => NativeExternalSigner.create('01'.repeat(32), 'mainnet', true))
+} finally {
+  if (node) node.shutdown()
+  if (signer) signer.destroy()
+  fs.rmSync(root, { recursive: true, force: true })
 }
-
-console.log('Node binding canary passed')
+console.log('Native identity, offline init, errors, disposal and persistent signer reopen passed.')

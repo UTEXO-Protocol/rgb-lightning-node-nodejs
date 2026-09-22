@@ -1,0 +1,382 @@
+diff --git a/bindings/c-ffi/Cargo.lock b/bindings/c-ffi/Cargo.lock
+index f7824a8..366b67a 100644
+--- a/bindings/c-ffi/Cargo.lock
++++ b/bindings/c-ffi/Cargo.lock
+@@ -3356,14 +3356,12 @@ dependencies = [
+ [[package]]
+ name = "lightning-transaction-sync"
+ version = "0.2.1"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "b7260095a79a44b09ebd97e77855ec8b7996ab939223369f66244974a374bd2c"
+ dependencies = [
+  "bitcoin",
+  "electrum-client 0.24.1",
+  "esplora-client",
+  "lightning 0.2.2",
+- "lightning-macros 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
++ "lightning-macros 0.2.1",
+ ]
+ 
+ [[package]]
+@@ -4762,7 +4760,7 @@ dependencies = [
+ [[package]]
+ name = "rgb-lib"
+ version = "0.3.0-beta.7"
+-source = "git+https://github.com/dcorral/rgb-lib.git?rev=94b6221ea9bf04562d89c21c9f074f4ecfbddd5d#94b6221ea9bf04562d89c21c9f074f4ecfbddd5d"
++source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?tag=v0.3.0-beta.34#62a8c3a045901147b3b06aed9f1e61f345695dce"
+ dependencies = [
+  "amplify",
+  "base64 0.22.1",
+@@ -4805,7 +4803,7 @@ dependencies = [
+ [[package]]
+ name = "rgb-lib-migration"
+ version = "0.3.0-beta.5"
+-source = "git+https://github.com/dcorral/rgb-lib.git?rev=94b6221ea9bf04562d89c21c9f074f4ecfbddd5d#94b6221ea9bf04562d89c21c9f074f4ecfbddd5d"
++source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?tag=v0.3.0-beta.34#62a8c3a045901147b3b06aed9f1e61f345695dce"
+ dependencies = [
+  "sea-orm-migration 2.0.2",
+  "tokio",
+diff --git a/bindings/c-ffi/Cargo.toml b/bindings/c-ffi/Cargo.toml
+index 597659c..ad7de0f 100644
+--- a/bindings/c-ffi/Cargo.toml
++++ b/bindings/c-ffi/Cargo.toml
+@@ -55,5 +55,6 @@ lightning-invoice = { path = "../../rust-lightning/lightning-invoice" }
+ lightning-net-tokio = { path = "../../rust-lightning/lightning-net-tokio" }
+ lightning-persister = { path = "../../rust-lightning/lightning-persister" }
+ lightning-rapid-gossip-sync = { path = "../../rust-lightning/lightning-rapid-gossip-sync" }
++lightning-transaction-sync = { path = "../../rust-lightning/lightning-transaction-sync" }
+ vls-core = { git = "https://github.com/UTEXO-Protocol/vls-core.git", branch = "feat/rgb-compatibility" }
+-vls-protocol-signer = { git = "https://github.com/UTEXO-Protocol/vls-protocol-signer.git", branch = "feat/rgb-compatibility" }
+\ No newline at end of file
++vls-protocol-signer = { git = "https://github.com/UTEXO-Protocol/vls-protocol-signer.git", branch = "feat/rgb-compatibility" }
+diff --git a/bindings/c-ffi/build.rs b/bindings/c-ffi/build.rs
+index f775f83..48b0e5f 100644
+--- a/bindings/c-ffi/build.rs
++++ b/bindings/c-ffi/build.rs
+@@ -3,6 +3,14 @@ extern crate cbindgen;
+ use std::env;
+ 
+ fn main() {
++    println!("cargo:rustc-env=RLN_BUILD_TARGET={}", env::var("TARGET").unwrap());
++    for key in ["RLN_ADAPTER_SHA256", "RLN_WRAPPER_SHA256", "RLN_LOCK_SHA256"] {
++        println!("cargo:rerun-if-env-changed={key}");
++        let value = env::var(key).expect("package build provenance is required");
++        assert!(value.len() == 64 && value.bytes().all(|b| b.is_ascii_hexdigit()),
++            "invalid package build provenance");
++        println!("cargo:rustc-env={key}={value}");
++    }
+     println!("cargo:rerun-if-changed=src");
+     println!("cargo:rerun-if-changed=cbindgen.toml");
+ 
+diff --git a/bindings/c-ffi/rln.h b/bindings/c-ffi/rln.h
+index 7e44bcb..6ba792f 100644
+--- a/bindings/c-ffi/rln.h
++++ b/bindings/c-ffi/rln.h
+@@ -42,6 +42,11 @@ struct CResultString rln_asset_link_create(const struct COpaqueStruct *node,
+ 
+ struct CResultString rln_asset_metadata(const struct COpaqueStruct *node, const char *asset_id);
+ 
++/**
++ * Read-only identity compiled into this library, not supplied by JavaScript at runtime.
++ */
++struct CResultString rln_binding_build_info(void);
++
+ struct CResultString rln_btc_balance(const struct COpaqueStruct *node, bool skip_sync);
+ 
+ struct CResultString rln_cancel_hodl_invoice(const struct COpaqueStruct *node,
+@@ -143,6 +148,14 @@ struct CResult rln_native_external_signer_new(const char *seed_hex,
+                                               const char *network,
+                                               bool permissive_policy);
+ 
++/**
++ * Forward to the released persistent signer constructor.
++ */
++struct CResult rln_native_external_signer_new_with_storage(const char *seed_hex,
++                                                           const char *network,
++                                                           bool permissive_policy,
++                                                           const char *storage_dir_path);
++
+ struct CResultString rln_network_info(const struct COpaqueStruct *node);
+ 
+ struct CResultString rln_node_info(const struct COpaqueStruct *node);
+@@ -171,6 +184,14 @@ struct CResultString rln_sdk_initialize(const char *request_json);
+ struct CResultString rln_sdk_node_apay_new(const struct COpaqueStruct *node,
+                                            const char *host_node_id);
+ 
++/**
++ * Forward to the released address-attested APay registration API.
++ */
++struct CResultString rln_sdk_node_apay_new_with_address(const struct COpaqueStruct *node,
++                                                        const char *host_node_id,
++                                                        const char *username,
++                                                        const char *domain);
++
+ struct CResultString rln_sdk_node_attach_native_external_signer(const struct COpaqueStruct *node,
+                                                                 const struct COpaqueStruct *signer);
+ 
+diff --git a/bindings/c-ffi/rln.hpp b/bindings/c-ffi/rln.hpp
+index 7b06f67..96df063 100644
+--- a/bindings/c-ffi/rln.hpp
++++ b/bindings/c-ffi/rln.hpp
+@@ -43,6 +43,9 @@ CResultString rln_asset_link_create(const COpaqueStruct *node, const char *reque
+ 
+ CResultString rln_asset_metadata(const COpaqueStruct *node, const char *asset_id);
+ 
++/// Read-only identity compiled into this library, not supplied by JavaScript at runtime.
++CResultString rln_binding_build_info();
++
+ CResultString rln_btc_balance(const COpaqueStruct *node, bool skip_sync);
+ 
+ CResultString rln_cancel_hodl_invoice(const COpaqueStruct *node, const char *request_json);
+@@ -128,6 +131,12 @@ CResult rln_native_external_signer_new(const char *seed_hex,
+                                        const char *network,
+                                        bool permissive_policy);
+ 
++/// Forward to the released persistent signer constructor.
++CResult rln_native_external_signer_new_with_storage(const char *seed_hex,
++                                                    const char *network,
++                                                    bool permissive_policy,
++                                                    const char *storage_dir_path);
++
+ CResultString rln_network_info(const COpaqueStruct *node);
+ 
+ CResultString rln_node_info(const COpaqueStruct *node);
+@@ -151,6 +160,12 @@ CResultString rln_sdk_initialize(const char *request_json);
+ /// unused_hashes, refill_batch_size, first_hash_index). Upstream PR #51.
+ CResultString rln_sdk_node_apay_new(const COpaqueStruct *node, const char *host_node_id);
+ 
++/// Forward to the released address-attested APay registration API.
++CResultString rln_sdk_node_apay_new_with_address(const COpaqueStruct *node,
++                                                 const char *host_node_id,
++                                                 const char *username,
++                                                 const char *domain);
++
+ CResultString rln_sdk_node_attach_native_external_signer(const COpaqueStruct *node,
+                                                          const COpaqueStruct *signer);
+ 
+diff --git a/bindings/c-ffi/src/api.rs b/bindings/c-ffi/src/api.rs
+index 98d23a6..d08c5f2 100644
+--- a/bindings/c-ffi/src/api.rs
++++ b/bindings/c-ffi/src/api.rs
+@@ -288,7 +288,7 @@ pub(crate) fn decode_rgb_invoice(
+ ) -> Result<String, Error> {
+     let node = require_handle(node)?;
+     let resp = node.decode_rgb_invoice(ptr_to_string(invoice))?;
+-    json(JsonDecodeRgbInvoiceResponse::from(resp))
++    json(JsonDecodeRgbInvoiceResponse::try_from(resp)?)
+ }
+ 
+ pub(crate) fn get_payment(
+@@ -722,6 +722,34 @@ pub(crate) fn native_external_signer_bootstrap(signer: &COpaqueStruct) -> Result
+     json(JsonSdkExternalSignerBootstrap::from(bootstrap))
+ }
+ 
++pub(crate) fn native_external_signer_new_with_storage(
++    seed_hex: *const c_char,
++    network: *const c_char,
++    permissive_policy: bool,
++    storage_dir_path: *const c_char,
++) -> Result<Arc<NativeExternalSigner>, Error> {
++    Ok(NativeExternalSigner::new_with_storage(
++        ptr_to_string(seed_hex),
++        ptr_to_string(network),
++        Some(permissive_policy),
++        ptr_to_string(storage_dir_path),
++    )?)
++}
++
++pub(crate) fn sdk_node_apay_new_with_address(
++    node: &COpaqueStruct,
++    host_node_id: *const c_char,
++    username: *const c_char,
++    domain: *const c_char,
++) -> Result<String, Error> {
++    let node = require_handle(node)?;
++    json(node.apay_new_with_address(
++        ptr_to_string(host_node_id),
++        ptr_to_string(username),
++        ptr_to_string(domain),
++    )?)
++}
++
+ pub(crate) fn sdk_node_init_with_native_external_signer(
+     node: &COpaqueStruct,
+     signer: &COpaqueStruct,
+diff --git a/bindings/c-ffi/src/json_types.rs b/bindings/c-ffi/src/json_types.rs
+index 6da3557..36512d2 100644
+--- a/bindings/c-ffi/src/json_types.rs
++++ b/bindings/c-ffi/src/json_types.rs
+@@ -791,6 +791,7 @@ pub(crate) struct JsonDecodeLnInvoiceResponse {
+     pub asset_amount: Option<u64>,
+     pub description: Option<String>,
+     pub description_hash: Option<String>,
++    pub min_final_cltv_expiry_delta: u64,
+     pub payment_hash: String,
+     pub payment_secret: String,
+     pub payee_pubkey: Option<String>,
+@@ -807,6 +808,7 @@ impl From<DecodeLnInvoiceResponse> for JsonDecodeLnInvoiceResponse {
+             asset_amount: r.asset_amount,
+             description: r.description,
+             description_hash: r.description_hash,
++            min_final_cltv_expiry_delta: r.min_final_cltv_expiry_delta,
+             payment_hash: fmt_payment_hash(&r.payment_hash),
+             payment_secret: r.payment_secret,
+             payee_pubkey: r.payee_pubkey.as_ref().map(fmt_pubkey),
+@@ -815,6 +817,37 @@ impl From<DecodeLnInvoiceResponse> for JsonDecodeLnInvoiceResponse {
+     }
+ }
+ 
++#[derive(Debug, Serialize)]
++#[serde(tag = "type", content = "value")]
++pub(crate) enum JsonDecodedRgbAssignment {
++    Fungible(u64),
++    NonFungible,
++    InflationRight(u64),
++    Any,
++}
++
++fn parse_decoded_rgb_assignment(value: &str) -> Result<JsonDecodedRgbAssignment, Error> {
++    match value {
++        "Any" => return Ok(JsonDecodedRgbAssignment::Any),
++        "NonFungible" => return Ok(JsonDecodedRgbAssignment::NonFungible),
++        _ => {}
++    }
++    for (prefix, constructor) in [
++        ("Fungible(", JsonDecodedRgbAssignment::Fungible as fn(u64) -> JsonDecodedRgbAssignment),
++        ("InflationRight(", JsonDecodedRgbAssignment::InflationRight as fn(u64) -> JsonDecodedRgbAssignment),
++    ] {
++        if let Some(amount) = value.strip_prefix(prefix).and_then(|s| s.strip_suffix(')')) {
++            if !amount.is_empty() && amount.bytes().all(|b| b.is_ascii_digit()) {
++                if let Ok(amount) = amount.parse::<u64>() {
++                    return Ok(constructor(amount));
++                }
++            }
++            return Err(Error::StringParse("invalid decoded RGB assignment amount".into()));
++        }
++    }
++    Err(Error::StringParse("unknown decoded RGB assignment".into()))
++}
++
+ #[derive(Debug, Serialize)]
+ pub(crate) struct JsonDecodeRgbInvoiceResponse {
+     pub recipient_id: String,
+@@ -822,24 +855,49 @@ pub(crate) struct JsonDecodeRgbInvoiceResponse {
+     pub recipient_type: String,
+     pub asset_schema: Option<String>,
+     pub asset_id: Option<String>,
+-    pub assignment: String,
++    pub assignment: JsonDecodedRgbAssignment,
+     pub network: String,
+     pub expiration_timestamp: Option<i64>,
+     pub transport_endpoints: Vec<String>,
+ }
+ 
+-impl From<DecodeRgbInvoiceResponse> for JsonDecodeRgbInvoiceResponse {
+-    fn from(r: DecodeRgbInvoiceResponse) -> Self {
+-        JsonDecodeRgbInvoiceResponse {
++impl TryFrom<DecodeRgbInvoiceResponse> for JsonDecodeRgbInvoiceResponse {
++    type Error = Error;
++
++    fn try_from(r: DecodeRgbInvoiceResponse) -> Result<Self, Self::Error> {
++        Ok(JsonDecodeRgbInvoiceResponse {
+             recipient_id: r.recipient_id,
+             proxy_recipient_id: r.proxy_recipient_id,
+             recipient_type: r.recipient_type,
+             asset_schema: r.asset_schema,
+             asset_id: r.asset_id.as_ref().map(fmt_contract_id),
+-            assignment: r.assignment,
++            assignment: parse_decoded_rgb_assignment(&r.assignment)?,
+             network: r.network,
+             expiration_timestamp: r.expiration_timestamp,
+             transport_endpoints: r.transport_endpoints,
++        })
++    }
++}
++
++#[cfg(test)]
++mod release_adapter_tests {
++    use super::*;
++
++    #[test]
++    fn tagged_assignment_is_exact_and_strict() {
++        for (input, expected) in [
++            ("Any", serde_json::json!({ "type": "Any" })),
++            ("NonFungible", serde_json::json!({ "type": "NonFungible" })),
++            ("Fungible(0)", serde_json::json!({ "type": "Fungible", "value": 0 })),
++            ("InflationRight(18446744073709551615)", serde_json::json!({
++                "type": "InflationRight", "value": u64::MAX
++            })),
++        ] {
++            assert_eq!(serde_json::to_value(parse_decoded_rgb_assignment(input).unwrap()).unwrap(), expected);
++        }
++        for input in ["Unknown", "Fungible(-1)", "Fungible(+1)", "Fungible( 1)",
++            "Fungible()", "Fungible(18446744073709551616)", "Fungible(1)x"] {
++            assert!(parse_decoded_rgb_assignment(input).is_err(), "{input}");
+         }
+     }
+ }
+diff --git a/bindings/c-ffi/src/lib.rs b/bindings/c-ffi/src/lib.rs
+index dfc595a..624e113 100644
+--- a/bindings/c-ffi/src/lib.rs
++++ b/bindings/c-ffi/src/lib.rs
+@@ -89,6 +89,23 @@ pub extern "C" fn rln_free_string(s: *mut c_char) {
+ // Lifecycle
+ // ---------------------------------------------------------------------------
+ 
++/// Read-only identity compiled into this library, not supplied by JavaScript at runtime.
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_binding_build_info() -> CResultString {
++    ffi_call!("rln_binding_build_info", Ok::<String, utils::Error>(serde_json::json!({
++        "abi_version": 1,
++        "rln_version": "0.13.0-beta.3",
++        "rln_commit": "af03c7f1a65135a429f05a5820600338215954dc",
++        "lightning_commit": "38d73bc918f27956590585d2bb83c86f059679b0",
++        "adapter_sha256": env!("RLN_ADAPTER_SHA256"),
++        "wrapper_sha256": env!("RLN_WRAPPER_SHA256"),
++        "lock_sha256": env!("RLN_LOCK_SHA256"),
++        "target": env!("RLN_BUILD_TARGET"),
++        "capabilities": ["canonical-unlock-v1", "persistent-native-signer", "refresh-transfers-v1",
++            "apay-address", "decoded-invoice-cltv", "tagged-rgb-assignment"]
++    }).to_string()))
++}
++
+ #[unsafe(no_mangle)]
+ pub extern "C" fn rln_sdk_node_new(request_json: *const c_char) -> CResult {
+     ffi_call!("rln_sdk_node_new", api::sdk_node_new(request_json))
+@@ -678,6 +695,36 @@ pub extern "C" fn rln_sdk_shutdown() -> CResultString {
+ // External-signer surface
+ // ---------------------------------------------------------------------------
+ 
++/// Forward to the released address-attested APay registration API.
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_sdk_node_apay_new_with_address(
++    node: &COpaqueStruct,
++    host_node_id: *const c_char,
++    username: *const c_char,
++    domain: *const c_char,
++) -> CResultString {
++    ffi_call!(
++        "rln_sdk_node_apay_new_with_address",
++        api::sdk_node_apay_new_with_address(node, host_node_id, username, domain)
++    )
++}
++
++/// Forward to the released persistent signer constructor.
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_native_external_signer_new_with_storage(
++    seed_hex: *const c_char,
++    network: *const c_char,
++    permissive_policy: bool,
++    storage_dir_path: *const c_char,
++) -> CResult {
++    ffi_call!(
++        "rln_native_external_signer_new_with_storage",
++        api::native_external_signer_new_with_storage(
++            seed_hex, network, permissive_policy, storage_dir_path
++        )
++    )
++}
++
+ /// Drop a `NativeExternalSigner` handle. Safe to call immediately after
+ /// attach / init / unlock succeeds: RLN holds its own `Arc` clone.
+ #[unsafe(no_mangle)]

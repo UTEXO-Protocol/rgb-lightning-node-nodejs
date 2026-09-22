@@ -8,6 +8,7 @@ target/
 
 # Native addon prebuilds — distributed via GitHub Releases
 *.node
+*.provenance.json
 
 # Node
 node_modules/

@@ -12,6 +12,7 @@
 const os = require('os')
 const path = require('path')
 const fs = require('fs')
+const { parse, stringify, paymentRequest, unsupported, UnsupportedCapabilityError } = require('./json-boundary')
 
 // ─── 1. Native addon resolution ──────────────────────────────────────────
 
@@ -22,10 +23,9 @@ function resolvePlatformSuffix () {
   if (platform === 'darwin' && arch === 'arm64') return 'darwin-arm64'
   if (platform === 'darwin' && arch === 'x64') return 'darwin-x64'
   if (platform === 'linux' && arch === 'x64') {
-    if (fs.existsSync('/etc/alpine-release')) return 'linux-x64-musl'
-    return 'linux-x64-gnu'
+    return process.report?.getReport().header.glibcVersionRuntime ? 'linux-x64-gnu' : 'linux-x64-musl'
   }
-  if (platform === 'linux' && arch === 'arm64') return 'linux-arm64-gnu'
+  if (platform === 'linux' && arch === 'arm64' && process.report?.getReport().header.glibcVersionRuntime) return 'linux-arm64-gnu'
   return null
 }
 
@@ -42,11 +42,27 @@ if (!fs.existsSync(addonPath)) {
   throw new Error(
     `[@utexo/rgb-lightning-node-nodejs] Native addon not found at ${addonPath}. ` +
     'If postinstall was skipped (npm install --ignore-scripts), run ' +
-    '`bash scripts/download-libs.sh` manually or rebuild via `npm run build`.'
+    '`npm run build` with the documented Rust/platform toolchain installed.'
   )
 }
 
 const napi = require(addonPath)
+const { readConfig, identity } = require('./scripts/install-overlay-addon')
+const expectedIdentity = identity(readConfig())
+const runtimeInfo = parse(napi.getRuntimeInfo())
+for (const [key, expected] of Object.entries({
+  abi_version: 1,
+  rln_commit: expectedIdentity.commit,
+  lightning_commit: expectedIdentity.lightningCommit,
+  adapter_sha256: expectedIdentity.patchSha256,
+  wrapper_sha256: expectedIdentity.wrapperSha256,
+  lock_sha256: expectedIdentity.lockSha256,
+  target: expectedIdentity.target
+})) {
+  if (runtimeInfo[key] !== expected) throw new Error(`Native artifact identity mismatch: ${key}; rebuild the package`)
+}
+Object.freeze(runtimeInfo.capabilities)
+Object.freeze(runtimeInfo)
 
 // ─── 2. SdkNode wrapper ─────────────────────────────────────────────────
 
@@ -57,7 +73,7 @@ class SdkNode {
   }
 
   static create (request) {
-    return new SdkNode(napi.SdkNode.create(JSON.stringify(request)))
+    return new SdkNode(napi.SdkNode.create(stringify(request)))
   }
 
   // External-signer lifecycle (matches bare addon)
@@ -68,304 +84,261 @@ class SdkNode {
     this._inner.attachNativeExternalSigner(signer._inner)
   }
   unlockWithNativeExternalSigner (signer, request) {
-    this._inner.unlockWithNativeExternalSigner(signer._inner, JSON.stringify(request))
+    this._inner.unlockWithNativeExternalSigner(signer._inner, stringify(request))
   }
-  startUnlockWithNativeExternalSigner (signer, request) {
-    return JSON.parse(
-      this._inner.startUnlockWithNativeExternalSigner(signer._inner, JSON.stringify(request))
-    )
-  }
-  nativeOperationStatus (operationId) {
-    return JSON.parse(this._inner.nativeOperationStatus(operationId))
-  }
-  adoptNativeOperation (operationId) {
-    return JSON.parse(this._inner.adoptNativeOperation(operationId))
-  }
-  cancelNativeOperation (operationId) {
-    return JSON.parse(this._inner.cancelNativeOperation(operationId))
-  }
+  startUnlockWithNativeExternalSigner (signer, request) { unsupported('startUnlockWithNativeExternalSigner') }
+  nativeOperationStatus (operationId) { unsupported('nativeOperationStatus') }
+  adoptNativeOperation (operationId) { unsupported('adoptNativeOperation') }
+  cancelNativeOperation (operationId) { unsupported('cancelNativeOperation') }
   initWithExternalSigner (bootstrap) {
-    this._inner.initWithExternalSigner(JSON.stringify(bootstrap))
+    this._inner.initWithExternalSigner(stringify(bootstrap))
   }
   detachExternalSigner () { this._inner.detachExternalSigner() }
   unlockWithAttachedExternalSigner (request) {
-    this._inner.unlockWithAttachedExternalSigner(JSON.stringify(request))
+    this._inner.unlockWithAttachedExternalSigner(stringify(request))
   }
 
   shutdown () {
     if (this._closed) return
-    try {
-      this._inner.shutdown()
-    } finally {
-      this._inner = null
-      this._closed = true
-    }
+    this._inner.shutdown()
+    this._inner = null
+    this._closed = true
   }
 
   // Forces takeover of a stale VSS ownership fence after a previous node
   // died holding it. Throws if VSS isn't configured. Pointing two live
   // nodes at the same VSS store corrupts state — call only when certain
   // the previous owner is gone.
-  vssClearFence (request) { this._inner.vssClearFence(JSON.stringify(request)) }
+  vssClearFence (request) { this._inner.vssClearFence(stringify(request)) }
 
   // Force an immediate VSS backup flush. Returns `{ version }` where
   // version is the snapshot index just persisted. Throws if VSS isn't
   // configured / the flush fails. Backed by upstream vss_backup() PR.
-  vssBackup () { return JSON.parse(this._inner.vssBackup()) }
+  vssBackup () { return parse(this._inner.vssBackup()) }
 
-  vssDeleteAll (request) {
-    return JSON.parse(this._inner.vssDeleteAll(JSON.stringify(request)))
-  }
+  vssDeleteAll (request) { unsupported('vssDeleteAll') }
 
   // APay receiver-side: register this node with an LSP as an async-order
   // recipient. Pass the LSP's node_id (hex). Returns the parsed
   // AsyncOrderNewResponse (request_id, host_node_id, protocol_version,
   // order_id, status, accepted_through_index, next_index_expected,
   // unused_hashes, refill_batch_size, first_hash_index).
-  apayNew (hostNodeId) { return JSON.parse(this._inner.apayNew(hostNodeId)) }
+  apayNew (hostNodeId) { return parse(this._inner.apayNew(hostNodeId)) }
 
   // Register the APay hash batch and bind a signed username@domain
   // attestation to the wallet node identity.
   apayNewWithAddress (hostNodeId, username, domain) {
-    return JSON.parse(this._inner.apayNewWithAddress(hostNodeId, username, domain))
+    return parse(this._inner.apayNewWithAddress(hostNodeId, username, domain))
   }
 
   // Info / network / sync
-  nodeInfo () { return JSON.parse(this._inner.nodeInfo()) }
-  networkInfo () { return JSON.parse(this._inner.networkInfo()) }
-  sync () { return JSON.parse(this._inner.sync()) }
-  syncWallet (request) {
-    return JSON.parse(this._inner.syncWallet(JSON.stringify(request)))
-  }
-  walletSnapshot (request = {}) {
-    return JSON.parse(this._inner.walletSnapshot(JSON.stringify(request)))
-  }
-  rotateAddress () { return JSON.parse(this._inner.rotateAddress()) }
+  nodeInfo () { return parse(this._inner.nodeInfo()) }
+  networkInfo () { return parse(this._inner.networkInfo()) }
+  sync () { return parse(this._inner.sync()) }
+  syncWallet (request) { unsupported('syncWallet') }
+  walletSnapshot (request = {}) { unsupported('walletSnapshot') }
+  rotateAddress () { return parse(this._inner.rotateAddress()) }
 
   // Peers / channels
   // C-FFI's `rln_connect_peer` takes the raw pubkey@addr string (not a
   // JSON envelope) — matches @utexo/rgb-lightning-node-bare/index.js.
   connectPeer (peerPubkeyAndAddr) {
-    return JSON.parse(this._inner.connectPeer(peerPubkeyAndAddr))
+    return parse(this._inner.connectPeer(peerPubkeyAndAddr))
   }
   disconnectPeer (request) {
-    return JSON.parse(this._inner.disconnectPeer(JSON.stringify(request)))
+    return parse(this._inner.disconnectPeer(stringify(request)))
   }
-  listPeers () { return JSON.parse(this._inner.listPeers()) }
+  listPeers () { return parse(this._inner.listPeers()) }
   openChannel (request) {
-    return JSON.parse(this._inner.openChannel(JSON.stringify(request)))
+    return parse(this._inner.openChannel(stringify(request)))
   }
   closeChannel (request) {
-    return JSON.parse(this._inner.closeChannel(JSON.stringify(request)))
+    return parse(this._inner.closeChannel(stringify(request)))
   }
-  listChannels () { return JSON.parse(this._inner.listChannels()) }
+  listChannels () { return parse(this._inner.listChannels()) }
   getChannelId (temporaryChannelIdHex) {
-    return JSON.parse(this._inner.getChannelId(temporaryChannelIdHex))
+    return parse(this._inner.getChannelId(temporaryChannelIdHex))
   }
 
   // BTC + UTXOs
-  getAddress () { return JSON.parse(this._inner.getAddress()) }
+  getAddress () { return parse(this._inner.getAddress()) }
   // Alias to match bare addon's `address()` method name; both work.
-  address () { return JSON.parse(this._inner.getAddress()) }
+  address () { return parse(this._inner.getAddress()) }
   btcBalance (skipSync = false) {
-    return JSON.parse(this._inner.getBtcBalance(!!skipSync))
+    return parse(this._inner.getBtcBalance(!!skipSync))
   }
   listUnspents (skipSync = false) {
-    return JSON.parse(this._inner.listUnspents(!!skipSync))
+    return parse(this._inner.listUnspents(!!skipSync))
   }
   listTransactions (skipSync = false) {
-    return JSON.parse(this._inner.listTransactions(!!skipSync))
+    return parse(this._inner.listTransactions(!!skipSync))
   }
   listTransactionsByTxid (txid, skipSync = false) {
-    return JSON.parse(this._inner.listTransactionsByTxid(txid, !!skipSync))
+    return parse(this._inner.listTransactionsByTxid(txid, !!skipSync))
   }
   sendBtc (request) {
-    return JSON.parse(this._inner.sendBtc(JSON.stringify(request)))
+    return parse(this._inner.sendBtc(stringify(request)))
   }
 
-  prepareBtcSend (request) {
-    return JSON.parse(this._inner.prepareBtcSend(JSON.stringify(request)))
-  }
+  prepareBtcSend (request) { unsupported('prepareBtcSend') }
 
-  commitPreparedBtcSend (request) {
-    return JSON.parse(this._inner.commitPreparedBtcSend(JSON.stringify(request)))
-  }
+  commitPreparedBtcSend (request) { unsupported('commitPreparedBtcSend') }
 
-  cancelBtcSendPlan (request) {
-    return JSON.parse(this._inner.cancelBtcSendPlan(JSON.stringify(request)))
-  }
+  cancelBtcSendPlan (request) { unsupported('cancelBtcSendPlan') }
 
-  prepareCreateUtxos (request) {
-    return JSON.parse(this._inner.prepareCreateUtxos(JSON.stringify(request)))
-  }
+  prepareCreateUtxos (request) { unsupported('prepareCreateUtxos') }
 
-  commitPreparedCreateUtxos (request) {
-    return JSON.parse(this._inner.commitPreparedCreateUtxos(JSON.stringify(request)))
-  }
+  commitPreparedCreateUtxos (request) { unsupported('commitPreparedCreateUtxos') }
 
-  cancelCreateUtxosPlan (request) {
-    return JSON.parse(this._inner.cancelCreateUtxosPlan(JSON.stringify(request)))
-  }
+  cancelCreateUtxosPlan (request) { unsupported('cancelCreateUtxosPlan') }
 
-  listPendingVanillaTransactions () {
-    return JSON.parse(this._inner.listPendingVanillaTransactions())
-  }
+  listPendingVanillaTransactions () { unsupported('listPendingVanillaTransactions') }
 
-  listAddressReceipts (address) {
-    return JSON.parse(this._inner.listAddressReceipts(address))
-  }
+  listAddressReceipts (address) { unsupported('listAddressReceipts') }
 
   createUtxos (request) {
-    return JSON.parse(this._inner.createUtxos(JSON.stringify(request)))
+    return parse(this._inner.createUtxos(stringify(request)))
   }
   // blocks: 1..=65535 — sat/vB fee rate target
   estimateFee (blocks) {
-    return JSON.parse(this._inner.estimateFee(blocks >>> 0))
+    if (!Number.isInteger(blocks) || blocks < 1 || blocks > 0xffff) throw new RangeError('blocks must be a positive u16')
+    return parse(this._inner.estimateFee(blocks))
   }
 
   // Lightning invoices / payments
   lnInvoice (request) {
-    return JSON.parse(this._inner.lnInvoice(JSON.stringify(request)))
+    return parse(this._inner.lnInvoice(stringify(request)))
   }
   decodeLnInvoice (invoice) {
     // C-FFI expects the raw BOLT11 string (matches bare addon).
-    return JSON.parse(this._inner.decodeLnInvoice(invoice))
+    return parse(this._inner.decodeLnInvoice(invoice))
   }
   invoiceStatus (invoice) {
-    return JSON.parse(this._inner.invoiceStatus(invoice))
+    return parse(this._inner.invoiceStatus(invoice))
   }
   cancelHodlInvoice (request) {
-    return JSON.parse(this._inner.cancelHodlInvoice(JSON.stringify(request)))
+    return parse(this._inner.cancelHodlInvoice(stringify(request)))
   }
   claimHodlInvoice (request) {
-    return JSON.parse(this._inner.claimHodlInvoice(JSON.stringify(request)))
+    return parse(this._inner.claimHodlInvoice(stringify(request)))
   }
   sendPayment (request) {
-    return JSON.parse(this._inner.sendPayment(JSON.stringify(request)))
+    return parse(this._inner.sendPayment(paymentRequest(request)))
   }
   keysend (request) {
-    return JSON.parse(this._inner.keysend(JSON.stringify(request)))
+    return parse(this._inner.keysend(stringify(request)))
   }
-  listPayments () { return JSON.parse(this._inner.listPayments()) }
+  listPayments () { return parse(this._inner.listPayments()) }
   getPayment (paymentHashHex, paymentType) {
-    return JSON.parse(this._inner.getPayment(paymentHashHex, paymentType))
+    return parse(this._inner.getPayment(paymentHashHex, paymentType))
   }
 
   // Atomic swaps (parity with bare addon; WDK does not surface these)
   makerInit (request) {
-    return JSON.parse(this._inner.makerInit(JSON.stringify(request)))
+    return parse(this._inner.makerInit(stringify(request)))
   }
   makerExecute (request) {
-    return JSON.parse(this._inner.makerExecute(JSON.stringify(request)))
+    return parse(this._inner.makerExecute(stringify(request)))
   }
   taker (request) {
-    return JSON.parse(this._inner.taker(JSON.stringify(request)))
+    return parse(this._inner.taker(stringify(request)))
   }
-  listSwaps () { return JSON.parse(this._inner.listSwaps()) }
+  listSwaps () { return parse(this._inner.listSwaps()) }
   getSwap (paymentHash, takerFlag) {
-    return JSON.parse(this._inner.getSwap(paymentHash, !!takerFlag))
+    return parse(this._inner.getSwap(paymentHash, !!takerFlag))
   }
 
   // RGB assets — issuance
   issueAssetNia (request) {
-    return JSON.parse(this._inner.issueAssetNia(JSON.stringify(request)))
+    return parse(this._inner.issueAssetNia(stringify(request)))
   }
   issueAssetUda (request) {
-    return JSON.parse(this._inner.issueAssetUda(JSON.stringify(request)))
+    return parse(this._inner.issueAssetUda(stringify(request)))
   }
   issueAssetCfa (request) {
-    return JSON.parse(this._inner.issueAssetCfa(JSON.stringify(request)))
+    return parse(this._inner.issueAssetCfa(stringify(request)))
   }
   issueAssetIfa (request) {
-    return JSON.parse(this._inner.issueAssetIfa(JSON.stringify(request)))
+    return parse(this._inner.issueAssetIfa(stringify(request)))
   }
 
   // RGB assets — listing / metadata / balance
   listAssets (filterAssetSchemas) {
-    return JSON.parse(this._inner.listAssets(JSON.stringify(filterAssetSchemas ?? [])))
+    return parse(this._inner.listAssets(stringify(filterAssetSchemas ?? [])))
   }
   assetBalance (assetId) {
-    return JSON.parse(this._inner.getAssetBalance(assetId))
+    return parse(this._inner.getAssetBalance(assetId))
   }
   assetLinkCreate (request) {
-    return JSON.parse(this._inner.assetLinkCreate(JSON.stringify(request)))
+    return parse(this._inner.assetLinkCreate(stringify(request)))
   }
   assetMetadata (assetId) {
-    return JSON.parse(this._inner.assetMetadata(assetId))
+    return parse(this._inner.assetMetadata(assetId))
   }
 
   // RGB invoices / transfers
   rgbInvoice (request) {
-    return JSON.parse(this._inner.rgbInvoice(JSON.stringify(request)))
+    return parse(this._inner.rgbInvoice(stringify(request)))
   }
   decodeRgbInvoice (invoice) {
-    return JSON.parse(this._inner.decodeRgbInvoice(invoice))
+    return parse(this._inner.decodeRgbInvoice(invoice))
   }
   sendRgb (request) {
-    return JSON.parse(this._inner.sendRgb(JSON.stringify(request)))
+    return parse(this._inner.sendRgb(stringify(request)))
   }
 
-  importRgbTransferConsignment (request) {
-    return JSON.parse(this._inner.importRgbTransferConsignment(JSON.stringify(request)))
-  }
+  importRgbTransferConsignment (request) { unsupported('importRgbTransferConsignment') }
 
-  importRgbContract (request) {
-    return JSON.parse(this._inner.importRgbContract(JSON.stringify(request)))
-  }
+  importRgbContract (request) { unsupported('importRgbContract') }
 
-  prepareRgbSend (request) {
-    return JSON.parse(this._inner.prepareRgbSend(JSON.stringify(request)))
-  }
+  prepareRgbSend (request) { unsupported('prepareRgbSend') }
 
-  commitPreparedRgbSend (request) {
-    return JSON.parse(this._inner.commitPreparedRgbSend(JSON.stringify(request)))
-  }
-  cancelRgbSendPlan (request) {
-    return JSON.parse(this._inner.cancelRgbSendPlan(JSON.stringify(request)))
-  }
-  listPendingRgbSendPlans () {
-    return JSON.parse(this._inner.listPendingRgbSendPlans())
-  }
+  commitPreparedRgbSend (request) { unsupported('commitPreparedRgbSend') }
+  cancelRgbSendPlan (request) { unsupported('cancelRgbSendPlan') }
+  listPendingRgbSendPlans () { unsupported('listPendingRgbSendPlans') }
   refreshTransfers (request) {
-    this._inner.refreshTransfers(JSON.stringify(request))
+    return parse(this._inner.refreshTransfers(stringify(request)))
     return { ok: true }
   }
   failTransfers (request) {
-    return JSON.parse(this._inner.failTransfers(JSON.stringify(request)))
+    return parse(this._inner.failTransfers(stringify(request)))
   }
   inflate (request) {
-    return JSON.parse(this._inner.inflate(JSON.stringify(request)))
+    return parse(this._inner.inflate(stringify(request)))
   }
-  listTransfers (assetId) {
-    return JSON.parse(this._inner.listTransfers(assetId))
+  listTransfers (assetId, txid) {
+    if (assetId && typeof assetId === 'object') {
+      return parse(this._inner.listTransfers(assetId.asset_id ?? null, assetId.txid ?? null))
+    }
+    return parse(this._inner.listTransfers(assetId ?? null, txid ?? null))
   }
   listTransfersByTxid (txid) {
-    return JSON.parse(this._inner.listTransfersByTxid(txid))
+    return parse(this._inner.listTransfersByTxid(txid))
   }
 
   // RGB asset media
   getAssetMedia (digest) {
-    return JSON.parse(this._inner.getAssetMedia(digest))
+    return parse(this._inner.getAssetMedia(digest))
   }
   postAssetMedia (request) {
-    return JSON.parse(this._inner.postAssetMedia(JSON.stringify(request)))
+    return parse(this._inner.postAssetMedia(stringify(request)))
   }
 
   // Signing / onion / diagnostics
   signMessage (message) {
-    return JSON.parse(this._inner.signMessage(message))
+    return parse(this._inner.signMessage(message))
   }
   verifyMessage (message, signature) {
-    return JSON.parse(this._inner.verifyMessage(message, signature))
+    return parse(this._inner.verifyMessage(message, signature))
   }
   sendOnionMessage (request) {
-    return JSON.parse(this._inner.sendOnionMessage(JSON.stringify(request)))
+    return parse(this._inner.sendOnionMessage(stringify(request)))
   }
   checkIndexerUrl (indexerUrl) {
-    return JSON.parse(this._inner.checkIndexerUrl(indexerUrl))
+    return parse(this._inner.checkIndexerUrl(indexerUrl))
   }
   checkProxyEndpoint (proxyEndpoint) {
-    return JSON.parse(this._inner.checkProxyEndpoint(proxyEndpoint))
+    return parse(this._inner.checkProxyEndpoint(proxyEndpoint))
   }
 }
 
@@ -377,8 +350,9 @@ class NativeExternalSigner {
     this._destroyed = false
   }
 
-  static create (seedHex, network, permissivePolicy = true) {
-    if (typeof seedHex !== 'string' || seedHex.length !== 64) {
+  static create (seedHex, network, permissivePolicy = false) {
+    if (typeof permissivePolicy !== 'boolean') throw new TypeError('permissivePolicy must be boolean')
+    if (typeof seedHex !== 'string' || !/^[0-9a-fA-F]{64}$/.test(seedHex)) {
       throw new Error('NativeExternalSigner.create: seedHex must be a 64-char hex string')
     }
     return new NativeExternalSigner(
@@ -387,7 +361,8 @@ class NativeExternalSigner {
   }
 
   static createWithStorage (seedHex, network, storageDirPath, permissivePolicy = false) {
-    if (typeof seedHex !== 'string' || seedHex.length !== 64) {
+    if (typeof permissivePolicy !== 'boolean') throw new TypeError('permissivePolicy must be boolean')
+    if (typeof seedHex !== 'string' || !/^[0-9a-fA-F]{64}$/.test(seedHex)) {
       throw new Error('NativeExternalSigner.createWithStorage: seedHex must be a 64-char hex string')
     }
     if (typeof storageDirPath !== 'string' || storageDirPath.length === 0) {
@@ -405,28 +380,25 @@ class NativeExternalSigner {
 
   bootstrap () {
     if (this._destroyed) throw new Error('NativeExternalSigner already destroyed')
-    return JSON.parse(this._inner.bootstrap())
+    return parse(this._inner.bootstrap())
   }
 
   destroy () {
     if (this._destroyed) return
-    try { this._inner.destroy() } catch { /* ignore */ }
+    this._inner.destroy()
     this._destroyed = true
   }
 }
 
 // ─── 4. Module-level helpers (parity with bare addon, no-ops for now) ───
 
-// The bare addon exposes uniffiHealthcheck / uniffiIsInitialized /
-// sdkInitialize / sdkShutdown. The napi binding doesn't surface these
-// yet — wdk-rgb-lightning's BareRgbLightningBinding / NodeRgbLightningBinding
-// only call them as static helpers, so we stub them with sensible
-// fallbacks. Wire real implementations when we surface the module-level
-// uniffi entry points through napi.
+// Module-level helpers forward the released C-FFI behavior.
 
 exports.SdkNode = SdkNode
 exports.NativeExternalSigner = NativeExternalSigner
-exports.uniffiHealthcheck = () => 'unsupported-in-node-binding'
-exports.uniffiIsInitialized = () => true
-exports.sdkInitialize = () => undefined
-exports.sdkShutdown = () => undefined
+exports.UnsupportedCapabilityError = UnsupportedCapabilityError
+exports.getRuntimeInfo = () => runtimeInfo
+exports.uniffiHealthcheck = () => napi.uniffiHealthcheck()
+exports.uniffiIsInitialized = () => parse(napi.uniffiIsInitialized())
+exports.sdkInitialize = (request) => napi.sdkInitialize(stringify(request))
+exports.sdkShutdown = () => napi.sdkShutdown()
