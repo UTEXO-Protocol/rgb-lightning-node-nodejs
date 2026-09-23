@@ -1,7 +1,7 @@
 # RLN 0.13.0-beta.3 Upgrade Tracker
 
-Status: local implementation verified on macOS arm64; source push blocked by
-GitHub workflow authorization. Draft PR, not release approval.
+Status: implementation pushed and verified locally on macOS arm64; GitHub CI
+qualification is in progress. Draft PR, not release approval.
 
 ## Scope
 
@@ -36,7 +36,7 @@ GitHub workflow authorization. Draft PR, not release approval.
 | G5 | Integrator zero-channel report root cause | Unproven: deployed build IDs and server provisioning logs required |
 | G6 | Current app depends on excluded overlay features | Separate adoption gate; do not change app pins |
 | G7 | Candidate publication, promotion and merge | Not authorized by this draft-PR task |
-| G8 | GitHub OAuth credential lacks workflow scope | Blocked: initial tracker is remote, full implementation commits remain local. Existing SSH key also rejected. Do not drop workflow safeguards to bypass authorization |
+| G8 | GitHub OAuth credential lacked workflow scope | Resolved: user refreshed authorization; implementation through 875cff3 pushed successfully on 2026-09-23. Draft #22 contains the implementation and CI has started. No safeguards removed |
 
 Excluded capabilities: coherent wallet snapshot/FullSync, native operation registry,
 prepared-send plans and inventories, address receipts, RLN import APIs, VSS delete-all
