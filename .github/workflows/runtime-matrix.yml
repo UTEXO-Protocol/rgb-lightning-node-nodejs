@@ -1,0 +1,85 @@
+name: Runtime matrix
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/runtime-matrix.yml'
+      - 'scripts/runtime-matrix.sh'
+      - 'src/**'
+      - 'Cargo*'
+      - 'build.rs'
+      - 'index*'
+      - 'json-boundary.js'
+      - 'patches/**'
+
+permissions:
+  contents: read
+
+jobs:
+  native-runtime:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            target: darwin-arm64
+          - runner: macos-15-intel
+            target: darwin-x64
+          - runner: ubuntu-22.04
+            target: linux-x64-gnu
+          - runner: ubuntu-24.04-arm
+            target: linux-arm64-gnu
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    env:
+      CARGO_BUILD_JOBS: 2
+      CARGO_PROFILE_RELEASE_DEBUG: 0
+      EXPECTED_TARGET: ${{ matrix.target }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659
+        with:
+          toolchain: '1.94.0'
+          rustflags: ''
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y cmake clang pkg-config libssl-dev
+      - run: bash scripts/runtime-matrix.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: runtime-${{ matrix.target }}-${{ github.sha }}
+          path: |
+            runtime-evidence.json
+            index-*.provenance.json
+            *.tgz
+          if-no-files-found: warn
+
+  musl-runtime:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Build and execute inside real musl userland
+        run: |
+          docker run --rm -v "$PWD:/candidate" -w /candidate \
+            -e EXPECTED_TARGET=linux-x64-musl -e CARGO_BUILD_JOBS=2 \
+            -e RUSTFLAGS='-C target-feature=-crt-static' \
+            rust:1.94.0-alpine3.23 sh -ec '
+              apk add --no-cache nodejs npm bash git cmake clang clang-dev make g++ pkgconf openssl-dev perl linux-headers
+              export LIBCLANG_PATH=/usr/lib
+              bash scripts/runtime-matrix.sh
+            '
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: runtime-linux-x64-musl-${{ github.sha }}
+          path: |
+            runtime-evidence.json
+            index-*.provenance.json
+            *.tgz
+          if-no-files-found: warn
