@@ -1,5 +1,7 @@
 'use strict'
 
+const { parse: parseLossless } = require('lossless-json')
+
 class UnsupportedCapabilityError extends Error {
   constructor (capability) {
     super(`${capability} is not supported by released RLN 0.13.0-beta.3`)
@@ -24,7 +26,15 @@ function checkedNumber (value) {
 }
 
 function parse (text) {
-  return JSON.parse(text, (_, value) => checkedNumber(value))
+  // RLN reports u64::MAX limits and 64-bit channel IDs even for small wallets.
+  // Inspect numeric tokens before conversion, never an already-rounded Number.
+  return parseLossless(text, undefined, {
+    parseNumber (token) {
+      const number = Number(token)
+      if (/^-?\d+$/.test(token) && !Number.isSafeInteger(number)) return BigInt(token).toString()
+      return checkedNumber(number)
+    }
+  })
 }
 
 function stringify (value) {

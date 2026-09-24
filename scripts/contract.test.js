@@ -27,8 +27,12 @@ function facade (overrides = {}) {
   return result
 }
 
-test('unsafe JSON amounts fail instead of rounding', () => {
-  for (const raw of ['{"amount":9007199254740993}', '{"amount":18446744073709551615}', '[1e999]']) {
+test('large JSON response integers remain exact and unsafe input numbers fail', () => {
+  assert.equal(boundary.parse('{"amount":9007199254740993}').amount, '9007199254740993')
+  assert.equal(boundary.parse('{"channel_asset_max_amount":18446744073709551615}').channel_asset_max_amount, '18446744073709551615')
+  assert.equal(boundary.parse('{"short_channel_id":989560465031299073}').short_channel_id, '989560465031299073')
+  assert.deepEqual(boundary.parse('[-9223372036854775808,0,1.25,1e3]'), ['-9223372036854775808', 0, 1.25, 1000])
+  for (const raw of ['[1e999]', '[1e20]']) {
     assert.throws(() => boundary.parse(raw), { code: 'ERR_RLN_UNSAFE_NUMBER' })
   }
   assert.equal(boundary.parse('{"amount":9007199254740991}').amount, Number.MAX_SAFE_INTEGER)

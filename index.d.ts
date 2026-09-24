@@ -12,14 +12,17 @@ export type JsonRequest = Record<string, unknown>
 /** Integer encoded as base-10 text so values never cross JS's safe-number boundary. */
 export type DecimalString = `${bigint}`
 
+/** Safe integers are numbers; larger native response integers are exact decimal strings. */
+export type ExactInteger = number | DecimalString
+
 export interface DecodedLnInvoice {
   description: string | null
   description_hash: string | null
-  amt_msat: number | null
+  amt_msat: ExactInteger | null
   expiry_sec: number
   timestamp: number
   asset_id: string | null
-  asset_amount: number | null
+  asset_amount: ExactInteger | null
   payment_hash: string
   payment_secret: string
   payee_pubkey: string | null
@@ -43,8 +46,8 @@ export interface SendPaymentResponse {
 }
 
 export interface LightningPayment {
-  amt_msat: number | null
-  asset_amount: number | null
+  amt_msat: ExactInteger | null
+  asset_amount: ExactInteger | null
   asset_id: string | null
   payment_hash: string
   payment_type: 'Outbound' | 'InboundAutoClaim' | 'InboundHodl'
@@ -58,9 +61,9 @@ export interface LightningPayment {
 }
 
 export type DecodedRgbAssignment =
-  | { type: 'Fungible'; value: number }
+  | { type: 'Fungible'; value: ExactInteger }
   | { type: 'NonFungible' }
-  | { type: 'InflationRight'; value: number }
+  | { type: 'InflationRight'; value: ExactInteger }
   | { type: 'Any' }
 
 export interface DecodedRgbInvoice {

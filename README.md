@@ -72,12 +72,12 @@ The key is a batch-transfer ID, not a transfer-row index. Nulls and failure deta
 are retained. `listTransfers(assetId?, txid?)` and an object-filter overload support
 combined filters. Returned UTXOs preserve `exists`, including false.
 
-All JSON integer inputs and outputs must fit JavaScript's safe integer range.
-Unsafe integers, NaN and infinity throw `ERR_RLN_UNSAFE_NUMBER`; the wrapper does
-not pretend that conversion to BigInt after parsing recovers lost precision.
-Native C-FFI can represent u64, but this JS API intentionally fails outside the
-safe-number range. Decimal strings are not an alternative for released requests
-whose native schema requires a number.
+Native response integers outside JavaScript's safe range are exact decimal
+strings; safe integers remain numbers. This preserves released node limits and
+64-bit channel IDs without rounding. Unsafe numeric inputs, NaN and infinity
+still throw `ERR_RLN_UNSAFE_NUMBER` before native calls. Full-range u64 request
+inputs are not supported; decimal strings are not an alternative for released
+request fields whose native schema requires a number.
 
 Unknown `sendPayment` fields, including routing fee caps, fail before submission.
 RLN 0.13 does not enforce a native routing-fee cap. Do not treat an uncapped payment
@@ -111,10 +111,13 @@ mnemonic records; that specific format restriction does not apply to WDK's
 external-signer key-source records. Seed-only recreation is not recovery of RGB,
 channel or signer state. Never delete databases to make an upgrade proceed.
 
-Do not roll back to stale state after new channel activity. Existing wallet,
-device, recovery and LSP qualification remains explicitly tracked, not implied by
-unit tests. Current WDK dev consumers that use excluded APIs cannot adopt this line
-without a separately reviewed migration.
+Do not roll back to stale state after new channel activity. The owner confirmed
+no live wallets: this candidate is fresh-wallet only, with no legacy migration
+promise. Real local transfer and diagnostic Lightning/APay evidence is recorded
+in `UPGRADE-TRACKER.md`; strict outgoing signing and same-process reopen still
+block production. VSS is excluded from this profile. Runtime, adverse recovery
+and deployed LSP qualification are not implied by unit tests. Overlay-dependent
+WDK consumers need a separately reviewed API adaptation before adopting this line.
 
 ## Verification
 
