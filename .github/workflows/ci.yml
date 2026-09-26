@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main, codex/rln-0.13.0-beta.3]
+    branches: [main, release/rln-0.13.0-beta.3]
 
 permissions:
   contents: read

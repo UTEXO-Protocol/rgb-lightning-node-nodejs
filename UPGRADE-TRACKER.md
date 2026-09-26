@@ -17,6 +17,16 @@
   runs are excluded. Other platforms must rerun CI for the updated identity.
 - Coordinated adoption tracker:
   https://github.com/UTEXO-Protocol/wdk-rgb-lightning/blob/release/rln-0.13.0-beta.3/RELEASE-ADOPTION-TRACKER.md
+- Updated native matrix run 36228166056 passed all five targets at `549c428`:
+  macOS arm64/x64, Linux glibc arm64/x64, and Linux musl x64. This is optimized
+  offline runtime/ABI/package execution, not funded networking on every target.
+- Extended strict funded fixture `wdk-rln-address-policy-ScQkKP` passed seven
+  checks, including actual settlement of witness invoices created before,
+  between and after UTXO setup, then persistence after process restart.
+- Disk-full fixture `wdk-rln-storage-0DGXfK` passed on the updated host adapter:
+  bounded 128-MiB volume, independent ENOSPC proof, cold restart without state
+  replacement, reconciled funds and an independently confirmed subsequent send.
+- CI branch filter now follows the existing `release/rln-0.13.0-beta.3` branch.
 
 Status: 2026-09-24 local released-runtime qualification completed within the
 recorded scope, with unresolved strict-signer and same-process reopen blockers.
@@ -35,7 +45,7 @@ Draft PR, not release approval. CI applies only to its reported commit.
 
 | Work | Status | Required Evidence |
 | --- | --- | --- |
-| Dedicated upgrade branch | Done | `codex/rln-0.13.0-beta.3` |
+| Dedicated upgrade branch | Done | `release/rln-0.13.0-beta.3` |
 | Released native graph and bounded C-FFI adapter | Implemented | Eight binding/build files only; locked debug and optimized host builds passed |
 | Wrapper types, unsupported capability rejection, exact numbers | Verified locally | 12 JS/installer tests and declaration checks pass |
 | Source install/provenance/artifact workflow | Verified on host | Exact graph, adapter, lock, wrapper, target and artifact identity; final packed Node/WDK source install passed |
