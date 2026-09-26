@@ -1,5 +1,23 @@
 # RLN 0.13.0-beta.3 Upgrade Tracker
 
+## 2026-09-26 On-Chain Binding Follow-Up
+
+- Forward the released `pending_blinded` count through C-FFI and public types.
+  The adapter advertises `pending-blinded-v1`; its SHA-256 is
+  `4a4272cb616ceb2f21e01677a24fe7b246c233408c22e6a103bd2db1cea30c94`.
+  No native wallet, signer, channel or dependency behavior changed.
+- Thirteen JS/installer tests and declarations pass. Optimized macOS arm64
+  rebuild and native offline ABI/lifecycle canary pass.
+- WDK funded strict-regtest address-policy fixture passes on the rebuilt addon:
+  blinded reservation counts 1/2 persist through restart, native non-reuse keeps
+  setup outputs separate from unpaid witness scripts, and explicitly allocated
+  and rotated BTC addresses remain discoverable after a process restart.
+- This is not same-process unlocked signer recreation evidence. The retained
+  signer database lock remains an upstream lifecycle blocker. Physical device
+  runs are excluded. Other platforms must rerun CI for the updated identity.
+- Coordinated adoption tracker:
+  https://github.com/UTEXO-Protocol/wdk-rgb-lightning/blob/release/rln-0.13.0-beta.3/RELEASE-ADOPTION-TRACKER.md
+
 Status: 2026-09-24 local released-runtime qualification completed within the
 recorded scope, with unresolved strict-signer and same-process reopen blockers.
 Draft PR, not release approval. CI applies only to its reported commit.

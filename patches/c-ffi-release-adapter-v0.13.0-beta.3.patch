@@ -203,7 +203,7 @@ index 98d23a6..d08c5f2 100644
      node: &COpaqueStruct,
      signer: &COpaqueStruct,
 diff --git a/bindings/c-ffi/src/json_types.rs b/bindings/c-ffi/src/json_types.rs
-index 6da3557..36512d2 100644
+index 6da3557..a156733 100644
 --- a/bindings/c-ffi/src/json_types.rs
 +++ b/bindings/c-ffi/src/json_types.rs
 @@ -791,6 +791,7 @@ pub(crate) struct JsonDecodeLnInvoiceResponse {
@@ -315,8 +315,47 @@ index 6da3557..36512d2 100644
          }
      }
  }
+@@ -2024,6 +2082,7 @@ impl From<Utxo> for JsonUtxo {
+ pub(crate) struct JsonUnspent {
+     pub utxo: JsonUtxo,
+     pub rgb_allocations: Vec<JsonRgbAllocation>,
++    pub pending_blinded: u32,
+ }
+ 
+ impl From<Unspent> for JsonUnspent {
+@@ -2031,6 +2090,30 @@ impl From<Unspent> for JsonUnspent {
+         JsonUnspent {
+             utxo: u.utxo.into(),
+             rgb_allocations: u.rgb_allocations.into_iter().map(Into::into).collect(),
++            pending_blinded: u.pending_blinded,
++        }
++    }
++}
++
++#[cfg(test)]
++mod unspent_tests {
++    use super::*;
++
++    #[test]
++    fn preserves_pending_blinded_reservations() {
++        for pending_blinded in [0, 3, u32::MAX] {
++            let unspent = Unspent {
++                utxo: Utxo {
++                    outpoint: format!("{}:0", "ab".repeat(32)),
++                    btc_amount: 1000,
++                    colorable: true,
++                    exists: true,
++                },
++                rgb_allocations: vec![],
++                pending_blinded,
++            };
++            let json = serde_json::to_value(JsonUnspent::from(unspent)).unwrap();
++            assert_eq!(json["pending_blinded"], pending_blinded);
+         }
+     }
+ }
 diff --git a/bindings/c-ffi/src/lib.rs b/bindings/c-ffi/src/lib.rs
-index dfc595a..624e113 100644
+index dfc595a..46d304f 100644
 --- a/bindings/c-ffi/src/lib.rs
 +++ b/bindings/c-ffi/src/lib.rs
 @@ -89,6 +89,23 @@ pub extern "C" fn rln_free_string(s: *mut c_char) {
@@ -336,7 +375,7 @@ index dfc595a..624e113 100644
 +        "lock_sha256": env!("RLN_LOCK_SHA256"),
 +        "target": env!("RLN_BUILD_TARGET"),
 +        "capabilities": ["canonical-unlock-v1", "persistent-native-signer", "refresh-transfers-v1",
-+            "apay-address", "decoded-invoice-cltv", "tagged-rgb-assignment"]
++            "apay-address", "decoded-invoice-cltv", "tagged-rgb-assignment", "pending-blinded-v1"]
 +    }).to_string()))
 +}
 +

@@ -110,6 +110,8 @@ export interface RgbUnspent {
     exists: boolean
   }
   rgb_allocations: RgbAllocation[]
+  /** Number of pending blinded receive reservations; never inferred from allocations. */
+  pending_blinded: number
 }
 
 export interface AssetLinkCreateRequest {

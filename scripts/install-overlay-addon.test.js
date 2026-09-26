@@ -35,6 +35,14 @@ test('adapter forwards only released APIs and preserves tagged invoice data', ()
   for (const symbol of ['rln_wallet_snapshot', 'rln_prepare_btc_send', 'native_operations.rs']) assert.ok(!patch.includes(symbol))
 })
 
+test('adapter preserves native blinded receive reservation counts', () => {
+  const patch = fs.readFileSync(readConfig().patchPath, 'utf8')
+  assert.match(patch, /\+\s+pub pending_blinded: u32/)
+  assert.match(patch, /\+\s+pending_blinded: u\.pending_blinded/)
+  assert.match(patch, /pending-blinded-v1/)
+  assert.match(patch, /preserves_pending_blinded_reservations/)
+})
+
 test('manifest rejects wrong artifact, source, wrapper, lock and target identities', () => {
   const config = readConfig()
   const manifest = { ...identity(config), addonSha256: 'a'.repeat(64) }
