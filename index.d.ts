@@ -9,166 +9,35 @@ export type JsonValue = JsonPrimitive | JsonObject | JsonValue[]
 export interface JsonObject { [key: string]: JsonValue }
 export type JsonRequest = Record<string, unknown>
 
+export interface ImportRgbContractRequest {
+  contract_base64: string
+  expected_asset_id: string
+}
+export interface ImportRgbTransferConsignmentRequest {
+  consignment_base64: string
+  offchain_txid: string
+  expected_asset_id?: string
+}
+export interface ImportRgbResponse {
+  asset_id: string
+  already_imported: boolean
+  metadata: JsonObject
+}
+
 /** Integer encoded as base-10 text so values never cross JS's safe-number boundary. */
 export type DecimalString = `${bigint}`
 
-export type WalletSyncMode = 'routine' | 'recovery'
-
-export type NativeOperationState =
-  | 'queued'
-  | 'running'
-  | 'cancel_requested'
-  | 'succeeded'
-  | 'failed'
-  | 'cancelled'
-
-export interface NativeOperationStatus {
-  contract_version: 1
-  operation_id: string
-  kind: 'unlock_with_native_external_signer'
-  state: NativeOperationState
-  created_at_ms: DecimalString
-  started_at_ms?: DecimalString
-  finished_at_ms?: DecimalString
-  updated_at_ms: DecimalString
-  cancellation_requested: boolean
-  can_cancel_immediately: boolean
-  adoption_count: number
-  error?: string
-}
-
-export interface StartNativeOperationResponse extends NativeOperationStatus {
-  adopted_existing: boolean
-}
-
-export interface WalletSyncRequest {
-  mode: WalletSyncMode
-}
-
-export type WalletSyncKeychainResult =
-  | { status: 'succeeded'; checkpoint: WalletSnapshotNetwork }
-  | { status: 'failed'; error_code: string }
-
-export interface WalletSyncResponse {
-  contract_version: 2
-  mode: WalletSyncMode
-  vanilla: WalletSyncKeychainResult
-  colored: WalletSyncKeychainResult
-}
-
-export interface WalletSnapshotRequest {
-  asset_ids?: string[]
-  max_assets?: number
-  max_channels?: number
-  max_activity_items?: number
-  include_activity?: boolean
-}
-
-export interface WalletSnapshotNetwork {
-  network: 'mainnet' | 'testnet' | 'regtest' | 'signet'
-  height: number
-  block_hash: string
-}
-
-export interface WalletSnapshotBalance {
-  settled: DecimalString
-  future: DecimalString
-  spendable: DecimalString
-}
-
-export interface WalletSnapshotBtc {
-  vanilla: WalletSnapshotBalance
-  colored: WalletSnapshotBalance
-}
-
-export interface WalletSnapshotAssetBalance extends WalletSnapshotBalance {
-  offchain_outbound: DecimalString
-  offchain_inbound: DecimalString
-}
-
-export interface WalletSnapshotAsset {
-  asset_id: string
-  ticker: string
-  name: string
-  precision: number
-  balance: WalletSnapshotAssetBalance
-}
-
-export interface WalletSnapshotNode {
-  pubkey: string
-  num_channels: DecimalString
-  num_usable_channels: DecimalString
-  /** Aggregate LDK amount claimable on channel close; this is not routing capacity. */
-  claimable_onchain_sat: DecimalString
-  eventual_close_fees_sat: DecimalString
-  pending_outbound_payments_sat: DecimalString
-  num_peers: DecimalString
-  latest_rgs_snapshot_timestamp: DecimalString | null
-}
-
-export interface WalletSnapshotChannel {
-  channel_id: string
-  peer_pubkey: string
-  status: 'Opening' | 'Opened' | 'Closing'
-  ready: boolean
-  capacity_sat: DecimalString
-  /** LDK amount claimable from this channel monitor; this is not outbound capacity. */
-  claimable_onchain_sat: DecimalString
-  outbound_capacity_msat: DecimalString
-  inbound_capacity_msat: DecimalString
-  next_outbound_htlc_limit_msat: DecimalString
-  next_outbound_htlc_minimum_msat: DecimalString
-  is_usable: boolean
-  public: boolean
-  funding_txid: string | null
-  peer_alias: string | null
-  short_channel_id: DecimalString | null
-  asset_id: string | null
-  asset_local_amount: DecimalString | null
-  asset_remote_amount: DecimalString | null
-  virtual_open_mode: string | null
-}
-
-export interface WalletSnapshotBlockTime {
-  height: number
-  timestamp: DecimalString
-}
-
-export interface WalletSnapshotTransaction {
-  transaction_type: 'RgbSend' | 'Drain' | 'CreateUtxos' | 'SendBtc' | 'Incoming'
-  purpose:
-    | 'incoming_bitcoin'
-    | 'outgoing_bitcoin'
-    | 'rgb_anchor'
-    | 'wallet_drain'
-    | 'rgb_utxo_maintenance'
-  direction: 'incoming' | 'outgoing' | 'internal'
-  txid: string
-  received: DecimalString
-  sent: DecimalString
-  fee: DecimalString
-  external_value: DecimalString | null
-  confirmation_time: WalletSnapshotBlockTime | null
-}
-
-export interface WalletSnapshotPayment {
-  amt_msat: DecimalString | null
-  asset_amount: DecimalString | null
-  asset_id: string | null
-  payment_hash: string
-  payment_type: 'Outbound' | 'InboundAutoClaim' | 'InboundHodl'
-  status: 'Pending' | 'Claimable' | 'Claiming' | 'Succeeded' | 'Cancelled' | 'Failed'
-  created_at: DecimalString
-  updated_at: DecimalString
-  payee_pubkey: string
-}
+/** Safe integers are numbers; larger native response integers are exact decimal strings. */
+export type ExactInteger = number | DecimalString
 
 export interface DecodedLnInvoice {
-  amt_msat: number | null
+  description: string | null
+  description_hash: string | null
+  amt_msat: ExactInteger | null
   expiry_sec: number
   timestamp: number
   asset_id: string | null
-  asset_amount: number | null
+  asset_amount: ExactInteger | null
   payment_hash: string
   payment_secret: string
   payee_pubkey: string | null
@@ -189,12 +58,11 @@ export interface SendPaymentResponse {
   payment_hash: string | null
   payment_secret: string | null
   status: LightningPaymentStatus
-  failure_code: string | null
 }
 
 export interface LightningPayment {
-  amt_msat: number | null
-  asset_amount: number | null
+  amt_msat: ExactInteger | null
+  asset_amount: ExactInteger | null
   asset_id: string | null
   payment_hash: string
   payment_type: 'Outbound' | 'InboundAutoClaim' | 'InboundHodl'
@@ -203,15 +71,14 @@ export interface LightningPayment {
   updated_at: number
   payee_pubkey: string
   preimage: string | null
+  description: string | null
   description_hash: string | null
-  fee_paid_msat: number | null
-  failure_code: string | null
 }
 
 export type DecodedRgbAssignment =
-  | { type: 'Fungible'; value: number }
+  | { type: 'Fungible'; value: ExactInteger }
   | { type: 'NonFungible' }
-  | { type: 'InflationRight'; value: number }
+  | { type: 'InflationRight'; value: ExactInteger }
   | { type: 'Any' }
 
 export interface DecodedRgbInvoice {
@@ -225,97 +92,11 @@ export interface DecodedRgbInvoice {
   transport_endpoints: string[]
 }
 
-export interface ImportRgbTransferConsignmentRequest {
-  consignment_base64: string
-  offchain_txid: string
-  expected_asset_id?: string
-}
-
-export interface ImportRgbTransferConsignmentResponse {
-  asset_id: string
-  already_imported: boolean
-  metadata: JsonObject
-}
-
-export interface ImportRgbContractRequest {
-  contract_base64: string
-  expected_asset_id: string
-}
-
-export interface ImportRgbContractResponse {
-  asset_id: string
-  already_imported: boolean
-  metadata: JsonObject
-}
-
-export interface WalletSnapshotTransferEndpoint {
-  endpoint: string
-  transport_type: string
-  used: boolean
-}
-
-export interface WalletSnapshotTransfer {
-  idx: number
-  created_at: DecimalString
-  updated_at: DecimalString
-  status: string
-  requested_assignment: WalletSnapshotRgbAssignment | null
-  assignments: WalletSnapshotRgbAssignment[]
-  kind: string
-  txid: string | null
-  recipient_id: string | null
-  receive_utxo: string | null
-  change_utxo: string | null
-  expiration: DecimalString | null
-  transport_endpoints: WalletSnapshotTransferEndpoint[]
-}
-
-export interface WalletSnapshotRgbAssignment {
-  kind: 'Fungible' | 'NonFungible' | 'InflationRight' | 'Any'
-  amount?: DecimalString
-}
-
-export interface WalletSnapshotAssetTransfers {
-  asset_id: string
-  transfers: WalletSnapshotTransfer[]
-}
-
-export interface WalletSnapshotResponse {
-  contract_version: 2
-  native_source: 'rgb-lightning-node-v0.11.0-beta.3+utexo-wallet-v3'
-  capture_sequence: DecimalString
-  capture_attempts: 2 | 3
-  stable_capture_count: 2
-  started_at_ms: DecimalString
-  completed_at_ms: DecimalString
-  network_before: WalletSnapshotNetwork
-  network_after: WalletSnapshotNetwork
-  node: WalletSnapshotNode
-  btc: WalletSnapshotBtc
-  assets: WalletSnapshotAsset[]
-  channels: WalletSnapshotChannel[]
-  transactions?: WalletSnapshotTransaction[]
-  payments?: WalletSnapshotPayment[]
-  transfers?: WalletSnapshotAssetTransfers[]
-}
-
 export interface BtcSendRequest {
   amount: number
   address: string
   fee_rate: number
   skip_sync: boolean
-}
-
-export interface PreparedSendResponse {
-  plan_id: string
-  fee_sat: DecimalString
-  total_input_sat: DecimalString
-  total_output_sat: DecimalString
-  size_vbytes: DecimalString
-}
-
-export interface PreparedRgbSendResponse extends PreparedSendResponse {
-  batch_transfer_idx: number
 }
 
 export interface CreateUtxosRequest {
@@ -326,31 +107,8 @@ export interface CreateUtxosRequest {
   skip_sync: boolean
 }
 
-export interface PreparedCreateUtxosResponse extends PreparedSendResponse {
-  target_count: number
-  output_size_sat: number
-}
-
-export interface CommitPreparedSendRequest {
-  plan_id: string
-}
-
 export interface SendBtcResponse {
   txid: string
-}
-
-export interface CancelBtcSendPlanResponse {
-  cancelled: boolean
-}
-
-export interface PendingVanillaTransaction {
-  txid: string
-  operation_type: 'CreateUtxos' | 'Drain' | 'SendBtc'
-}
-
-export interface PendingRgbSendPlan {
-  plan_id: string
-  batch_transfer_idx: number
 }
 
 export interface RgbAllocation {
@@ -364,16 +122,11 @@ export interface RgbUnspent {
     outpoint: string
     btc_amount: number
     colorable: boolean
+    exists: boolean
   }
   rgb_allocations: RgbAllocation[]
+  /** Number of pending blinded receive reservations; never inferred from allocations. */
   pending_blinded: number
-}
-
-export interface AddressReceipt {
-  txid: string
-  amount_sat: DecimalString
-  confirmations: number
-  block_height: number | null
 }
 
 export interface AssetLinkCreateRequest {
@@ -414,13 +167,17 @@ export class SdkNode {
   initWithNativeExternalSigner(signer: NativeExternalSigner): void
   attachNativeExternalSigner(signer: NativeExternalSigner): void
   unlockWithNativeExternalSigner(signer: NativeExternalSigner, request: JsonRequest): void
+  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
   startUnlockWithNativeExternalSigner(
     signer: NativeExternalSigner,
     request: JsonRequest
-  ): StartNativeOperationResponse
-  nativeOperationStatus(operationId: string): NativeOperationStatus
-  adoptNativeOperation(operationId: string): NativeOperationStatus
-  cancelNativeOperation(operationId: string): NativeOperationStatus
+  ): never
+  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
+  nativeOperationStatus(operationId: string): never
+  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
+  adoptNativeOperation(operationId: string): never
+  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
+  cancelNativeOperation(operationId: string): never
   initWithExternalSigner(bootstrap: JsonRequest): void
   detachExternalSigner(): void
   unlockWithAttachedExternalSigner(request: JsonRequest): void
@@ -429,7 +186,8 @@ export class SdkNode {
   // VSS / APay
   vssClearFence(request: JsonRequest): void
   vssBackup(): JsonObject
-  vssDeleteAll(request: { password: string }): { deleted_keys: number }
+  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
+  vssDeleteAll(request: { password: string }): never
   apayNew(hostNodeId: string): JsonObject
   apayNewWithAddress(hostNodeId: string, username: string, domain: string): JsonObject
 
@@ -437,8 +195,10 @@ export class SdkNode {
   nodeInfo(): JsonObject
   networkInfo(): JsonObject
   sync(): JsonValue
-  syncWallet(request: WalletSyncRequest): WalletSyncResponse
-  walletSnapshot(request?: WalletSnapshotRequest): WalletSnapshotResponse
+  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
+  syncWallet(request: JsonRequest): never
+  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
+  walletSnapshot(request?: JsonRequest): never
   getAddress(): JsonObject
   address(): JsonObject
   rotateAddress(): JsonObject
@@ -458,14 +218,22 @@ export class SdkNode {
   listTransactions(skipSync?: boolean): JsonValue
   listTransactionsByTxid(txid: string, skipSync?: boolean): JsonValue
   sendBtc(request: BtcSendRequest): SendBtcResponse
-  prepareBtcSend(request: BtcSendRequest): PreparedSendResponse
-  commitPreparedBtcSend(request: CommitPreparedSendRequest): SendBtcResponse
-  cancelBtcSendPlan(request: { plan_id: string }): CancelBtcSendPlanResponse
-  prepareCreateUtxos(request: CreateUtxosRequest): PreparedCreateUtxosResponse
-  commitPreparedCreateUtxos(request: CommitPreparedSendRequest): SendBtcResponse
-  cancelCreateUtxosPlan(request: { plan_id: string }): CancelBtcSendPlanResponse
-  listPendingVanillaTransactions(): PendingVanillaTransaction[]
-  listAddressReceipts(address: string): AddressReceipt[]
+  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
+  prepareBtcSend(request: BtcSendRequest): never
+  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
+  commitPreparedBtcSend(request: JsonRequest): never
+  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
+  cancelBtcSendPlan(request: { plan_id: string }): never
+  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
+  prepareCreateUtxos(request: CreateUtxosRequest): never
+  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
+  commitPreparedCreateUtxos(request: JsonRequest): never
+  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
+  cancelCreateUtxosPlan(request: { plan_id: string }): never
+  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
+  listPendingVanillaTransactions(): never
+  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
+  listAddressReceipts(address: string): never
   createUtxos(request: JsonRequest): JsonValue
   estimateFee(blocks: number): JsonObject
 
@@ -501,16 +269,23 @@ export class SdkNode {
   rgbInvoice(request: JsonRequest): JsonObject
   decodeRgbInvoice(invoice: string): DecodedRgbInvoice
   sendRgb(request: JsonRequest): JsonValue
-  importRgbTransferConsignment(request: ImportRgbTransferConsignmentRequest): ImportRgbTransferConsignmentResponse
-  importRgbContract(request: ImportRgbContractRequest): ImportRgbContractResponse
-  prepareRgbSend(request: JsonRequest): PreparedRgbSendResponse
-  commitPreparedRgbSend(request: CommitPreparedSendRequest): JsonValue
-  cancelRgbSendPlan(request: { plan_id: string }): CancelBtcSendPlanResponse
-  listPendingRgbSendPlans(): PendingRgbSendPlan[]
-  refreshTransfers(request: JsonRequest): { ok: true }
+  /** Validated metadata import for an already accepted transfer; does not accept ownership. */
+  importRgbTransferConsignment(request: ImportRgbTransferConsignmentRequest): ImportRgbResponse
+  /** Validated public contract metadata import; does not create allocations or a balance. */
+  importRgbContract(request: ImportRgbContractRequest): ImportRgbResponse
+  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
+  prepareRgbSend(request: JsonRequest): never
+  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
+  commitPreparedRgbSend(request: JsonRequest): never
+  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
+  cancelRgbSendPlan(request: { plan_id: string }): never
+  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
+  listPendingRgbSendPlans(): never
+  refreshTransfers(request: JsonRequest): RefreshTransfersResponse
   failTransfers(request: JsonRequest): JsonValue
   inflate(request: JsonRequest): JsonValue
-  listTransfers(assetId: string): JsonValue
+  listTransfers(assetId?: string, txid?: string): JsonValue
+  listTransfers(filters: { asset_id?: string; txid?: string }): JsonValue
   listTransfersByTxid(txid: string): JsonValue
 
   // RGB asset media
@@ -526,6 +301,28 @@ export class SdkNode {
 }
 
 export function uniffiHealthcheck(): string
+export interface RuntimeInfo {
+  readonly abi_version: 1
+  readonly rln_version: '0.13.0-beta.3'
+  readonly rln_commit: string
+  readonly lightning_commit: string
+  readonly adapter_sha256: string
+  readonly wrapper_sha256: string
+  readonly lock_sha256: string
+  readonly target: string
+  readonly capabilities: readonly string[]
+}
+export interface RefreshTransfersResponse {
+  transfers: Record<string, {
+    updated_status: string | null
+    failure: { name: string; message: string } | null
+  }>
+}
+export class UnsupportedCapabilityError extends Error {
+  readonly code: 'ERR_RLN_UNSUPPORTED_CAPABILITY'
+  readonly capability: string
+}
+export function getRuntimeInfo(): RuntimeInfo
 export function uniffiIsInitialized(): boolean
 export function sdkInitialize(request?: JsonRequest): void
 export function sdkShutdown(): void

@@ -1,66 +1,18 @@
-# UTEXO local patches over `rgb-lightning-node` upstream
+# Production RLN With Approved Imports
 
-CI-only mirror of the optional patch series maintained in
-[`@utexo/rgb-lightning-node-bare`][bare]. Both bindings consume the same
-`rgb-lightning-node/bindings/c-ffi` crate, so the same patch is applied
-before the static lib / napi addon is built.
+Only `release-import-adapter-v0.13.0-beta.3.patch` is active. It applies to
+RLN `af03c7f1a65135a429f05a5820600338215954dc` and includes the rebased
+[import PR #128](https://github.com/UTEXO-Protocol/rgb-lightning-node/pull/128)
+at `5d5aa742984d52767e1055fed6aa154ad732d551` plus the existing C-FFI adapter.
 
-The release workflow clones `rgb-lightning-node` at the pinned tag and applies
-`patches/c-ffi-utexo-patches-<tag>.patch` before `napi build` when that file
-exists and is non-empty. Current tags build directly from upstream.
+The 23-file allowlist in `scripts/release-contract.js` includes the import SDK,
+REST, UniFFI and C-FFI entrypoints and tests. The existing adapter forwards released
+persistent signer/APay methods, invoice serialization and build identity, and fixes
+the C-FFI lock/transaction-sync patch map. The root Cargo manifests/lock and released
+RGB-lib and rust-lightning revisions are unchanged. There are no additional signer,
+VSS, routing, synchronization or prepared-send behavior patches.
 
-Keep overlays in lock-step with the copy in the bare repo. Tags without a
-matching file are built directly from upstream.
-
-[bare]: https://github.com/UTEXO-Protocol/rgb-lightning-node-bare
-
-## c-ffi-utexo-patches-v0.11.0-beta.3.patch
-
-This overlay includes transactional orphaned virtual-channel recovery so a
-failed RGB channel open cannot permanently reserve inventory or block the peer.
-It also exposes `rln_sdk_node_apay_new_with_address`, carrying RLN's existing
-signed Lightning Address attestation API through the generated C boundary.
-Lightning send responses and persisted payment records expose stable failure
-codes, and node shutdown releases native ownership before signer destruction.
-Shutdown now aborts and joins peer reconnect/listener tasks before its final
-peer disconnect, so a reconnect cannot leave the LSP with a half-open socket.
-RGB contract, asset amount, carrier millisatoshis, invoice expiry, and terminal
-reason remain bound to the same payment after restart and are exposed by wallet
-snapshot contract v3. Address rotation reveals the new script before returning.
-
-Adds versioned dual-keychain synchronization, bounded decimal-safe wallet
-snapshots, explicit Lightning routing-fee caps, and persisted actual routing
-fees to the pinned v0.11 native source. It preserves complete Lightning
-invoice decode metadata and stable tagged RGB assignments across C-FFI, and
-also adds deterministic BTC/RGB prepare-and-commit plans, BTC plan
-cancellation, pending vanilla transaction inspection, and RGB UTXO setup
-isolation from existing and future witness invoices.
-The same overlay permits a replacement trusted virtual channel only after the
-previous native session reaches its terminal abandoned state.
-Inbound channels are classified as virtual only when an explicitly configured
-trusted peer requests SCID privacy; ordinary inbound channels retain standard
-LDK handling even while virtual-channel support is enabled.
-The local VSS writer identity now survives process restarts without being
-replicated with the mnemonic, allowing the same installation to reclaim its
-fence while independently provisioned installations remain excluded.
-
-Adds the versioned wallet synchronization and exact snapshot contract used by
-WDK portfolio refreshes. Routine synchronization FullSyncs both Vanilla and
-Colored keychains, recovery synchronization FullScans both keychains, and the
-snapshot serializes all monetary values as bounded decimal strings. Keep this
-file byte-identical to the Bare binding's overlay.
-
-## c-ffi-utexo-patches-v0.9.0-beta.3.patch
-
-Adds the versioned wallet synchronization and exact snapshot contract used by
-WDK portfolio refreshes. Routine synchronization FullSyncs both Vanilla and
-Colored keychains, recovery synchronization FullScans both keychains, and the
-snapshot serializes all monetary values as bounded decimal strings. Keep this
-file byte-identical to the bare binding's overlay.
-
-## c-ffi-utexo-patches-v0.6.0-beta.1.patch
-
-Intentionally empty. The apay_new / vss_clear_fence / vss_backup / hodl
-c-ffi wrappers this series used to add were merged upstream into
-rgb-lightning-node (PRs #62/#63/#66) and ship in tag v0.6.0-beta.1, so no
-overlay is needed. The release workflow skips applying an empty patch.
+Contract import adds validated public metadata, not allocations. Transfer-consignment
+import registers metadata for the native receive flow, not arbitrary spendable funds.
+Both runtimes must use identical patch bytes. The native identity records both the
+release base and import commit; changing sources requires new hashes and rebuilt artifacts.

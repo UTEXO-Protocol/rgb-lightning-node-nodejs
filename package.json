@@ -1,6 +1,6 @@
 {
   "name": "@utexo/rgb-lightning-node-nodejs",
-  "version": "0.1.0-beta.16",
+  "version": "0.2.0-beta.1",
   "description": "Node.js (napi-rs) bindings for rgb-lightning-node",
   "keywords": [
     "rgb",
@@ -14,21 +14,24 @@
   "files": [
     "index.js",
     "index.d.ts",
+    "json-boundary.js",
     "scripts/",
     "patches/",
     "src/",
     "build.rs",
     "Cargo.toml",
     "Cargo.lock",
-    "README.md"
+    "README.md",
+    "UPGRADE-TRACKER.md"
   ],
   "scripts": {
     "postinstall": "node scripts/install-overlay-addon.js",
-    "build": "mkdir -p .napi-generated && napi build --platform --release --no-js --dts .napi-generated/index.d.ts && node scripts/stage-local-addon.js",
-    "build:debug": "mkdir -p .napi-generated && napi build --platform --no-js --dts .napi-generated/index.d.ts && node scripts/stage-local-addon.js",
+    "build": "node scripts/install-overlay-addon.js",
+    "build:debug": "node scripts/install-overlay-addon.js --debug",
     "check:types": "tsc --noEmit --strict --skipLibCheck index.d.ts",
     "test:installer": "node --test scripts/install-overlay-addon.test.js",
-    "test": "npm run test:installer && node test.js"
+    "test:unit": "node --test scripts/*.test.js",
+    "test": "npm run test:unit && node test.js"
   },
   "engines": {
     "node": ">=18"
@@ -45,10 +48,16 @@
   "author": "UTEXO",
   "utexoNativeOverlay": {
     "repository": "https://github.com/UTEXO-Protocol/rgb-lightning-node.git",
-    "ref": "v0.11.0-beta.3",
-    "commit": "f30a5393268de67c6bb5a1c525bc790c5b11afa2",
-    "patch": "patches/c-ffi-utexo-patches-v0.11.0-beta.3.patch",
-    "patchSha256": "d0b6d4b057edd675e3d4385f2243b266020feeb1bee7714e7625e2f7bc0c945c",
-    "rustToolchain": "1.88.0"
+    "ref": "v0.13.0-beta.3",
+    "commit": "af03c7f1a65135a429f05a5820600338215954dc",
+    "lightningCommit": "38d73bc918f27956590585d2bb83c86f059679b0",
+    "patch": "patches/release-import-adapter-v0.13.0-beta.3.patch",
+    "patchSha256": "aaca114a52611d7fa909846690d7545424a81b09e3c7f072d8e9932e1d52f15a",
+    "cffiLockSha256": "790ebf1a68fcc60f67f2e703dfc1abc2e3e65a52494b4156ec4de7c4b2d42b4b",
+    "rustToolchain": "1.94.0",
+    "importCommit": "5d5aa742984d52767e1055fed6aa154ad732d551"
+  },
+  "dependencies": {
+    "lossless-json": "4.3.1"
   }
 }
