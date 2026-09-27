@@ -15,7 +15,7 @@ test('release metadata is exact and the adapter is checksum-bound', () => {
   assert.throws(() => validateAdapter({ ...config, commit: '0'.repeat(40) }), /identity/)
 })
 
-test('adapter changes only the declared binding and build files', () => {
+test('adapter changes only the reviewed release/import files', () => {
   const patch = fs.readFileSync(readConfig().patchPath, 'utf8')
   const files = [...patch.matchAll(/^diff --git a\/(\S+) b\/(\S+)$/gm)]
   assert.equal(files.length, ALLOWED_FILES.length)
@@ -23,12 +23,12 @@ test('adapter changes only the declared binding and build files', () => {
     assert.equal(a, b)
     assert.ok(ALLOWED_FILES.includes(a), a)
   }
-  for (const forbidden of ['src/sdk/', 'src/persistence/', 'src/uniffi_api/', 'rust-lightning/']) {
+  for (const forbidden of ['src/persistence/', 'src/signer/', 'src/ldk', 'rust-lightning/']) {
     assert.ok(!files.some(([, file]) => file.startsWith(forbidden)), forbidden)
   }
 })
 
-test('adapter forwards only released APIs and preserves tagged invoice data', () => {
+test('adapter includes only the approved import extension and released binding repairs', () => {
   const patch = fs.readFileSync(readConfig().patchPath, 'utf8')
   for (const symbol of ['rln_native_external_signer_new_with_storage', 'rln_sdk_node_apay_new_with_address',
     'rln_binding_build_info', 'min_final_cltv_expiry_delta', 'JsonDecodedRgbAssignment']) assert.ok(patch.includes(symbol))

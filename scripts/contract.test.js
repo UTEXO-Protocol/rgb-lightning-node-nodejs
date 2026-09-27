@@ -13,7 +13,7 @@ function facade (overrides = {}) {
   const root = path.resolve(__dirname, '..')
   const identity = installer.identity(installer.readConfig())
   const info = { abi_version: 1, rln_version: '0.13.0-beta.3', rln_commit: identity.commit,
-    lightning_commit: identity.lightningCommit, adapter_sha256: identity.patchSha256,
+    import_commit: identity.importCommit, lightning_commit: identity.lightningCommit, adapter_sha256: identity.patchSha256,
     wrapper_sha256: identity.wrapperSha256, lock_sha256: identity.lockSha256,
     target: identity.target, capabilities: [], ...overrides }
   const native = { getRuntimeInfo: () => JSON.stringify(info) }
@@ -57,7 +57,7 @@ test('all unsupported APIs throw before accessing a native handle', () => {
     'cancelNativeOperation', 'vssDeleteAll', 'syncWallet', 'walletSnapshot', 'prepareBtcSend',
     'commitPreparedBtcSend', 'cancelBtcSendPlan', 'prepareCreateUtxos', 'commitPreparedCreateUtxos',
     'cancelCreateUtxosPlan', 'listPendingVanillaTransactions', 'listAddressReceipts',
-    'importRgbTransferConsignment', 'importRgbContract', 'prepareRgbSend',
+    'prepareRgbSend',
     'commitPreparedRgbSend', 'cancelRgbSendPlan', 'listPendingRgbSendPlans'
   ]) assert.throws(() => node[method]({}), UnsupportedCapabilityError, method)
 })
@@ -97,4 +97,22 @@ test('failed shutdown retains native state for retry and reports the failure', (
   node.shutdown()
   node.shutdown()
   assert.equal(calls, 2)
+})
+
+test('approved RGB imports preserve payloads, exact metadata and native failures', () => {
+  for (const method of ['importRgbContract', 'importRgbTransferConsignment']) {
+    let received
+    const native = { [method]: (request) => {
+      received = JSON.parse(request)
+      return '{"asset_id":"rgb:expected","already_imported":false,"metadata":{"max_supply":18446744073709551615}}'
+    } }
+    const node = new (facade().SdkNode)(native)
+    const request = method === 'importRgbContract'
+      ? { contract_base64: 'YQ==', expected_asset_id: 'rgb:expected' }
+      : { consignment_base64: 'YQ==', offchain_txid: 'a'.repeat(64), expected_asset_id: 'rgb:expected' }
+    assert.equal(node[method](request).metadata.max_supply, '18446744073709551615')
+    assert.deepEqual(received, request)
+    native[method] = () => { throw new Error('invalid contract') }
+    assert.throws(() => node[method](request), /invalid contract/)
+  }
 })

@@ -94,10 +94,12 @@ access, and their declaration return type is `never`:
 - Prepared/commit/cancel BTC, RGB and UTXO plans and pending plan inventories.
 - Native asynchronous operation start/status/adopt/cancel.
 - Address receipts and pending vanilla transaction inventory.
-- RGB contract and transfer-consignment imports.
 - VSS delete-all.
 
-No upstream wallet, routing, signer-policy, VSS or persistence code is patched.
+RGB contract and transfer-consignment metadata imports are the one approved
+extension: RLN PR #128 rebased onto 0.13.0-beta.3. Both validate payloads and
+identity; neither creates balances. See `patches/README.md` for the exact pin.
+No additional routing, signer-policy, VSS or persistence patch is included.
 The allowlisted C-FFI adapter forwards persistent signer/APay registration,
 serializes existing invoice fields, exports build identity and corrects build
 metadata. The exact patch and dependency graph are checked before building.

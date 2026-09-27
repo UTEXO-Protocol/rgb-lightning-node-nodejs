@@ -1,5 +1,29 @@
 # RLN 0.13.0-beta.3 Upgrade Tracker
 
+## Approved Import Extension (2026-09-27)
+
+This candidate is RLN `v0.13.0-beta.3` (`af03c7f1a65135a429f05a5820600338215954dc`)
+plus the narrowly scoped [RLN import PR #128](https://github.com/UTEXO-Protocol/rgb-lightning-node/pull/128)
+at `5d5aa742984d52767e1055fed6aa154ad732d551`. It is not an unmodified upstream release.
+The released RGB-lib revision, root Cargo lockfile and rust-lightning gitlink are unchanged.
+Contract import validates public metadata and grants no balance. Transfer-consignment import
+registers metadata only; it does not replace the normal RGB receive/settlement protocol.
+
+Current checks: funded Rust SDK NIA/IFA import, idempotence, identity rejection, zero balance
+before receipt, named IFA invoice, real transfer and allocation-preserving reimport passed.
+Node host debug build, 14 wrapper/installer tests, native lifecycle canary and types passed.
+Bare host debug build, 37 wrapper/installer tests and native lifecycle canary passed.
+WDK: 706 tests, types, lint and package verification passed. Fresh-wallet IFA import
+and actual named-invoice receipt/send settled on both Node and Bare 1.32.0. Both
+started with zero imported balance, received 250000 units, sent 100000 units and
+preserved the resulting 150000/100000 balances across reimport. Node also repeated
+NIA/IFA/CFA/UDA receipt and two-sided transfer settlement. These are regtest fixtures,
+not production USDT. Mobile release artifact requalification and final Iris integration
+are in progress; historical artifact/runtime passes below do not qualify
+this new import patch. No physical-device tests, publication or production approval.
+The existing signer-reopen, reorg/recovery, VSS and deployment gates remain separate.
+
+
 ## 2026-09-26 On-Chain Binding Follow-Up
 
 - Forward the released `pending_blinded` count through C-FFI and public types.

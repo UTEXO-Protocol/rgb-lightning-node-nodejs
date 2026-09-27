@@ -7,15 +7,36 @@ const { execFileSync } = require('node:child_process')
 
 const RELEASE = Object.freeze({
   ref: 'v0.13.0-beta.3',
+  importCommit: '5d5aa742984d52767e1055fed6aa154ad732d551',
   commit: 'af03c7f1a65135a429f05a5820600338215954dc',
   lightningCommit: '38d73bc918f27956590585d2bb83c86f059679b0',
   rustToolchain: '1.94.0',
   cffiLockSha256: '790ebf1a68fcc60f67f2e703dfc1abc2e3e65a52494b4156ec4de7c4b2d42b4b'
 })
 const ALLOWED_FILES = Object.freeze([
-  'bindings/c-ffi/Cargo.toml', 'bindings/c-ffi/Cargo.lock',
-  'bindings/c-ffi/build.rs', 'bindings/c-ffi/rln.h', 'bindings/c-ffi/rln.hpp',
-  'bindings/c-ffi/src/api.rs', 'bindings/c-ffi/src/json_types.rs', 'bindings/c-ffi/src/lib.rs'
+  'bindings/c-ffi/Cargo.lock',
+  'bindings/c-ffi/Cargo.toml',
+  'bindings/c-ffi/build.rs',
+  'bindings/c-ffi/rln.h',
+  'bindings/c-ffi/rln.hpp',
+  'bindings/c-ffi/src/api.rs',
+  'bindings/c-ffi/src/json_types.rs',
+  'bindings/c-ffi/src/lib.rs',
+  'bindings/rgb_lightning_node.udl',
+  'src/error.rs',
+  'src/lib.rs',
+  'src/main.rs',
+  'src/rgb.rs',
+  'src/rgb_import.rs',
+  'src/routes.rs',
+  'src/sdk/mod.rs',
+  'src/test/lib_sdk/contract_import.rs',
+  'src/test/lib_sdk/mod.rs',
+  'src/test_utils.rs',
+  'src/uniffi_api/mod.rs',
+  'src/uniffi_api/state.rs',
+  'src/uniffi_api/tests.rs',
+  'src/uniffi_api/types.rs'
 ])
 const GIT_SOURCES = Object.freeze({
   musig2: 'git+https://github.com/arik-so/rust-musig2?rev=6f95a05718cbb44d8fe3fa6021aea8117aa38d50#6f95a05718cbb44d8fe3fa6021aea8117aa38d50',
@@ -38,7 +59,7 @@ function validateAdapter (config) {
   const patch = fs.readFileSync(config.patchPath, 'utf8')
   const changes = [...patch.matchAll(/^diff --git a\/(\S+) b\/(\S+)$/gm)]
   if (changes.length === 0 || changes.some(([, a, b]) => a !== b || !ALLOWED_FILES.includes(a))) {
-    throw new Error('Native adapter changes files outside the binding/build allowlist')
+    throw new Error('Native adapter changes files outside the approved release/import allowlist')
   }
   if (sha256(config.patchPath) !== config.patchSha256) throw new Error('Native adapter checksum mismatch')
 }

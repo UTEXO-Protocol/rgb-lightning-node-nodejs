@@ -9,6 +9,21 @@ export type JsonValue = JsonPrimitive | JsonObject | JsonValue[]
 export interface JsonObject { [key: string]: JsonValue }
 export type JsonRequest = Record<string, unknown>
 
+export interface ImportRgbContractRequest {
+  contract_base64: string
+  expected_asset_id: string
+}
+export interface ImportRgbTransferConsignmentRequest {
+  consignment_base64: string
+  offchain_txid: string
+  expected_asset_id?: string
+}
+export interface ImportRgbResponse {
+  asset_id: string
+  already_imported: boolean
+  metadata: JsonObject
+}
+
 /** Integer encoded as base-10 text so values never cross JS's safe-number boundary. */
 export type DecimalString = `${bigint}`
 
@@ -254,10 +269,10 @@ export class SdkNode {
   rgbInvoice(request: JsonRequest): JsonObject
   decodeRgbInvoice(invoice: string): DecodedRgbInvoice
   sendRgb(request: JsonRequest): JsonValue
-  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
-  importRgbTransferConsignment(request: JsonRequest): never
-  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
-  importRgbContract(request: JsonRequest): never
+  /** Validated metadata import for an already accepted transfer; does not accept ownership. */
+  importRgbTransferConsignment(request: ImportRgbTransferConsignmentRequest): ImportRgbResponse
+  /** Validated public contract metadata import; does not create allocations or a balance. */
+  importRgbContract(request: ImportRgbContractRequest): ImportRgbResponse
   /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
   prepareRgbSend(request: JsonRequest): never
   /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
