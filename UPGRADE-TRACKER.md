@@ -27,6 +27,10 @@
   bounded 128-MiB volume, independent ENOSPC proof, cold restart without state
   replacement, reconciled funds and an independently confirmed subsequent send.
 - CI branch filter now follows the existing `release/rln-0.13.0-beta.3` branch.
+- Updated strict interrupted-send fixture `wdk-rln-interrupted-BzwkU1` passes
+  at 0/20/100-ms dispatch-relative timings, including an actual unacknowledged
+  interruption. Recovery does not automatically resend. This is not proof of
+  interruption at every native database-commit boundary.
 
 Status: 2026-09-24 local released-runtime qualification completed within the
 recorded scope, with unresolved strict-signer and same-process reopen blockers.
