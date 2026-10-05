@@ -27,8 +27,9 @@ when checked. The scoped credential helper is implemented; no personal token
 was copied to GitHub. Complete release builds, anonymous packed installs and
 license/notices review remain publication gates.
 
-Host debug builds pass. Optimized host and clean-consumer verification is in
-progress. Fresh Android arm64 input checks pass, but bare-link 3.3.2/bare-lief
+Host debug and optimized builds, native canaries and fresh packed-consumer
+installs pass. Both optimized runtimes also pass the funded four-schema/export
+matrix. Fresh Android arm64 input checks pass, but bare-link 3.3.2/bare-lief
 0.2.9 output fails 16-KiB RELRO alignment. Remaining 0.15 platform/runtime
 qualification is open; historical 0.13 results are not reused as passes.
 
@@ -47,3 +48,10 @@ contains the full evidence, ownership, compatibility and remaining PR/issue list
 Mainnet Lightning, mainnet IFA and external-signer BFA/burn remain unsupported.
 Iris, the WDK base upgrade, existing-wallet migration and physical devices are
 outside this change. UPGRADE-TRACKER.md is historical 0.13 evidence.
+
+Draft reviews: [WDK #45](https://github.com/UTEXO-Protocol/wdk-rgb-lightning/pull/45),
+[Node #24](https://github.com/UTEXO-Protocol/rgb-lightning-node-nodejs/pull/24),
+[Bare #22](https://github.com/UTEXO-Protocol/rgb-lightning-node-bare/pull/22).
+WDK CI passes. Native CI logs confirm missing ORG_READ_TOKEN, not successful
+cross-platform builds. Both complete-artifact publication gates reject the
+currently incomplete matrices. No registry package or release tag was created.
