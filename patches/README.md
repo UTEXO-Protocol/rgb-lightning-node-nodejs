@@ -1,18 +1,25 @@
-# Production RLN With Approved Imports
+# RLN 0.15 C binding adapter
 
-Only `release-import-adapter-v0.13.0-beta.3.patch` is active. It applies to
-RLN `af03c7f1a65135a429f05a5820600338215954dc` and includes the rebased
-[import PR #128](https://github.com/UTEXO-Protocol/rgb-lightning-node/pull/128)
-at `5d5aa742984d52767e1055fed6aa154ad732d551` plus the existing C-FFI adapter.
+`release-adapter-v0.15.0-beta.3.patch` applies to released RLN
+`e2b39d5ae8da74525eafb58bc39b9a614c756a73` and its released rust-lightning
+submodule `6d6d061f840264296e7de2b1c64dac6c0dd7eb26`.
 
-The 23-file allowlist in `scripts/release-contract.js` includes the import SDK,
-REST, UniFFI and C-FFI entrypoints and tests. The existing adapter forwards released
-persistent signer/APay methods, invoice serialization and build identity, and fixes
-the C-FFI lock/transaction-sync patch map. The root Cargo manifests/lock and released
-RGB-lib and rust-lightning revisions are unchanged. There are no additional signer,
-VSS, routing, synchronization or prepared-send behavior patches.
+The eight-file allowlist in `scripts/release-contract.js` is limited to
+`bindings/c-ffi`: its manifest, lockfile, build script, headers and three Rust
+binding files. It does not modify RLN, rgb-lib, VLS or LDK runtime behavior.
 
-Contract import adds validated public metadata, not allocations. Transfer-consignment
-import registers metadata for the native receive flow, not arbitrary spendable funds.
-Both runtimes must use identical patch bytes. The native identity records both the
-release base and import commit; changing sources requires new hashes and rebuilt artifacts.
+The adapter exposes the released persistent external-signer constructor and
+address-bound APay registration, preserves invoice CLTV, emits structured RGB
+invoice assignments and `pending_blinded`, and exports runtime provenance.
+It supplies the coherent transaction-sync Cargo path and the four BFA overrides
+needed by the released dependency graph. Compatible lockfile updates include
+`h2` 0.4.16 and `rustls` 0.23.45; remaining advisories are release gates.
+
+Contract import and accepted-transfer metadata import are already in RLN 0.15
+(PR #128). There is no import backport or separate import revision. These imports
+do not credit arbitrary funds. Saved consignment export also comes from the
+released C API; the Node and Bare wrappers expose its bytes and local path.
+
+Both native repositories must contain identical patch bytes. The manifest pins
+the patch, C-FFI lock, source graph and build recipe; the compiled identity also
+binds the wrapper and target. Source changes require rebuilt artifacts.

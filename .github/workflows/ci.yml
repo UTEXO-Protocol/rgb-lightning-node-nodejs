@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main, release/rln-0.13.0-beta.3]
+    branches: [main, release/rln-0.15.0-beta.3]
 
 permissions:
   contents: read
@@ -32,7 +32,9 @@ jobs:
       - run: npm run test:unit
       - run: rustfmt --edition 2021 --check src/lib.rs build.rs
       - name: Build exact release graph
-        run: npm run build:debug
+        env:
+          ORG_READ_TOKEN: ${{ secrets.ORG_READ_TOKEN }}
+        run: node scripts/with-source-access.js npm run build:debug
       - run: npm test
       - name: Native adapter tests
         run: node scripts/test-native-adapter.js

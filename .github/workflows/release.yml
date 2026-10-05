@@ -18,10 +18,10 @@ jobs:
             target: aarch64-apple-darwin
             suffix: darwin-arm64
             runnable: true
-          - runner: macos-15
+          - runner: macos-15-intel
             target: x86_64-apple-darwin
             suffix: darwin-x64
-            runnable: false
+            runnable: true
           - runner: warp-ubuntu-latest-x64-16x
             target: x86_64-unknown-linux-gnu
             suffix: linux-x64-gnu
@@ -49,7 +49,10 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm run test:unit
       - run: npm run check:types
-      - run: npm run build
+      - name: Build with scoped source access
+        env:
+          ORG_READ_TOKEN: ${{ secrets.ORG_READ_TOKEN }}
+        run: node scripts/with-source-access.js npm run build
       - name: Runnable target smoke
         if: matrix.runnable
         run: npm test
@@ -73,6 +76,8 @@ jobs:
       RLN_NODE_TARGET: linux-x64-musl
       CC: gcc
       CXX: g++
+      RUSTFLAGS: '-C target-feature=-crt-static'
+      LIBCLANG_PATH: /usr/lib
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Build prerequisites
@@ -83,13 +88,15 @@ jobs:
           rustup target add --toolchain 1.94.0 x86_64-unknown-linux-musl
       - name: Build and verify
         shell: bash
+        env:
+          ORG_READ_TOKEN: ${{ secrets.ORG_READ_TOKEN }}
         run: |
           set -euo pipefail
           export PATH="/usr/bin:$PATH"
           npm ci --ignore-scripts
           npm run test:unit
           npm run check:types
-          npm run build
+          node scripts/with-source-access.js npm run build
           npm test
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:

@@ -48,7 +48,9 @@ jobs:
           rustflags: ''
       - if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y cmake clang pkg-config libssl-dev
-      - run: bash scripts/runtime-matrix.sh
+      - run: node scripts/with-source-access.js bash scripts/runtime-matrix.sh
+        env:
+          ORG_READ_TOKEN: ${{ secrets.ORG_READ_TOKEN }}
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
@@ -65,14 +67,17 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - name: Build and execute inside real musl userland
+        env:
+          ORG_READ_TOKEN: ${{ secrets.ORG_READ_TOKEN }}
         run: |
           docker run --rm -v "$PWD:/candidate" -w /candidate \
+            -e ORG_READ_TOKEN \
             -e EXPECTED_TARGET=linux-x64-musl -e CARGO_BUILD_JOBS=2 \
             -e RUSTFLAGS='-C target-feature=-crt-static' \
             rust:1.94.0-alpine3.23 sh -ec '
               apk add --no-cache nodejs npm bash git cmake clang clang-dev make g++ pkgconf openssl-dev perl linux-headers
               export LIBCLANG_PATH=/usr/lib
-              bash scripts/runtime-matrix.sh
+              node scripts/with-source-access.js bash scripts/runtime-matrix.sh
             '
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()

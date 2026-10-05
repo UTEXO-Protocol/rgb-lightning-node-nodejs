@@ -273,6 +273,10 @@ export class SdkNode {
   importRgbTransferConsignment(request: ImportRgbTransferConsignmentRequest): ImportRgbResponse
   /** Validated public contract metadata import; does not create allocations or a balance. */
   importRgbContract(request: ImportRgbContractRequest): ImportRgbResponse
+  /** Local consignment bytes, encoded as lowercase hexadecimal (not base64). */
+  getConsignment(assetId: string, txid: string): { bytes_hex: string }
+  /** Native filesystem path. A consignment export is not a complete wallet backup. */
+  getConsignmentPath(assetId: string, txid: string): { path: string }
   /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
   prepareRgbSend(request: JsonRequest): never
   /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
@@ -303,7 +307,7 @@ export class SdkNode {
 export function uniffiHealthcheck(): string
 export interface RuntimeInfo {
   readonly abi_version: 1
-  readonly rln_version: '0.13.0-beta.3'
+  readonly rln_version: '0.15.0-beta.3'
   readonly rln_commit: string
   readonly lightning_commit: string
   readonly adapter_sha256: string

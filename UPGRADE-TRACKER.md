@@ -1,5 +1,8 @@
 # RLN 0.13.0-beta.3 Upgrade Tracker
 
+Historical 0.13 evidence. Current candidate status is in
+[RELEASE-0.15-TRACKER.md](./RELEASE-0.15-TRACKER.md).
+
 ## Approved Import Extension (2026-09-27)
 
 This candidate is RLN `v0.13.0-beta.3` (`af03c7f1a65135a429f05a5820600338215954dc`)

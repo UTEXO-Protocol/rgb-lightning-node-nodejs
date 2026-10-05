@@ -501,9 +501,9 @@ checksum = "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53"
 
 [[package]]
 name = "aws-lc-rs"
-version = "1.17.3"
+version = "1.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "00bdb5da18dac48ca2cc7cd4a98e533e8635a58e2361d13a1a4ee3888e0d72f1"
+checksum = "ce2b2dcc879c3bae0d371e77c99f2238400ef24ec001394befa67b6e543add9e"
 dependencies = [
  "aws-lc-sys",
  "zeroize",
@@ -511,9 +511,9 @@ dependencies = [
 
 [[package]]
 name = "aws-lc-sys"
-version = "0.43.0"
+version = "0.44.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "43103168cc76fe62678a375e722fc9cb3a0146159ac5828bc4f0dfd755c2224c"
+checksum = "f09fae7be8bb3174e05c6afdb34199e6dc0c7c04ba9fa237b1967adfbde27483"
 dependencies = [
  "cc",
  "cmake",
@@ -998,8 +998,8 @@ version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b65c2e1ab98050c93cc9ada070d5070e014329c65196d03f6f8f1f75c2666f37"
 dependencies = [
- "rustls 0.23.42",
- "rustls-webpki 0.103.13",
+ "rustls 0.23.45",
+ "rustls-webpki 0.103.15",
  "tokio",
  "tokio-rustls",
  "webpki-roots 1.0.9",
@@ -1958,7 +1958,7 @@ dependencies = [
  "byteorder",
  "libc",
  "log",
- "rustls 0.23.42",
+ "rustls 0.23.45",
  "serde",
  "serde_json",
  "webpki-roots 0.25.4",
@@ -1975,7 +1975,7 @@ dependencies = [
  "byteorder",
  "libc",
  "log",
- "rustls 0.23.42",
+ "rustls 0.23.45",
  "serde",
  "serde_json",
  "webpki-roots 0.25.4",
@@ -2057,7 +2057,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -2439,9 +2439,9 @@ dependencies = [
 
 [[package]]
 name = "h2"
-version = "0.4.15"
+version = "0.4.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6cb093c84e8bd9b188d4c4a8cb6579fc016968d14c99882163cd3ff402a4f155"
+checksum = "a9f37a958b41b3b19ee2707c06439c0e9e547e847223eb791ecb0cb821c65e27"
 dependencies = [
  "atomic-waker",
  "bytes",
@@ -2729,7 +2729,7 @@ dependencies = [
  "http",
  "hyper",
  "hyper-util",
- "rustls 0.23.42",
+ "rustls 0.23.45",
  "tokio",
  "tokio-rustls",
  "tower-service",
@@ -2973,7 +2973,7 @@ checksum = "3640c1c38b8e4e43584d8df18be5fc6b0aa314ce6ebf51b53313d4306cca8e46"
 dependencies = [
  "hermit-abi",
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -3727,7 +3727,7 @@ version = "0.50.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7957b9740744892f114936ab4a57b3f487491bbeafaf8083688b16841a4240e5"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -4412,7 +4412,7 @@ dependencies = [
  "quinn-proto",
  "quinn-udp",
  "rustc-hash",
- "rustls 0.23.42",
+ "rustls 0.23.45",
  "socket2",
  "thiserror 2.0.19",
  "tokio",
@@ -4434,7 +4434,7 @@ dependencies = [
  "rand_pcg",
  "ring",
  "rustc-hash",
- "rustls 0.23.42",
+ "rustls 0.23.45",
  "rustls-pki-types",
  "slab",
  "thiserror 2.0.19",
@@ -4454,7 +4454,7 @@ dependencies = [
  "once_cell",
  "socket2",
  "tracing",
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -4738,7 +4738,7 @@ dependencies = [
  "percent-encoding",
  "pin-project-lite",
  "quinn",
- "rustls 0.23.42",
+ "rustls 0.23.45",
  "rustls-pki-types",
  "rustls-platform-verifier",
  "serde",
@@ -4803,8 +4803,7 @@ dependencies = [
 [[package]]
 name = "rgb-consensus"
 version = "0.11.1-rc.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cee44070883ac31a112814ee635623b0bde44a2afab71ff3c591700a878a76d9"
+source = "git+https://github.com/UTEXO-Protocol/rgb-consensus-s-bfa?rev=2faf6118b2f5fe30dd90dd5244d5a7dc32bcd757#2faf6118b2f5fe30dd90dd5244d5a7dc32bcd757"
 dependencies = [
  "amplify",
  "baid64",
@@ -4830,8 +4829,7 @@ dependencies = [
 [[package]]
 name = "rgb-invoicing"
 version = "0.11.1-rc.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b44153a2411b2d1ddc859a011061f95ec07acf32e70c414193838244207e232e"
+source = "git+https://github.com/UTEXO-Protocol/rgb-ops-s-bfa?rev=773766b5ca7a9e705ec68c2f9ed0917f505cd6e3#773766b5ca7a9e705ec68c2f9ed0917f505cd6e3"
 dependencies = [
  "amplify",
  "baid64",
@@ -4848,7 +4846,7 @@ dependencies = [
 [[package]]
 name = "rgb-lib"
 version = "0.3.0-beta.7"
-source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?tag=v0.3.0-beta.34#62a8c3a045901147b3b06aed9f1e61f345695dce"
+source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?tag=v0.3.0-beta.42-bfa#aaf5b52f63ff2ee966707f099aacadd5f2e6037f"
 dependencies = [
  "amplify",
  "base64 0.22.1",
@@ -4868,7 +4866,7 @@ dependencies = [
  "rgb-schemas",
  "rgb-strict-encoding",
  "rgb-strict-types",
- "rustls 0.23.42",
+ "rustls 0.23.45",
  "scrypt 0.12.0",
  "sea-orm 2.0.2",
  "sea-query 1.0.2",
@@ -4891,7 +4889,7 @@ dependencies = [
 [[package]]
 name = "rgb-lib-migration"
 version = "0.3.0-beta.5"
-source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?tag=v0.3.0-beta.34#62a8c3a045901147b3b06aed9f1e61f345695dce"
+source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?tag=v0.3.0-beta.42-bfa#aaf5b52f63ff2ee966707f099aacadd5f2e6037f"
 dependencies = [
  "sea-orm-migration 2.0.2",
  "tokio",
@@ -4938,7 +4936,7 @@ dependencies = [
  "rgb-lib",
  "rgb-psbt-utils",
  "rln-migration",
- "rustls 0.23.42",
+ "rustls 0.23.45",
  "scrypt 0.11.0",
  "sea-orm 1.1.20",
  "serde",
@@ -4969,8 +4967,7 @@ dependencies = [
 [[package]]
 name = "rgb-ops"
 version = "0.11.1-rc.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e454f98d8ab2ef78a2e0ba924e2a5c67b5ed55ba1664f4a6ee269d2f271353bc"
+source = "git+https://github.com/UTEXO-Protocol/rgb-ops-s-bfa?rev=773766b5ca7a9e705ec68c2f9ed0917f505cd6e3#773766b5ca7a9e705ec68c2f9ed0917f505cd6e3"
 dependencies = [
  "amplify",
  "baid64",
@@ -5008,8 +5005,7 @@ dependencies = [
 [[package]]
 name = "rgb-schemas"
 version = "0.11.1-rc.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4fa6cd396adb8e48b558c12750d8c8837aefe230ad905f1be5424b1d57b4f55b"
+source = "git+https://github.com/UTEXO-Protocol/rgb-schemas-s-bfa?rev=238dfe7a89db998107fd87d919bf2757a2746d7f#238dfe7a89db998107fd87d919bf2757a2746d7f"
 dependencies = [
  "amplify",
  "rgb-aluvm",
@@ -5227,7 +5223,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.12.1",
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -5244,16 +5240,16 @@ dependencies = [
 
 [[package]]
 name = "rustls"
-version = "0.23.42"
+version = "0.23.45"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c54fcab019b409d04215d3a17cb438fd7fbf192ee61461f20f4fe18704bc138"
+checksum = "0d41d731c7d2f962d1ccc364cec258de3c0e93b38c2fb3ba97ac74513048d634"
 dependencies = [
  "aws-lc-rs",
  "log",
  "once_cell",
  "ring",
  "rustls-pki-types",
- "rustls-webpki 0.103.13",
+ "rustls-webpki 0.103.15",
  "subtle",
  "zeroize",
 ]
@@ -5291,14 +5287,14 @@ dependencies = [
  "jni",
  "log",
  "once_cell",
- "rustls 0.23.42",
+ "rustls 0.23.45",
  "rustls-native-certs",
  "rustls-platform-verifier-android",
- "rustls-webpki 0.103.13",
+ "rustls-webpki 0.103.15",
  "security-framework",
  "security-framework-sys",
  "webpki-root-certs",
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -5319,9 +5315,9 @@ dependencies = [
 
 [[package]]
 name = "rustls-webpki"
-version = "0.103.13"
+version = "0.103.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "61c429a8649f110dddef65e2a5ad240f747e85f7758a6bccc7e5777bd33f756e"
+checksum = "f3c3cf1d8b1e7d4927e2d154c3fcb02979afb9939629c62cd9048d4f07b60ac2"
 dependencies = [
  "aws-lc-rs",
  "ring",
@@ -6295,7 +6291,7 @@ dependencies = [
  "memchr",
  "once_cell",
  "percent-encoding",
- "rustls 0.23.42",
+ "rustls 0.23.45",
  "serde",
  "serde_json",
  "sha2 0.10.9",
@@ -6333,7 +6329,7 @@ dependencies = [
  "memchr",
  "percent-encoding",
  "rust_decimal",
- "rustls 0.23.42",
+ "rustls 0.23.45",
  "serde",
  "serde_json",
  "sha2 0.10.9",
@@ -6782,10 +6778,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
 dependencies = [
  "fastrand",
- "getrandom 0.4.3",
+ "getrandom 0.3.4",
  "once_cell",
  "rustix 1.1.4",
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -6794,7 +6790,7 @@ version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d8c27177b12a6399ffc08b98f76f7c9a1f4fe9fc967c784c5a071fa8d93cf7e1"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -6962,7 +6958,7 @@ version = "0.26.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1729aa945f29d91ba541258c8df89027d5792d85a8841fb65e8bf0f4ede4ef61"
 dependencies = [
- "rustls 0.23.42",
+ "rustls 0.23.45",
  "tokio",
 ]
 
@@ -7852,7 +7848,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]

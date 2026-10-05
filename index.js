@@ -53,7 +53,6 @@ const runtimeInfo = parse(napi.getRuntimeInfo())
 for (const [key, expected] of Object.entries({
   abi_version: 1,
   rln_commit: expectedIdentity.commit,
-  import_commit: expectedIdentity.importCommit,
   lightning_commit: expectedIdentity.lightningCommit,
   adapter_sha256: expectedIdentity.patchSha256,
   wrapper_sha256: expectedIdentity.wrapperSha256,
@@ -294,6 +293,14 @@ class SdkNode {
 
   importRgbContract (request) {
     return parse(this._inner.importRgbContract(stringify(request)))
+  }
+
+  getConsignment (assetId, txid) {
+    return parse(this._inner.getConsignment(assetId, txid))
+  }
+
+  getConsignmentPath (assetId, txid) {
+    return parse(this._inner.getConsignmentPath(assetId, txid))
   }
 
   prepareRgbSend (request) { unsupported('prepareRgbSend') }

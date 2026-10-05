@@ -1,14 +1,23 @@
 # RGB Lightning Node: Node.js
 
-The 0.2 candidate line binds **RLN v0.13.0-beta.3**, commit
-`af03c7f1a65135a429f05a5820600338215954dc`. It is a breaking, release-based
+The 0.2 candidate line binds **RLN v0.15.0-beta.3**, commit
+`e2b39d5ae8da74525eafb58bc39b9a614c756a73`. It is a breaking, release-based
 replacement for the former 0.11 behavior overlay. See
-[UPGRADE-TRACKER.md](UPGRADE-TRACKER.md) before adopting it.
+[RELEASE-0.15-TRACKER.md](RELEASE-0.15-TRACKER.md) before adopting it.
 
 ## Installation
 
-This candidate deliberately retains a **source-build installation contract**.
-Normal npm installation runs the pinned, locked Cargo build. It requires Node 18+
+Installation reuses matching packed release artifacts after verifying provenance
+and checksums, without requiring Rust. Missing, stale or corrupt artifacts trigger
+the pinned, locked source build; they are never loaded as a fallback. Publication
+requires all five release artifacts. This candidate is not yet published or fully
+qualified.
+
+Source builds require access to three private upstream BFA repositories even when
+BFA is unused. Authorized CI uses `ORG_READ_TOKEN` through
+`node scripts/with-source-access.js npm run build`; the credential helper is
+restricted to those repositories and the token is not embedded in artifacts.
+Source building requires Node 18+
 (Node 22 is the tested development baseline), Git, Rust **1.94.0**, a C/C++
 compiler, platform SDK, CMake, and native dependency prerequisites. Rust must
 already be installed; installation does not silently change your Rust toolchains.
@@ -19,15 +28,16 @@ Linux arm64 musl artifact. Linux GNU builds need OpenSSL development headers and
 pkg-config; macOS needs Xcode command-line tools and CMake. Cross-compilation
 also requires the target Rust standard library and platform compiler/sysroot.
 
-`npm install --ignore-scripts` installs JavaScript for inspection only.
-It does not install a usable wallet. Run `npm run build` after installing the
+Without a verified packed addon, `npm install --ignore-scripts` is for inspection
+only. Run `npm run build` after installing the
 prerequisites. `npm run build:debug` is for local diagnostics only.
 `RLN_NODE_TARGET` selects one of the target suffixes above for cross-builds.
 The normal loader verifies the compiled release, adapter, wrapper, lock and target
 identity before allowing node creation. Do not rename or reuse an old binary.
 
-Build assets uploaded by CI are review artifacts. This installer does not download
-unverified release binaries and makes no no-Rust installation promise.
+Build assets uploaded by CI are review artifacts. This installer never downloads
+an unverified release binary. Anonymous clean-install qualification and approval
+to redistribute the private-source build are required before publication.
 
 Use the default package-local Cargo target directory, or a dedicated cache per
 package/source checkout. Sharing `CARGO_TARGET_DIR` between the Node and Bare
@@ -80,7 +90,7 @@ inputs are not supported; decimal strings are not an alternative for released
 request fields whose native schema requires a number.
 
 Unknown `sendPayment` fields, including routing fee caps, fail before submission.
-RLN 0.13 does not enforce a native routing-fee cap. Do not treat an uncapped payment
+RLN 0.15 does not enforce a native routing-fee cap. Do not treat an uncapped payment
 as a capped one. Released payment types do not promise overlay failure codes or
 paid-fee fields.
 
@@ -96,13 +106,18 @@ access, and their declaration return type is `never`:
 - Address receipts and pending vanilla transaction inventory.
 - VSS delete-all.
 
-RGB contract and transfer-consignment metadata imports are the one approved
-extension: RLN PR #128 rebased onto 0.13.0-beta.3. Both validate payloads and
+RGB contract and transfer-consignment metadata imports are released in RLN 0.15
+(PR #128). Both validate payloads and
 identity; neither creates balances. See `patches/README.md` for the exact pin.
 No additional routing, signer-policy, VSS or persistence patch is included.
 The allowlisted C-FFI adapter forwards persistent signer/APay registration,
 serializes existing invoice fields, exports build identity and corrects build
 metadata. The exact patch and dependency graph are checked before building.
+
+`getConsignment(assetId, txid)` returns `{ bytes_hex }` from a locally saved
+transfer. `getConsignmentPath(assetId, txid)` returns `{ path }`; keep this native
+filesystem path inside the trusted host. Missing assets/transfers propagate native
+errors. WDK converts the hex to `Uint8Array` and does not expose the path method.
 
 ## Migration and Release Restrictions
 
@@ -116,7 +131,7 @@ channel or signer state. Never delete databases to make an upgrade proceed.
 Do not roll back to stale state after new channel activity. The owner confirmed
 no live wallets: this candidate is fresh-wallet only, with no legacy migration
 promise. Real local transfer and diagnostic Lightning/APay evidence is recorded
-in `UPGRADE-TRACKER.md`; strict outgoing signing and same-process reopen still
+in `RELEASE-0.15-TRACKER.md`; strict outgoing signing and same-process reopen still
 block production. VSS is excluded from this profile. Runtime, adverse recovery
 and deployed LSP qualification are not implied by unit tests. Overlay-dependent
 WDK consumers need a separately reviewed API adaptation before adopting this line.

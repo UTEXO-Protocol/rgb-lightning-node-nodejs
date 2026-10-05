@@ -57,7 +57,6 @@ function identity (config) {
     repository: config.repository,
     ref: config.ref,
     commit: config.commit,
-    importCommit: config.importCommit,
     lightningCommit: config.lightningCommit,
     patchSha256: config.patchSha256,
     rustToolchain: config.rustToolchain,

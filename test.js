@@ -62,3 +62,17 @@ try {
   fs.rmSync(root, { recursive: true, force: true })
 }
 console.log('Native identity, offline init, errors, disposal and persistent signer reopen passed.')
+
+const mainnetRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'rln-mainnet-policy-'))
+const mainnet = SdkNode.create({ storage_dir_path: mainnetRoot,
+  daemon_listening_port: 0, ldk_peer_listening_port: 0, network: 'mainnet',
+  max_media_upload_size_mb: 5, enable_virtual_channels_v0: false, reuse_addresses: true })
+try {
+  assert.throws(() => mainnet.lnInvoice({ amt_msat: 1000, expiry_sec: 3600 }), /LightningUnsupportedOnMainnet/)
+  assert.throws(() => mainnet.listChannels(), /LightningUnsupportedOnMainnet/)
+  assert.throws(() => mainnet.btcBalance(true), /NotInitialized/)
+} finally {
+  mainnet.shutdown()
+  fs.rmSync(mainnetRoot, { recursive: true, force: true })
+}
+console.log('Mainnet Lightning rejection and unchanged on-chain initialization requirements passed; no network connection or funds used.')

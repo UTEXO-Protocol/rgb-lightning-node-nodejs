@@ -12,8 +12,8 @@ const installer = require('./install-overlay-addon')
 function facade (overrides = {}) {
   const root = path.resolve(__dirname, '..')
   const identity = installer.identity(installer.readConfig())
-  const info = { abi_version: 1, rln_version: '0.13.0-beta.3', rln_commit: identity.commit,
-    import_commit: identity.importCommit, lightning_commit: identity.lightningCommit, adapter_sha256: identity.patchSha256,
+  const info = { abi_version: 1, rln_version: '0.15.0-beta.3', rln_commit: identity.commit,
+    lightning_commit: identity.lightningCommit, adapter_sha256: identity.patchSha256,
     wrapper_sha256: identity.wrapperSha256, lock_sha256: identity.lockSha256,
     target: identity.target, capabilities: [], ...overrides }
   const native = { getRuntimeInfo: () => JSON.stringify(info) }
@@ -115,4 +115,25 @@ test('approved RGB imports preserve payloads, exact metadata and native failures
     native[method] = () => { throw new Error('invalid contract') }
     assert.throws(() => node[method](request), /invalid contract/)
   }
+})
+
+test('local export preserves hexadecimal bytes, native paths and errors', () => {
+  const calls = []
+  const native = {
+    getConsignment: (...args) => { calls.push(args); return '{"bytes_hex":"00ff80"}' },
+    getConsignmentPath: () => '{"path":"/local/wallet/transfer/consignment.rgb"}'
+  }
+  const node = new (facade().SdkNode)(native)
+  assert.deepEqual(node.getConsignment('asset', 'txid'), { bytes_hex: '00ff80' })
+  assert.deepEqual(calls, [['asset', 'txid']])
+  assert.equal(node.getConsignmentPath('asset', 'txid').path, '/local/wallet/transfer/consignment.rgb')
+  const error = new Error('Rln(UnknownTransfer): missing consignment')
+  native.getConsignment = () => { throw error }
+  assert.throws(() => node.getConsignment('asset', 'txid'), error)
+})
+
+test('released mainnet policy errors retain their native identity', () => {
+  const error = new Error('Rln(LightningUnsupportedOnMainnet): Lightning unsupported on mainnet')
+  const node = new (facade().SdkNode)({ sendPayment: () => { throw error } })
+  assert.throws(() => node.sendPayment({ invoice: 'invoice' }), error)
 })

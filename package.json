@@ -1,6 +1,6 @@
 {
   "name": "@utexo/rgb-lightning-node-nodejs",
-  "version": "0.2.0-beta.1",
+  "version": "0.2.0-beta.2",
   "description": "Node.js (napi-rs) bindings for rgb-lightning-node",
   "keywords": [
     "rgb",
@@ -12,6 +12,8 @@
   "main": "index.js",
   "types": "index.d.ts",
   "files": [
+    "index-*.node",
+    "index-*.provenance.json",
     "index.js",
     "index.d.ts",
     "json-boundary.js",
@@ -22,9 +24,11 @@
     "Cargo.toml",
     "Cargo.lock",
     "README.md",
-    "UPGRADE-TRACKER.md"
+    "UPGRADE-TRACKER.md",
+    "RELEASE-0.15-TRACKER.md"
   ],
   "scripts": {
+    "prepublishOnly": "node scripts/verify-release-artifacts.js",
     "postinstall": "node scripts/install-overlay-addon.js",
     "build": "node scripts/install-overlay-addon.js",
     "build:debug": "node scripts/install-overlay-addon.js --debug",
@@ -48,14 +52,13 @@
   "author": "UTEXO",
   "utexoNativeOverlay": {
     "repository": "https://github.com/UTEXO-Protocol/rgb-lightning-node.git",
-    "ref": "v0.13.0-beta.3",
-    "commit": "af03c7f1a65135a429f05a5820600338215954dc",
-    "lightningCommit": "38d73bc918f27956590585d2bb83c86f059679b0",
-    "patch": "patches/release-import-adapter-v0.13.0-beta.3.patch",
-    "patchSha256": "aaca114a52611d7fa909846690d7545424a81b09e3c7f072d8e9932e1d52f15a",
-    "cffiLockSha256": "790ebf1a68fcc60f67f2e703dfc1abc2e3e65a52494b4156ec4de7c4b2d42b4b",
-    "rustToolchain": "1.94.0",
-    "importCommit": "5d5aa742984d52767e1055fed6aa154ad732d551"
+    "ref": "v0.15.0-beta.3",
+    "commit": "e2b39d5ae8da74525eafb58bc39b9a614c756a73",
+    "lightningCommit": "6d6d061f840264296e7de2b1c64dac6c0dd7eb26",
+    "patch": "patches/release-adapter-v0.15.0-beta.3.patch",
+    "patchSha256": "1e73269080a7a4e62026b72358175be15c1d7f31b1e3004cc09b7e3062da06b7",
+    "cffiLockSha256": "38949d8407b0ae4f2964ac02dc22ef4de69d5a863875a82849afa3845d06a576",
+    "rustToolchain": "1.94.0"
   },
   "dependencies": {
     "lossless-json": "4.3.1"
