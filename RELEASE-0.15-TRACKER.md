@@ -1,9 +1,22 @@
 # RLN 0.15 release tracker
 
-Candidate `0.2.0-beta.2`, branch `release/rln-0.15.0-beta.3`, based on
+Candidate `0.2.0-beta.3`, branch `release/rln-0.15.0-beta.3`, based on
 `release/rln-0.13.0-beta.3`. No npm publication or production approval.
 
-## Completed
+## Merged External-Signer BFA Follow-up
+
+The current source is RLN `a17b685615750536f0320db1cd3f3ba68a8f1c57`,
+the exact PR #192 merge. LDK, rgb-lib and the approved C-FFI lock are unchanged.
+Both unlock entrypoints accept optional `eth_rpc_url`; the new compiled
+`external-signer-eth-rpc-v1` capability prevents confusing this source build with
+the older release binary. External-signer burn remains unsupported.
+
+Current BFA results, RN comparison and remaining gates are maintained in the
+[WDK BFA report](https://github.com/UTEXO-Protocol/wdk-rgb-lightning/blob/release/rln-0.15.0-beta.3/BFA-QUALIFICATION.md).
+The qualification below records the previous candidate, not a retest of every
+platform or failure mode against this new source.
+
+## Previous Candidate Qualification
 
 - Pin RLN `e2b39d5ae8da74525eafb58bc39b9a614c756a73`, LDK
   `6d6d061f840264296e7de2b1c64dac6c0dd7eb26`, rgb-lib beta.42-bfa and its
@@ -45,7 +58,7 @@ npm audit passes; that does not qualify native dependencies.
 
 The [WDK release tracker](https://github.com/UTEXO-Protocol/wdk-rgb-lightning/blob/release/rln-0.15.0-beta.3/RELEASE-0.15-TRACKER.md)
 contains the full evidence, ownership, compatibility and remaining PR/issue list.
-Mainnet Lightning, mainnet IFA and external-signer BFA/burn remain unsupported.
+Mainnet Lightning, mainnet IFA and external-signer burn remain unsupported.
 Iris, the WDK base upgrade, existing-wallet migration and physical devices are
 outside this change. UPGRADE-TRACKER.md is historical 0.13 evidence.
 

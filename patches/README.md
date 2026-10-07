@@ -1,7 +1,7 @@
 # RLN 0.15 C binding adapter
 
-`release-adapter-v0.15.0-beta.3.patch` applies to released RLN
-`e2b39d5ae8da74525eafb58bc39b9a614c756a73` and its released rust-lightning
+`release-adapter-v0.15.0-beta.3.patch` applies to RLN 0.15 plus merged PR #192,
+`a17b685615750536f0320db1cd3f3ba68a8f1c57`, and its unchanged rust-lightning
 submodule `6d6d061f840264296e7de2b1c64dac6c0dd7eb26`.
 
 The eight-file allowlist in `scripts/release-contract.js` is limited to
@@ -14,6 +14,10 @@ invoice assignments and `pending_blinded`, and exports runtime provenance.
 It supplies the coherent transaction-sync Cargo path and the four BFA overrides
 needed by the released dependency graph. Compatible lockfile updates include
 `h2` 0.4.16 and `rustls` 0.23.45; remaining advisories are release gates.
+
+Ethereum RPC forwarding comes from merged RLN, not this adapter. Compiled
+capabilities include `external-signer-eth-rpc-v1`. The source version remains
+`0.15.0-beta.3`; the full commit distinguishes it from the older release binary.
 
 Contract import and accepted-transfer metadata import are already in RLN 0.15
 (PR #128). There is no import backport or separate import revision. These imports

@@ -9,6 +9,23 @@ export type JsonValue = JsonPrimitive | JsonObject | JsonValue[]
 export interface JsonObject { [key: string]: JsonValue }
 export type JsonRequest = Record<string, unknown>
 
+export interface ExternalUnlockRequest {
+  ldk_chain_sync:
+    | { mode: 'TransactionSync'; config: { indexer_url: string } }
+    | { mode: 'BlockSync'; config: {
+      bitcoind_rpc_username: string
+      bitcoind_rpc_password: string
+      bitcoind_rpc_host: string
+      bitcoind_rpc_port: number
+    } }
+  indexer_url?: string | null
+  proxy_endpoint?: string | null
+  announce_addresses?: string[]
+  announce_alias?: string | null
+  /** Ethereum JSON-RPC used by BFA validation. Omitted/null disables BFA. */
+  eth_rpc_url?: string | null
+}
+
 export interface ImportRgbContractRequest {
   contract_base64: string
   expected_asset_id: string
@@ -166,7 +183,7 @@ export class SdkNode {
   // External-signer lifecycle
   initWithNativeExternalSigner(signer: NativeExternalSigner): void
   attachNativeExternalSigner(signer: NativeExternalSigner): void
-  unlockWithNativeExternalSigner(signer: NativeExternalSigner, request: JsonRequest): void
+  unlockWithNativeExternalSigner(signer: NativeExternalSigner, request: ExternalUnlockRequest): void
   /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
   startUnlockWithNativeExternalSigner(
     signer: NativeExternalSigner,
@@ -180,7 +197,7 @@ export class SdkNode {
   cancelNativeOperation(operationId: string): never
   initWithExternalSigner(bootstrap: JsonRequest): void
   detachExternalSigner(): void
-  unlockWithAttachedExternalSigner(request: JsonRequest): void
+  unlockWithAttachedExternalSigner(request: ExternalUnlockRequest): void
   shutdown(): void
 
   // VSS / APay

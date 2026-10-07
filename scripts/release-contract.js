@@ -6,8 +6,9 @@ const path = require('node:path')
 const { execFileSync } = require('node:child_process')
 
 const RELEASE = Object.freeze({
-  ref: 'v0.15.0-beta.3',
-  commit: 'e2b39d5ae8da74525eafb58bc39b9a614c756a73',
+  rlnVersion: '0.15.0-beta.3',
+  ref: 'a17b685615750536f0320db1cd3f3ba68a8f1c57',
+  commit: 'a17b685615750536f0320db1cd3f3ba68a8f1c57',
   lightningCommit: '6d6d061f840264296e7de2b1c64dac6c0dd7eb26',
   rustToolchain: '1.94.0',
   cffiLockSha256: '38949d8407b0ae4f2964ac02dc22ef4de69d5a863875a82849afa3845d06a576'

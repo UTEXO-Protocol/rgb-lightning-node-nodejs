@@ -1,7 +1,7 @@
 # RGB Lightning Node: Node.js
 
-The 0.2 candidate line binds **RLN v0.15.0-beta.3**, commit
-`e2b39d5ae8da74525eafb58bc39b9a614c756a73`. It is a breaking, release-based
+The **0.2.0-beta.3** candidate binds **RLN v0.15.0-beta.3 plus merged PR #192**, commit
+`a17b685615750536f0320db1cd3f3ba68a8f1c57`. It is a breaking, release-based
 replacement for the former 0.11 behavior overlay. See
 [RELEASE-0.15-TRACKER.md](RELEASE-0.15-TRACKER.md) before adopting it.
 
@@ -67,12 +67,18 @@ node.unlockWithNativeExternalSigner(signer, {
   indexer_url: 'ssl://example.invalid:50002',
   proxy_endpoint: 'rpc://example.invalid/json-rpc',
   announce_addresses: [],
-  announce_alias: 'wallet'
+  announce_alias: 'wallet',
+  eth_rpc_url: 'https://ethereum-rpc.example.invalid'
 })
 ```
 
 The endpoints above are placeholders. `BlockSync` instead takes the four
 `bitcoind_rpc_*` fields inside `config`. The top-level RGB indexer is independent.
+`eth_rpc_url` is optional on both external-signer unlock entrypoints. Set it to
+the Ethereum RPC for the asset's bridge chain for BFA validation; omitted/null
+preserve the non-BFA behavior. PR #192 is built from its exact merged source,
+because the published RLN release binaries do not contain it. The runtime
+advertises `external-signer-eth-rpc-v1`; external-signer burn is still unsupported.
 Use `NativeExternalSigner.createWithStorage` with stable, wallet-specific storage.
 The default policy is strict; permissive policy is an explicit non-mainnet option.
 Persistent local signer storage does not establish fresh-device VSS recovery.

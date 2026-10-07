@@ -408,7 +408,7 @@ index 498a7e1..b178e19 100644
                                                           const COpaqueStruct *signer);
  
 diff --git a/bindings/c-ffi/src/api.rs b/bindings/c-ffi/src/api.rs
-index c1b0f82..4864f29 100644
+index 2b9e873..a1e874e 100644
 --- a/bindings/c-ffi/src/api.rs
 +++ b/bindings/c-ffi/src/api.rs
 @@ -288,7 +288,7 @@ pub(crate) fn decode_rgb_invoice(
@@ -456,10 +456,10 @@ index c1b0f82..4864f29 100644
      node: &COpaqueStruct,
      signer: &COpaqueStruct,
 diff --git a/bindings/c-ffi/src/json_types.rs b/bindings/c-ffi/src/json_types.rs
-index efc3e06..fc9173a 100644
+index 5b606f1..b033603 100644
 --- a/bindings/c-ffi/src/json_types.rs
 +++ b/bindings/c-ffi/src/json_types.rs
-@@ -796,6 +796,7 @@ pub(crate) struct JsonDecodeLnInvoiceResponse {
+@@ -812,6 +812,7 @@ pub(crate) struct JsonDecodeLnInvoiceResponse {
      pub asset_amount: Option<u64>,
      pub description: Option<String>,
      pub description_hash: Option<String>,
@@ -467,7 +467,7 @@ index efc3e06..fc9173a 100644
      pub payment_hash: String,
      pub payment_secret: String,
      pub payee_pubkey: Option<String>,
-@@ -812,6 +813,7 @@ impl From<DecodeLnInvoiceResponse> for JsonDecodeLnInvoiceResponse {
+@@ -828,6 +829,7 @@ impl From<DecodeLnInvoiceResponse> for JsonDecodeLnInvoiceResponse {
              asset_amount: r.asset_amount,
              description: r.description,
              description_hash: r.description_hash,
@@ -475,7 +475,7 @@ index efc3e06..fc9173a 100644
              payment_hash: fmt_payment_hash(&r.payment_hash),
              payment_secret: r.payment_secret,
              payee_pubkey: r.payee_pubkey.as_ref().map(fmt_pubkey),
-@@ -820,6 +822,45 @@ impl From<DecodeLnInvoiceResponse> for JsonDecodeLnInvoiceResponse {
+@@ -836,6 +838,45 @@ impl From<DecodeLnInvoiceResponse> for JsonDecodeLnInvoiceResponse {
      }
  }
  
@@ -521,7 +521,7 @@ index efc3e06..fc9173a 100644
  #[derive(Debug, Serialize)]
  pub(crate) struct JsonDecodeRgbInvoiceResponse {
      pub recipient_id: String,
-@@ -827,24 +868,65 @@ pub(crate) struct JsonDecodeRgbInvoiceResponse {
+@@ -843,24 +884,65 @@ pub(crate) struct JsonDecodeRgbInvoiceResponse {
      pub recipient_type: String,
      pub asset_schema: Option<String>,
      pub asset_id: Option<String>,
@@ -592,7 +592,7 @@ index efc3e06..fc9173a 100644
          }
      }
  }
-@@ -2192,6 +2274,7 @@ impl From<Utxo> for JsonUtxo {
+@@ -2208,6 +2290,7 @@ impl From<Utxo> for JsonUtxo {
  pub(crate) struct JsonUnspent {
      pub utxo: JsonUtxo,
      pub rgb_allocations: Vec<JsonRgbAllocation>,
@@ -600,7 +600,7 @@ index efc3e06..fc9173a 100644
  }
  
  impl From<Unspent> for JsonUnspent {
-@@ -2199,6 +2282,30 @@ impl From<Unspent> for JsonUnspent {
+@@ -2215,6 +2298,30 @@ impl From<Unspent> for JsonUnspent {
          JsonUnspent {
              utxo: u.utxo.into(),
              rgb_allocations: u.rgb_allocations.into_iter().map(Into::into).collect(),
@@ -632,10 +632,10 @@ index efc3e06..fc9173a 100644
      }
  }
 diff --git a/bindings/c-ffi/src/lib.rs b/bindings/c-ffi/src/lib.rs
-index e1dded1..6068700 100644
+index e1dded1..cc930e0 100644
 --- a/bindings/c-ffi/src/lib.rs
 +++ b/bindings/c-ffi/src/lib.rs
-@@ -89,6 +89,24 @@ pub extern "C" fn rln_free_string(s: *mut c_char) {
+@@ -89,6 +89,25 @@ pub extern "C" fn rln_free_string(s: *mut c_char) {
  // Lifecycle
  // ---------------------------------------------------------------------------
  
@@ -645,7 +645,7 @@ index e1dded1..6068700 100644
 +    ffi_call!("rln_binding_build_info", Ok::<String, utils::Error>(serde_json::json!({
 +        "abi_version": 1,
 +        "rln_version": "0.15.0-beta.3",
-+        "rln_commit": "e2b39d5ae8da74525eafb58bc39b9a614c756a73",
++        "rln_commit": "a17b685615750536f0320db1cd3f3ba68a8f1c57",
 +        "lightning_commit": "6d6d061f840264296e7de2b1c64dac6c0dd7eb26",
 +        "adapter_sha256": env!("RLN_ADAPTER_SHA256"),
 +        "wrapper_sha256": env!("RLN_WRAPPER_SHA256"),
@@ -653,14 +653,15 @@ index e1dded1..6068700 100644
 +        "target": env!("RLN_BUILD_TARGET"),
 +        "capabilities": ["canonical-unlock-v1", "persistent-native-signer", "refresh-transfers-v1",
 +            "apay-address", "decoded-invoice-cltv", "tagged-rgb-assignment", "pending-blinded-v1",
-+            "rgb-contract-import-v1", "rgb-transfer-metadata-import-v1", "consignment-export-v1", "mainnet-lightning-rejection-v1"]
++            "rgb-contract-import-v1", "rgb-transfer-metadata-import-v1", "consignment-export-v1", "mainnet-lightning-rejection-v1",
++            "external-signer-eth-rpc-v1"]
 +    }).to_string()))
 +}
 +
  #[unsafe(no_mangle)]
  pub extern "C" fn rln_sdk_node_new(request_json: *const c_char) -> CResult {
      ffi_call!("rln_sdk_node_new", api::sdk_node_new(request_json))
-@@ -733,6 +751,39 @@ pub extern "C" fn rln_sdk_shutdown() -> CResultString {
+@@ -733,6 +752,39 @@ pub extern "C" fn rln_sdk_shutdown() -> CResultString {
  // External-signer surface
  // ---------------------------------------------------------------------------
  

@@ -49,6 +49,23 @@ test('compiled runtime identity is checked before any node is created', () => {
   assert.ok(Object.isFrozen(info.capabilities))
 })
 
+test('both external unlock entrypoints preserve optional Ethereum RPC and native errors', () => {
+  for (const method of ['unlockWithNativeExternalSigner', 'unlockWithAttachedExternalSigner']) {
+    const requests = []
+    const error = new Error('Rln(InvalidIndexer): Ethereum RPC unavailable')
+    const native = { [method]: (...args) => { requests.push(JSON.parse(args.at(-1))) } }
+    const node = new (facade().SdkNode)(native)
+    const invoke = request => method === 'unlockWithNativeExternalSigner'
+      ? node[method]({ _inner: {} }, request) : node[method](request)
+    for (const request of [{}, { eth_rpc_url: null }, { eth_rpc_url: 'http://127.0.0.1:29545' }]) {
+      invoke(request)
+      assert.deepEqual(requests.at(-1), request)
+    }
+    native[method] = () => { throw error }
+    assert.throws(() => invoke({ eth_rpc_url: 'http://127.0.0.1:29545' }), error)
+  }
+})
+
 test('all unsupported APIs throw before accessing a native handle', () => {
   const { SdkNode, UnsupportedCapabilityError } = facade()
   const node = new SdkNode(new Proxy({}, { get () { throw new Error('native accessed') } }))
