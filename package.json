@@ -1,6 +1,6 @@
 {
   "name": "@utexo/rgb-lightning-node-nodejs",
-  "version": "0.1.0-beta.16",
+  "version": "0.2.0-beta.3",
   "description": "Node.js (napi-rs) bindings for rgb-lightning-node",
   "keywords": [
     "rgb",
@@ -12,23 +12,30 @@
   "main": "index.js",
   "types": "index.d.ts",
   "files": [
+    "index-*.node",
+    "index-*.provenance.json",
     "index.js",
     "index.d.ts",
+    "json-boundary.js",
     "scripts/",
     "patches/",
     "src/",
     "build.rs",
     "Cargo.toml",
     "Cargo.lock",
-    "README.md"
+    "README.md",
+    "UPGRADE-TRACKER.md",
+    "RELEASE-0.15-TRACKER.md"
   ],
   "scripts": {
+    "prepublishOnly": "node scripts/verify-release-artifacts.js",
     "postinstall": "node scripts/install-overlay-addon.js",
-    "build": "mkdir -p .napi-generated && napi build --platform --release --no-js --dts .napi-generated/index.d.ts && node scripts/stage-local-addon.js",
-    "build:debug": "mkdir -p .napi-generated && napi build --platform --no-js --dts .napi-generated/index.d.ts && node scripts/stage-local-addon.js",
+    "build": "node scripts/install-overlay-addon.js",
+    "build:debug": "node scripts/install-overlay-addon.js --debug",
     "check:types": "tsc --noEmit --strict --skipLibCheck index.d.ts",
     "test:installer": "node --test scripts/install-overlay-addon.test.js",
-    "test": "npm run test:installer && node test.js"
+    "test:unit": "node --test scripts/*.test.js",
+    "test": "npm run test:unit && node test.js"
   },
   "engines": {
     "node": ">=18"
@@ -45,10 +52,16 @@
   "author": "UTEXO",
   "utexoNativeOverlay": {
     "repository": "https://github.com/UTEXO-Protocol/rgb-lightning-node.git",
-    "ref": "v0.11.0-beta.3",
-    "commit": "f30a5393268de67c6bb5a1c525bc790c5b11afa2",
-    "patch": "patches/c-ffi-utexo-patches-v0.11.0-beta.3.patch",
-    "patchSha256": "d0b6d4b057edd675e3d4385f2243b266020feeb1bee7714e7625e2f7bc0c945c",
-    "rustToolchain": "1.88.0"
+    "ref": "a17b685615750536f0320db1cd3f3ba68a8f1c57",
+    "commit": "a17b685615750536f0320db1cd3f3ba68a8f1c57",
+    "lightningCommit": "6d6d061f840264296e7de2b1c64dac6c0dd7eb26",
+    "patch": "patches/release-adapter-v0.15.0-beta.3.patch",
+    "patchSha256": "93d62bb91c0ab90a7ccc4a1382a9da84498e38506170ce74d3863292f0c9f2f4",
+    "cffiLockSha256": "38949d8407b0ae4f2964ac02dc22ef4de69d5a863875a82849afa3845d06a576",
+    "rustToolchain": "1.94.0",
+    "rlnVersion": "0.15.0-beta.3"
+  },
+  "dependencies": {
+    "lossless-json": "4.3.1"
   }
 }

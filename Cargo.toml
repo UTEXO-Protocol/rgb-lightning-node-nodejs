@@ -2,6 +2,7 @@
 name = "rln-node"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.94.0"
 license = "Apache-2.0"
 description = "Node-API bindings for rgb-lightning-node (RGB Lightning Node)"
 publish = false
@@ -14,9 +15,7 @@ crate-type = ["cdylib"]
 napi = { version = "2.16", default-features = false, features = ["napi8", "serde-json"] }
 napi-derive = "2.16"
 
-# Path dep for local builds; release prebuilds ship the compiled `.node`
-# via GitHub Releases (see scripts/download-libs.sh) so consumers don't
-# need this sibling checkout.
+# The installer prepares and verifies this exact release source for source builds.
 rln-c-ffi = { path = ".native-source/bindings/c-ffi" }
 
 [build-dependencies]
@@ -28,6 +27,10 @@ opt-level = 3
 strip = "symbols"
 codegen-units = 1
 
+[profile.dev]
+debug = 0
+incremental = false
+
 # Mirror the parent crate's `[patch.crates-io]` block so registry crates
 # resolve to the same revisions the parent is pinned against. Without
 # this, `vls-core` resolves to a crates.io version that lacks the
@@ -37,9 +40,7 @@ codegen-units = 1
 #
 # `lightning` MUST resolve to the SAME rust-lightning the parent crate
 # builds — the pinned submodule at `rgb-lightning-node/rust-lightning`.
-# The parent's v0.5.2 source uses fork APIs (e.g. `RgbInfo.batch_transfer_idx`)
-# that only exist at the submodule commit; a separate `rmn-boiko` branch tip
-# drifts behind and fails to compile the parent source.
+# Use the released submodule throughout the graph, never a floating branch tip.
 [patch.crates-io]
 lightning                      = { path = ".native-source/rust-lightning/lightning" }
 lightning-background-processor = { path = ".native-source/rust-lightning/lightning-background-processor" }
@@ -49,5 +50,10 @@ lightning-invoice              = { path = ".native-source/rust-lightning/lightni
 lightning-net-tokio            = { path = ".native-source/rust-lightning/lightning-net-tokio" }
 lightning-persister            = { path = ".native-source/rust-lightning/lightning-persister" }
 lightning-rapid-gossip-sync    = { path = ".native-source/rust-lightning/lightning-rapid-gossip-sync" }
+lightning-transaction-sync     = { path = ".native-source/rust-lightning/lightning-transaction-sync" }
 vls-core                       = { git = "https://github.com/UTEXO-Protocol/vls-core.git", branch = "feat/rgb-compatibility" }
 vls-protocol-signer            = { git = "https://github.com/UTEXO-Protocol/vls-protocol-signer.git", branch = "feat/rgb-compatibility" }
+rgb-consensus = { git = "https://github.com/UTEXO-Protocol/rgb-consensus-s-bfa", rev = "2faf6118b2f5fe30dd90dd5244d5a7dc32bcd757" }
+rgb-ops = { git = "https://github.com/UTEXO-Protocol/rgb-ops-s-bfa", rev = "773766b5ca7a9e705ec68c2f9ed0917f505cd6e3" }
+rgb-invoicing = { git = "https://github.com/UTEXO-Protocol/rgb-ops-s-bfa", rev = "773766b5ca7a9e705ec68c2f9ed0917f505cd6e3" }
+rgb-schemas = { git = "https://github.com/UTEXO-Protocol/rgb-schemas-s-bfa", rev = "238dfe7a89db998107fd87d919bf2757a2746d7f" }

@@ -1,66 +1,29 @@
-# UTEXO local patches over `rgb-lightning-node` upstream
+# RLN 0.15 C binding adapter
 
-CI-only mirror of the optional patch series maintained in
-[`@utexo/rgb-lightning-node-bare`][bare]. Both bindings consume the same
-`rgb-lightning-node/bindings/c-ffi` crate, so the same patch is applied
-before the static lib / napi addon is built.
+`release-adapter-v0.15.0-beta.3.patch` applies to RLN 0.15 plus merged PR #192,
+`a17b685615750536f0320db1cd3f3ba68a8f1c57`, and its unchanged rust-lightning
+submodule `6d6d061f840264296e7de2b1c64dac6c0dd7eb26`.
 
-The release workflow clones `rgb-lightning-node` at the pinned tag and applies
-`patches/c-ffi-utexo-patches-<tag>.patch` before `napi build` when that file
-exists and is non-empty. Current tags build directly from upstream.
+The eight-file allowlist in `scripts/release-contract.js` is limited to
+`bindings/c-ffi`: its manifest, lockfile, build script, headers and three Rust
+binding files. It does not modify RLN, rgb-lib, VLS or LDK runtime behavior.
 
-Keep overlays in lock-step with the copy in the bare repo. Tags without a
-matching file are built directly from upstream.
+The adapter exposes the released persistent external-signer constructor and
+address-bound APay registration, preserves invoice CLTV, emits structured RGB
+invoice assignments and `pending_blinded`, and exports runtime provenance.
+It supplies the coherent transaction-sync Cargo path and the four BFA overrides
+needed by the released dependency graph. Compatible lockfile updates include
+`h2` 0.4.16 and `rustls` 0.23.45; remaining advisories are release gates.
 
-[bare]: https://github.com/UTEXO-Protocol/rgb-lightning-node-bare
+Ethereum RPC forwarding comes from merged RLN, not this adapter. Compiled
+capabilities include `external-signer-eth-rpc-v1`. The source version remains
+`0.15.0-beta.3`; the full commit distinguishes it from the older release binary.
 
-## c-ffi-utexo-patches-v0.11.0-beta.3.patch
+Contract import and accepted-transfer metadata import are already in RLN 0.15
+(PR #128). There is no import backport or separate import revision. These imports
+do not credit arbitrary funds. Saved consignment export also comes from the
+released C API; the Node and Bare wrappers expose its bytes and local path.
 
-This overlay includes transactional orphaned virtual-channel recovery so a
-failed RGB channel open cannot permanently reserve inventory or block the peer.
-It also exposes `rln_sdk_node_apay_new_with_address`, carrying RLN's existing
-signed Lightning Address attestation API through the generated C boundary.
-Lightning send responses and persisted payment records expose stable failure
-codes, and node shutdown releases native ownership before signer destruction.
-Shutdown now aborts and joins peer reconnect/listener tasks before its final
-peer disconnect, so a reconnect cannot leave the LSP with a half-open socket.
-RGB contract, asset amount, carrier millisatoshis, invoice expiry, and terminal
-reason remain bound to the same payment after restart and are exposed by wallet
-snapshot contract v3. Address rotation reveals the new script before returning.
-
-Adds versioned dual-keychain synchronization, bounded decimal-safe wallet
-snapshots, explicit Lightning routing-fee caps, and persisted actual routing
-fees to the pinned v0.11 native source. It preserves complete Lightning
-invoice decode metadata and stable tagged RGB assignments across C-FFI, and
-also adds deterministic BTC/RGB prepare-and-commit plans, BTC plan
-cancellation, pending vanilla transaction inspection, and RGB UTXO setup
-isolation from existing and future witness invoices.
-The same overlay permits a replacement trusted virtual channel only after the
-previous native session reaches its terminal abandoned state.
-Inbound channels are classified as virtual only when an explicitly configured
-trusted peer requests SCID privacy; ordinary inbound channels retain standard
-LDK handling even while virtual-channel support is enabled.
-The local VSS writer identity now survives process restarts without being
-replicated with the mnemonic, allowing the same installation to reclaim its
-fence while independently provisioned installations remain excluded.
-
-Adds the versioned wallet synchronization and exact snapshot contract used by
-WDK portfolio refreshes. Routine synchronization FullSyncs both Vanilla and
-Colored keychains, recovery synchronization FullScans both keychains, and the
-snapshot serializes all monetary values as bounded decimal strings. Keep this
-file byte-identical to the Bare binding's overlay.
-
-## c-ffi-utexo-patches-v0.9.0-beta.3.patch
-
-Adds the versioned wallet synchronization and exact snapshot contract used by
-WDK portfolio refreshes. Routine synchronization FullSyncs both Vanilla and
-Colored keychains, recovery synchronization FullScans both keychains, and the
-snapshot serializes all monetary values as bounded decimal strings. Keep this
-file byte-identical to the bare binding's overlay.
-
-## c-ffi-utexo-patches-v0.6.0-beta.1.patch
-
-Intentionally empty. The apay_new / vss_clear_fence / vss_backup / hodl
-c-ffi wrappers this series used to add were merged upstream into
-rgb-lightning-node (PRs #62/#63/#66) and ship in tag v0.6.0-beta.1, so no
-overlay is needed. The release workflow skips applying an empty patch.
+Both native repositories must contain identical patch bytes. The manifest pins
+the patch, C-FFI lock, source graph and build recipe; the compiled identity also
+binds the wrapper and target. Source changes require rebuilt artifacts.

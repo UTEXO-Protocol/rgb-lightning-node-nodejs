@@ -1,229 +1,141 @@
 'use strict'
 
-const crypto = require('node:crypto')
 const fs = require('node:fs')
-const os = require('node:os')
 const path = require('node:path')
 const { spawnSync } = require('node:child_process')
+const contract = require('./release-contract')
 
 const packageRoot = path.resolve(__dirname, '..')
 const sourceRoot = path.join(packageRoot, '.native-source')
-const manifestPath = path.join(packageRoot, '.utexo-node-overlay.json')
-const manifestSchema = 1
-
-function fail (message) {
-  throw new Error(`[rgb-lightning-node-nodejs] ${message}`)
-}
-
-function sha256 (filePath) {
-  return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex')
-}
+const TARGETS = Object.freeze({
+  'darwin-arm64': 'aarch64-apple-darwin',
+  'darwin-x64': 'x86_64-apple-darwin',
+  'linux-x64-gnu': 'x86_64-unknown-linux-gnu',
+  'linux-x64-musl': 'x86_64-unknown-linux-musl',
+  'linux-arm64-gnu': 'aarch64-unknown-linux-gnu'
+})
+const WRAPPER_FILES = ['index.js', 'index.d.ts', 'json-boundary.js', 'src/lib.rs', 'build.rs', 'Cargo.toml']
 
 function run (command, args, options = {}) {
-  const result = spawnSync(command, args, {
-    cwd: options.cwd ?? packageRoot,
-    env: options.env ?? process.env,
-    encoding: 'utf8',
-    maxBuffer: 32 * 1024 * 1024,
-    stdio: options.capture ? 'pipe' : 'inherit'
-  })
+  const result = spawnSync(command, args, { cwd: packageRoot, stdio: 'inherit', ...options })
   if (result.error) throw result.error
-  if (result.status !== 0) {
-    const detail = options.capture ? `: ${(result.stderr || result.stdout).trim()}` : ''
-    fail(`${command} exited with status ${result.status}${detail}`)
-  }
-  return result.stdout
-}
-
-function probe (command, args, cwd = packageRoot) {
-  return spawnSync(command, args, {
-    cwd,
-    encoding: 'utf8',
-    maxBuffer: 32 * 1024 * 1024,
-    stdio: 'pipe'
-  })
+  if (result.status !== 0) throw new Error(`${command} failed (status ${result.status})`)
 }
 
 function readConfig () {
-  const packageJson = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'))
-  const config = packageJson.utexoNativeOverlay
-  if (!config || typeof config !== 'object' || Array.isArray(config)) {
-    fail('utexoNativeOverlay is required')
-  }
-  for (const field of [
-    'repository',
-    'ref',
-    'commit',
-    'patch',
-    'patchSha256',
-    'rustToolchain'
-  ]) {
-    if (!Object.prototype.hasOwnProperty.call(config, field)) {
-      fail(`utexoNativeOverlay.${field} is required`)
-    }
-  }
-  if (config.repository !== 'https://github.com/UTEXO-Protocol/rgb-lightning-node.git') {
-    fail('utexoNativeOverlay.repository is not approved')
-  }
-  if (!/^[0-9a-f]{40}$/.test(config.commit)) {
-    fail('utexoNativeOverlay.commit must be a full Git commit')
-  }
-  if (!/^[0-9a-f]{64}$/.test(config.patchSha256)) {
-    fail('utexoNativeOverlay.patchSha256 must be a SHA-256 digest')
+  const config = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'))).utexoNativeOverlay
+  if (!config || config.repository !== 'https://github.com/UTEXO-Protocol/rgb-lightning-node.git') {
+    throw new Error('Missing or unapproved native source repository')
   }
   const patchPath = path.resolve(packageRoot, config.patch)
-  if (
-    !patchPath.startsWith(`${path.join(packageRoot, 'patches')}${path.sep}`) ||
-    !fs.existsSync(patchPath) ||
-    sha256(patchPath) !== config.patchSha256
-  ) {
-    fail('native overlay patch is missing or does not match package metadata')
-  }
-  return Object.freeze({ ...config, patchPath })
+  if (!patchPath.startsWith(path.join(packageRoot, 'patches') + path.sep)) throw new Error('Invalid adapter path')
+  const result = Object.freeze({ ...config, patchPath })
+  contract.validateAdapter(result)
+  return result
 }
 
 function platformSuffix () {
-  const key = `${process.platform}-${process.arch}`
-  if (key === 'darwin-arm64' || key === 'darwin-x64') return key
-  if (key === 'linux-arm64') return 'linux-arm64-gnu'
-  if (key === 'linux-x64') {
-    return fs.existsSync('/etc/alpine-release') ? 'linux-x64-musl' : 'linux-x64-gnu'
+  if (process.env.RLN_NODE_TARGET) {
+    if (!TARGETS[process.env.RLN_NODE_TARGET]) throw new Error('Unsupported RLN_NODE_TARGET')
+    return process.env.RLN_NODE_TARGET
   }
-  fail(`unsupported build host ${key}`)
+  let suffix = `${process.platform}-${process.arch}`
+  if (process.platform === 'linux') {
+    const glibc = process.report?.getReport().header.glibcVersionRuntime
+    suffix += glibc ? '-gnu' : '-musl'
+  }
+  if (!TARGETS[suffix]) throw new Error(`Unsupported native target: ${suffix}`)
+  return suffix
 }
 
-function addonPath () {
-  return path.join(packageRoot, `index-${platformSuffix()}.node`)
-}
+function addonPath () { return path.join(packageRoot, `index-${platformSuffix()}.node`) }
+function manifestPath () { return path.join(packageRoot, `index-${platformSuffix()}.provenance.json`) }
 
 function identity (config) {
   return {
-    schemaVersion: manifestSchema,
+    schemaVersion: 2,
     repository: config.repository,
     ref: config.ref,
     commit: config.commit,
+    lightningCommit: config.lightningCommit,
     patchSha256: config.patchSha256,
     rustToolchain: config.rustToolchain,
-    platform: process.platform,
-    arch: process.arch
+    macosDeploymentTarget: '13.0',
+    target: TARGETS[platformSuffix()],
+    wrapperSha256: contract.wrapperSha256(packageRoot, WRAPPER_FILES),
+    lockSha256: contract.sha256(path.join(packageRoot, 'Cargo.lock')),
+    profile: process.argv.includes('--debug') ? 'debug' : 'release'
   }
 }
 
 function manifestMatches (config, manifest, addonSha256) {
-  if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) {
-    return false
-  }
-  for (const [key, expected] of Object.entries(identity(config))) {
-    if (manifest[key] !== expected) return false
-  }
-  return manifest.addonSha256 === addonSha256
+  return !!manifest && Object.entries(identity(config)).every(([key, value]) => manifest[key] === value) &&
+    manifest.addonSha256 === addonSha256
 }
 
 function existingAddonMatches (config) {
-  const addon = addonPath()
-  if (!fs.existsSync(addon) || fs.statSync(addon).size === 0 || !fs.existsSync(manifestPath)) {
-    return false
-  }
   try {
-    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
-    return manifestMatches(config, manifest, sha256(addon))
-  } catch {
-    return false
-  }
+    return fs.statSync(addonPath()).size > 0 && manifestMatches(config,
+      JSON.parse(fs.readFileSync(manifestPath())), contract.sha256(addonPath()))
+  } catch { return false }
 }
 
-function recordAddonProvenance (config) {
-  const addon = addonPath()
-  if (!fs.existsSync(addon) || fs.statSync(addon).size === 0) {
-    fail(`cannot record provenance for missing addon ${addon}`)
+function recordAddonProvenance (config, descriptor) {
+  if (!descriptor || JSON.stringify(descriptor) !== JSON.stringify(identity(config))) {
+    throw new Error('Wrapper changed while native compilation was in progress; rebuild')
   }
-  fs.writeFileSync(
-    manifestPath,
-    `${JSON.stringify({
-      ...identity(config),
-      addonSha256: sha256(addon)
-    }, null, 2)}\n`,
-    { mode: 0o600 }
-  )
-}
-
-function validateAndApplySource (config) {
-  const head = run('git', ['-C', sourceRoot, 'rev-parse', 'HEAD'], { capture: true }).trim()
-  if (head !== config.commit) {
-    fail(`native source must resolve to ${config.commit}`)
-  }
-  const forward = probe('git', ['-C', sourceRoot, 'apply', '--check', config.patchPath])
-  if (forward.status === 0) {
-    run('git', ['-C', sourceRoot, 'apply', config.patchPath])
-    return
-  }
-  const reverse = probe(
-    'git',
-    ['-C', sourceRoot, 'apply', '--reverse', '--check', config.patchPath]
-  )
-  if (reverse.status !== 0) {
-    fail('native source is neither pristine nor an exact application of the configured overlay')
-  }
+  if (fs.statSync(addonPath()).size === 0) throw new Error('Empty native addon')
+  fs.writeFileSync(manifestPath(), JSON.stringify({
+    ...descriptor, addonSha256: contract.sha256(addonPath())
+  }, null, 2) + '\n')
 }
 
 function prepareSource (config) {
-  fs.rmSync(sourceRoot, { force: true, recursive: true })
-  const override = process.env.RLN_NODE_SOURCE_DIR
-  if (override) {
-    fs.symlinkSync(path.resolve(override), sourceRoot, 'dir')
-  } else {
-    run('git', [
-      'clone',
-      '--recurse-submodules',
-      '--shallow-submodules',
-      '--depth', '1',
-      '--branch', config.ref,
-      config.repository,
-      sourceRoot
-    ])
+  if (!fs.existsSync(sourceRoot)) {
+    const source = process.env.RLN_NODE_SOURCE_DIR || config.repository
+    run('git', ['clone', '--no-hardlinks', '--no-checkout', source, sourceRoot])
+    run('git', ['-C', sourceRoot, 'checkout', '--detach', config.commit])
+    run('git', ['-C', sourceRoot, 'submodule', 'update', '--init', '--recursive'])
   }
-  validateAndApplySource(config)
+  contract.prepareSource(sourceRoot, config)
 }
 
 function buildAddon (config) {
-  run('rustup', ['toolchain', 'install', config.rustToolchain, '--profile', 'minimal'])
-  run('cargo', ['build', '--release', '--locked'], {
-    env: {
-      ...process.env,
-      RUSTUP_TOOLCHAIN: config.rustToolchain
-    }
-  })
-  const extension = process.platform === 'darwin' ? 'dylib' : 'so'
-  const built = path.join(packageRoot, 'target', 'release', `librln_node.${extension}`)
-  if (!fs.existsSync(built) || fs.statSync(built).size === 0) {
-    fail(`cargo did not produce ${built}`)
-  }
-  const addon = addonPath()
-  fs.copyFileSync(built, addon)
-  recordAddonProvenance(config)
+  contract.verifyCargoGraph(path.join(packageRoot, 'Cargo.toml'), sourceRoot)
+  const descriptor = identity(config)
+  const args = ['build', '--locked', '--target', descriptor.target]
+  const apple = descriptor.target.includes('apple-darwin')
+  if (descriptor.profile === 'release') args.push('--release')
+  run('cargo', args, { env: {
+    ...process.env,
+    RUSTUP_TOOLCHAIN: config.rustToolchain,
+    ...(apple ? {
+      MACOSX_DEPLOYMENT_TARGET: descriptor.macosDeploymentTarget,
+      CFLAGS: `${process.env.CFLAGS || ''} -mmacosx-version-min=${descriptor.macosDeploymentTarget}`.trim(),
+      CXXFLAGS: `${process.env.CXXFLAGS || ''} -mmacosx-version-min=${descriptor.macosDeploymentTarget}`.trim()
+    } : {}),
+    RLN_ADAPTER_SHA256: config.patchSha256,
+    RLN_WRAPPER_SHA256: descriptor.wrapperSha256,
+    RLN_LOCK_SHA256: descriptor.lockSha256
+  } })
+  const extension = descriptor.target.includes('apple') ? 'dylib' : 'so'
+  const built = path.join(process.env.CARGO_TARGET_DIR || path.join(packageRoot, 'target'),
+    descriptor.target, descriptor.profile, `librln_node.${extension}`)
+  fs.copyFileSync(built, addonPath())
+  recordAddonProvenance(config, descriptor)
 }
 
 function main () {
   const config = readConfig()
-  if (existingAddonMatches(config)) {
-    process.stdout.write('[rgb-lightning-node-nodejs] Native overlay addon is current.\n')
-    return
-  }
-  prepareSource(config)
-  buildAddon(config)
   if (!existingAddonMatches(config)) {
-    fail('built addon failed overlay provenance verification')
+    prepareSource(config)
+    if (process.argv.includes('--prepare-only')) return
+    buildAddon(config)
   }
-  process.stdout.write('[rgb-lightning-node-nodejs] Built and verified native overlay addon.\n')
+  if (!existingAddonMatches(config)) throw new Error('Native artifact failed provenance verification')
+  process.stdout.write('Verified release-based native addon.\n')
 }
 
 if (require.main === module) main()
-
-module.exports = {
-  addonPath,
-  existingAddonMatches,
-  identity,
-  manifestMatches,
-  recordAddonProvenance,
-  readConfig
-}
+module.exports = { addonPath, existingAddonMatches, identity, manifestMatches, readConfig,
+  recordAddonProvenance, prepareSource, buildAddon, TARGETS, platformSuffix }
