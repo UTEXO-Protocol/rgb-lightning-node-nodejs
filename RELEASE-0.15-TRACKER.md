@@ -83,7 +83,24 @@ Both GNU CI targets now build and run inside the same Ubuntu 22.04 container
 recipe, independent of host runner version. A tested libc-symbol gate rejects
 GNU artifacts requiring newer than 2.35 and musl artifacts referencing glibc.
 The candidate workflow reuses this matrix instead of a separate build recipe.
-Replacement CI artifacts and final packed-consumer checks are pending.
+Both replacement GNU jobs in
+[runtime run 37926368735](https://github.com/UTEXO-Protocol/rgb-lightning-node-nodejs/actions/runs/37926368735)
+pass and require glibc symbols through 2.34. The assembled CI package excludes
+the rejected ARM64 artifact: macOS/musl inputs come from the earlier passing
+run, both GNU inputs from the corrected jobs. Every input passes the same
+native source/adapter/wrapper/lock identity checks. The new PR merge-ref tree
+is identical to the release-branch fix.
+
+The same assembled archive passes all five fresh offline consumers and native
+canaries, with no credentials, compiler invocation or native source fetch.
+All Linux ELF checks pass, including the Ubuntu 22.04 glibc floor, OpenSSL 3
+dependencies, RELRO/NOW and non-executable stack. Evidence and input origins:
+`/tmp/wdk-release-ci-20261009/node-verified/complete-matrix.json`.
+The wrapper/installer suite now has 21 passing tests. The funded macOS ARM64
+CI addon also passes both external-unlock entrypoints (12 cases), all four
+non-BFA schemas, and BFA receive/send/balance/history/export/cold-restart checks.
+Unlocked same-process reopen, pending witness balances and adversarial BFA
+event selection still fail their acceptance tests. Production is not approved.
 
 ## Previous Candidate Qualification
 
@@ -103,9 +120,9 @@ Replacement CI artifacts and final packed-consumer checks are pending.
 
 ## Open gates
 
-Source authentication is resolved. Local five-target builds and offline packed
-installs pass. The hosted ARM64 compatibility regression above must be closed
-using replacement artifacts; license/notices review and the remaining
+Source authentication and the hosted ARM64 compatibility regression are resolved
+with verified replacement artifacts. Five-target offline packed installs pass;
+license/notices review and the remaining
 runtime/network/recovery qualifications are still publication gates.
 
 Host debug and optimized builds, native canaries and fresh packed-consumer

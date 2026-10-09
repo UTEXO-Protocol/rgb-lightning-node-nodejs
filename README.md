@@ -28,6 +28,12 @@ Linux arm64 musl artifact. Linux GNU builds need OpenSSL development headers and
 pkg-config; macOS needs Xcode command-line tools and CMake. Cross-compilation
 also requires the target Rust standard library and platform compiler/sysroot.
 
+The locally qualified GNU artifacts require OpenSSL 3 runtime libraries and
+reference glibc symbols through 2.34; they were tested on Ubuntu 22.04. The musl
+artifact was tested on Alpine 3.23 with OpenSSL 3 and libgcc. Rebuilding on a
+different distribution can change these requirements; see the release tracker
+for the exact tested runtimes and scope.
+
 Without a verified packed addon, `npm install --ignore-scripts` is for inspection
 only. Run `npm run build` after installing the
 prerequisites. `npm run build:debug` is for local diagnostics only.
