@@ -7,6 +7,9 @@ npm ci --ignore-scripts
 npm run check:types
 npm run test:unit
 npm run build
+if [[ "$EXPECTED_TARGET" == linux-* ]]; then
+  node scripts/check-linux-runtime.js "$EXPECTED_TARGET"
+fi
 node test.js
 node scripts/test-native-adapter.js
 npm pack --ignore-scripts

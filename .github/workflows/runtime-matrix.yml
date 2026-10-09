@@ -2,10 +2,16 @@ name: Runtime matrix
 
 on:
   workflow_dispatch:
+  workflow_call:
+    secrets:
+      ORG_READ_TOKEN:
+        required: true
   pull_request:
     paths:
       - '.github/workflows/runtime-matrix.yml'
       - 'scripts/runtime-matrix.sh'
+      - 'scripts/check-linux-runtime*'
+      - '.github/docker/runtime-gnu.Dockerfile'
       - 'src/**'
       - 'Cargo*'
       - 'build.rs'
@@ -39,24 +45,36 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        if: runner.os == 'macOS'
         with:
           node-version: '22'
           cache: npm
       - uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659
+        if: runner.os == 'macOS'
         with:
           toolchain: '1.94.0'
           rustflags: ''
-      - if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y cmake clang pkg-config libssl-dev
       - run: node scripts/with-source-access.js bash scripts/runtime-matrix.sh
+        if: runner.os == 'macOS'
         env:
           ORG_READ_TOKEN: ${{ secrets.ORG_READ_TOKEN }}
+      - name: Build and execute against the Ubuntu 22.04 baseline
+        if: runner.os == 'Linux'
+        env:
+          ORG_READ_TOKEN: ${{ secrets.ORG_READ_TOKEN }}
+        run: |
+          docker build -t rln-gnu-runtime -f .github/docker/runtime-gnu.Dockerfile .github/docker
+          docker run --rm -v "$PWD:/candidate" -w /candidate \
+            -e ORG_READ_TOKEN -e EXPECTED_TARGET -e CARGO_BUILD_JOBS \
+            -e CARGO_PROFILE_RELEASE_DEBUG \
+            rln-gnu-runtime node scripts/with-source-access.js bash scripts/runtime-matrix.sh
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: runtime-${{ matrix.target }}-${{ github.sha }}
           path: |
             runtime-evidence.json
+            linux-runtime-compatibility.json
             index-*.provenance.json
             *.tgz
           if-no-files-found: warn
@@ -75,7 +93,7 @@ jobs:
             -e EXPECTED_TARGET=linux-x64-musl -e CARGO_BUILD_JOBS=2 \
             -e RUSTFLAGS='-C target-feature=-crt-static' \
             rust:1.94.0-alpine3.23 sh -ec '
-              apk add --no-cache nodejs npm bash git cmake clang clang-dev make g++ pkgconf openssl-dev perl linux-headers
+              apk add --no-cache nodejs npm bash git cmake clang clang-dev make g++ pkgconf openssl-dev perl linux-headers binutils
               export LIBCLANG_PATH=/usr/lib
               node scripts/with-source-access.js bash scripts/runtime-matrix.sh
             '
@@ -85,6 +103,7 @@ jobs:
           name: runtime-linux-x64-musl-${{ github.sha }}
           path: |
             runtime-evidence.json
+            linux-runtime-compatibility.json
             index-*.provenance.json
             *.tgz
           if-no-files-found: warn
