@@ -13,6 +13,30 @@ security updates. Both native repos have identical adapter and C-FFI lock hashes
 `SdkNode.burn(request)` and its `burnAsset` alias forward merged `rln_burn`;
 the new runtime capability is `external-signer-burn-v1`.
 
+All seven new-source Bare artifacts are built and verified, and the
+[seven-target hosted matrix](https://github.com/UTEXO-Protocol/rgb-lightning-node-bare/actions/runs/38213919881)
+passed. The frozen local artifacts retain their original build origins and
+hashes; duplicate hosted binaries do not replace them. Iris imported all seven
+with provenance checks and completed iOS/Android worklet generation.
+
+The [Node runtime matrix](https://github.com/UTEXO-Protocol/rgb-lightning-node-nodejs/actions/runs/38213891152)
+passed all five jobs: Darwin arm64 and x64, both GNU architectures and Linux
+musl. Every job passed the native canary and all ten Rust adapter tests.
+All five binaries and original provenance sidecars are centralized in the
+Node checkout, and the complete release artifact gate passes.
+Final local checks pass: Bare 56 tests, Node 23 tests, both native Darwin
+canaries and both TypeScript checks. Implementation commits are Bare
+`cc62bf3a1765d89cb8b0b990ea16a47936f799de` and Node
+`c30cf547fb2960f737b1463f3410445f43932b1b`; documentation changes do not alter
+their native source, wrapper, lock or artifact identities.
+
+Independent host qualification passed WDK c941925 BFA receive/send/burn/reopen/export
+on the frozen Bare Darwin host, plus beta47 consensus validation and negative
+event/amount/recipient checks. This does not qualify Node funded behavior,
+mobile runtime, physical devices, EVM payout or general crash recovery.
+Historical failures below are not silently considered fixed. Package versions
+are unchanged; publication and production promotion remain separate release gates.
+
 See [NATIVE-UPGRADE-20261012.md](./NATIVE-UPGRADE-20261012.md) for source identities,
 local build commands and current matrix status. Everything below is historical
 qualification of the old pin, not evidence for the newly rebuilt binaries.
@@ -132,7 +156,7 @@ event selection still fail their acceptance tests. Production is not approved.
 - Funded WDK tests pass for NIA/IFA/CFA/UDA receive/send/balance/export,
   six-decimal IFA contract import/settlement and bounded disk-full recovery.
 
-## Open gates
+## Historical Open Gates
 
 Source authentication and the hosted ARM64 compatibility regression are resolved
 with verified replacement artifacts. Five-target offline packed installs pass;
