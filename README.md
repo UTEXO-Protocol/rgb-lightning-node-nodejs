@@ -1,7 +1,7 @@
 # RGB Lightning Node: Node.js
 
-The **0.2.0-beta.3** candidate binds **RLN v0.15.0-beta.3 plus merged PR #192**, commit
-`a17b685615750536f0320db1cd3f3ba68a8f1c57`. It is a breaking, release-based
+The **0.2.0-beta.3** candidate binds **RLN v0.15.0-beta.3 plus merged dev through #200**, commit
+`8777d71d7781b408fcce89c9c965ae29e8ad2300`. It is a breaking, release-based
 replacement for the former 0.11 behavior overlay. See
 [RELEASE-0.15-TRACKER.md](RELEASE-0.15-TRACKER.md) before adopting it.
 
@@ -84,7 +84,16 @@ The endpoints above are placeholders. `BlockSync` instead takes the four
 the Ethereum RPC for the asset's bridge chain for BFA validation; omitted/null
 preserve the non-BFA behavior. PR #192 is built from its exact merged source,
 because the published RLN release binaries do not contain it. The runtime
-advertises `external-signer-eth-rpc-v1`; external-signer burn is still unsupported.
+advertises `external-signer-eth-rpc-v1` and `external-signer-burn-v1`.
+
+`burn({ asset_id, amount, burn_recipient?, fee_rate, min_confirmations })`
+(also named `burnAsset`) returns `{ txid, batch_transfer_idx }`.
+`burn_recipient` is optional/null for non-BFA assets and required for BFA:
+exactly 32 bytes encoded as 64 hex characters without a `0x` prefix.
+Burn amount and fee rate accept safe integer numbers or exact decimal strings;
+both become native u64 JSON numbers. Confirmation count must fit u8.
+Signing, validation and transaction submission use merged RLN, not an overlay.
+
 Use `NativeExternalSigner.createWithStorage` with stable, wallet-specific storage.
 The default policy is strict; permissive policy is an explicit non-mainnet option.
 Persistent local signer storage does not establish fresh-device VSS recovery.
@@ -98,8 +107,8 @@ Native response integers outside JavaScript's safe range are exact decimal
 strings; safe integers remain numbers. This preserves released node limits and
 64-bit channel IDs without rounding. Unsafe numeric inputs, NaN and infinity
 still throw `ERR_RLN_UNSAFE_NUMBER` before native calls. Full-range u64 request
-inputs are not supported; decimal strings are not an alternative for released
-request fields whose native schema requires a number.
+inputs are supported only by the typed burn boundary; other request methods
+retain their existing number-only contract.
 
 Unknown `sendPayment` fields, including routing fee caps, fail before submission.
 RLN 0.15 does not enforce a native routing-fee cap. Do not treat an uncapped payment

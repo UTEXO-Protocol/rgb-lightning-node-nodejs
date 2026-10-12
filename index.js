@@ -12,7 +12,7 @@
 const os = require('os')
 const path = require('path')
 const fs = require('fs')
-const { parse, stringify, paymentRequest, unsupported, UnsupportedCapabilityError } = require('./json-boundary')
+const { parse, stringify, paymentRequest, burnRequest, unsupported, UnsupportedCapabilityError } = require('./json-boundary')
 
 // ─── 1. Native addon resolution ──────────────────────────────────────────
 
@@ -317,6 +317,12 @@ class SdkNode {
   }
   inflate (request) {
     return parse(this._inner.inflate(stringify(request)))
+  }
+  burn (request) {
+    return parse(this._inner.burn(burnRequest(request)))
+  }
+  burnAsset (request) {
+    return this.burn(request)
   }
   listTransfers (assetId, txid) {
     if (assetId && typeof assetId === 'object') {

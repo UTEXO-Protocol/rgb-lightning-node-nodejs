@@ -25,14 +25,15 @@
     "Cargo.lock",
     "README.md",
     "UPGRADE-TRACKER.md",
-    "RELEASE-0.15-TRACKER.md"
+    "RELEASE-0.15-TRACKER.md",
+    "NATIVE-UPGRADE-20261012.md"
   ],
   "scripts": {
     "prepublishOnly": "node scripts/verify-release-artifacts.js",
     "postinstall": "node scripts/install-overlay-addon.js",
     "build": "node scripts/install-overlay-addon.js",
     "build:debug": "node scripts/install-overlay-addon.js --debug",
-    "check:types": "tsc --noEmit --strict --skipLibCheck index.d.ts",
+    "check:types": "tsc --noEmit --strict --skipLibCheck index.d.ts && tsc --noEmit --strict --target es2020 --module node16 scripts/burn-types.ts",
     "test:installer": "node --test scripts/install-overlay-addon.test.js",
     "test:unit": "node --test scripts/*.test.js",
     "test": "npm run test:unit && node test.js"
@@ -52,12 +53,12 @@
   "author": "UTEXO",
   "utexoNativeOverlay": {
     "repository": "https://github.com/UTEXO-Protocol/rgb-lightning-node.git",
-    "ref": "a17b685615750536f0320db1cd3f3ba68a8f1c57",
-    "commit": "a17b685615750536f0320db1cd3f3ba68a8f1c57",
-    "lightningCommit": "6d6d061f840264296e7de2b1c64dac6c0dd7eb26",
+    "ref": "8777d71d7781b408fcce89c9c965ae29e8ad2300",
+    "commit": "8777d71d7781b408fcce89c9c965ae29e8ad2300",
+    "lightningCommit": "fc5c4c64db36a9b6aa8cd878ca1225a977e67106",
     "patch": "patches/release-adapter-v0.15.0-beta.3.patch",
-    "patchSha256": "93d62bb91c0ab90a7ccc4a1382a9da84498e38506170ce74d3863292f0c9f2f4",
-    "cffiLockSha256": "38949d8407b0ae4f2964ac02dc22ef4de69d5a863875a82849afa3845d06a576",
+    "patchSha256": "f6d2959e1ceff0400cbd372759c4957cd5a52964f4ec646a79ee15c21b2291c0",
+    "cffiLockSha256": "a8f4a5d0985dd9ba319572ad7e4109f19b8b2f660e48fc8ae424ecdc764d9451",
     "rustToolchain": "1.94.0",
     "rlnVersion": "0.15.0-beta.3"
   },

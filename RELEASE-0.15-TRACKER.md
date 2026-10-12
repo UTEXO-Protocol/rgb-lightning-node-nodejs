@@ -3,9 +3,23 @@
 Candidate `0.2.0-beta.3`, branch `release/rln-0.15.0-beta.3`, based on
 `release/rln-0.13.0-beta.3`. No npm publication or production approval.
 
-## Merged External-Signer BFA Follow-up
+## October 12 Native Upgrade
 
-The current source is RLN `a17b685615750536f0320db1cd3f3ba68a8f1c57`,
+Current source: RLN `8777d71d7781b408fcce89c9c965ae29e8ad2300` (merged
+PR #200, including external-signer burn #194), rust-lightning
+`fc5c4c64db36a9b6aa8cd878ca1225a977e67106`, and rgb-lib beta.47-bfa.
+The eight-file C-FFI-only adapter is preserved, including its h2/rustls
+security updates. Both native repos have identical adapter and C-FFI lock hashes.
+`SdkNode.burn(request)` and its `burnAsset` alias forward merged `rln_burn`;
+the new runtime capability is `external-signer-burn-v1`.
+
+See [NATIVE-UPGRADE-20261012.md](./NATIVE-UPGRADE-20261012.md) for source identities,
+local build commands and current matrix status. Everything below is historical
+qualification of the old pin, not evidence for the newly rebuilt binaries.
+
+## Historical Merged External-Signer BFA Follow-up
+
+The previous source was RLN `a17b685615750536f0320db1cd3f3ba68a8f1c57`,
 the exact PR #192 merge. LDK, rgb-lib and the approved C-FFI lock are unchanged.
 Both unlock entrypoints accept optional `eth_rpc_url`; the new compiled
 `external-signer-eth-rpc-v1` capability prevents confusing this source build with

@@ -23,7 +23,7 @@ use napi_derive::napi;
 
 use rlncffi::{
     free_native_external_signer, free_sdk_node, rln_address, rln_asset_balance,
-    rln_asset_link_create, rln_asset_metadata, rln_btc_balance, rln_cancel_hodl_invoice,
+    rln_asset_link_create, rln_asset_metadata, rln_btc_balance, rln_burn, rln_cancel_hodl_invoice,
     rln_check_indexer_url, rln_check_proxy_endpoint, rln_claim_hodl_invoice, rln_close_channel,
     rln_connect_peer, rln_create_utxos, rln_decode_ln_invoice, rln_decode_rgb_invoice,
     rln_disconnect_peer, rln_estimate_fee, rln_fail_transfers, rln_free_string,
@@ -539,6 +539,11 @@ impl SdkNode {
     }
 
     // -- RGB assets -------------------------------------------------------
+
+    #[napi]
+    pub fn burn(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_burn, request_json)
+    }
 
     #[napi]
     pub fn issue_asset_nia(&self, request_json: String) -> Result<String> {

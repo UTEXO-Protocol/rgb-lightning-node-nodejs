@@ -47,6 +47,22 @@ export type DecimalString = `${bigint}`
 /** Safe integers are numbers; larger native response integers are exact decimal strings. */
 export type ExactInteger = number | DecimalString
 
+export interface BurnRequest {
+  asset_id: string
+  /** Unsigned 64-bit amount; decimal strings preserve values beyond safe integers. */
+  amount: ExactInteger
+  /** Required for BFA assets: 32 bytes encoded as 64 hex characters, without 0x. */
+  burn_recipient?: string | null
+  /** Unsigned 64-bit fee rate in sat/vB. */
+  fee_rate: ExactInteger
+  min_confirmations: number
+}
+
+export interface BurnResponse {
+  txid: string
+  batch_transfer_idx: number
+}
+
 export interface DecodedLnInvoice {
   description: string | null
   description_hash: string | null
@@ -305,6 +321,8 @@ export class SdkNode {
   refreshTransfers(request: JsonRequest): RefreshTransfersResponse
   failTransfers(request: JsonRequest): JsonValue
   inflate(request: JsonRequest): JsonValue
+  burn(request: BurnRequest): BurnResponse
+  burnAsset(request: BurnRequest): BurnResponse
   listTransfers(assetId?: string, txid?: string): JsonValue
   listTransfers(filters: { asset_id?: string; txid?: string }): JsonValue
   listTransfersByTxid(txid: string): JsonValue

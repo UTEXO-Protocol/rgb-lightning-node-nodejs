@@ -1,6 +1,6 @@
 'use strict'
 
-const { parse: parseLossless } = require('lossless-json')
+const { parse: parseLossless, stringify: stringifyLossless, LosslessNumber } = require('lossless-json')
 
 class UnsupportedCapabilityError extends Error {
   constructor (capability) {
@@ -53,4 +53,42 @@ function paymentRequest (request) {
   return stringify(request)
 }
 
-module.exports = { parse, stringify, paymentRequest, unsupported, UnsupportedCapabilityError }
+function burnRequest (request) {
+  if (!request || typeof request !== 'object' || Array.isArray(request)) {
+    throw new TypeError('burn request must be an object')
+  }
+  for (const key of Object.keys(request)) {
+    if (!['asset_id', 'amount', 'burn_recipient', 'fee_rate', 'min_confirmations'].includes(key)) {
+      throw new TypeError(`Unknown burn request field: ${key}`)
+    }
+  }
+  if (typeof request.asset_id !== 'string' || !request.asset_id) {
+    throw new TypeError('burn.asset_id must be a non-empty string')
+  }
+  const uint64 = (value, field) => {
+    checkedNumber(value)
+    if (!((typeof value === 'number' && Number.isSafeInteger(value) && value >= 0) ||
+        (typeof value === 'string' && /^(0|[1-9][0-9]*)$/.test(value))) ||
+        BigInt(value) > 18446744073709551615n) {
+      throw new RangeError(`burn.${field} must be an unsigned 64-bit integer`)
+    }
+    return new LosslessNumber(String(value))
+  }
+  if (!Number.isInteger(request.min_confirmations) ||
+      request.min_confirmations < 0 || request.min_confirmations > 255) {
+    throw new RangeError('burn.min_confirmations must be an unsigned 8-bit integer')
+  }
+  if (request.burn_recipient != null && (typeof request.burn_recipient !== 'string' ||
+      !/^[0-9a-fA-F]{64}$/.test(request.burn_recipient))) {
+    throw new TypeError('burn.burn_recipient must encode exactly 32 bytes as hex')
+  }
+  return stringifyLossless({
+    asset_id: request.asset_id,
+    amount: uint64(request.amount, 'amount'),
+    burn_recipient: request.burn_recipient,
+    fee_rate: uint64(request.fee_rate, 'fee_rate'),
+    min_confirmations: request.min_confirmations
+  })
+}
+
+module.exports = { parse, stringify, paymentRequest, burnRequest, unsupported, UnsupportedCapabilityError }

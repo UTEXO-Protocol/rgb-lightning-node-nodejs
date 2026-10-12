@@ -7,6 +7,59 @@ const path = require('node:path')
 const vm = require('node:vm')
 const { createRequire } = require('node:module')
 const boundary = require('../json-boundary')
+
+test('burn preserves the merged native contract, exact u64 tokens and failures', () => {
+  const calls = []
+  let fail = false
+  const error = new Error('Rln(InvalidBurnRecipient): recipient required for BFA')
+  const native = { burn: (...args) => {
+    if (fail) throw error
+    calls.push(args.at(-1))
+    return '{"txid":"abc","batch_transfer_idx":2147483647}'
+  } }
+  const node = new (facade().SdkNode)(native)
+  const request = { asset_id: 'rgb:test', amount: '18446744073709551615',
+    fee_rate: '1', min_confirmations: 0 }
+  for (const method of ['burn', 'burnAsset']) {
+    for (const recipient of [undefined, null, 'ab'.repeat(32)]) {
+      const input = { ...request, burn_recipient: recipient }
+      assert.deepEqual(node[method](input), { txid: 'abc', batch_transfer_idx: 2147483647 })
+      assert.match(calls.at(-1), /"amount":18446744073709551615/)
+      assert.match(calls.at(-1), /"fee_rate":1/)
+      assert.equal(boundary.parse(calls.at(-1)).burn_recipient, recipient)
+      assert.equal(input.amount, request.amount)
+    }
+    fail = true
+    assert.throws(() => node[method](request), error)
+    fail = false
+  }
+})
+
+test('burn rejects invalid or lossy values before native submission', () => {
+  let calls = 0
+  const native = { burn: () => { calls++; return '{}' } }
+  const node = new (facade().SdkNode)(native)
+  const request = { asset_id: 'rgb:test', amount: 1, fee_rate: 1, min_confirmations: 1 }
+  for (const method of ['burn', 'burnAsset']) {
+    for (const field of ['amount', 'fee_rate']) {
+      for (const value of [-1, 1.5, NaN, Infinity, 2 ** 64, '-1', '1.5', '1e3', '01',
+        '18446744073709551616', null, undefined, {}, true]) {
+        assert.throws(() => node[method]({ ...request, [field]: value }))
+      }
+    }
+    for (const min_confirmations of [-1, 256, 1.5, '1', null]) {
+      assert.throws(() => node[method]({ ...request, min_confirmations }))
+    }
+    for (const burn_recipient of ['', '0x' + 'ab'.repeat(32), 'ab'.repeat(31), 'gg'.repeat(32), 1]) {
+      assert.throws(() => node[method]({ ...request, burn_recipient }))
+    }
+    assert.throws(() => node[method]({ ...request, recipient: 'ab'.repeat(32) }), /Unknown burn/)
+    for (const input of [null, undefined, [], { ...request, asset_id: '' }]) {
+      assert.throws(() => node[method](input))
+    }
+  }
+  assert.equal(calls, 0)
+})
 const installer = require('./install-overlay-addon')
 
 function facade (overrides = {}) {

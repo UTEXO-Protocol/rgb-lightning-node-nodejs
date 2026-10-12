@@ -1,5 +1,5 @@
 diff --git a/bindings/c-ffi/Cargo.lock b/bindings/c-ffi/Cargo.lock
-index b935dd3..fbdd660 100644
+index bc43f3c..2536c5c 100644
 --- a/bindings/c-ffi/Cargo.lock
 +++ b/bindings/c-ffi/Cargo.lock
 @@ -501,9 +501,9 @@ checksum = "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53"
@@ -632,7 +632,7 @@ index 5b606f1..b033603 100644
      }
  }
 diff --git a/bindings/c-ffi/src/lib.rs b/bindings/c-ffi/src/lib.rs
-index e1dded1..cc930e0 100644
+index e1dded1..8a9ef00 100644
 --- a/bindings/c-ffi/src/lib.rs
 +++ b/bindings/c-ffi/src/lib.rs
 @@ -89,6 +89,25 @@ pub extern "C" fn rln_free_string(s: *mut c_char) {
@@ -645,8 +645,8 @@ index e1dded1..cc930e0 100644
 +    ffi_call!("rln_binding_build_info", Ok::<String, utils::Error>(serde_json::json!({
 +        "abi_version": 1,
 +        "rln_version": "0.15.0-beta.3",
-+        "rln_commit": "a17b685615750536f0320db1cd3f3ba68a8f1c57",
-+        "lightning_commit": "6d6d061f840264296e7de2b1c64dac6c0dd7eb26",
++        "rln_commit": "8777d71d7781b408fcce89c9c965ae29e8ad2300",
++        "lightning_commit": "fc5c4c64db36a9b6aa8cd878ca1225a977e67106",
 +        "adapter_sha256": env!("RLN_ADAPTER_SHA256"),
 +        "wrapper_sha256": env!("RLN_WRAPPER_SHA256"),
 +        "lock_sha256": env!("RLN_LOCK_SHA256"),
@@ -654,7 +654,7 @@ index e1dded1..cc930e0 100644
 +        "capabilities": ["canonical-unlock-v1", "persistent-native-signer", "refresh-transfers-v1",
 +            "apay-address", "decoded-invoice-cltv", "tagged-rgb-assignment", "pending-blinded-v1",
 +            "rgb-contract-import-v1", "rgb-transfer-metadata-import-v1", "consignment-export-v1", "mainnet-lightning-rejection-v1",
-+            "external-signer-eth-rpc-v1"]
++            "external-signer-eth-rpc-v1", "external-signer-burn-v1"]
 +    }).to_string()))
 +}
 +

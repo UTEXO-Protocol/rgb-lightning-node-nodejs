@@ -1,8 +1,8 @@
 # RLN 0.15 C binding adapter
 
-`release-adapter-v0.15.0-beta.3.patch` applies to RLN 0.15 plus merged PR #192,
-`a17b685615750536f0320db1cd3f3ba68a8f1c57`, and its unchanged rust-lightning
-submodule `6d6d061f840264296e7de2b1c64dac6c0dd7eb26`.
+`release-adapter-v0.15.0-beta.3.patch` applies to merged RLN dev through PR #200,
+`8777d71d7781b408fcce89c9c965ae29e8ad2300`, and its rust-lightning
+submodule `fc5c4c64db36a9b6aa8cd878ca1225a977e67106` (rgb-lib beta.47-bfa).
 
 The eight-file allowlist in `scripts/release-contract.js` is limited to
 `bindings/c-ffi`: its manifest, lockfile, build script, headers and three Rust
@@ -16,7 +16,9 @@ needed by the released dependency graph. Compatible lockfile updates include
 `h2` 0.4.16 and `rustls` 0.23.45; remaining advisories are release gates.
 
 Ethereum RPC forwarding comes from merged RLN, not this adapter. Compiled
-capabilities include `external-signer-eth-rpc-v1`. The source version remains
+capabilities include `external-signer-eth-rpc-v1` and `external-signer-burn-v1`.
+External-signer burn comes from merged PR #194, not this adapter.
+The source version remains
 `0.15.0-beta.3`; the full commit distinguishes it from the older release binary.
 
 Contract import and accepted-transfer metadata import are already in RLN 0.15
