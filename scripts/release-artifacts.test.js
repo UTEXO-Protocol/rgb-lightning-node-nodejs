@@ -8,6 +8,7 @@ const path = require('node:path')
 const { TARGETS, identity, readConfig } = require('./install-overlay-addon')
 const { sha256 } = require('./release-contract')
 const { verifyReleaseArtifacts } = require('./verify-release-artifacts')
+const { fixture } = require('./macho-linkedit-fixture')
 
 test('publication requires all five matching release artifacts and rejects corruption', t => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'rln-publication-test-'))
@@ -16,7 +17,7 @@ test('publication requires all five matching release artifacts and rejects corru
   assert.throws(() => verifyReleaseArtifacts(root), /ENOENT/)
   for (const [suffix, target] of Object.entries(TARGETS)) {
     const artifact = path.join(root, `index-${suffix}.node`)
-    fs.writeFileSync(artifact, `fixture-${suffix}`)
+    fs.writeFileSync(artifact, suffix.startsWith('darwin-') ? fixture(suffix === 'darwin-arm64' ? 0x0100000c : 0x01000007) : `fixture-${suffix}`)
     fs.writeFileSync(path.join(root, `index-${suffix}.provenance.json`), JSON.stringify({
       ...expected, target, profile: 'release', addonSha256: sha256(artifact)
     }))

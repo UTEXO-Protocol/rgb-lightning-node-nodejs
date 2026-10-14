@@ -4,6 +4,7 @@ const fs = require('node:fs')
 const path = require('node:path')
 const { spawnSync } = require('node:child_process')
 const contract = require('./release-contract')
+const { verifyMachOFile } = require('./macho-linkedit')
 
 const packageRoot = path.resolve(__dirname, '..')
 const sourceRoot = path.join(packageRoot, '.native-source')
@@ -61,7 +62,7 @@ function identity (config) {
     patchSha256: config.patchSha256,
     rustToolchain: config.rustToolchain,
     macosDeploymentTarget: '13.0',
-    buildRecipeSha256: contract.wrapperSha256(packageRoot, ['scripts/install-overlay-addon.js']),
+    buildRecipeSha256: contract.wrapperSha256(packageRoot, ['scripts/install-overlay-addon.js', 'scripts/macho-linkedit.js']),
     target: TARGETS[platformSuffix()],
     wrapperSha256: contract.wrapperSha256(packageRoot, WRAPPER_FILES),
     lockSha256: contract.sha256(path.join(packageRoot, 'Cargo.lock')),
@@ -76,6 +77,7 @@ function manifestMatches (config, manifest, addonSha256) {
 
 function existingAddonMatches (config) {
   try {
+    if (platformSuffix().startsWith('darwin-')) verifyMachOFile(addonPath(), platformSuffix())
     return fs.statSync(addonPath()).size > 0 && manifestMatches(config,
       JSON.parse(fs.readFileSync(manifestPath())), contract.sha256(addonPath()))
   } catch { return false }
@@ -86,6 +88,7 @@ function recordAddonProvenance (config, descriptor) {
     throw new Error('Wrapper changed while native compilation was in progress; rebuild')
   }
   if (fs.statSync(addonPath()).size === 0) throw new Error('Empty native addon')
+  if (platformSuffix().startsWith('darwin-')) verifyMachOFile(addonPath(), platformSuffix())
   fs.writeFileSync(manifestPath(), JSON.stringify({
     ...descriptor, addonSha256: contract.sha256(addonPath())
   }, null, 2) + '\n')
@@ -104,9 +107,13 @@ function prepareSource (config) {
 function buildAddon (config) {
   contract.verifyCargoGraph(path.join(packageRoot, 'Cargo.toml'), sourceRoot)
   const descriptor = identity(config)
-  const args = ['build', '--locked', '--target', descriptor.target]
   const apple = descriptor.target.includes('apple-darwin')
+  const args = [apple ? 'rustc' : 'build', '--locked', '--target', descriptor.target]
   if (descriptor.profile === 'release') args.push('--release')
+  // Rust 1.94's post-link objcopy stripping can misalign Mach-O LINKEDIT
+  // on macOS 27. Apple ld performs equivalent local/debug symbol stripping
+  // while maintaining loader alignment and the final code signature.
+  if (apple) args.push('--', '-C', 'strip=none', '-C', 'link-arg=-Wl,-x', '-C', 'link-arg=-Wl,-S')
   run('cargo', args, { env: {
     ...process.env,
     RUSTUP_TOOLCHAIN: config.rustToolchain,

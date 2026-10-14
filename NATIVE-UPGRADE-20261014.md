@@ -48,3 +48,26 @@ An initial clean host build reproduced Rust's [proc-macro stripping defect](http
 Bare recipe provenance now binds the source-build orchestration and C-FFI/CMake shell scripts rather than only the CMake script. Node sidecars additionally bind `buildRecipeSha256` to its installer/build orchestration. This rejects artifacts built under older build recipes. No previous artifact is restamped as a pass.
 
 Fresh cargo-audit reports ten lockfile vulnerabilities: five Quinn findings, rkyv, rsa and three legacy webpki findings. Quinn/rkyv/rsa are absent from the selected normal/build graph on all targets. Legacy webpki is active through minreq/rustls0.21 and remains a release security gate; no incompatible dependency version is forced into upstream runtime code.
+
+## Final Darwin stripping and loader qualification
+
+A second real macOS 27 check found that Rust 1.94's final `strip = "symbols"`
+path also emitted an unaligned LINKEDIT string pool. The initial failed addon,
+its original sidecar and failed canary log are retained as unqualified evidence.
+The Darwin installer now uses `cargo rustc` with `-C strip=none` and Apple
+link-time `-x` / `-S` to remove local/debug symbols while preserving loader
+alignment and the code signature. GNU/musl release stripping is unchanged.
+
+The bound build recipe includes the installer and new Mach-O validator.
+`buildRecipeSha256` is `f7113f4e7b8f3bef09c97568f7f4ec0bc24a16f049f4268dbe9fba490a3b177c`.
+Installer reuse, sidecar recording and the complete release gate reject malformed,
+wrong-architecture or misaligned Darwin addons even on older macOS.
+The final arm64 binary passes all 25 unit tests, structural validation and actual
+Node 22.23.3 native canaries on macOS 27. Intel/Rosetta and three Linux final
+recipe rebuilds are pending; old sidecars are not relabeled.
+
+Current funded Bare tests still reproduce signer database locking after
+unlocked same-process reopen and a doubled pending witness balance. Root's
+fresh burn and independent beta50 validation pass, including missing-event,
+wrong-recipient and wrong-amount rejection. These functional passes do not
+close the lifecycle/accounting or native dependency security gates.
