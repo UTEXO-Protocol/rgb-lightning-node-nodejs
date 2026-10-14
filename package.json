@@ -26,7 +26,8 @@
     "README.md",
     "UPGRADE-TRACKER.md",
     "RELEASE-0.15-TRACKER.md",
-    "NATIVE-UPGRADE-20261012.md"
+    "NATIVE-UPGRADE-20261012.md",
+    "NATIVE-UPGRADE-20261014.md"
   ],
   "scripts": {
     "prepublishOnly": "node scripts/verify-release-artifacts.js",
