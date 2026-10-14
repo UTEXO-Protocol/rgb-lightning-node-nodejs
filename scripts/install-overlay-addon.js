@@ -61,6 +61,7 @@ function identity (config) {
     patchSha256: config.patchSha256,
     rustToolchain: config.rustToolchain,
     macosDeploymentTarget: '13.0',
+    buildRecipeSha256: contract.wrapperSha256(packageRoot, ['scripts/install-overlay-addon.js']),
     target: TARGETS[platformSuffix()],
     wrapperSha256: contract.wrapperSha256(packageRoot, WRAPPER_FILES),
     lockSha256: contract.sha256(path.join(packageRoot, 'Cargo.lock')),

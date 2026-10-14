@@ -9,11 +9,11 @@ No package, release or artifact is published.
 - RLN: `ecc69f20308231400561f6f060fea88acfa40cc4`, version `0.17.0-beta.3`
 - LDK: `79b9eb5166546c62692d3a672986f385c7fe047d`
 - rgb-lib: `v0.3.0-beta.50-bfa`, `1b951af0c8233308c919975552487be19ad2a930`
-- Shared adapter SHA-256: `a091d7d81831702f2b1a1479d32614f3ee17dae248318e98cbf8dadd00d211d9`
+- Shared adapter SHA-256: `bbec56a1ef9c05feb9d50a9edab556837be872f482bf1183493a4f449f45275d`
 - C-FFI lock SHA-256: `5fcdc9ad9179d3230e48973cdfa514a863d13a837752027febf8ea04713bbeb5`
 - Bare wrapper SHA-256: `36ae181f6feb775e93848125334e92dbfad7ddbdc0643667ea1f5e8a0e429651`
-- Bare recipe SHA-256: `22eac5a64490e16d79cecdd086b28ae0e2cb041e88af9a9ac7491b541a6ad146`
-- Node wrapper SHA-256: `f30a7b48547c4e10ab2f3f4d33f6215835344681ee575d8deb51211c80ad2418`
+- Bare recipe SHA-256: `bcc14b617ba4ac0818dcf8c496bacc27ca35bdf3c20ca840d04c9d82b57c62b7`
+- Node wrapper SHA-256: `c8b74b9698806b949bff3dd46dd4a5f48545b9f08c695f4e47c03c56d9ac2657`
 - Node lock SHA-256: `de8eedbec81519cafbdf02c3445654d31ec6fbda8181be42f5926dcaf7911108`
 - Rust: `1.94.0`; Apple deployment targets macOS 13.0/iOS 16.0; Android NDK `27.1.12297006`, API 29
 
@@ -40,3 +40,11 @@ dependency security review, physical-device and funded/mobile qualification
 gates remain open until fresh tests resolve them. Artifact matrices do not
 constitute production approval. See the historical tracker and WDK production
 gate report for reproductions.
+
+## macOS 27 build compatibility
+
+An initial clean host build reproduced Rust's [proc-macro stripping defect](https://github.com/rust-lang/rust/issues/157750): dyld rejects an unaligned LINKEDIT string pool. The release and development build-override profiles now set `strip = "none"` for compile-time dependencies in the C-FFI manifest and Node wrapper. Shipped target optimization and stripping remain unchanged. No caller environment flag is required. The failed trace remains local evidence, and qualification is repeated against these final identities.
+
+Bare recipe provenance now binds the source-build orchestration and C-FFI/CMake shell scripts rather than only the CMake script. Node sidecars additionally bind `buildRecipeSha256` to its installer/build orchestration. This rejects artifacts built under older build recipes. No previous artifact is restamped as a pass.
+
+Fresh cargo-audit reports ten lockfile vulnerabilities: five Quinn findings, rkyv, rsa and three legacy webpki findings. Quinn/rkyv/rsa are absent from the selected normal/build graph on all targets. Legacy webpki is active through minreq/rustls0.21 and remains a release security gate; no incompatible dependency version is forced into upstream runtime code.

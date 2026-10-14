@@ -282,7 +282,7 @@ index be5eede..f880358 100644
  ]
  
 diff --git a/bindings/c-ffi/Cargo.toml b/bindings/c-ffi/Cargo.toml
-index 546e27d..3b59fc6 100644
+index 546e27d..d2807dc 100644
 --- a/bindings/c-ffi/Cargo.toml
 +++ b/bindings/c-ffi/Cargo.toml
 @@ -55,6 +55,7 @@ lightning-invoice = { path = "../../rust-lightning/lightning-invoice" }
@@ -293,6 +293,19 @@ index 546e27d..3b59fc6 100644
  vls-core = { git = "https://github.com/UTEXO-Protocol/vls-core.git", branch = "feat/rgb-compatibility" }
  vls-protocol-signer = { git = "https://github.com/UTEXO-Protocol/vls-protocol-signer.git", branch = "feat/rgb-compatibility" }
  # BFA-enabled RGB crates required by the parent's rgb-lib revision; keep in lock-step with the
+@@ -63,3 +64,12 @@ rgb-consensus = { git = "https://github.com/UTEXO-Protocol/rgb-consensus-s-bfa",
+ rgb-ops = { git = "https://github.com/UTEXO-Protocol/rgb-ops-s-bfa", rev = "773766b5ca7a9e705ec68c2f9ed0917f505cd6e3" }
+ rgb-invoicing = { git = "https://github.com/UTEXO-Protocol/rgb-ops-s-bfa", rev = "773766b5ca7a9e705ec68c2f9ed0917f505cd6e3" }
+ rgb-schemas = { git = "https://github.com/UTEXO-Protocol/rgb-schemas-s-bfa", rev = "238dfe7a89db998107fd87d919bf2757a2746d7f" }
++
++# Rust 1.94's proc-macro stripping emits LINKEDIT string pools rejected by
++# macOS 27. These dependencies execute only during compilation, so this
++# override does not change the shipped target's optimization/strip policy.
++[profile.release.build-override]
++strip = "none"
++
++[profile.dev.build-override]
++strip = "none"
 diff --git a/bindings/c-ffi/build.rs b/bindings/c-ffi/build.rs
 index f775f83..86daa71 100644
 --- a/bindings/c-ffi/build.rs
