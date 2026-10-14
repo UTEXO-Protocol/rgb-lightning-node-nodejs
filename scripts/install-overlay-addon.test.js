@@ -56,7 +56,7 @@ test('manifest rejects wrong artifact, source, wrapper, lock and target identiti
 
 test('wrapper lock uses the released RGB-lib and path transaction sync', () => {
   const lock = fs.readFileSync(path.join(__dirname, '..', 'Cargo.lock'), 'utf8')
-  assert.match(lock, /rgb-lib\.git\?tag=v0\.3\.0-beta\.47-bfa#74a096a5bfbba7744af16c36c3595a24464c134c/)
+  assert.match(lock, /rgb-lib\.git\?tag=v0\.3\.0-beta\.50-bfa#1b951af0c8233308c919975552487be19ad2a930/)
   assert.doesNotMatch(lock, /95332c41|94b6221|dcorral/)
   const sync = lock.split('[[package]]').find(block => block.includes('name = "lightning-transaction-sync"'))
   assert.ok(sync)

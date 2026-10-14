@@ -65,7 +65,7 @@ const installer = require('./install-overlay-addon')
 function facade (overrides = {}) {
   const root = path.resolve(__dirname, '..')
   const identity = installer.identity(installer.readConfig())
-  const info = { abi_version: 1, rln_version: '0.15.0-beta.3', rln_commit: identity.commit,
+  const info = { abi_version: 1, rln_version: '0.17.0-beta.3', rln_commit: identity.commit,
     lightning_commit: identity.lightningCommit, adapter_sha256: identity.patchSha256,
     wrapper_sha256: identity.wrapperSha256, lock_sha256: identity.lockSha256,
     target: identity.target, capabilities: [], ...overrides }

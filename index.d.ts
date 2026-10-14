@@ -342,7 +342,7 @@ export class SdkNode {
 export function uniffiHealthcheck(): string
 export interface RuntimeInfo {
   readonly abi_version: 1
-  readonly rln_version: '0.15.0-beta.3'
+  readonly rln_version: '0.17.0-beta.3'
   readonly rln_commit: string
   readonly lightning_commit: string
   readonly adapter_sha256: string

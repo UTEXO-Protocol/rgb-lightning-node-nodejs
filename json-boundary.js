@@ -4,7 +4,7 @@ const { parse: parseLossless, stringify: stringifyLossless, LosslessNumber } = r
 
 class UnsupportedCapabilityError extends Error {
   constructor (capability) {
-    super(`${capability} is not supported by released RLN 0.15.0-beta.3`)
+    super(`${capability} is not supported by released RLN 0.17.0-beta.3`)
     this.name = 'UnsupportedCapabilityError'
     this.code = 'ERR_RLN_UNSUPPORTED_CAPABILITY'
     this.capability = capability

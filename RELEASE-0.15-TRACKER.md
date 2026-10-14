@@ -1,3 +1,15 @@
+# Current candidate: RLN SDK 0.17.0-beta.3
+
+Candidate `0.2.0-beta.4` updates this existing release branch without publication.
+The branch and filename preserve their historical names. Exact graph, fresh
+qualification and remaining release gates are in
+[NATIVE-UPGRADE-20261014.md](./NATIVE-UPGRADE-20261014.md).
+
+All evidence below belongs to previous source/artifact identities. It is not a
+pass for the 0.17 candidate; known failures remain unresolved until retested.
+
+---
+
 # RLN 0.15 release tracker
 
 Candidate `0.2.0-beta.3`, branch `release/rln-0.15.0-beta.3`, based on

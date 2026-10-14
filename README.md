@@ -1,7 +1,7 @@
 # RGB Lightning Node: Node.js
 
-The **0.2.0-beta.3** candidate binds **RLN v0.15.0-beta.3 plus merged dev through #200**, commit
-`8777d71d7781b408fcce89c9c965ae29e8ad2300`. It is a breaking, release-based
+The **0.2.0-beta.4** candidate binds **RLN v0.17.0-beta.3**, commit
+`ecc69f20308231400561f6f060fea88acfa40cc4`. It is a breaking, release-based
 replacement for the former 0.11 behavior overlay. See
 [RELEASE-0.15-TRACKER.md](RELEASE-0.15-TRACKER.md) before adopting it.
 

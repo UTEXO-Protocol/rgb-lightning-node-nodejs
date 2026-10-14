@@ -1,31 +1,23 @@
-# RLN 0.15 C binding adapter
+# RLN 0.17 C binding adapter
 
-`release-adapter-v0.15.0-beta.3.patch` applies to merged RLN dev through PR #200,
-`8777d71d7781b408fcce89c9c965ae29e8ad2300`, and its rust-lightning
-submodule `fc5c4c64db36a9b6aa8cd878ca1225a977e67106` (rgb-lib beta.47-bfa).
+`release-adapter-v0.17.0-beta.3.patch` applies to RLN SDK tag
+`v0.17.0-beta.3`, commit `ecc69f20308231400561f6f060fea88acfa40cc4`,
+LDK submodule `79b9eb5166546c62692d3a672986f385c7fe047d` and rgb-lib
+`v0.3.0-beta.50-bfa` / `1b951af0c8233308c919975552487be19ad2a930`.
 
-The eight-file allowlist in `scripts/release-contract.js` is limited to
-`bindings/c-ffi`: its manifest, lockfile, build script, headers and three Rust
-binding files. It does not modify RLN, rgb-lib, VLS or LDK runtime behavior.
+The eight-file allowlist in `scripts/release-contract.js` changes only the
+C-FFI manifest, lockfile, build script, headers and three Rust binding files.
+RLN, rgb-lib, LDK and signer runtime implementations remain upstream bytes.
+Both native repositories contain byte-identical adapters.
 
-The adapter exposes the released persistent external-signer constructor and
-address-bound APay registration, preserves invoice CLTV, emits structured RGB
-invoice assignments and `pending_blinded`, and exports runtime provenance.
-It supplies the coherent transaction-sync Cargo path and the four BFA overrides
-needed by the released dependency graph. Compatible lockfile updates include
-`h2` 0.4.16 and `rustls` 0.23.45; remaining advisories are release gates.
+The prior binding repairs remain: persistent external signer, address-bound APay,
+invoice CLTV, structured RGB assignments, `pending_blinded`, and compiled
+provenance. Upstream now supplies BFA Cargo overrides; this adapter adds only the
+matching path-based transaction sync override. The reviewed h2 0.4.16 and rustls
+0.23.45 lock updates remain. Existing security and runtime gates remain open.
 
-Ethereum RPC forwarding comes from merged RLN, not this adapter. Compiled
-capabilities include `external-signer-eth-rpc-v1` and `external-signer-burn-v1`.
-External-signer burn comes from merged PR #194, not this adapter.
-The source version remains
-`0.15.0-beta.3`; the full commit distinguishes it from the older release binary.
-
-Contract import and accepted-transfer metadata import are already in RLN 0.15
-(PR #128). There is no import backport or separate import revision. These imports
-do not credit arbitrary funds. Saved consignment export also comes from the
-released C API; the Node and Bare wrappers expose its bytes and local path.
-
-Both native repositories must contain identical patch bytes. The manifest pins
-the patch, C-FFI lock, source graph and build recipe; the compiled identity also
-binds the wrapper and target. Source changes require rebuilt artifacts.
+Ethereum RPC forwarding, external-signer burn and BFA Lightning behavior come
+from upstream. This source update does not enable Lightning in Iris or expose
+new BFA Lightning methods in the wrappers. The compiled SDK version is now
+correctly `0.17.0-beta.3`; source, adapter, wrapper, lock and target hashes remain
+mandatory. Old adapters are retained solely as historical source evidence.
