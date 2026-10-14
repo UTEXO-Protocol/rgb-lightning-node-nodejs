@@ -46,12 +46,15 @@ if (!fs.existsSync(addonPath)) {
   )
 }
 
+const { readConfig, verifyAddonAdmission } = require('./scripts/install-overlay-addon')
+const nativeConfig = readConfig()
+const expectedIdentity = verifyAddonAdmission(__dirname, nativeConfig, suffix)
+// Only verified bytes may enter the native loader or run addon initialization.
 const napi = require(addonPath)
-const { readConfig, identity } = require('./scripts/install-overlay-addon')
-const expectedIdentity = identity(readConfig())
 const runtimeInfo = parse(napi.getRuntimeInfo())
 for (const [key, expected] of Object.entries({
   abi_version: 1,
+  rln_version: nativeConfig.rlnVersion,
   rln_commit: expectedIdentity.commit,
   lightning_commit: expectedIdentity.lightningCommit,
   adapter_sha256: expectedIdentity.patchSha256,

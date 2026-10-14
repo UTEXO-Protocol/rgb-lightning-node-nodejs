@@ -75,6 +75,25 @@ function manifestMatches (config, manifest, addonSha256) {
     manifest.addonSha256 === addonSha256
 }
 
+// Admission is pure validation: never build, fetch or dlopen a native file.
+// Development builds remain loadable only with complete matching provenance;
+// publication separately requires every artifact to have release profile.
+function verifyAddonAdmission (root, config, suffix) {
+  if (!TARGETS[suffix]) throw new Error('Unsupported native admission target')
+  const artifact = path.join(root, `index-${suffix}.node`)
+  const sidecar = path.join(root, `index-${suffix}.provenance.json`)
+  const manifest = JSON.parse(fs.readFileSync(sidecar, 'utf8'))
+  if (!['release', 'debug'].includes(manifest.profile)) throw new Error('Unapproved native build profile')
+  const expected = { ...identity(config), target: TARGETS[suffix], profile: manifest.profile }
+  if (!Object.entries(expected).every(([key, value]) => manifest[key] === value) ||
+      !fs.statSync(artifact).isFile() || fs.statSync(artifact).size === 0 ||
+      manifest.addonSha256 !== contract.sha256(artifact)) {
+    throw new Error('Native artifact admission failed: missing, stale or corrupt provenance; rebuild the package')
+  }
+  if (suffix.startsWith('darwin-')) verifyMachOFile(artifact, suffix)
+  return expected
+}
+
 function existingAddonMatches (config) {
   try {
     if (platformSuffix().startsWith('darwin-')) verifyMachOFile(addonPath(), platformSuffix())
@@ -146,4 +165,4 @@ function main () {
 
 if (require.main === module) main()
 module.exports = { addonPath, existingAddonMatches, identity, manifestMatches, readConfig,
-  recordAddonProvenance, prepareSource, buildAddon, TARGETS, platformSuffix }
+  recordAddonProvenance, prepareSource, buildAddon, TARGETS, platformSuffix, verifyAddonAdmission }

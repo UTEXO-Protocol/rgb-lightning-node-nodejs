@@ -74,7 +74,9 @@ function facade (overrides = {}) {
   const localRequire = createRequire(path.join(root, 'index.js'))
   vm.runInNewContext(fs.readFileSync(path.join(root, 'index.js'), 'utf8'), {
     __dirname: root, exports: result, Buffer, process,
-    require: (id) => id.endsWith('.node') ? native : id === 'fs'
+    require: (id) => id === './scripts/install-overlay-addon'
+      ? { ...installer, verifyAddonAdmission: () => identity }
+      : id.endsWith('.node') ? native : id === 'fs'
       ? { ...fs, existsSync: () => true } : localRequire(id)
   })
   return result
@@ -97,6 +99,7 @@ test('large JSON response integers remain exact and unsafe input numbers fail', 
 
 test('compiled runtime identity is checked before any node is created', () => {
   assert.throws(() => facade({ rln_commit: 'old' }), /identity mismatch/)
+  assert.throws(() => facade({ rln_version: '0.15.0-beta.3' }), /rln_version/)
   const info = facade().getRuntimeInfo()
   assert.ok(Object.isFrozen(info))
   assert.ok(Object.isFrozen(info.capabilities))

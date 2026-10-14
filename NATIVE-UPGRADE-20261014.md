@@ -71,3 +71,24 @@ unlocked same-process reopen and a doubled pending witness balance. Root's
 fresh burn and independent beta50 validation pass, including missing-event,
 wrong-recipient and wrong-amount rejection. These functional passes do not
 close the lifecycle/accounting or native dependency security gates.
+
+## Pre-loader admission hardening
+
+Independent review found that callers skipping postinstall could reach dlopen
+before the sidecar/build-recipe admission checks. The facade now verifies the
+sidecar, full native identity, wrapper/lock/recipe hashes, actual addon bytes and
+Darwin layout before loading the native module. Only the two known build
+profiles (release/debug) are loadable; the application argv does not select the
+profile. Publication still requires all five artifacts to be release builds.
+
+Fresh regression tests prove missing/malformed/stale/corrupt sidecars and a
+hash-matching misaligned Mach-O cannot reach dlopen or addon initialization.
+Both valid profiles remain usable when a consumer passes unrelated --debug.
+The 29-test suite and declarations pass. The wrapper hash is now
+`3647ddc882ff0e04133f69d14123f2dba3c111ca31d47ffc4946a4bf402ef30d`;
+recipe hash is `07c989d17d2bf6be5cbb6d9e491937316dd67a68dd09aafa755aa91dc4ec7a84`.
+All five artifacts are being rebuilt against this final import contract. The
+previous f711 matrix remains historical evidence, not a final artifact pass.
+
+Ten Rust C-FFI adapter tests also pass locally on macOS 27 under the pinned
+1.94 toolchain. The native core/adapter/locks and Bare artifacts are unchanged.
