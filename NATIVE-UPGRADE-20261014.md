@@ -2,7 +2,7 @@
 
 Candidate `0.2.0-beta.4` targets published RLN SDK `v0.17.0-beta.3`.
 The existing `release/rln-0.15.0-beta.3` branch retains its review history.
-No package, release or artifact is published.
+The candidate has not been merged, tagged or published to npm or a GitHub release.
 
 ## Exact source identity
 
@@ -13,7 +13,8 @@ No package, release or artifact is published.
 - C-FFI lock SHA-256: `5fcdc9ad9179d3230e48973cdfa514a863d13a837752027febf8ea04713bbeb5`
 - Bare wrapper SHA-256: `36ae181f6feb775e93848125334e92dbfad7ddbdc0643667ea1f5e8a0e429651`
 - Bare recipe SHA-256: `bcc14b617ba4ac0818dcf8c496bacc27ca35bdf3c20ca840d04c9d82b57c62b7`
-- Node wrapper SHA-256: `c8b74b9698806b949bff3dd46dd4a5f48545b9f08c695f4e47c03c56d9ac2657`
+- Node wrapper SHA-256: `3647ddc882ff0e04133f69d14123f2dba3c111ca31d47ffc4946a4bf402ef30d`
+- Node recipe SHA-256: `07c989d17d2bf6be5cbb6d9e491937316dd67a68dd09aafa755aa91dc4ec7a84`
 - Node lock SHA-256: `de8eedbec81519cafbdf02c3445654d31ec6fbda8181be42f5926dcaf7911108`
 - Rust: `1.94.0`; Apple deployment targets macOS 13.0/iOS 16.0; Android NDK `27.1.12297006`, API 29
 
@@ -25,8 +26,10 @@ Iris continues to enforce its on-chain-only profile.
 ## Qualification
 
 Both source and locked Git graphs and declarations are verified. Bare's 56 and
-Node's 23 unit checks pass locally. Fresh optimized target matrices and runtime
-canaries are being rebuilt; results will be recorded here after completion.
+Node's 29 unit checks pass locally. Both final optimized Mac architectures pass
+actual Node 22.23.3 canaries on macOS 27.0.1 (Intel executes through Rosetta).
+The final five-target hosted matrix and assembled complete release-artifact
+gate pass. Original artifact hashes, sidecars and runtime identities are verified.
 Historical 0.15/0.16 binaries and tests are not evidence for this source.
 
 All seven Bare targets must pass checksum, archive/addon symbol and provenance
@@ -59,12 +62,12 @@ link-time `-x` / `-S` to remove local/debug symbols while preserving loader
 alignment and the code signature. GNU/musl release stripping is unchanged.
 
 The bound build recipe includes the installer and new Mach-O validator.
-`buildRecipeSha256` is `f7113f4e7b8f3bef09c97568f7f4ec0bc24a16f049f4268dbe9fba490a3b177c`.
 Installer reuse, sidecar recording and the complete release gate reject malformed,
 wrong-architecture or misaligned Darwin addons even on older macOS.
-The final arm64 binary passes all 25 unit tests, structural validation and actual
-Node 22.23.3 native canaries on macOS 27. Intel/Rosetta and three Linux final
-recipe rebuilds are pending; old sidecars are not relabeled.
+The intermediate `c8b74b` wrapper/`f7113f` recipe passed its original matrix,
+but those artifacts are historical after the import-contract change below.
+Both final Mac binaries pass structural checks and actual Node 22.23.3 canaries
+on macOS 27.0.1. Old sidecars are never relabeled.
 
 Current funded Bare tests still reproduce signer database locking after
 unlocked same-process reopen and a doubled pending witness balance. Root's
@@ -87,8 +90,62 @@ Both valid profiles remain usable when a consumer passes unrelated --debug.
 The 29-test suite and declarations pass. The wrapper hash is now
 `3647ddc882ff0e04133f69d14123f2dba3c111ca31d47ffc4946a4bf402ef30d`;
 recipe hash is `07c989d17d2bf6be5cbb6d9e491937316dd67a68dd09aafa755aa91dc4ec7a84`.
-All five artifacts are being rebuilt against this final import contract. The
+All five artifacts were rebuilt against this final import contract. The
 previous f711 matrix remains historical evidence, not a final artifact pass.
 
 Ten Rust C-FFI adapter tests also pass locally on macOS 27 under the pinned
 1.94 toolchain. The native core/adapter/locks and Bare artifacts are unchanged.
+
+## Final five-target artifact qualification
+
+The [final build-only matrix](https://github.com/UTEXO-Protocol/rgb-lightning-node-nodejs/actions/runs/38559279576)
+passes all five targets against source `82eeb4cea5038c007b44036307834156a26c71d5`
+(native implementation `42b5fcbe505ec9b6aa7b48273507fb43cf96c491`). Every job
+runs the 29 unit tests, declaration checks, optimized native identity/offline
+lifecycle/error canary and ten Rust adapter tests on the actual target runtime.
+
+| Target | Hosted Node | Actual libc requirement |
+| --- | --- | --- |
+| macOS arm64 | 22.23.2 | macOS deployment target 13.0 |
+| macOS x64 | 22.23.2 | macOS deployment target 13.0 |
+| Linux GNU arm64 | 22.23.0 | glibc 2.34, OpenSSL 3 |
+| Linux GNU x64 | 22.23.0 | glibc 2.34, OpenSSL 3 |
+| Linux musl x64 | 24.18.1 | Alpine 3.23; no glibc references |
+
+Both GNU symbol-version requirements are checked from the original final ELF
+bytes and match the CI compatibility JSON. Both original hosted Mac binaries
+also pass actual Node 22.23.3 canaries on macOS 27.0.1, with Intel through
+Rosetta. Both local Mac binaries additionally encode minimum OS 13.0.
+
+All original archives retain their GitHub digest, ZIP checksum, addon checksum
+and source/adapter/wrapper/lock/recipe sidecars. The central full-five gate
+passes with the three original Linux outputs and the independently qualified
+local Mac outputs; original hosted Mac outputs are retained separately.
+No superseded artifact or sidecar is restamped. The public source, runtime and
+artifact origin record is
+`release-evidence/2026-10-14/native-node-final-admission-artifact-origins.json`.
+
+## Final funded on-chain boundaries
+
+The final `3647dd` wrapper/`07c989` recipe host was tested through WDK against
+isolated regtest fixtures. All thirteen cases preserve the original native
+artifact and sidecar hashes. Nine pass: twelve external-unlock controls, fourteen
+asset checks, eleven BFA burn steps, seven address checks, six cold-copy checks,
+eight BTC reorg checks, eight default interruption checks, twelve wide/delayed
+interruption checks, and nine disk-full checks.
+
+Four cases fail and remain release blockers: unlocked same-process signer
+reopen (P01), RGB reorg recovery (P03), pending witness balance double counting
+(P04), and event ordering after ten earlier passing checks (P06). The passing
+interruption/copy cases do not establish broader crash or RGB recovery safety.
+
+Independent validation uses the exact beta50 rgb-lib source. The final burn
+proof passes; missing FundsIn is rejected by consensus validation, while the
+wrong-recipient and wrong-amount controls are rejected by the metadata
+prechecks. The proof SHA-256 is
+`d213c151309dc65f507f8637136de3dcd564113fdbbee17c42ced11309474ffb`.
+All forty indexed on-chain/lifecycle attempts, including earlier failed fixtures and superseded
+artifacts, remain indexed in `release-evidence/2026-10-14/onchain-test-index.json`.
+These passes leave the four functional failures, active native TLS advisories
+and physical-device/mobile runtime qualification open. There is no production
+approval, merge or publication.

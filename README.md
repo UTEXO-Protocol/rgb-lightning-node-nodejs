@@ -3,7 +3,8 @@
 The **0.2.0-beta.4** candidate binds **RLN v0.17.0-beta.3**, commit
 `ecc69f20308231400561f6f060fea88acfa40cc4`. It is a breaking, release-based
 replacement for the former 0.11 behavior overlay. See
-[RELEASE-0.15-TRACKER.md](RELEASE-0.15-TRACKER.md) before adopting it.
+[NATIVE-UPGRADE-20261014.md](NATIVE-UPGRADE-20261014.md) for current qualification
+and [RELEASE-0.15-TRACKER.md](RELEASE-0.15-TRACKER.md) for historical restrictions.
 
 ## Installation
 
@@ -27,6 +28,9 @@ Unverified targets remain release gates in the tracker. There is no Windows or
 Linux arm64 musl artifact. Linux GNU builds need OpenSSL development headers and
 pkg-config; macOS needs Xcode command-line tools and CMake. Cross-compilation
 also requires the target Rust standard library and platform compiler/sysroot.
+The source builder applies the macOS 27 proc-macro and final-link compatibility
+settings itself. Optimized Darwin binaries use Apple linker stripping and must
+pass the Mach-O layout guard; no caller-specific strip override is needed.
 
 The locally qualified GNU artifacts require OpenSSL 3 runtime libraries and
 reference glibc symbols through 2.34; they were tested on Ubuntu 22.04. The musl
@@ -38,8 +42,11 @@ Without a verified packed addon, `npm install --ignore-scripts` is for inspectio
 only. Run `npm run build` after installing the
 prerequisites. `npm run build:debug` is for local diagnostics only.
 `RLN_NODE_TARGET` selects one of the target suffixes above for cross-builds.
-The normal loader verifies the compiled release, adapter, wrapper, lock and target
-identity before allowing node creation. Do not rename or reuse an old binary.
+The normal loader verifies the sidecar, source/adapter/wrapper/lock/build-recipe
+identity, actual addon hash and Darwin layout before dlopen. The compiled native
+identity is checked after loading and before node creation. A consumer's unrelated
+`--debug` argument does not select an artifact profile. Do not rename or reuse
+an old binary.
 
 Build assets uploaded by CI are review artifacts. This installer never downloads
 an unverified release binary. Anonymous clean-install qualification and approval
@@ -82,8 +89,8 @@ The endpoints above are placeholders. `BlockSync` instead takes the four
 `bitcoind_rpc_*` fields inside `config`. The top-level RGB indexer is independent.
 `eth_rpc_url` is optional on both external-signer unlock entrypoints. Set it to
 the Ethereum RPC for the asset's bridge chain for BFA validation; omitted/null
-preserve the non-BFA behavior. PR #192 is built from its exact merged source,
-because the published RLN release binaries do not contain it. The runtime
+preserve the non-BFA behavior. The pinned RLN 0.17 SDK source includes the merged
+Ethereum RPC and external-signer burn changes from PR #192. The runtime
 advertises `external-signer-eth-rpc-v1` and `external-signer-burn-v1`.
 
 `burn({ asset_id, amount, burn_recipient?, fee_rate, min_confirmations })`
@@ -111,7 +118,7 @@ inputs are supported only by the typed burn boundary; other request methods
 retain their existing number-only contract.
 
 Unknown `sendPayment` fields, including routing fee caps, fail before submission.
-RLN 0.15 does not enforce a native routing-fee cap. Do not treat an uncapped payment
+The pinned SDK's send-payment request exposes no routing-fee cap. Do not treat an uncapped payment
 as a capped one. Released payment types do not promise overlay failure codes or
 paid-fee fields.
 
