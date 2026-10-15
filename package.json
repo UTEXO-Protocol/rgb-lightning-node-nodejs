@@ -39,7 +39,7 @@
     "check:types": "tsc --noEmit --strict --skipLibCheck index.d.ts && tsc --noEmit --strict --target es2020 --module node16 scripts/burn-types.ts",
     "test:installer": "node --test scripts/install-overlay-addon.test.js",
     "test:unit": "node --test scripts/*.test.js",
-    "test": "npm run test:unit && node test.js"
+    "test": "npm run test:unit && node test.js && node test-worker-teardown.js"
   },
   "engines": {
     "node": ">=18"
