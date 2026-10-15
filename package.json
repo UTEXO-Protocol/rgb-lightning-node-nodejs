@@ -1,6 +1,6 @@
 {
   "name": "@utexo/rgb-lightning-node-nodejs",
-  "version": "0.1.0-beta.16",
+  "version": "0.2.0-beta.4",
   "description": "Node.js (napi-rs) bindings for rgb-lightning-node",
   "keywords": [
     "rgb",
@@ -12,23 +12,34 @@
   "main": "index.js",
   "types": "index.d.ts",
   "files": [
+    "index-*.node",
+    "index-*.provenance.json",
     "index.js",
     "index.d.ts",
+    "json-boundary.js",
     "scripts/",
     "patches/",
     "src/",
     "build.rs",
     "Cargo.toml",
     "Cargo.lock",
-    "README.md"
+    "README.md",
+    "UPGRADE-TRACKER.md",
+    "RELEASE-0.15-TRACKER.md",
+    "NATIVE-UPGRADE-20261012.md",
+    "NATIVE-UPGRADE-20261014.md",
+    "SIGNER-LIFECYCLE.md",
+    "NATIVE-UPGRADE-20261015.md"
   ],
   "scripts": {
+    "prepublishOnly": "node scripts/verify-release-artifacts.js",
     "postinstall": "node scripts/install-overlay-addon.js",
-    "build": "mkdir -p .napi-generated && napi build --platform --release --no-js --dts .napi-generated/index.d.ts && node scripts/stage-local-addon.js",
-    "build:debug": "mkdir -p .napi-generated && napi build --platform --no-js --dts .napi-generated/index.d.ts && node scripts/stage-local-addon.js",
-    "check:types": "tsc --noEmit --strict --skipLibCheck index.d.ts",
+    "build": "node scripts/install-overlay-addon.js",
+    "build:debug": "node scripts/install-overlay-addon.js --debug",
+    "check:types": "tsc --noEmit --strict --skipLibCheck index.d.ts && tsc --noEmit --strict --target es2020 --module node16 scripts/burn-types.ts",
     "test:installer": "node --test scripts/install-overlay-addon.test.js",
-    "test": "npm run test:installer && node test.js"
+    "test:unit": "node --test scripts/*.test.js",
+    "test": "npm run test:unit && node test.js && node test-worker-teardown.js"
   },
   "engines": {
     "node": ">=18"
@@ -45,10 +56,16 @@
   "author": "UTEXO",
   "utexoNativeOverlay": {
     "repository": "https://github.com/UTEXO-Protocol/rgb-lightning-node.git",
-    "ref": "v0.11.0-beta.3",
-    "commit": "f30a5393268de67c6bb5a1c525bc790c5b11afa2",
-    "patch": "patches/c-ffi-utexo-patches-v0.11.0-beta.3.patch",
-    "patchSha256": "d0b6d4b057edd675e3d4385f2243b266020feeb1bee7714e7625e2f7bc0c945c",
-    "rustToolchain": "1.88.0"
+    "ref": "ecc69f20308231400561f6f060fea88acfa40cc4",
+    "commit": "ecc69f20308231400561f6f060fea88acfa40cc4",
+    "lightningCommit": "79b9eb5166546c62692d3a672986f385c7fe047d",
+    "patch": "patches/release-adapter-v0.17.0-beta.3.patch",
+    "patchSha256": "7f89dc518f8fe69dc6baf62c4ee96e9d5a25d6b6ae70ab529c7b4bcc65979c90",
+    "cffiLockSha256": "5fcdc9ad9179d3230e48973cdfa514a863d13a837752027febf8ea04713bbeb5",
+    "rustToolchain": "1.94.0",
+    "rlnVersion": "0.17.0-beta.3"
+  },
+  "dependencies": {
+    "lossless-json": "4.3.1"
   }
 }

@@ -1,0 +1,3520 @@
+diff --git a/bindings/c-ffi/Cargo.lock b/bindings/c-ffi/Cargo.lock
+index be5eede..f880358 100644
+--- a/bindings/c-ffi/Cargo.lock
++++ b/bindings/c-ffi/Cargo.lock
+@@ -501,9 +501,9 @@ checksum = "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53"
+ 
+ [[package]]
+ name = "aws-lc-rs"
+-version = "1.17.3"
++version = "1.18.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "00bdb5da18dac48ca2cc7cd4a98e533e8635a58e2361d13a1a4ee3888e0d72f1"
++checksum = "ce2b2dcc879c3bae0d371e77c99f2238400ef24ec001394befa67b6e543add9e"
+ dependencies = [
+  "aws-lc-sys",
+  "zeroize",
+@@ -511,9 +511,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "aws-lc-sys"
+-version = "0.43.0"
++version = "0.44.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "43103168cc76fe62678a375e722fc9cb3a0146159ac5828bc4f0dfd755c2224c"
++checksum = "f09fae7be8bb3174e05c6afdb34199e6dc0c7c04ba9fa237b1967adfbde27483"
+ dependencies = [
+  "cc",
+  "cmake",
+@@ -998,8 +998,8 @@ version = "0.3.7"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "b65c2e1ab98050c93cc9ada070d5070e014329c65196d03f6f8f1f75c2666f37"
+ dependencies = [
+- "rustls 0.23.42",
+- "rustls-webpki 0.103.13",
++ "rustls 0.23.45",
++ "rustls-webpki 0.103.15",
+  "tokio",
+  "tokio-rustls",
+  "webpki-roots 1.0.9",
+@@ -1939,7 +1939,7 @@ dependencies = [
+  "byteorder",
+  "libc",
+  "log",
+- "rustls 0.23.42",
++ "rustls 0.23.45",
+  "serde",
+  "serde_json",
+  "webpki-roots 0.25.4",
+@@ -1956,7 +1956,7 @@ dependencies = [
+  "byteorder",
+  "libc",
+  "log",
+- "rustls 0.23.42",
++ "rustls 0.23.45",
+  "serde",
+  "serde_json",
+  "webpki-roots 0.25.4",
+@@ -2038,7 +2038,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
+ dependencies = [
+  "libc",
+- "windows-sys 0.61.2",
++ "windows-sys 0.59.0",
+ ]
+ 
+ [[package]]
+@@ -2420,9 +2420,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "h2"
+-version = "0.4.15"
++version = "0.4.16"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "6cb093c84e8bd9b188d4c4a8cb6579fc016968d14c99882163cd3ff402a4f155"
++checksum = "a9f37a958b41b3b19ee2707c06439c0e9e547e847223eb791ecb0cb821c65e27"
+ dependencies = [
+  "atomic-waker",
+  "bytes",
+@@ -2710,7 +2710,7 @@ dependencies = [
+  "http",
+  "hyper",
+  "hyper-util",
+- "rustls 0.23.42",
++ "rustls 0.23.45",
+  "tokio",
+  "tokio-rustls",
+  "tower-service",
+@@ -2954,7 +2954,7 @@ checksum = "3640c1c38b8e4e43584d8df18be5fc6b0aa314ce6ebf51b53313d4306cca8e46"
+ dependencies = [
+  "hermit-abi",
+  "libc",
+- "windows-sys 0.61.2",
++ "windows-sys 0.59.0",
+ ]
+ 
+ [[package]]
+@@ -3356,14 +3356,12 @@ dependencies = [
+ [[package]]
+ name = "lightning-transaction-sync"
+ version = "0.2.1"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "b7260095a79a44b09ebd97e77855ec8b7996ab939223369f66244974a374bd2c"
+ dependencies = [
+  "bitcoin",
+  "electrum-client 0.24.1",
+  "esplora-client",
+  "lightning 0.2.2",
+- "lightning-macros 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
++ "lightning-macros 0.2.1",
+ ]
+ 
+ [[package]]
+@@ -3641,7 +3639,7 @@ version = "0.50.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "7957b9740744892f114936ab4a57b3f487491bbeafaf8083688b16841a4240e5"
+ dependencies = [
+- "windows-sys 0.61.2",
++ "windows-sys 0.59.0",
+ ]
+ 
+ [[package]]
+@@ -4326,7 +4324,7 @@ dependencies = [
+  "quinn-proto",
+  "quinn-udp",
+  "rustc-hash",
+- "rustls 0.23.42",
++ "rustls 0.23.45",
+  "socket2",
+  "thiserror 2.0.19",
+  "tokio",
+@@ -4348,7 +4346,7 @@ dependencies = [
+  "rand_pcg",
+  "ring",
+  "rustc-hash",
+- "rustls 0.23.42",
++ "rustls 0.23.45",
+  "rustls-pki-types",
+  "slab",
+  "thiserror 2.0.19",
+@@ -4368,7 +4366,7 @@ dependencies = [
+  "once_cell",
+  "socket2",
+  "tracing",
+- "windows-sys 0.61.2",
++ "windows-sys 0.59.0",
+ ]
+ 
+ [[package]]
+@@ -4652,7 +4650,7 @@ dependencies = [
+  "percent-encoding",
+  "pin-project-lite",
+  "quinn",
+- "rustls 0.23.42",
++ "rustls 0.23.45",
+  "rustls-pki-types",
+  "rustls-platform-verifier",
+  "serde",
+@@ -4780,7 +4778,7 @@ dependencies = [
+  "rgb-schemas",
+  "rgb-strict-encoding",
+  "rgb-strict-types",
+- "rustls 0.23.42",
++ "rustls 0.23.45",
+  "scrypt 0.12.0",
+  "sea-orm 2.0.2",
+  "sea-query 1.0.2",
+@@ -4850,7 +4848,7 @@ dependencies = [
+  "rgb-lib",
+  "rgb-psbt-utils",
+  "rln-migration",
+- "rustls 0.23.42",
++ "rustls 0.23.45",
+  "scrypt 0.11.0",
+  "sea-orm 1.1.20",
+  "serde",
+@@ -5127,7 +5125,7 @@ dependencies = [
+  "errno",
+  "libc",
+  "linux-raw-sys 0.12.1",
+- "windows-sys 0.61.2",
++ "windows-sys 0.59.0",
+ ]
+ 
+ [[package]]
+@@ -5144,16 +5142,16 @@ dependencies = [
+ 
+ [[package]]
+ name = "rustls"
+-version = "0.23.42"
++version = "0.23.45"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "3c54fcab019b409d04215d3a17cb438fd7fbf192ee61461f20f4fe18704bc138"
++checksum = "0d41d731c7d2f962d1ccc364cec258de3c0e93b38c2fb3ba97ac74513048d634"
+ dependencies = [
+  "aws-lc-rs",
+  "log",
+  "once_cell",
+  "ring",
+  "rustls-pki-types",
+- "rustls-webpki 0.103.13",
++ "rustls-webpki 0.103.15",
+  "subtle",
+  "zeroize",
+ ]
+@@ -5191,14 +5189,14 @@ dependencies = [
+  "jni",
+  "log",
+  "once_cell",
+- "rustls 0.23.42",
++ "rustls 0.23.45",
+  "rustls-native-certs",
+  "rustls-platform-verifier-android",
+- "rustls-webpki 0.103.13",
++ "rustls-webpki 0.103.15",
+  "security-framework",
+  "security-framework-sys",
+  "webpki-root-certs",
+- "windows-sys 0.61.2",
++ "windows-sys 0.59.0",
+ ]
+ 
+ [[package]]
+@@ -5219,9 +5217,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "rustls-webpki"
+-version = "0.103.13"
++version = "0.103.15"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "61c429a8649f110dddef65e2a5ad240f747e85f7758a6bccc7e5777bd33f756e"
++checksum = "f3c3cf1d8b1e7d4927e2d154c3fcb02979afb9939629c62cd9048d4f07b60ac2"
+ dependencies = [
+  "aws-lc-rs",
+  "ring",
+@@ -6195,7 +6193,7 @@ dependencies = [
+  "memchr",
+  "once_cell",
+  "percent-encoding",
+- "rustls 0.23.42",
++ "rustls 0.23.45",
+  "serde",
+  "serde_json",
+  "sha2 0.10.9",
+@@ -6233,7 +6231,7 @@ dependencies = [
+  "memchr",
+  "percent-encoding",
+  "rust_decimal",
+- "rustls 0.23.42",
++ "rustls 0.23.45",
+  "serde",
+  "serde_json",
+  "sha2 0.10.9",
+@@ -6682,10 +6680,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
+ dependencies = [
+  "fastrand",
+- "getrandom 0.4.3",
++ "getrandom 0.3.4",
+  "once_cell",
+  "rustix 1.1.4",
+- "windows-sys 0.61.2",
++ "windows-sys 0.59.0",
+ ]
+ 
+ [[package]]
+@@ -6694,7 +6692,7 @@ version = "1.2.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "d8c27177b12a6399ffc08b98f76f7c9a1f4fe9fc967c784c5a071fa8d93cf7e1"
+ dependencies = [
+- "windows-sys 0.61.2",
++ "windows-sys 0.59.0",
+ ]
+ 
+ [[package]]
+@@ -6862,7 +6860,7 @@ version = "0.26.4"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "1729aa945f29d91ba541258c8df89027d5792d85a8841fb65e8bf0f4ede4ef61"
+ dependencies = [
+- "rustls 0.23.42",
++ "rustls 0.23.45",
+  "tokio",
+ ]
+ 
+diff --git a/bindings/c-ffi/Cargo.toml b/bindings/c-ffi/Cargo.toml
+index 546e27d..d2807dc 100644
+--- a/bindings/c-ffi/Cargo.toml
++++ b/bindings/c-ffi/Cargo.toml
+@@ -55,6 +55,7 @@ lightning-invoice = { path = "../../rust-lightning/lightning-invoice" }
+ lightning-net-tokio = { path = "../../rust-lightning/lightning-net-tokio" }
+ lightning-persister = { path = "../../rust-lightning/lightning-persister" }
+ lightning-rapid-gossip-sync = { path = "../../rust-lightning/lightning-rapid-gossip-sync" }
++lightning-transaction-sync = { path = "../../rust-lightning/lightning-transaction-sync" }
+ vls-core = { git = "https://github.com/UTEXO-Protocol/vls-core.git", branch = "feat/rgb-compatibility" }
+ vls-protocol-signer = { git = "https://github.com/UTEXO-Protocol/vls-protocol-signer.git", branch = "feat/rgb-compatibility" }
+ # BFA-enabled RGB crates required by the parent's rgb-lib revision; keep in lock-step with the
+@@ -63,3 +64,12 @@ rgb-consensus = { git = "https://github.com/UTEXO-Protocol/rgb-consensus-s-bfa",
+ rgb-ops = { git = "https://github.com/UTEXO-Protocol/rgb-ops-s-bfa", rev = "773766b5ca7a9e705ec68c2f9ed0917f505cd6e3" }
+ rgb-invoicing = { git = "https://github.com/UTEXO-Protocol/rgb-ops-s-bfa", rev = "773766b5ca7a9e705ec68c2f9ed0917f505cd6e3" }
+ rgb-schemas = { git = "https://github.com/UTEXO-Protocol/rgb-schemas-s-bfa", rev = "238dfe7a89db998107fd87d919bf2757a2746d7f" }
++
++# Rust 1.94's proc-macro stripping emits LINKEDIT string pools rejected by
++# macOS 27. These dependencies execute only during compilation, so this
++# override does not change the shipped target's optimization/strip policy.
++[profile.release.build-override]
++strip = "none"
++
++[profile.dev.build-override]
++strip = "none"
+diff --git a/bindings/c-ffi/build.rs b/bindings/c-ffi/build.rs
+index f775f83..86daa71 100644
+--- a/bindings/c-ffi/build.rs
++++ b/bindings/c-ffi/build.rs
+@@ -3,6 +3,23 @@ extern crate cbindgen;
+ use std::env;
+ 
+ fn main() {
++    println!(
++        "cargo:rustc-env=RLN_BUILD_TARGET={}",
++        env::var("TARGET").unwrap()
++    );
++    for key in [
++        "RLN_ADAPTER_SHA256",
++        "RLN_WRAPPER_SHA256",
++        "RLN_LOCK_SHA256",
++    ] {
++        println!("cargo:rerun-if-env-changed={key}");
++        let value = env::var(key).expect("package build provenance is required");
++        assert!(
++            value.len() == 64 && value.bytes().all(|b| b.is_ascii_hexdigit()),
++            "invalid package build provenance"
++        );
++        println!("cargo:rustc-env={key}={value}");
++    }
+     println!("cargo:rerun-if-changed=src");
+     println!("cargo:rerun-if-changed=cbindgen.toml");
+ 
+diff --git a/bindings/c-ffi/rln.h b/bindings/c-ffi/rln.h
+index c8bb08b..62b7e54 100644
+--- a/bindings/c-ffi/rln.h
++++ b/bindings/c-ffi/rln.h
+@@ -42,6 +42,11 @@ struct CResultString rln_asset_link_create(const struct COpaqueStruct *node,
+ 
+ struct CResultString rln_asset_metadata(const struct COpaqueStruct *node, const char *asset_id);
+ 
++/**
++ * Read-only identity compiled into this library, not supplied by JavaScript at runtime.
++ */
++struct CResultString rln_binding_build_info(void);
++
+ struct CResultString rln_btc_balance(const struct COpaqueStruct *node, bool skip_sync);
+ 
+ struct CResultString rln_burn(const struct COpaqueStruct *node, const char *request_json);
+@@ -167,6 +172,22 @@ struct CResult rln_native_external_signer_new(const char *seed_hex,
+                                               const char *network,
+                                               bool permissive_policy);
+ 
++/**
++ * Forward to the released persistent signer constructor.
++ */
++struct CResult rln_native_external_signer_new_with_storage(const char *seed_hex,
++                                                           const char *network,
++                                                           bool permissive_policy,
++                                                           const char *storage_dir_path);
++
++/**
++ * Permanently revoke every clone of this signer and release its persistent
++ * store. Node shutdown must finish first. This is idempotent and does not free
++ * the host handle; ordinary handle free/GC never revokes an attached signer.
++ * The caller must keep the host handle alive until this call returns.
++ */
++struct CResultString rln_native_external_signer_shutdown(const struct COpaqueStruct *signer);
++
+ struct CResultString rln_network_info(const struct COpaqueStruct *node);
+ 
+ struct CResultString rln_node_info(const struct COpaqueStruct *node);
+@@ -195,6 +216,14 @@ struct CResultString rln_sdk_initialize(const char *request_json);
+ struct CResultString rln_sdk_node_apay_new(const struct COpaqueStruct *node,
+                                            const char *host_node_id);
+ 
++/**
++ * Forward to the released address-attested APay registration API.
++ */
++struct CResultString rln_sdk_node_apay_new_with_address(const struct COpaqueStruct *node,
++                                                        const char *host_node_id,
++                                                        const char *username,
++                                                        const char *domain);
++
+ struct CResultString rln_sdk_node_attach_native_external_signer(const struct COpaqueStruct *node,
+                                                                 const struct COpaqueStruct *signer);
+ 
+diff --git a/bindings/c-ffi/rln.hpp b/bindings/c-ffi/rln.hpp
+index 498a7e1..59f585d 100644
+--- a/bindings/c-ffi/rln.hpp
++++ b/bindings/c-ffi/rln.hpp
+@@ -43,6 +43,9 @@ CResultString rln_asset_link_create(const COpaqueStruct *node, const char *reque
+ 
+ CResultString rln_asset_metadata(const COpaqueStruct *node, const char *asset_id);
+ 
++/// Read-only identity compiled into this library, not supplied by JavaScript at runtime.
++CResultString rln_binding_build_info();
++
+ CResultString rln_btc_balance(const COpaqueStruct *node, bool skip_sync);
+ 
+ CResultString rln_burn(const COpaqueStruct *node, const char *request_json);
+@@ -147,6 +150,18 @@ CResult rln_native_external_signer_new(const char *seed_hex,
+                                        const char *network,
+                                        bool permissive_policy);
+ 
++/// Forward to the released persistent signer constructor.
++CResult rln_native_external_signer_new_with_storage(const char *seed_hex,
++                                                    const char *network,
++                                                    bool permissive_policy,
++                                                    const char *storage_dir_path);
++
++/// Permanently revoke every clone of this signer and release its persistent
++/// store. Node shutdown must finish first. This is idempotent and does not free
++/// the host handle; ordinary handle free/GC never revokes an attached signer.
++/// The caller must keep the host handle alive until this call returns.
++CResultString rln_native_external_signer_shutdown(const COpaqueStruct *signer);
++
+ CResultString rln_network_info(const COpaqueStruct *node);
+ 
+ CResultString rln_node_info(const COpaqueStruct *node);
+@@ -170,6 +185,12 @@ CResultString rln_sdk_initialize(const char *request_json);
+ /// unused_hashes, refill_batch_size, first_hash_index). Upstream PR #51.
+ CResultString rln_sdk_node_apay_new(const COpaqueStruct *node, const char *host_node_id);
+ 
++/// Forward to the released address-attested APay registration API.
++CResultString rln_sdk_node_apay_new_with_address(const COpaqueStruct *node,
++                                                 const char *host_node_id,
++                                                 const char *username,
++                                                 const char *domain);
++
+ CResultString rln_sdk_node_attach_native_external_signer(const COpaqueStruct *node,
+                                                          const COpaqueStruct *signer);
+ 
+diff --git a/bindings/c-ffi/src/api.rs b/bindings/c-ffi/src/api.rs
+index 2b9e873..1d70429 100644
+--- a/bindings/c-ffi/src/api.rs
++++ b/bindings/c-ffi/src/api.rs
+@@ -91,7 +91,7 @@ pub(crate) fn sdk_node_unlock(
+ 
+ pub(crate) fn sdk_node_shutdown(node: &COpaqueStruct) -> Result<String, Error> {
+     let node = require_handle(node)?;
+-    node.shutdown();
++    node.shutdown()?;
+     ok_void()
+ }
+ 
+@@ -288,7 +288,7 @@ pub(crate) fn decode_rgb_invoice(
+ ) -> Result<String, Error> {
+     let node = require_handle(node)?;
+     let resp = node.decode_rgb_invoice(ptr_to_string(invoice))?;
+-    json(JsonDecodeRgbInvoiceResponse::from(resp))
++    json(JsonDecodeRgbInvoiceResponse::try_from(resp)?)
+ }
+ 
+ pub(crate) fn get_payment(
+@@ -749,7 +749,7 @@ pub(crate) fn sdk_global_initialize(request_json: *const c_char) -> Result<Strin
+ }
+ 
+ pub(crate) fn sdk_global_shutdown() -> Result<String, Error> {
+-    rln::sdk_shutdown();
++    rln::sdk_shutdown()?;
+     ok_void()
+ }
+ 
+@@ -783,6 +783,34 @@ pub(crate) fn native_external_signer_bootstrap(signer: &COpaqueStruct) -> Result
+     json(JsonSdkExternalSignerBootstrap::from(bootstrap))
+ }
+ 
++pub(crate) fn native_external_signer_new_with_storage(
++    seed_hex: *const c_char,
++    network: *const c_char,
++    permissive_policy: bool,
++    storage_dir_path: *const c_char,
++) -> Result<Arc<NativeExternalSigner>, Error> {
++    Ok(NativeExternalSigner::new_with_storage(
++        ptr_to_string(seed_hex),
++        ptr_to_string(network),
++        Some(permissive_policy),
++        ptr_to_string(storage_dir_path),
++    )?)
++}
++
++pub(crate) fn sdk_node_apay_new_with_address(
++    node: &COpaqueStruct,
++    host_node_id: *const c_char,
++    username: *const c_char,
++    domain: *const c_char,
++) -> Result<String, Error> {
++    let node = require_handle(node)?;
++    json(node.apay_new_with_address(
++        ptr_to_string(host_node_id),
++        ptr_to_string(username),
++        ptr_to_string(domain),
++    )?)
++}
++
+ pub(crate) fn sdk_node_init_with_native_external_signer(
+     node: &COpaqueStruct,
+     signer: &COpaqueStruct,
+diff --git a/bindings/c-ffi/src/json_types.rs b/bindings/c-ffi/src/json_types.rs
+index 5b606f1..b033603 100644
+--- a/bindings/c-ffi/src/json_types.rs
++++ b/bindings/c-ffi/src/json_types.rs
+@@ -812,6 +812,7 @@ pub(crate) struct JsonDecodeLnInvoiceResponse {
+     pub asset_amount: Option<u64>,
+     pub description: Option<String>,
+     pub description_hash: Option<String>,
++    pub min_final_cltv_expiry_delta: u64,
+     pub payment_hash: String,
+     pub payment_secret: String,
+     pub payee_pubkey: Option<String>,
+@@ -828,6 +829,7 @@ impl From<DecodeLnInvoiceResponse> for JsonDecodeLnInvoiceResponse {
+             asset_amount: r.asset_amount,
+             description: r.description,
+             description_hash: r.description_hash,
++            min_final_cltv_expiry_delta: r.min_final_cltv_expiry_delta,
+             payment_hash: fmt_payment_hash(&r.payment_hash),
+             payment_secret: r.payment_secret,
+             payee_pubkey: r.payee_pubkey.as_ref().map(fmt_pubkey),
+@@ -836,6 +838,45 @@ impl From<DecodeLnInvoiceResponse> for JsonDecodeLnInvoiceResponse {
+     }
+ }
+ 
++#[derive(Debug, Serialize)]
++#[serde(tag = "type", content = "value")]
++pub(crate) enum JsonDecodedRgbAssignment {
++    Fungible(u64),
++    NonFungible,
++    InflationRight(u64),
++    Any,
++}
++
++fn parse_decoded_rgb_assignment(value: &str) -> Result<JsonDecodedRgbAssignment, Error> {
++    match value {
++        "Any" => return Ok(JsonDecodedRgbAssignment::Any),
++        "NonFungible" => return Ok(JsonDecodedRgbAssignment::NonFungible),
++        _ => {}
++    }
++    for (prefix, constructor) in [
++        (
++            "Fungible(",
++            JsonDecodedRgbAssignment::Fungible as fn(u64) -> JsonDecodedRgbAssignment,
++        ),
++        (
++            "InflationRight(",
++            JsonDecodedRgbAssignment::InflationRight as fn(u64) -> JsonDecodedRgbAssignment,
++        ),
++    ] {
++        if let Some(amount) = value.strip_prefix(prefix).and_then(|s| s.strip_suffix(')')) {
++            if !amount.is_empty() && amount.bytes().all(|b| b.is_ascii_digit()) {
++                if let Ok(amount) = amount.parse::<u64>() {
++                    return Ok(constructor(amount));
++                }
++            }
++            return Err(Error::StringParse(
++                "invalid decoded RGB assignment amount".into(),
++            ));
++        }
++    }
++    Err(Error::StringParse("unknown decoded RGB assignment".into()))
++}
++
+ #[derive(Debug, Serialize)]
+ pub(crate) struct JsonDecodeRgbInvoiceResponse {
+     pub recipient_id: String,
+@@ -843,24 +884,65 @@ pub(crate) struct JsonDecodeRgbInvoiceResponse {
+     pub recipient_type: String,
+     pub asset_schema: Option<String>,
+     pub asset_id: Option<String>,
+-    pub assignment: String,
++    pub assignment: JsonDecodedRgbAssignment,
+     pub network: String,
+     pub expiration_timestamp: Option<i64>,
+     pub transport_endpoints: Vec<String>,
+ }
+ 
+-impl From<DecodeRgbInvoiceResponse> for JsonDecodeRgbInvoiceResponse {
+-    fn from(r: DecodeRgbInvoiceResponse) -> Self {
+-        JsonDecodeRgbInvoiceResponse {
++impl TryFrom<DecodeRgbInvoiceResponse> for JsonDecodeRgbInvoiceResponse {
++    type Error = Error;
++
++    fn try_from(r: DecodeRgbInvoiceResponse) -> Result<Self, Self::Error> {
++        Ok(JsonDecodeRgbInvoiceResponse {
+             recipient_id: r.recipient_id,
+             proxy_recipient_id: r.proxy_recipient_id,
+             recipient_type: r.recipient_type,
+             asset_schema: r.asset_schema,
+             asset_id: r.asset_id.as_ref().map(fmt_contract_id),
+-            assignment: r.assignment,
++            assignment: parse_decoded_rgb_assignment(&r.assignment)?,
+             network: r.network,
+             expiration_timestamp: r.expiration_timestamp,
+             transport_endpoints: r.transport_endpoints,
++        })
++    }
++}
++
++#[cfg(test)]
++mod release_adapter_tests {
++    use super::*;
++
++    #[test]
++    fn tagged_assignment_is_exact_and_strict() {
++        for (input, expected) in [
++            ("Any", serde_json::json!({ "type": "Any" })),
++            ("NonFungible", serde_json::json!({ "type": "NonFungible" })),
++            (
++                "Fungible(0)",
++                serde_json::json!({ "type": "Fungible", "value": 0 }),
++            ),
++            (
++                "InflationRight(18446744073709551615)",
++                serde_json::json!({
++                    "type": "InflationRight", "value": u64::MAX
++                }),
++            ),
++        ] {
++            assert_eq!(
++                serde_json::to_value(parse_decoded_rgb_assignment(input).unwrap()).unwrap(),
++                expected
++            );
++        }
++        for input in [
++            "Unknown",
++            "Fungible(-1)",
++            "Fungible(+1)",
++            "Fungible( 1)",
++            "Fungible()",
++            "Fungible(18446744073709551616)",
++            "Fungible(1)x",
++        ] {
++            assert!(parse_decoded_rgb_assignment(input).is_err(), "{input}");
+         }
+     }
+ }
+@@ -2208,6 +2290,7 @@ impl From<Utxo> for JsonUtxo {
+ pub(crate) struct JsonUnspent {
+     pub utxo: JsonUtxo,
+     pub rgb_allocations: Vec<JsonRgbAllocation>,
++    pub pending_blinded: u32,
+ }
+ 
+ impl From<Unspent> for JsonUnspent {
+@@ -2215,6 +2298,30 @@ impl From<Unspent> for JsonUnspent {
+         JsonUnspent {
+             utxo: u.utxo.into(),
+             rgb_allocations: u.rgb_allocations.into_iter().map(Into::into).collect(),
++            pending_blinded: u.pending_blinded,
++        }
++    }
++}
++
++#[cfg(test)]
++mod unspent_tests {
++    use super::*;
++
++    #[test]
++    fn preserves_pending_blinded_reservations() {
++        for pending_blinded in [0, 3, u32::MAX] {
++            let unspent = Unspent {
++                utxo: Utxo {
++                    outpoint: format!("{}:0", "ab".repeat(32)),
++                    btc_amount: 1000,
++                    colorable: true,
++                    exists: true,
++                },
++                rgb_allocations: vec![],
++                pending_blinded,
++            };
++            let json = serde_json::to_value(JsonUnspent::from(unspent)).unwrap();
++            assert_eq!(json["pending_blinded"], pending_blinded);
+         }
+     }
+ }
+diff --git a/bindings/c-ffi/src/lib.rs b/bindings/c-ffi/src/lib.rs
+index e1dded1..8d6a0eb 100644
+--- a/bindings/c-ffi/src/lib.rs
++++ b/bindings/c-ffi/src/lib.rs
+@@ -89,6 +89,26 @@ pub extern "C" fn rln_free_string(s: *mut c_char) {
+ // Lifecycle
+ // ---------------------------------------------------------------------------
+ 
++/// Read-only identity compiled into this library, not supplied by JavaScript at runtime.
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_binding_build_info() -> CResultString {
++    ffi_call!("rln_binding_build_info", Ok::<String, utils::Error>(serde_json::json!({
++        "abi_version": 1,
++        "rln_version": "0.17.0-beta.3",
++        "rln_commit": "ecc69f20308231400561f6f060fea88acfa40cc4",
++        "lightning_commit": "79b9eb5166546c62692d3a672986f385c7fe047d",
++        "adapter_sha256": env!("RLN_ADAPTER_SHA256"),
++        "wrapper_sha256": env!("RLN_WRAPPER_SHA256"),
++        "lock_sha256": env!("RLN_LOCK_SHA256"),
++        "target": env!("RLN_BUILD_TARGET"),
++        "capabilities": ["canonical-unlock-v1", "persistent-native-signer", "refresh-transfers-v1",
++            "apay-address", "decoded-invoice-cltv", "tagged-rgb-assignment", "pending-blinded-v1",
++            "rgb-contract-import-v1", "rgb-transfer-metadata-import-v1", "consignment-export-v1", "mainnet-lightning-rejection-v1",
++            "external-signer-eth-rpc-v1", "external-signer-burn-v1",
++            "native-signer-shutdown-v1", "owned-session-cleanup-v1"]
++    }).to_string()))
++}
++
+ #[unsafe(no_mangle)]
+ pub extern "C" fn rln_sdk_node_new(request_json: *const c_char) -> CResult {
+     ffi_call!("rln_sdk_node_new", api::sdk_node_new(request_json))
+@@ -733,6 +753,39 @@ pub extern "C" fn rln_sdk_shutdown() -> CResultString {
+ // External-signer surface
+ // ---------------------------------------------------------------------------
+ 
++/// Forward to the released address-attested APay registration API.
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_sdk_node_apay_new_with_address(
++    node: &COpaqueStruct,
++    host_node_id: *const c_char,
++    username: *const c_char,
++    domain: *const c_char,
++) -> CResultString {
++    ffi_call!(
++        "rln_sdk_node_apay_new_with_address",
++        api::sdk_node_apay_new_with_address(node, host_node_id, username, domain)
++    )
++}
++
++/// Forward to the released persistent signer constructor.
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_native_external_signer_new_with_storage(
++    seed_hex: *const c_char,
++    network: *const c_char,
++    permissive_policy: bool,
++    storage_dir_path: *const c_char,
++) -> CResult {
++    ffi_call!(
++        "rln_native_external_signer_new_with_storage",
++        api::native_external_signer_new_with_storage(
++            seed_hex,
++            network,
++            permissive_policy,
++            storage_dir_path
++        )
++    )
++}
++
+ /// Drop a `NativeExternalSigner` handle. Safe to call immediately after
+ /// attach / init / unlock succeeds: RLN holds its own `Arc` clone.
+ #[unsafe(no_mangle)]
+@@ -754,6 +807,86 @@ mod free_tests {
+         free_sdk_node(COpaqueStruct::null());
+         free_native_external_signer(COpaqueStruct::null());
+     }
++
++    #[test]
++    fn free_signer_handle_does_not_revoke_attached_clone() {
++        let signer =
++            NativeExternalSigner::new("11".repeat(32), "regtest".to_string(), Some(true)).unwrap();
++        let attached_clone = Arc::clone(&signer);
++        free_native_external_signer(COpaqueStruct::new(signer));
++        attached_clone.bootstrap().unwrap();
++        attached_clone.shutdown().unwrap();
++    }
++
++    #[test]
++    fn explicit_signer_shutdown_revokes_clones_and_is_idempotent() {
++        let signer =
++            NativeExternalSigner::new("11".repeat(32), "regtest".to_string(), Some(true)).unwrap();
++        let attached_clone = Arc::clone(&signer);
++        let handle = COpaqueStruct::new(signer);
++        for _ in 0..2 {
++            let result = rln_native_external_signer_shutdown(&handle);
++            assert!(matches!(result.result, CResultValue::Ok));
++            assert_eq!(unsafe { CStr::from_ptr(result.inner) }.to_bytes(), b"{}");
++            rln_free_string(result.inner);
++        }
++        assert!(matches!(
++            attached_clone.bootstrap(),
++            Err(RlnError::ExternalSignerUnavailable(_))
++        ));
++        free_native_external_signer(handle);
++    }
++
++    #[test]
++    fn signer_shutdown_rejects_null_handle_without_unwinding() {
++        let result = rln_native_external_signer_shutdown(&COpaqueStruct::null());
++        assert!(matches!(result.result, CResultValue::Err));
++        assert!(unsafe { CStr::from_ptr(result.inner) }
++            .to_string_lossy()
++            .contains("Type mismatch"));
++        rln_free_string(result.inner);
++    }
++
++    #[test]
++    fn shared_signer_handle_supports_concurrent_bootstrap_and_shutdown() {
++        let signer =
++            NativeExternalSigner::new("11".repeat(32), "regtest".to_string(), Some(true)).unwrap();
++        let handle = COpaqueStruct::new(signer);
++        let ptr = handle.ptr as usize;
++        let ty = handle.ty;
++        let barrier = Arc::new(std::sync::Barrier::new(9));
++        let calls: Vec<_> = (0..8)
++            .map(|_| {
++                let barrier = Arc::clone(&barrier);
++                std::thread::spawn(move || {
++                    // C callers may share a live handle but must never free it
++                    // concurrently with an operation. The parent owns it here.
++                    let borrowed = COpaqueStruct {
++                        ptr: ptr as *const c_void,
++                        ty,
++                    };
++                    barrier.wait();
++                    for _ in 0..100 {
++                        let result = rln_native_external_signer_bootstrap(&borrowed);
++                        if matches!(result.result, CResultValue::Err) {
++                            assert!(unsafe { CStr::from_ptr(result.inner) }
++                                .to_string_lossy()
++                                .contains("ExternalSignerUnavailable"));
++                        }
++                        rln_free_string(result.inner);
++                    }
++                })
++            })
++            .collect();
++        barrier.wait();
++        let result = rln_native_external_signer_shutdown(&handle);
++        assert!(matches!(result.result, CResultValue::Ok));
++        rln_free_string(result.inner);
++        for call in calls {
++            call.join().unwrap();
++        }
++        free_native_external_signer(handle);
++    }
+ }
+ 
+ #[unsafe(no_mangle)]
+@@ -776,6 +909,21 @@ pub extern "C" fn rln_native_external_signer_bootstrap(signer: &COpaqueStruct) -
+     )
+ }
+ 
++/// Permanently revoke every clone of this signer and release its persistent
++/// store. Node shutdown must finish first. This is idempotent and does not free
++/// the host handle; ordinary handle free/GC never revokes an attached signer.
++/// The caller must keep the host handle alive until this call returns.
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_native_external_signer_shutdown(signer: &COpaqueStruct) -> CResultString {
++    ffi_call!(
++        "rln_native_external_signer_shutdown",
++        (|| {
++            utils::require_signer(signer)?.shutdown()?;
++            Ok::<String, utils::Error>("{}".to_string())
++        })()
++    )
++}
++
+ #[unsafe(no_mangle)]
+ pub extern "C" fn rln_sdk_node_init_with_native_external_signer(
+     node: &COpaqueStruct,
+diff --git a/bindings/c-ffi/src/utils.rs b/bindings/c-ffi/src/utils.rs
+index 98c3372..c4db3c0 100644
+--- a/bindings/c-ffi/src/utils.rs
++++ b/bindings/c-ffi/src/utils.rs
+@@ -69,6 +69,18 @@ impl COpaqueStruct {
+ }
+ 
+ pub(crate) trait CReturnType: Sized + 'static {
++    fn from_opaque_shared(other: &COpaqueStruct) -> Result<&Self, Error> {
++        let mut hasher = DefaultHasher::new();
++        TypeId::of::<Self>().hash(&mut hasher);
++        if other.ty != hasher.finish() || other.ptr.is_null() {
++            return Err(Error::TypeMismatch);
++        }
++        // The caller retains this typed allocation until the call returns.
++        // Signer operations use interior synchronization, so concurrent calls
++        // must borrow its Arc immutably rather than manufacture aliased &mut.
++        Ok(unsafe { &*(other.ptr as *const Self) })
++    }
++
+     #[allow(clippy::mut_from_ref)]
+     fn from_opaque(other: &COpaqueStruct) -> Result<&mut Self, Error> {
+         let mut hasher = DefaultHasher::new();
+@@ -254,10 +266,8 @@ fn panic_payload_to_string(payload: &Box<dyn std::any::Any + Send + 'static>) ->
+     "panic with non-string payload".to_string()
+ }
+ 
+-pub(crate) fn require_signer(
+-    signer: &COpaqueStruct,
+-) -> Result<&mut Arc<NativeExternalSigner>, Error> {
+-    <Arc<NativeExternalSigner>>::from_opaque(signer)
++pub(crate) fn require_signer(signer: &COpaqueStruct) -> Result<&Arc<NativeExternalSigner>, Error> {
++    <Arc<NativeExternalSigner>>::from_opaque_shared(signer)
+ }
+ 
+ #[cfg(test)]
+diff --git a/bindings/rgb_lightning_node.udl b/bindings/rgb_lightning_node.udl
+index df823f2..c34d5ea 100644
+--- a/bindings/rgb_lightning_node.udl
++++ b/bindings/rgb_lightning_node.udl
+@@ -5,6 +5,7 @@ namespace rgb_lightning_node {
+ interface SdkNode {
+     [Throws=RlnError, Name=create]
+     constructor(SdkInitRequest request);
++    [Throws=RlnError]
+     void shutdown();
+     [Throws=RlnError]
+     NodeInfo node_info();
+diff --git a/src/ldk.rs b/src/ldk.rs
+index 2ff6e98..314cab2 100644
+--- a/src/ldk.rs
++++ b/src/ldk.rs
+@@ -109,8 +109,8 @@ use std::collections::HashSet;
+ use std::convert::TryInto;
+ use std::fs;
+ use std::hash::{DefaultHasher, Hash, Hasher};
++use std::net::SocketAddr;
+ use std::net::ToSocketAddrs;
+-use std::net::{SocketAddr, TcpListener};
+ use std::path::Path;
+ use std::str::FromStr;
+ #[cfg(test)]
+@@ -120,7 +120,6 @@ use std::sync::{Arc, Mutex, MutexGuard, RwLock, Weak};
+ #[cfg(any(test, feature = "vss"))]
+ use std::time::Instant;
+ use std::time::{Duration, SystemTime};
+-use time::OffsetDateTime;
+ use tokio::runtime::Handle;
+ use tokio::sync::watch::Sender;
+ use tokio::task::JoinHandle;
+@@ -187,11 +186,11 @@ use crate::signer::{
+ };
+ use crate::swap::{SwapData, SwapInfo};
+ use crate::utils::{
+-    check_port_is_available, connect_peer_if_necessary, description_from_invoice,
+-    description_hash_from_invoice, do_connect_peer, get_current_timestamp,
+-    get_max_local_rgb_amount, hex_str, validate_and_parse_payment_hash,
+-    validate_and_parse_payment_preimage, AppState, CommonState, LightningState, StaticState,
+-    UnlockedAppState, FATAL_ERROR, PROXY_ENDPOINT_LOCAL, PROXY_ENDPOINT_PUBLIC,
++    connect_peer_if_necessary, description_from_invoice, description_hash_from_invoice,
++    do_connect_peer, get_current_timestamp, get_max_local_rgb_amount, hex_str,
++    validate_and_parse_payment_hash, validate_and_parse_payment_preimage, AppState, CommonState,
++    LightningState, StaticState, UnlockedAppState, FATAL_ERROR, PROXY_ENDPOINT_LOCAL,
++    PROXY_ENDPOINT_PUBLIC,
+ };
+ 
+ const RGB_TRANSFER_CHAN_EXPIRATION_SECS: u64 = 86400;
+@@ -341,14 +340,290 @@ pub(crate) fn node_override_matches(
+         .is_some_and(|id| *id == our_node_id)
+ }
+ 
++/// Owns every session worker, including work created by events and peer connections.
++/// Closing admission and taking the handles use the same mutex as spawning, so shutdown
++/// cannot miss a worker registered concurrently with it. Workers must finish in-flight
++/// persistence/chain operations before observing cancellation at their next wait.
++pub(crate) struct SessionTasks {
++    shutdown: CancellationToken,
++    registry: Mutex<SessionTaskRegistry>,
++}
++
++struct SessionTaskRegistry {
++    closed: bool,
++    handles: Vec<JoinHandle<()>>,
++    failures: Vec<String>,
++}
++
++impl SessionTasks {
++    fn new() -> Arc<Self> {
++        Arc::new(Self {
++            shutdown: CancellationToken::new(),
++            registry: Mutex::new(SessionTaskRegistry {
++                closed: false,
++                handles: Vec::new(),
++                failures: Vec::new(),
++            }),
++        })
++    }
++
++    pub(crate) fn cancellation(&self) -> CancellationToken {
++        self.shutdown.clone()
++    }
++
++    pub(crate) fn spawn<F>(&self, future: F) -> Result<(), F>
++    where
++        F: std::future::Future<Output = ()> + Send + 'static,
++    {
++        let mut registry = self.registry.lock().unwrap();
++        if registry.closed {
++            return Err(future);
++        }
++        // Reap completed handles without discarding a task panic. Keeping every completed
++        // connection handle would grow memory for a long-lived routing node.
++        let mut pending = Vec::new();
++        for mut handle in std::mem::take(&mut registry.handles) {
++            if handle.is_finished() {
++                match futures::FutureExt::now_or_never(&mut handle) {
++                    Some(Ok(())) => {}
++                    Some(Err(error)) => registry.failures.push(error.to_string()),
++                    None => pending.push(handle),
++                }
++            } else {
++                pending.push(handle);
++            }
++        }
++        registry.handles = pending;
++        registry.handles.push(tokio::spawn(future));
++        Ok(())
++    }
++
++    fn record_failure(&self, failure: String) {
++        self.registry.lock().unwrap().failures.push(failure);
++    }
++
++    fn close(&self) {
++        self.registry.lock().unwrap().closed = true;
++        self.shutdown.cancel();
++    }
++
++    async fn join(&self) -> Result<(), String> {
++        self.close();
++        let (handles, mut failures) = {
++            let mut registry = self.registry.lock().unwrap();
++            (
++                std::mem::take(&mut registry.handles),
++                std::mem::take(&mut registry.failures),
++            )
++        };
++        for handle in handles {
++            if let Err(error) = handle.await {
++                tracing::error!(%error, "session worker failed while shutting down");
++                failures.push(error.to_string());
++            }
++        }
++        // A live worker can report an I/O failure while we await its handle. Admission
++        // is closed and every owned task is now done, so this final reap is complete.
++        failures.extend(std::mem::take(&mut self.registry.lock().unwrap().failures));
++        if failures.is_empty() {
++            Ok(())
++        } else {
++            Err(failures.join("; "))
++        }
++    }
++}
++
++impl Drop for SessionTasks {
++    fn drop(&mut self) {
++        self.shutdown.cancel();
++        // Rollback for a failed/aborted startup or an owner unwinding unexpectedly.
++        // Normal shutdown awaits these workers, rather than detaching or aborting them.
++        let registry = self
++            .registry
++            .get_mut()
++            .unwrap_or_else(|error| error.into_inner());
++        for handle in registry.handles.drain(..) {
++            handle.abort();
++        }
++    }
++}
++
++async fn accept_peer(
++    listener: &tokio::net::TcpListener,
++    shutdown: &CancellationToken,
++) -> std::io::Result<Option<tokio::net::TcpStream>> {
++    tokio::select! {
++        biased;
++        _ = shutdown.cancelled() => Ok(None),
++        accepted = listener.accept() => accepted.map(|(stream, _)| Some(stream)),
++    }
++}
++
+ pub(crate) struct LdkBackgroundServices {
+     stop_processing: Arc<AtomicBool>,
+-    gossip_shutdown: Arc<tokio::sync::Notify>,
++    tasks: Arc<SessionTasks>,
++    completions: Arc<SessionTasks>,
+     peer_manager: Arc<PeerManager>,
+     bp_exit: Sender<()>,
+     background_processor: Option<JoinHandle<Result<(), io::Error>>>,
+ }
+ 
++impl Drop for LdkBackgroundServices {
++    fn drop(&mut self) {
++        self.stop_processing.store(true, Ordering::Release);
++        self.tasks.close();
++        self.completions.close();
++        self.peer_manager.disconnect_all_peers();
++        let _ = self.bp_exit.send(());
++        // Normal stop took and awaited this handle. Prevent accidental owner destruction
++        // from detaching a background processor which would retain the entire session.
++        if let Some(processor) = self.background_processor.take() {
++            processor.abort();
++        }
++    }
++}
++
++#[cfg(test)]
++mod session_task_tests {
++    use super::*;
++
++    #[tokio::test]
++    async fn port_zero_listener_and_its_owner_are_released_before_join_returns() {
++        let tasks = SessionTasks::new();
++        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
++        let actual_address = listener.local_addr().unwrap();
++        let marker = Arc::new(());
++        let retained = Arc::downgrade(&marker);
++        let shutdown = tasks.cancellation();
++        assert!(tasks
++            .spawn(async move {
++                let _marker = marker;
++                assert!(accept_peer(&listener, &shutdown).await.unwrap().is_none());
++            })
++            .is_ok());
++        tokio::task::yield_now().await;
++        tokio::time::timeout(Duration::from_secs(1), tasks.join())
++            .await
++            .unwrap()
++            .unwrap();
++        assert!(retained.upgrade().is_none());
++        assert!(std::net::TcpListener::bind(actual_address).is_ok());
++    }
++
++    #[tokio::test(start_paused = true)]
++    async fn cancellation_does_not_wait_for_a_worker_timer() {
++        let tasks = SessionTasks::new();
++        let marker = Arc::new(());
++        let retained = Arc::downgrade(&marker);
++        let shutdown = tasks.cancellation();
++        assert!(tasks.spawn(async move {
++            let _marker = marker;
++            tokio::select! {
++                biased;
++                _ = shutdown.cancelled() => {},
++                _ = tokio::time::sleep(Duration::from_secs(86400)) => panic!("waited for timer"),
++            }
++        }).is_ok());
++        tokio::task::yield_now().await;
++        tasks.join().await.unwrap();
++        assert!(retained.upgrade().is_none());
++    }
++
++    #[tokio::test]
++    async fn join_drains_in_flight_work_instead_of_aborting_it() {
++        let tasks = SessionTasks::new();
++        let (finish, pending) = tokio::sync::oneshot::channel();
++        let completed = Arc::new(AtomicBool::new(false));
++        let observed = completed.clone();
++        assert!(tasks
++            .spawn(async move {
++                pending.await.unwrap();
++                observed.store(true, Ordering::Release);
++            })
++            .is_ok());
++        let joining = {
++            let tasks = tasks.clone();
++            tokio::spawn(async move { tasks.join().await })
++        };
++        tokio::task::yield_now().await;
++        assert!(!joining.is_finished());
++        finish.send(()).unwrap();
++        joining.await.unwrap().unwrap();
++        assert!(completed.load(Ordering::Acquire));
++    }
++
++    #[tokio::test]
++    async fn closing_admission_rejects_late_workers() {
++        let tasks = SessionTasks::new();
++        tasks.close();
++        assert!(tasks.spawn(async { panic!("late worker ran") }).is_err());
++        tasks.join().await.unwrap();
++        tasks.join().await.unwrap();
++    }
++
++    #[tokio::test]
++    async fn failed_startup_owner_drop_aborts_the_listener() {
++        let tasks = SessionTasks::new();
++        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
++        let actual_address = listener.local_addr().unwrap();
++        let marker = Arc::new(());
++        let retained = Arc::downgrade(&marker);
++        assert!(tasks
++            .spawn(async move {
++                let _marker = marker;
++                let _ = listener.accept().await;
++            })
++            .is_ok());
++        tokio::task::yield_now().await;
++        drop(tasks);
++        tokio::time::timeout(Duration::from_secs(1), async {
++            while retained.upgrade().is_some() {
++                tokio::task::yield_now().await;
++            }
++        })
++        .await
++        .unwrap();
++        assert!(std::net::TcpListener::bind(actual_address).is_ok());
++    }
++
++    #[tokio::test]
++    async fn join_observes_failures_reported_while_draining() {
++        let tasks = SessionTasks::new();
++        let reporter = Arc::downgrade(&tasks);
++        let (finish, pending) = tokio::sync::oneshot::channel();
++        assert!(tasks
++            .spawn(async move {
++                pending.await.unwrap();
++                reporter
++                    .upgrade()
++                    .unwrap()
++                    .record_failure("late I/O failure".into());
++            })
++            .is_ok());
++        let joining = {
++            let tasks = tasks.clone();
++            tokio::spawn(async move { tasks.join().await })
++        };
++        tokio::task::yield_now().await;
++        assert!(!joining.is_finished());
++        finish.send(()).unwrap();
++        assert_eq!(joining.await.unwrap().unwrap_err(), "late I/O failure");
++    }
++
++    #[tokio::test]
++    async fn reaping_a_finished_worker_preserves_its_panic() {
++        let tasks = SessionTasks::new();
++        assert!(tasks
++            .spawn(async { panic!("retained lifecycle panic") })
++            .is_ok());
++        tokio::task::yield_now().await;
++        tokio::task::yield_now().await;
++        assert!(tasks.spawn(async {}).is_ok());
++        let failure = tasks.join().await.unwrap_err();
++        assert!(failure.contains("retained lifecycle panic"));
++    }
++}
++
+ #[derive(Clone, Debug)]
+ pub(crate) struct PaymentInfo {
+     pub(crate) preimage: Option<PaymentPreimage>,
+@@ -1103,12 +1378,14 @@ impl LightningState {
+ /// `FutureSpawner` backed by `tokio::spawn`, used to drive async monitor
+ /// persistence completions for `MonitorUpdatingPersisterAsync`.
+ #[cfg(feature = "vss")]
+-pub(crate) struct TokioFutureSpawner;
++pub(crate) struct TokioFutureSpawner(Weak<SessionTasks>);
+ 
+ #[cfg(feature = "vss")]
+ impl FutureSpawner for TokioFutureSpawner {
+     fn spawn<T: std::future::Future<Output = ()> + Send + 'static>(&self, future: T) {
+-        tokio::spawn(future);
++        if let Some(tasks) = self.0.upgrade() {
++            let _ = tasks.spawn(future);
++        }
+     }
+ }
+ 
+@@ -3796,18 +4073,26 @@ async fn handle_ldk_events(
+                 .await
+         }
+         Event::ConnectionNeeded { node_id, addresses } => {
+-            tokio::spawn(async move {
+-                for address in addresses {
+-                    if let Ok(sockaddrs) = address.to_socket_addrs() {
+-                        for addr in sockaddrs {
+-                            let pm = Arc::clone(&unlocked_state.peer_manager);
+-                            if connect_peer_if_necessary(node_id, addr, pm).await.is_ok() {
+-                                return;
++            if let Some(tasks) = unlocked_state.session_tasks.upgrade() {
++                let shutdown = tasks.cancellation();
++                let _ = tasks.spawn(async move {
++                    for address in addresses {
++                        if shutdown.is_cancelled() {
++                            return;
++                        }
++                        if let Ok(sockaddrs) = address.to_socket_addrs() {
++                            for addr in sockaddrs {
++                                if connect_peer_if_necessary(node_id, addr, &unlocked_state)
++                                    .await
++                                    .is_ok()
++                                {
++                                    return;
++                                }
+                             }
+                         }
+                     }
+-                }
+-            });
++                });
++            }
+         }
+         Event::SplicePending { .. } => {
+             // We don't use the splice feature, so this event should never be seen.
+@@ -5518,6 +5803,44 @@ async fn prepare_node(
+ 
+ async fn start_lightning(
+     #[allow(unused_mut)] mut setup: NodeStartup,
++) -> Result<(Option<LdkBackgroundServices>, Arc<UnlockedAppState>), APIError> {
++    let tasks = SessionTasks::new();
++    let completions = SessionTasks::new();
++    #[cfg(feature = "vss")]
++    let kv_store = Arc::clone(&setup.kv_store);
++    #[cfg(feature = "vss")]
++    let monitor_store = setup.monitor_kv_store.clone();
++    // Once async work can start, an unwinding destructor cannot prove remote mutations
++    // have stopped. Release the fence only after explicit rollback has drained them.
++    #[cfg(feature = "vss")]
++    if let Some(mut fence) = setup.fence_guard.take() {
++        fence.disarm();
++    }
++    let result = start_lightning_inner(setup, Arc::clone(&tasks), Arc::clone(&completions)).await;
++    if result.is_err() {
++        let worker_result = tasks.join().await;
++        #[cfg(feature = "vss")]
++        let teardown = stop_vss_stores(
++            &kv_store,
++            monitor_store.as_ref(),
++            Instant::now() + VSS_TEARDOWN_TIMEOUT,
++        )
++        .await;
++        let completion_result = completions.join().await;
++        if worker_result.is_ok() && completion_result.is_ok() {
++            #[cfg(feature = "vss")]
++            release_vss_fence(kv_store, teardown).await;
++        } else {
++            return Err(APIError::Unexpected(format!("startup rollback failed: workers={worker_result:?}, completions={completion_result:?}")));
++        }
++    }
++    result
++}
++
++async fn start_lightning_inner(
++    #[allow(unused_mut)] mut setup: NodeStartup,
++    session_tasks: Arc<SessionTasks>,
++    completion_tasks: Arc<SessionTasks>,
+ ) -> Result<(Option<LdkBackgroundServices>, Arc<UnlockedAppState>), APIError> {
+     // Defense in depth: no chain backend, manager or worker precedes this check.
+     setup.app_state.check_lightning_supported()?;
+@@ -5525,6 +5848,29 @@ async fn start_lightning(
+     let static_state = &app_state.static_state;
+     let unlock_request = setup.unlock_request.clone();
+     let gossip_source_config = unlock_request.gossip_source.clone().unwrap_or_default();
++    // Validate all operator-supplied announcement data before creating any worker.
++    let ldk_announced_listen_addr = unlock_request
++        .announce_addresses
++        .iter()
++        .map(|addr| {
++            SocketAddress::from_str(addr).map_err(|_| {
++                APIError::InvalidAnnounceAddresses(format!("failed to parse address '{addr}'"))
++            })
++        })
++        .collect::<Result<Vec<_>, _>>()?;
++    let ldk_announced_node_name = match &unlock_request.announce_alias {
++        Some(alias) if alias.len() > 32 => {
++            return Err(APIError::InvalidAnnounceAlias(s!(
++                "cannot be longer than 32 bytes"
++            )))
++        }
++        Some(alias) => {
++            let mut name = [0; 32];
++            name[..alias.len()].copy_from_slice(alias.as_bytes());
++            name
++        }
++        None => [0; 32],
++    };
+     let kv_store = Arc::clone(&setup.kv_store);
+     let external_signer_mode = setup.external_signer_mode;
+     let internal_mnemonic = setup.internal_mnemonic.clone();
+@@ -5541,6 +5887,19 @@ async fn start_lightning(
+     let bitcoin_network = static_state.network;
+     let network: Network = bitcoin_network.into();
+     let ldk_peer_listening_port = static_state.ldk_peer_listening_port;
++    // Bind synchronously during startup. A collision is an unlock error, not a detached
++    // task panic. The owned listener is dropped when cancellation wins accept(), even
++    // when port zero selected an OS-assigned port; no synthetic TCP wakeup is needed.
++    let listener = crate::utils::bind_first_available(&[
++        format!("[::]:{ldk_peer_listening_port}"),
++        format!("0.0.0.0:{ldk_peer_listening_port}"),
++    ])
++    .await
++    .map_err(|error| APIError::Unexpected(format!("failed to bind peer listener: {error}")))?;
++    let listener_address = listener.local_addr().map_err(|error| {
++        APIError::Unexpected(format!("failed to read peer listener address: {error}"))
++    })?;
++    tracing::debug!(%listener_address, "bound session peer listener");
+     #[cfg(feature = "vss")]
+     let monitor_kv_store = setup.monitor_kv_store.clone().ok_or_else(|| {
+         APIError::Unexpected("Lightning monitor store is not available".to_string())
+@@ -5582,6 +5941,9 @@ async fn start_lightning(
+                 handle.clone(),
+                 Arc::clone(&logger),
+                 static_state.config.chain.fee_refresh_interval_secs,
++                static_state.config.chain.indexer_timeout_secs,
++                &session_tasks,
++                &completion_tasks,
+             )
+             .await
+             {
+@@ -5590,7 +5952,11 @@ async fn start_lightning(
+             };
+ 
+             // Check that the bitcoind we've connected to is running the network we expect
+-            let bitcoind_chain = bitcoind_client.get_blockchain_info().await.chain;
++            let bitcoind_chain = bitcoind_client
++                .get_blockchain_info()
++                .await
++                .map_err(|error| APIError::FailedBitcoindConnection(error.to_string()))?
++                .chain;
+             if bitcoind_chain
+                 != match bitcoin_network {
+                     BitcoinNetwork::Mainnet => "main",
+@@ -5606,7 +5972,11 @@ async fn start_lightning(
+             // Poll for the best chain tip, used by the channel manager & spv client
+             let polled_chain_tip = init::validate_best_block_header(bitcoind_client.as_ref())
+                 .await
+-                .expect("Failed to fetch best block header and best block");
++                .map_err(|error| {
++                    APIError::FailedBitcoindConnection(format!(
++                        "failed to fetch best block header: {error:?}"
++                    ))
++                })?;
+             let initial_best_block = polled_chain_tip.to_best_block();
+ 
+             ChainSetup {
+@@ -5639,16 +6009,14 @@ async fn start_lightning(
+                     Arc::clone(&logger),
+                     static_state.config.chain.indexer_timeout_secs,
+                     static_state.config.chain.fee_refresh_interval_secs,
++                    &session_tasks,
++                    &completion_tasks,
+                 )
+                 .map_err(|e| APIError::InvalidIndexer(e.to_string()))?,
+             );
+             let tx_sync = Arc::new(
+-                IndexerSyncClient::new(
+-                    ln_indexer_url.to_string(),
+-                    ln_indexer_protocol,
+-                    Arc::clone(&logger),
+-                )
+-                .map_err(|e| APIError::InvalidIndexer(e.to_string()))?,
++                IndexerSyncClient::from_indexer(&indexer_client, Arc::clone(&logger))
++                    .map_err(|e| APIError::InvalidIndexer(e.to_string()))?,
+             );
+             let initial_best_block = indexer_client
+                 .get_best_block()
+@@ -5684,7 +6052,7 @@ async fn start_lightning(
+     let (chain_monitor, mut channelmonitors): (Arc<ChainMonitor>, _) = {
+         let persister = MonitorUpdatingPersisterAsync::new(
+             Arc::clone(&monitor_kv_store),
+-            TokioFutureSpawner,
++            TokioFutureSpawner(Arc::downgrade(&completion_tasks)),
+             Arc::clone(&logger),
+             1000,
+             Arc::clone(&keys_manager),
+@@ -6090,7 +6458,7 @@ async fn start_lightning(
+     });
+ 
+     // The UTXO verifier can only attach to a P2P sync, and only after PeerManager
+-    // is built (the verifier holds an Arc<PeerManager>). RGS mode skips it.
++    // is built. Verifiers use weak feedback references so the gossip graph is acyclic. RGS mode skips it.
+     let (p2p_gossip_sync_for_verifier, route_handler): (
+         Option<Arc<P2PGossipSync>>,
+         Arc<RoutingMessageHandler>,
+@@ -6205,61 +6573,110 @@ async fn start_lightning(
+     // provide a verifier, so announcements are checked whatever the sync mode is.
+     if let Some(p2p) = &p2p_gossip_sync_for_verifier {
+         let peer_manager_wake = Arc::new({
+-            let peer_manager = Arc::clone(&peer_manager);
+-            move || peer_manager.process_events()
++            let peer_manager = Arc::downgrade(&peer_manager);
++            move || {
++                if let Some(peer_manager) = peer_manager.upgrade() {
++                    peer_manager.process_events();
++                }
++            }
+         });
+         let utxo_lookup: Arc<dyn UtxoLookup + Send + Sync> = match &backend {
+             #[cfg(feature = "block-sync")]
+             ChainBackend::BlockSync { client, .. } => Arc::new(BlockSyncGossipVerifier::new(
+                 Arc::clone(&client.bitcoind_rpc_client),
+-                Arc::clone(p2p),
++                Arc::downgrade(p2p),
+                 peer_manager_wake,
+-                handle.clone(),
++                Arc::downgrade(&session_tasks),
+             )),
+             #[cfg(feature = "transaction-sync")]
+             ChainBackend::TransactionSync { client, .. } => Arc::new(IndexerGossipVerifier::new(
+                 Arc::clone(client),
+-                Arc::clone(p2p),
++                Arc::downgrade(p2p),
+                 peer_manager_wake,
++                Arc::downgrade(&session_tasks),
+             )),
+         };
+         p2p.add_utxo_lookup(Some(utxo_lookup));
+     }
+ 
++    let output_sweeper: Arc<OutputSweeper> = Arc::new(output_sweeper);
++    #[cfg(feature = "transaction-sync")]
++    if let ChainBackend::TransactionSync { tx_sync, .. } = &backend {
++        let confirmables: Vec<Arc<dyn Confirm + Send + Sync>> = vec![
++            channel_manager.clone(),
++            chain_monitor.clone(),
++            output_sweeper.clone(),
++        ];
++        // Finish the fallible initial sync before publishing a listener or manager worker.
++        sync_chain_data(tx_sync.clone(), confirmables)
++            .await
++            .map_err(|error| APIError::InvalidIndexer(error.to_string()))?;
++    }
+     // ## Running LDK
+     // Initialize networking
+ 
+-    let peer_manager_connection_handler = peer_manager.clone();
+-    let listening_port = ldk_peer_listening_port;
+     let stop_processing = Arc::new(AtomicBool::new(false));
+-    let stop_listen = Arc::clone(&stop_processing);
+-    tokio::spawn(async move {
+-        // Dual-stack when available; hosts with IPv6 disabled fall back to IPv4.
+-        let listener = crate::utils::bind_first_available(&[
+-            format!("[::]:{listening_port}"),
+-            format!("0.0.0.0:{listening_port}"),
+-        ])
+-        .await
+-        .expect("Failed to bind to listen port - is something else already listening on it?");
++    let peer_manager_connection_handler = Arc::clone(&peer_manager);
++    let listener_shutdown = session_tasks.cancellation();
++    let listener_tasks = Arc::downgrade(&session_tasks);
++    let listener_app_shutdown = app_state.cancel_token.clone();
++    let _ = session_tasks.spawn(async move {
+         loop {
+-            let peer_mgr = peer_manager_connection_handler.clone();
+-            let tcp_stream = listener.accept().await.unwrap().0;
+-            if stop_listen.load(Ordering::Acquire) {
+-                return;
++            let accepted = match accept_peer(&listener, &listener_shutdown).await {
++                Ok(Some(stream)) => Ok(stream),
++                Ok(None) => break,
++                Err(error) => Err(error),
++            };
++            match accepted {
++                Ok(stream) => {
++                    if listener_shutdown.is_cancelled() {
++                        break;
++                    }
++                    match stream.into_std() {
++                        Ok(stream) => {
++                            let completion = lightning_net_tokio::setup_inbound(
++                                Arc::clone(&peer_manager_connection_handler),
++                                stream,
++                            );
++                            if let Some(tasks) = listener_tasks.upgrade() {
++                                if let Err(completion) = tasks.spawn(completion) {
++                                    peer_manager_connection_handler.disconnect_all_peers();
++                                    completion.await;
++                                }
++                            } else {
++                                peer_manager_connection_handler.disconnect_all_peers();
++                                completion.await;
++                            }
++                        }
++                        Err(error) => tracing::warn!(%error, "failed to accept peer stream"),
++                    }
++                }
++                Err(error) => {
++                    if matches!(
++                        error.kind(),
++                        std::io::ErrorKind::Interrupted
++                            | std::io::ErrorKind::WouldBlock
++                            | std::io::ErrorKind::ConnectionAborted
++                    ) {
++                        continue;
++                    }
++                    let failure = format!("peer listener failed: {error}");
++                    tracing::error!(%failure, "stopping failed session listener");
++                    if let Some(tasks) = listener_tasks.upgrade() {
++                        tasks.record_failure(failure.clone());
++                    }
++                    let _ = FATAL_ERROR.set(failure);
++                    listener_app_shutdown.cancel();
++                    break;
++                }
+             }
+-            tokio::spawn(async move {
+-                lightning_net_tokio::setup_inbound(
+-                    peer_mgr.clone(),
+-                    tcp_stream.into_std().unwrap(),
+-                )
+-                .await;
+-            });
+         }
++        // Covers an inbound connection racing the initial shutdown disconnect.
++        peer_manager_connection_handler.disconnect_all_peers();
+     });
+ 
+     // Connect and Disconnect Blocks
+-    let output_sweeper: Arc<OutputSweeper> = Arc::new(output_sweeper);
+-    let stop_listen = Arc::clone(&stop_processing);
++    let chain_shutdown = session_tasks.cancellation();
+     match backend {
+         #[cfg(feature = "block-sync")]
+         ChainBackend::BlockSync { client, .. } => {
+@@ -6269,7 +6686,7 @@ async fn start_lightning(
+             let chain_tip =
+                 block_sync_chain_tip.expect("block-sync chain tip is set while syncing listeners");
+             let mut cache = block_sync_cache;
+-            tokio::spawn(async move {
++            let _ = session_tasks.spawn(async move {
+                 let chain_poller = poll::ChainPoller::new(client.as_ref(), network);
+                 let chain_listener = (
+                     chain_monitor_listener,
+@@ -6278,13 +6695,21 @@ async fn start_lightning(
+                 let mut spv_client =
+                     SpvClient::new(chain_tip, chain_poller, &mut cache, &chain_listener);
+                 loop {
+-                    if stop_listen.load(Ordering::Acquire) {
++                    if chain_shutdown.is_cancelled() {
+                         return;
+                     }
+-                    if let Err(e) = spv_client.poll_best_tip().await {
+-                        tracing::error!("Error while polling best tip: {:?}", e);
++                    tokio::select! {
++                        biased;
++                        _ = chain_shutdown.cancelled() => return,
++                        result = spv_client.poll_best_tip() => {
++                            if let Err(error) = result { tracing::error!(?error, "Error while polling best tip"); }
++                        }
++                    }
++                    tokio::select! {
++                        biased;
++                        _ = chain_shutdown.cancelled() => return,
++                        _ = tokio::time::sleep(Duration::from_secs(1)) => {},
+                     }
+-                    tokio::time::sleep(Duration::from_secs(1)).await;
+                 }
+             });
+         }
+@@ -6295,19 +6720,19 @@ async fn start_lightning(
+                 chain_monitor.clone(),
+                 output_sweeper.clone(),
+             ];
+-            // bring everything up to the current tip before starting to serve
+-            sync_chain_data(tx_sync.clone(), confirmables.clone())
+-                .await
+-                .map_err(|e| APIError::InvalidIndexer(e.to_string()))?;
+-            tokio::spawn(async move {
++            let _ = session_tasks.spawn(async move {
+                 loop {
+-                    if stop_listen.load(Ordering::Acquire) {
++                    if chain_shutdown.is_cancelled() {
+                         return;
+                     }
+                     if let Err(e) = sync_chain_data(tx_sync.clone(), confirmables.clone()).await {
+                         tracing::error!("Error while syncing via indexer: {:?}", e);
+                     }
+-                    tokio::time::sleep(Duration::from_secs(1)).await;
++                    tokio::select! {
++                        biased;
++                        _ = chain_shutdown.cancelled() => return,
++                        _ = tokio::time::sleep(Duration::from_secs(1)) => {},
++                    }
+                 }
+             });
+         }
+@@ -6508,6 +6933,7 @@ async fn start_lightning(
+ 
+     let unlocked_state = Arc::new(LightningState {
+         common: Arc::clone(&common),
++        session_tasks: Arc::downgrade(&session_tasks),
+         channel_manager: Arc::clone(&channel_manager),
+         gossip_source: Arc::clone(&gossip_source),
+         inbound_payments,
+@@ -6540,15 +6966,19 @@ async fn start_lightning(
+         taker_swaps: Arc::clone(&taker_swaps),
+     }));
+ 
+-    // Refresh the RGS snapshot on a fixed interval (RGS mode only). The first
+-    // tick fires immediately, so a freshly unlocked node syncs right away.
+-    let gossip_shutdown = Arc::new(tokio::sync::Notify::new());
++    // Snapshot HTTP work is cancellable and joined with the other session workers.
+     if unlocked_state.gossip_source.is_rgs() {
+-        tokio::spawn(crate::gossip::run_rgs_sync_loop(
+-            Arc::clone(&unlocked_state.gossip_source),
+-            Arc::clone(&gossip_shutdown),
+-            Duration::from_secs(static_state.config.gossip.rgs_sync_interval_secs),
+-        ));
++        let gossip_source = Arc::clone(&unlocked_state.gossip_source);
++        let shutdown = session_tasks.cancellation();
++        let interval = Duration::from_secs(static_state.config.gossip.rgs_sync_interval_secs);
++        let _ = session_tasks.spawn(async move {
++            let notify = Arc::new(tokio::sync::Notify::new());
++            tokio::select! {
++                biased;
++                _ = shutdown.cancelled() => {},
++                _ = crate::gossip::run_rgs_sync_loop(gossip_source, notify, interval) => {},
++            }
++        });
+     }
+ 
+     let recent_payments_payment_ids = channel_manager
+@@ -6615,17 +7045,22 @@ async fn start_lightning(
+     let connect_cm = Arc::clone(&channel_manager);
+     let connect_pm = Arc::clone(&peer_manager);
+     let connect_db = static_state.db();
+-    let stop_connect = Arc::clone(&stop_processing);
++    let connect_shutdown = session_tasks.cancellation();
++    let connect_tasks = Arc::downgrade(&session_tasks);
+     let reconnect_interval_secs = static_state.config.node.peer_reconnect_interval_secs;
+-    tokio::spawn(async move {
++    let _ = session_tasks.spawn(async move {
+         let mut interval = tokio::time::interval(Duration::from_secs(reconnect_interval_secs));
+         interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
+         loop {
+-            interval.tick().await;
++            tokio::select! {
++                biased;
++                _ = connect_shutdown.cancelled() => return,
++                _ = interval.tick() => {},
++            }
+             // checked here and not only per peer: with no channels to reconnect, or once the read
+             // below starts failing, the inner check is unreachable and the task would outlive the
+             // node it belongs to, polling its database by path forever
+-            if stop_connect.load(Ordering::Acquire) {
++            if connect_shutdown.is_cancelled() {
+                 return;
+             }
+             let db = RlnDatabase::new((*connect_db).clone());
+@@ -6637,14 +7072,18 @@ async fn start_lightning(
+                         .map(|chan| chan.counterparty.node_id)
+                         .filter(|id| connect_pm.peer_by_node_id(id).is_none())
+                     {
+-                        if stop_connect.load(Ordering::Acquire) {
++                        if connect_shutdown.is_cancelled() {
+                             return;
+                         }
+                         for (pubkey, peer_addr) in info.iter() {
+                             if *pubkey == node_id {
+-                                let _ =
+-                                    do_connect_peer(*pubkey, *peer_addr, Arc::clone(&connect_pm))
+-                                        .await;
++                                let _ = do_connect_peer(
++                                    *pubkey,
++                                    *peer_addr,
++                                    Arc::clone(&connect_pm),
++                                    connect_tasks.clone(),
++                                )
++                                .await;
+                             }
+                         }
+                     }
+@@ -6676,16 +7115,16 @@ async fn start_lightning(
+     if let Some(link) = external_signer_link_watch {
+         let su_channel_manager = Arc::clone(&channel_manager);
+         let su_chain_monitor = Arc::clone(&chain_monitor);
+-        let su_stop = Arc::clone(&stop_processing);
+-        tokio::spawn(async move {
++        let su_stop = session_tasks.cancellation();
++        let _ = session_tasks.spawn(async move {
+             loop {
+                 // Healthy: idle until the link reports a change (with a coarse timer only to notice
+                 // node shutdown — it drives no signer work).
+                 let link_event = tokio::select! {
+                     _ = link.changed() => true,
+-                    _ = tokio::time::sleep(Duration::from_secs(30)) => false,
++                    _ = su_stop.cancelled() => return,
+                 };
+-                if su_stop.load(Ordering::Acquire) {
++                if su_stop.is_cancelled() {
+                     return;
+                 }
+                 if link_event && link.is_connected() {
+@@ -6707,10 +7146,12 @@ async fn start_lightning(
+                 interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
+                 loop {
+                     tokio::select! {
++                        biased;
++                        _ = su_stop.cancelled() => return,
+                         _ = interval.tick() => {}
+                         _ = link.changed() => {}
+                     }
+-                    if su_stop.load(Ordering::Acquire) {
++                    if su_stop.is_cancelled() {
+                         return;
+                     }
+                     su_chain_monitor.signer_unblocked(None);
+@@ -6723,45 +7164,17 @@ async fn start_lightning(
+         });
+     }
+ 
+-    // Regularly broadcast our node_announcement. This is only required (or possible) if we have
+-    // some public channels.
+-    let mut ldk_announced_listen_addr = Vec::new();
+-    for addr in unlock_request.announce_addresses {
+-        match SocketAddress::from_str(&addr) {
+-            Ok(sa) => {
+-                ldk_announced_listen_addr.push(sa);
+-            }
+-            Err(_) => {
+-                return Err(APIError::InvalidAnnounceAddresses(format!(
+-                    "failed to parse address '{addr}'"
+-                )))
+-            }
+-        }
+-    }
+-    let ldk_announced_node_name = match unlock_request.announce_alias {
+-        Some(s) => {
+-            if s.len() > 32 {
+-                return Err(APIError::InvalidAnnounceAlias(s!(
+-                    "cannot be longer than 32 bytes"
+-                )));
+-            }
+-            let mut bytes = [0; 32];
+-            bytes[..s.len()].copy_from_slice(s.as_bytes());
+-            bytes
+-        }
+-        None => [0; 32],
+-    };
+-
+     // cleanup the buffers of RGB file transfers a peer started and never finished
+     let sweep_handler = Arc::clone(&rgb_file_transfer_handler);
+-    let stop_sweep = Arc::clone(&stop_processing);
+-    tokio::spawn(async move {
++    let stop_sweep = session_tasks.cancellation();
++    let _ = session_tasks.spawn(async move {
+         let mut interval = tokio::time::interval(REASSEMBLY_SWEEP_INTERVAL);
+         interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
+         loop {
+-            interval.tick().await;
+-            if stop_sweep.load(Ordering::Acquire) {
+-                return;
++            tokio::select! {
++                biased;
++                _ = stop_sweep.cancelled() => return,
++                _ = interval.tick() => {},
+             }
+             sweep_handler.sweep_stale_state();
+         }
+@@ -6771,15 +7184,24 @@ async fn start_lightning(
+     let chan_man = Arc::clone(&channel_manager);
+     let announce_initial_delay_secs = static_state.config.node.announce_initial_delay_secs;
+     let announce_refresh_interval_secs = static_state.config.node.announce_refresh_interval_secs;
+-    tokio::spawn(async move {
+-        // First wait until we have some peers and maybe have opened a channel.
+-        tokio::time::sleep(Duration::from_secs(announce_initial_delay_secs)).await;
++    let announce_shutdown = session_tasks.cancellation();
++    let _ = session_tasks.spawn(async move {
++        // Cancellation also covers the initial delay, before the first announcement.
++        tokio::select! {
++            biased;
++            _ = announce_shutdown.cancelled() => return,
++            _ = tokio::time::sleep(Duration::from_secs(announce_initial_delay_secs)) => {},
++        }
+         // Then, update our announcement periodically to keep it fresh but avoid unnecessary churn
+         // in the global gossip network.
+         let mut interval =
+             tokio::time::interval(Duration::from_secs(announce_refresh_interval_secs));
+         loop {
+-            interval.tick().await;
++            tokio::select! {
++                biased;
++                _ = announce_shutdown.cancelled() => return,
++                _ = interval.tick() => {},
++            }
+             // Don't bother trying to announce if we don't have any public channls, though our
+             // peers should drop such an announcement anyway. Note that announcement may not
+             // propagate until we have a channel with 6+ confirmations.
+@@ -6808,7 +7230,8 @@ async fn start_lightning(
+     Ok((
+         Some(LdkBackgroundServices {
+             stop_processing,
+-            gossip_shutdown,
++            tasks: session_tasks,
++            completions: completion_tasks,
+             peer_manager: peer_manager.clone(),
+             bp_exit,
+             background_processor: Some(background_processor),
+@@ -6851,15 +7274,11 @@ impl AppState {
+         ldk_background_services
+             .stop_processing
+             .store(true, Ordering::Release);
+-        ldk_background_services.gossip_shutdown.notify_one();
++        ldk_background_services.tasks.close();
+         ldk_background_services.peer_manager.disconnect_all_peers();
+ 
+-        // Stop the background processor. Its `bp_exit` receiver lives inside the
+-        // `process_events_async` future, so nothing to signal if the background processor is
+-        // already gone. Also, send can find no receiver during a panic (racy).
+-        if !ldk_background_services.bp_exit.is_closed() {
+-            let _ = ldk_background_services.bp_exit.send(());
+-        }
++        // The background processor remains alive until the workers have finished, so
++        // the final persistence pass includes any chain update that was in flight.
+         Some(ldk_background_services)
+     }
+ }
+@@ -6980,13 +7399,19 @@ async fn release_vss_fence(kv_store: Arc<SyncedKvStore>, teardown: VssTeardown)
+ 
+ // Runs while shutting down, possibly because the background processor itself
+ // died, so its outcome is reported instead of unwrapped.
+-fn log_bp_shutdown_result(res: Result<Result<(), io::Error>, tokio::task::JoinError>) {
++fn log_bp_shutdown_result(
++    res: Result<Result<(), io::Error>, tokio::task::JoinError>,
++) -> Option<String> {
+     match res {
+-        Ok(Ok(())) => {}
+-        Ok(Err(e)) => {
+-            tracing::error!(error = %e, "background processor exited with error during shutdown")
++        Ok(Ok(())) => None,
++        Ok(Err(error)) => {
++            tracing::error!(%error, "background processor exited with error during shutdown");
++            Some(error.to_string())
++        }
++        Err(error) => {
++            tracing::error!(%error, "background processor task join failed");
++            Some(error.to_string())
+         }
+-        Err(e) => tracing::error!(error = %e, "background processor task join failed"),
+     }
+ }
+ 
+@@ -7052,7 +7477,16 @@ mod vss_teardown_tests {
+ }
+ 
+ /// Stop the resources owned by the unlocked session, including wallet-only persistence.
+-pub(crate) async fn stop_node(app_state: Arc<AppState>) {
++pub(crate) async fn stop_node(app_state: Arc<AppState>) -> Result<(), APIError> {
++    // A second shutdown must wait for the first owner's final persistence and drops;
++    // otherwise its caller could revoke the signer while the first is still flushing.
++    let mut teardown_outcome = app_state.teardown.lock().await;
++    if app_state.cancel_token.is_cancelled() {
++        if let Some(outcome) = teardown_outcome.as_ref() {
++            return outcome.clone().map_err(APIError::Unexpected);
++        }
++    }
++    let mut cleanup_errors = Vec::new();
+     tracing::info!("Stopping node services");
+     // Wait for wallet operations holding the API mutex, then remove both session owners together.
+     // New callers cannot use a wallet after its VSS fence has been handed over; concurrent stops
+@@ -7074,19 +7508,33 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
+         )
+     });
+ 
++    if let Some(services) = lightning.as_ref() {
++        if let Err(error) = services.tasks.join().await {
++            cleanup_errors.push(error);
++        }
++        services.peer_manager.disconnect_all_peers();
++        let _ = services.bp_exit.send(());
++    }
++
+     #[cfg(feature = "vss")]
+     if let Some(mut join_handle) = lightning
+         .as_mut()
+         .and_then(|services| services.background_processor.take())
+     {
+         match tokio::time::timeout(BP_SHUTDOWN_FLUSH_TIMEOUT, &mut join_handle).await {
+-            Ok(res) => log_bp_shutdown_result(res),
++            Ok(res) => {
++                if let Some(error) = log_bp_shutdown_result(res) {
++                    cleanup_errors.push(error);
++                }
++            }
+             Err(_) => {
+                 tracing::error!("final VSS flush did not complete in {:?}; aborting pending retries — last channel-manager state may not have replicated", BP_SHUTDOWN_FLUSH_TIMEOUT);
+                 if let Some((_, Some(ref monitor_store))) = common_and_monitor {
+                     monitor_store.stop();
+                 }
+-                log_bp_shutdown_result(join_handle.await);
++                if let Some(error) = log_bp_shutdown_result(join_handle.await) {
++                    cleanup_errors.push(error);
++                }
+             }
+         }
+     }
+@@ -7095,9 +7543,13 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
+         .as_mut()
+         .and_then(|services| services.background_processor.take())
+     {
+-        log_bp_shutdown_result(join_handle.await);
++        if let Some(error) = log_bp_shutdown_result(join_handle.await) {
++            cleanup_errors.push(error);
++        }
+     }
+ 
++    #[cfg(feature = "vss")]
++    let mut pending_fence_release = None;
+     #[cfg(feature = "vss")]
+     if let Some((common, monitor_store)) = common_and_monitor {
+         let deadline = Instant::now() + VSS_TEARDOWN_TIMEOUT;
+@@ -7112,34 +7564,95 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
+             .is_err()
+             {
+                 worker.abort();
++                let _ = worker.await;
+                 tracing::warn!("common persistence worker did not exit within teardown budget");
+             }
+         }
+-        release_vss_fence(Arc::clone(&common.kv_store), teardown).await;
++        pending_fence_release = Some((Arc::clone(&common.kv_store), teardown));
+     }
+ 
+-    // Only an owned Lightning listener needs the baseline wakeup and port-release wait.
+-    // A wallet-only or already-stopped session must not contact an unused peer port.
+-    if lightning.is_some() {
+-        // connect to the peer port so it can be released
+-        let peer_port = app_state.static_state.ldk_peer_listening_port;
+-        let sock_addr = SocketAddr::from(([127, 0, 0, 1], peer_port));
+-        let _ = check_port_is_available(peer_port);
+-        // check the peer port has been released
+-        let t_0 = OffsetDateTime::now_utc();
+-        loop {
+-            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+-            if TcpListener::bind(sock_addr).is_ok() {
+-                break;
+-            }
+-            if (OffsetDateTime::now_utc() - t_0).as_seconds_f32() > 10.0 {
+-                tracing::error!("LDK peer port {peer_port} was not released within 10s");
+-                break;
+-            }
++    // Final broadcasts and async monitor completions remain admitted until the BP is
++    // gone and VSS shutdown has released any outage-pending persistence futures.
++    if let Some(services) = lightning.as_ref() {
++        if let Err(error) = services.completions.join().await {
++            cleanup_errors.push(error);
+         }
+     }
++
++    // LDK's network adapter hides its per-connection event worker handle. Its read
++    // completion closes that worker's event queue, but it can retain a manager until
++    // its next scheduling turn. Wait for actual manager destruction, not an arbitrary
++    // delay, before reporting a successful shutdown. This also detects future cycles.
++    let managers = lightning
++        .as_ref()
++        .zip(unlocked.as_ref().and_then(|state| state.lightning.as_ref()))
++        .map(|(services, state)| {
++            (
++                Arc::downgrade(&services.peer_manager),
++                Arc::downgrade(&state.channel_manager),
++            )
++        });
++    // Joining the accept worker proves the actual socket is dropped, including port zero.
++    drop(lightning);
+     drop(unlocked);
++    if let Some((peer_manager, channel_manager)) = managers {
++        if tokio::time::timeout(Duration::from_secs(5), async {
++            while peer_manager.strong_count() != 0 || channel_manager.strong_count() != 0 {
++                tokio::time::sleep(Duration::from_millis(1)).await;
++            }
++        })
++        .await
++        .is_err()
++        {
++            cleanup_errors.push(format!(
++                "session managers retained after teardown (peer={}, channel={})",
++                peer_manager.strong_count(),
++                channel_manager.strong_count()
++            ));
++        }
++    }
++    // A monitor write queued before stop may still finish after the store's stop
++    // signal. Drain every completion before releasing the cross-device fence.
++    #[cfg(feature = "vss")]
++    if let Some((store, teardown)) = pending_fence_release {
++        if cleanup_errors.is_empty() {
++            release_vss_fence(store, teardown).await;
++        } else {
++            tracing::error!("retaining VSS fence because session teardown failed");
++        }
++    }
++
++    if app_state.cancel_token.is_cancelled() {
++        // SQLx returns checked-out SQLite connections through tasks on DB_RUNTIME.
++        // That current-thread runtime is idle between database calls, so dropping
++        // the pool alone can leave its final return task and file descriptor parked.
++        // Drive closure on the owning runtime after every persistence user is done.
++        // A REST lock is nonterminal and must retain its database for the next unlock.
++        let database = app_state.db();
++        match tokio::task::spawn_blocking(move || {
++            crate::runtime::block_on(async move { database.close_by_ref().await })
++        })
++        .await
++        {
++            Ok(Ok(())) => {}
++            Ok(Err(error)) => cleanup_errors.push(format!("database pool close failed: {error}")),
++            Err(error) => cleanup_errors.push(format!("database pool close task failed: {error}")),
++        }
++    }
++
+     tracing::info!("Stopped node services");
++    let outcome = if cleanup_errors.is_empty() {
++        Ok(())
++    } else {
++        Err(format!(
++            "session teardown failed: {}",
++            cleanup_errors.join("; ")
++        ))
++    };
++    if app_state.cancel_token.is_cancelled() {
++        *teardown_outcome = Some(outcome.clone());
++    }
++    outcome.map_err(APIError::Unexpected)
+ }
+ 
+ pub(crate) fn write_rgb_payment_info_file(
+diff --git a/src/ldk_chain_backend/block_sync.rs b/src/ldk_chain_backend/block_sync.rs
+index 5c6701e..6189956 100644
+--- a/src/ldk_chain_backend/block_sync.rs
++++ b/src/ldk_chain_backend/block_sync.rs
+@@ -13,23 +13,26 @@ use lightning_block_sync::gossip::UtxoSource;
+ use lightning_block_sync::http::HttpEndpoint;
+ use lightning_block_sync::http::JsonResponse;
+ use lightning_block_sync::rpc::RpcClient;
+-use lightning_block_sync::{AsyncBlockSourceResult, BlockData, BlockHeaderData, BlockSource};
++use lightning_block_sync::{
++    AsyncBlockSourceResult, BlockData, BlockHeaderData, BlockSource, BlockSourceError,
++};
+ use std::collections::{HashMap, VecDeque};
+ use std::convert::TryInto;
+ use std::str::FromStr;
+ use std::sync::atomic::AtomicU32;
+-use std::sync::{Arc, Mutex};
++use std::sync::{Arc, Mutex, Weak};
+ use std::time::Duration;
+ 
+ use crate::disk::FilesystemLogger;
+-use crate::ldk::P2PGossipSync;
++use crate::ldk::{P2PGossipSync, SessionTasks};
+ 
+ use super::{default_fee_buckets, fee_from_bucket, store_fee_estimates, MIN_FEERATE};
+ 
+ pub struct BitcoindClient {
+     pub(crate) bitcoind_rpc_client: Arc<RpcClient>,
+     fees: Arc<HashMap<ConfirmationTarget, AtomicU32>>,
+-    handle: tokio::runtime::Handle,
++    rpc_timeout: Duration,
++    completions: Weak<SessionTasks>,
+     logger: Arc<FilesystemLogger>,
+ }
+ 
+@@ -40,9 +43,13 @@ impl BlockSource for BitcoindClient {
+         height_hint: Option<u32>,
+     ) -> AsyncBlockSourceResult<'a, BlockHeaderData> {
+         Box::pin(async move {
+-            self.bitcoind_rpc_client
+-                .get_header(header_hash, height_hint)
+-                .await
++            tokio::time::timeout(
++                self.rpc_timeout,
++                self.bitcoind_rpc_client
++                    .get_header(header_hash, height_hint),
++            )
++            .await
++            .map_err(BlockSourceError::transient)?
+         })
+     }
+ 
+@@ -50,11 +57,22 @@ impl BlockSource for BitcoindClient {
+         &'a self,
+         header_hash: &'a BlockHash,
+     ) -> AsyncBlockSourceResult<'a, BlockData> {
+-        Box::pin(async move { self.bitcoind_rpc_client.get_block(header_hash).await })
++        Box::pin(async move {
++            tokio::time::timeout(
++                self.rpc_timeout,
++                self.bitcoind_rpc_client.get_block(header_hash),
++            )
++            .await
++            .map_err(BlockSourceError::transient)?
++        })
+     }
+ 
+     fn get_best_block(&self) -> AsyncBlockSourceResult<'_, (BlockHash, Option<u32>)> {
+-        Box::pin(async move { self.bitcoind_rpc_client.get_best_block().await })
++        Box::pin(async move {
++            tokio::time::timeout(self.rpc_timeout, self.bitcoind_rpc_client.get_best_block())
++                .await
++                .map_err(BlockSourceError::transient)?
++        })
+     }
+ }
+ 
+@@ -124,6 +142,9 @@ impl BitcoindClient {
+         handle: tokio::runtime::Handle,
+         logger: Arc<FilesystemLogger>,
+         fee_refresh_interval_secs: u64,
++        rpc_timeout_secs: u64,
++        tasks: &Arc<SessionTasks>,
++        completions: &Arc<SessionTasks>,
+     ) -> std::io::Result<Self> {
+         let http_endpoint = HttpEndpoint::for_host(host.clone()).with_port(port);
+         let rpc_credentials = general_purpose::STANDARD.encode(format!(
+@@ -132,9 +153,8 @@ impl BitcoindClient {
+             rpc_password.clone()
+         ));
+         let bitcoind_rpc_client = RpcClient::new(&rpc_credentials, http_endpoint);
+-        let _dummy = bitcoind_rpc_client
+-            .call_method::<BlockchainInfo>("getblockchaininfo", &[])
+-            .await
++        let rpc_timeout = Duration::from_secs(rpc_timeout_secs.max(1));
++        let _dummy = tokio::time::timeout(rpc_timeout, bitcoind_rpc_client.call_method::<BlockchainInfo>("getblockchaininfo", &[])).await.map_err(|error| std::io::Error::new(std::io::ErrorKind::TimedOut, error))?
+             .map_err(|_| {
+                 std::io::Error::new(std::io::ErrorKind::PermissionDenied,
+                 "failed to make initial call to bitcoind - please check your RPC user/password and access settings")
+@@ -142,7 +162,8 @@ impl BitcoindClient {
+         let client = Self {
+             bitcoind_rpc_client: Arc::new(bitcoind_rpc_client),
+             fees: Arc::new(default_fee_buckets()),
+-            handle: handle.clone(),
++            rpc_timeout,
++            completions: Arc::downgrade(completions),
+             logger,
+         };
+         BitcoindClient::poll_for_fee_estimates(
+@@ -151,6 +172,7 @@ impl BitcoindClient {
+             client.logger.clone(),
+             handle,
+             fee_refresh_interval_secs,
++            tasks,
+         );
+         Ok(client)
+     }
+@@ -161,8 +183,12 @@ impl BitcoindClient {
+         logger: Arc<FilesystemLogger>,
+         handle: tokio::runtime::Handle,
+         refresh_interval_secs: u64,
++        tasks: &Arc<SessionTasks>,
+     ) {
+-        handle.spawn(async move {
++        let _ = handle;
++        let shutdown = tasks.cancellation();
++        let worker_shutdown = shutdown.clone();
++        let worker = async move {
+             async fn get_estimate(
+                 rpc_client: &Arc<RpcClient>,
+                 logger: &Arc<FilesystemLogger>,
+@@ -189,6 +215,9 @@ impl BitcoindClient {
+             }
+ 
+             loop {
++                if shutdown.is_cancelled() {
++                    return;
++                }
+                 let mempoolmin_estimate = {
+                     match rpc_client
+                         .call_method::<MempoolMinFeeResponse>("getmempoolinfo", &[])
+@@ -249,16 +278,30 @@ impl BitcoindClient {
+                     mempoolmin_estimate,
+                 );
+ 
+-                tokio::time::sleep(Duration::from_secs(refresh_interval_secs)).await;
++                tokio::select! {
++                    biased;
++                    _ = shutdown.cancelled() => return,
++                    _ = tokio::time::sleep(Duration::from_secs(refresh_interval_secs)) => {},
++                }
++            }
++        };
++        let _ = tasks.spawn(async move {
++            tokio::select! {
++                biased;
++                _ = worker_shutdown.cancelled() => {},
++                _ = worker => {},
+             }
+         });
+     }
+ 
+-    pub async fn get_blockchain_info(&self) -> BlockchainInfo {
+-        self.bitcoind_rpc_client
+-            .call_method::<BlockchainInfo>("getblockchaininfo", &[])
+-            .await
+-            .unwrap()
++    pub async fn get_blockchain_info(&self) -> std::io::Result<BlockchainInfo> {
++        tokio::time::timeout(
++            self.rpc_timeout,
++            self.bitcoind_rpc_client
++                .call_method::<BlockchainInfo>("getblockchaininfo", &[]),
++        )
++        .await
++        .map_err(|error| std::io::Error::new(std::io::ErrorKind::TimedOut, error))?
+     }
+ }
+ 
+@@ -280,8 +323,12 @@ impl BroadcasterInterface for BitcoindClient {
+         let txn = txs.iter().map(encode::serialize_hex).collect::<Vec<_>>();
+         let bitcoind_rpc_client = Arc::clone(&self.bitcoind_rpc_client);
+         let logger = Arc::clone(&self.logger);
+-        self.handle.spawn(async move {
+-			let res = if txn.len() == 1 {
++        let rpc_timeout = self.rpc_timeout;
++        let Some(completions) = self.completions.upgrade() else {
++            return;
++        };
++        let _ = completions.spawn(async move {
++			let res = tokio::time::timeout(rpc_timeout, async { if txn.len() == 1 {
+ 				let tx_json = serde_json::json!(txn[0]);
+ 				bitcoind_rpc_client
+ 					.call_method::<serde_json::Value>("sendrawtransaction", &[tx_json])
+@@ -291,7 +338,7 @@ impl BroadcasterInterface for BitcoindClient {
+ 				bitcoind_rpc_client
+ 					.call_method::<serde_json::Value>("submitpackage", &[tx_json])
+ 					.await
+-			};
++			} }).await.unwrap_or_else(|error| Err(std::io::Error::new(std::io::ErrorKind::TimedOut, error)));
+ 			// This may error due to RL calling `broadcast_transactions` with the same transaction
+ 			// multiple times, but the error is safe to ignore.
+ 			match res {
+@@ -314,9 +361,9 @@ impl BroadcasterInterface for BitcoindClient {
+ // single `PeerManager` type serve both sync backends
+ pub(crate) struct BlockSyncGossipVerifier {
+     source: Arc<RpcClient>,
+-    gossiper: Arc<P2PGossipSync>,
++    gossiper: Weak<P2PGossipSync>,
++    tasks: Weak<SessionTasks>,
+     peer_manager_wake: Arc<dyn Fn() + Send + Sync>,
+-    handle: tokio::runtime::Handle,
+     block_cache: Arc<Mutex<VecDeque<(u32, Block)>>>,
+ }
+ 
+@@ -325,15 +372,15 @@ const BLOCK_CACHE_SIZE: usize = 5;
+ impl BlockSyncGossipVerifier {
+     pub(crate) fn new(
+         source: Arc<RpcClient>,
+-        gossiper: Arc<P2PGossipSync>,
++        gossiper: Weak<P2PGossipSync>,
+         peer_manager_wake: Arc<dyn Fn() + Send + Sync>,
+-        handle: tokio::runtime::Handle,
++        tasks: Weak<SessionTasks>,
+     ) -> Self {
+         Self {
+             source,
+             gossiper,
+             peer_manager_wake,
+-            handle,
++            tasks,
+             block_cache: Arc::new(Mutex::new(VecDeque::with_capacity(BLOCK_CACHE_SIZE))),
+         }
+     }
+@@ -430,13 +477,25 @@ impl UtxoLookup for BlockSyncGossipVerifier {
+         let res = UtxoFuture::new();
+         let fut = res.clone();
+         let source = Arc::clone(&self.source);
+-        let gossiper = Arc::clone(&self.gossiper);
++        let gossiper = self.gossiper.clone();
+         let peer_manager_wake = Arc::clone(&self.peer_manager_wake);
+         let block_cache = Arc::clone(&self.block_cache);
+-        self.handle.spawn(async move {
+-            let lookup = Self::retrieve_utxo(source, block_cache, short_channel_id).await;
+-            fut.resolve(gossiper.network_graph(), &*gossiper, lookup);
+-            peer_manager_wake();
++        let Some(tasks) = self.tasks.upgrade() else {
++            return UtxoResult::Async(res);
++        };
++        let shutdown = tasks.cancellation();
++        let _ = tasks.spawn(async move {
++            let lookup = tokio::select! {
++                biased;
++                _ = shutdown.cancelled() => return,
++                lookup = Self::retrieve_utxo(source, block_cache, short_channel_id) => lookup,
++            };
++            if !shutdown.is_cancelled() {
++                if let Some(gossiper) = gossiper.upgrade() {
++                    fut.resolve(gossiper.network_graph(), &*gossiper, lookup);
++                    peer_manager_wake();
++                }
++            }
+         });
+         UtxoResult::Async(res)
+     }
+diff --git a/src/ldk_chain_backend/transaction_sync.rs b/src/ldk_chain_backend/transaction_sync.rs
+index cadf7fb..3903882 100644
+--- a/src/ldk_chain_backend/transaction_sync.rs
++++ b/src/ldk_chain_backend/transaction_sync.rs
+@@ -10,13 +10,13 @@ use rgb_lib::wallet::rust_only::IndexerProtocol as RgbLibIndexerProtocol;
+ use std::collections::HashMap;
+ use std::io;
+ use std::sync::atomic::AtomicU32;
+-use std::sync::Arc;
++use std::sync::{Arc, Weak};
+ use std::time::Duration;
+ 
+ #[cfg(feature = "electrum")]
+ use {
+     bitcoin::consensus::encode,
+-    electrum_client::{Client as ElectrumClient, ElectrumApi, Param},
++    electrum_client::{Client as ElectrumClient, ConfigBuilder, ElectrumApi, Param},
+     lightning_transaction_sync::ElectrumSyncClient,
+     std::str::FromStr,
+ };
+@@ -29,7 +29,7 @@ use {
+ };
+ 
+ use crate::disk::FilesystemLogger;
+-use crate::ldk::P2PGossipSync;
++use crate::ldk::{P2PGossipSync, SessionTasks};
+ 
+ use super::{default_fee_buckets, fee_from_bucket, store_fee_estimates, MIN_FEERATE};
+ 
+@@ -45,13 +45,14 @@ enum IndexerBackend {
+ pub(crate) struct IndexerClient {
+     backend: IndexerBackend,
+     fees: Arc<HashMap<ConfirmationTarget, AtomicU32>>,
+-    handle: tokio::runtime::Handle,
++    completions: Weak<SessionTasks>,
+     logger: Arc<FilesystemLogger>,
+ }
+ 
+ pub(crate) struct IndexerGossipVerifier {
+     client: Arc<IndexerClient>,
+-    gossiper: Arc<P2PGossipSync>,
++    gossiper: Weak<P2PGossipSync>,
++    tasks: Weak<SessionTasks>,
+     peer_manager_wake: Arc<dyn Fn() + Send + Sync>,
+ }
+ 
+@@ -78,14 +79,20 @@ impl IndexerClient {
+         logger: Arc<FilesystemLogger>,
+         timeout_secs: u64,
+         fee_refresh_interval_secs: u64,
++        tasks: &Arc<SessionTasks>,
++        completions: &Arc<SessionTasks>,
+     ) -> io::Result<Self> {
+         let fees = Arc::new(default_fee_buckets());
+         let backend = match protocol {
+             #[cfg(feature = "electrum")]
+             RgbLibIndexerProtocol::Electrum => {
+-                let client = Arc::new(ElectrumClient::new(&server_url).map_err(|e| {
+-                    io::Error::other(format!("failed to connect to electrum server: {e}"))
+-                })?);
++                let config = ConfigBuilder::new()
++                    .timeout(Some(timeout_secs.clamp(1, 255) as u8))
++                    .retry(0)
++                    .build();
++                let client = Arc::new(ElectrumClient::from_config(&server_url, config).map_err(
++                    |e| io::Error::other(format!("failed to connect to electrum server: {e}")),
++                )?);
+                 client.server_features().map_err(|e| {
+                     io::Error::other(format!("failed to query electrum server features: {e}"))
+                 })?;
+@@ -95,6 +102,7 @@ impl IndexerClient {
+                     logger.clone(),
+                     handle.clone(),
+                     fee_refresh_interval_secs,
++                    tasks,
+                 );
+                 IndexerBackend::Electrum(client)
+             }
+@@ -115,6 +123,7 @@ impl IndexerClient {
+                     logger.clone(),
+                     handle.clone(),
+                     fee_refresh_interval_secs,
++                    tasks,
+                 );
+                 IndexerBackend::Esplora(client)
+             }
+@@ -125,7 +134,7 @@ impl IndexerClient {
+         Ok(Self {
+             backend,
+             fees,
+-            handle,
++            completions: Arc::downgrade(completions),
+             logger,
+         })
+     }
+@@ -193,13 +202,15 @@ impl IndexerClient {
+ impl IndexerGossipVerifier {
+     pub(crate) fn new(
+         client: Arc<IndexerClient>,
+-        gossiper: Arc<P2PGossipSync>,
++        gossiper: Weak<P2PGossipSync>,
+         peer_manager_wake: Arc<dyn Fn() + Send + Sync>,
++        tasks: Weak<SessionTasks>,
+     ) -> Self {
+         Self {
+             client,
+             gossiper,
+             peer_manager_wake,
++            tasks,
+         }
+     }
+ }
+@@ -211,7 +222,14 @@ impl UtxoLookup for IndexerGossipVerifier {
+         let client = self.client.clone();
+         let gossiper = self.gossiper.clone();
+         let peer_manager_wake = self.peer_manager_wake.clone();
+-        self.client.handle.spawn(async move {
++        let Some(tasks) = self.tasks.upgrade() else {
++            return UtxoResult::Async(result);
++        };
++        let shutdown = tasks.cancellation();
++        let _ = tasks.spawn(async move {
++            if shutdown.is_cancelled() {
++                return;
++            }
+             let lookup = tokio::task::spawn_blocking(move || {
+                 let height = (short_channel_id >> 40) as u32;
+                 let tx_index = ((short_channel_id >> 16) & 0x00ff_ffff) as usize;
+@@ -268,8 +286,12 @@ impl UtxoLookup for IndexerGossipVerifier {
+             })
+             .await
+             .unwrap_or(Err(UtxoLookupError::UnknownTx));
+-            future.resolve(gossiper.network_graph(), &*gossiper, lookup);
+-            peer_manager_wake();
++            if !shutdown.is_cancelled() {
++                if let Some(gossiper) = gossiper.upgrade() {
++                    future.resolve(gossiper.network_graph(), &*gossiper, lookup);
++                    peer_manager_wake();
++                }
++            }
+         });
+         UtxoResult::Async(result)
+     }
+@@ -301,25 +323,28 @@ fn electrum_txid_from_pos(
+ }
+ 
+ impl IndexerSyncClient {
+-    pub(crate) fn new(
+-        server_url: String,
+-        protocol: RgbLibIndexerProtocol,
++    pub(crate) fn from_indexer(
++        client: &IndexerClient,
+         logger: Arc<FilesystemLogger>,
+     ) -> io::Result<Self> {
+-        match protocol {
++        // Reuse the explicitly time-bounded clients; the upstream convenience constructors
++        // otherwise create new clients with unbounded Electrum socket waits.
++        match &client.backend {
+             #[cfg(feature = "electrum")]
+-            RgbLibIndexerProtocol::Electrum => {
+-                let client = ElectrumSyncClient::new(server_url, logger).map_err(|e| {
+-                    io::Error::other(format!("failed to initialize electrum sync client: {e}"))
+-                })?;
+-                Ok(Self::Electrum(client))
++            IndexerBackend::Electrum(client) => {
++                ElectrumSyncClient::from_client(Arc::clone(client), logger)
++                    .map(Self::Electrum)
++                    .map_err(|error| {
++                        io::Error::other(format!(
++                            "failed to initialize electrum sync client: {error}"
++                        ))
++                    })
+             }
+             #[cfg(feature = "esplora")]
+-            RgbLibIndexerProtocol::Esplora => {
+-                Ok(Self::Esplora(EsploraSyncClient::new(server_url, logger)))
+-            }
+-            #[cfg(not(all(feature = "electrum", feature = "esplora")))]
+-            protocol => Err(unsupported_protocol(protocol)),
++            IndexerBackend::Esplora(client) => Ok(Self::Esplora(EsploraSyncClient::from_client(
++                client.as_ref().clone(),
++                logger,
++            ))),
+         }
+     }
+ 
+@@ -377,7 +402,10 @@ impl BroadcasterInterface for IndexerClient {
+                     .collect::<Vec<_>>();
+                 let client = client.clone();
+                 let logger = self.logger.clone();
+-                self.handle.spawn(async move {
++                let Some(completions) = self.completions.upgrade() else {
++                    return;
++                };
++                let _ = completions.spawn(async move {
+                     let res = tokio::task::spawn_blocking(move || {
+                         let mut last_error = None;
+                         for tx in txs {
+@@ -413,7 +441,10 @@ impl BroadcasterInterface for IndexerClient {
+                 let txs = txs.iter().map(|tx| (*tx).clone()).collect::<Vec<_>>();
+                 let client = client.clone();
+                 let logger = self.logger.clone();
+-                self.handle.spawn(async move {
++                let Some(completions) = self.completions.upgrade() else {
++                    return;
++                };
++                let _ = completions.spawn(async move {
+                     let res = tokio::task::spawn_blocking(move || {
+                         let mut last_error = None;
+                         for tx in txs {
+@@ -455,9 +486,15 @@ fn poll_electrum_fee_estimates(
+     logger: Arc<FilesystemLogger>,
+     handle: tokio::runtime::Handle,
+     refresh_interval_secs: u64,
++    tasks: &Arc<SessionTasks>,
+ ) {
+-    handle.spawn(async move {
++    let _ = handle; // spawning remains on the session's current Tokio runtime
++    let shutdown = tasks.cancellation();
++    let _ = tasks.spawn(async move {
+         loop {
++            if shutdown.is_cancelled() {
++                return;
++            }
+             let res = tokio::task::spawn_blocking({
+                 let client = client.clone();
+                 move || {
+@@ -495,7 +532,11 @@ fn poll_electrum_fee_estimates(
+                 }
+             }
+ 
+-            tokio::time::sleep(Duration::from_secs(refresh_interval_secs)).await;
++            tokio::select! {
++                biased;
++                _ = shutdown.cancelled() => return,
++                _ = tokio::time::sleep(Duration::from_secs(refresh_interval_secs)) => {},
++            }
+         }
+     });
+ }
+@@ -507,9 +548,15 @@ fn poll_esplora_fee_estimates(
+     logger: Arc<FilesystemLogger>,
+     handle: tokio::runtime::Handle,
+     refresh_interval_secs: u64,
++    tasks: &Arc<SessionTasks>,
+ ) {
+-    handle.spawn(async move {
++    let _ = handle; // spawning remains on the session's current Tokio runtime
++    let shutdown = tasks.cancellation();
++    let _ = tasks.spawn(async move {
+         loop {
++            if shutdown.is_cancelled() {
++                return;
++            }
+             let res = tokio::task::spawn_blocking({
+                 let client = client.clone();
+                 move || client.get_fee_estimates()
+@@ -544,7 +591,11 @@ fn poll_esplora_fee_estimates(
+                 }
+             }
+ 
+-            tokio::time::sleep(Duration::from_secs(refresh_interval_secs)).await;
++            tokio::select! {
++                biased;
++                _ = shutdown.cancelled() => return,
++                _ = tokio::time::sleep(Duration::from_secs(refresh_interval_secs)) => {},
++            }
+         }
+     });
+ }
+diff --git a/src/main.rs b/src/main.rs
+index 027aab1..e34cb3f 100644
+--- a/src/main.rs
++++ b/src/main.rs
+@@ -362,7 +362,9 @@ async fn shutdown_signal(app_state: Arc<AppState>) {
+         tracing::info!("Will shutdown after change state is complete");
+         tokio::time::sleep(Duration::from_millis(300)).await;
+     }
+-    stop_node(app_state.clone()).await;
++    if let Err(error) = stop_node(app_state.clone()).await {
++        tracing::error!(?error, "node teardown failed");
++    }
+ }
+ 
+ // workaround for https://github.com/tokio-rs/tracing/issues/1372
+diff --git a/src/mainnet_startup_tests.rs b/src/mainnet_startup_tests.rs
+index 0c75b17..ab46500 100644
+--- a/src/mainnet_startup_tests.rs
++++ b/src/mainnet_startup_tests.rs
+@@ -623,6 +623,7 @@ async fn mainnet_shutdown_waits_for_inflight_unlock_publication() {
+     tokio::time::timeout(Duration::from_secs(15), shutdown)
+         .await
+         .unwrap()
++        .unwrap()
+         .unwrap();
+     assert!(!*fixture.state.changing_state.lock().unwrap());
+     assert!(fixture.state.unlocked_app_state.lock().await.is_none());
+@@ -703,7 +704,7 @@ async fn mainnet_attached_and_native_signer_unlock_keep_strict_policy_without_ch
+     )
+     .unwrap();
+     fixture.assert_no_lightning().await;
+-    node.shutdown();
++    node.shutdown().unwrap();
+     assert!(fixture.state.unlocked_app_state.lock().await.is_none());
+     assert!(!*fixture.state.changing_state.lock().unwrap());
+ }
+diff --git a/src/mainnet_tests.rs b/src/mainnet_tests.rs
+index ee431cf..8e04a86 100644
+--- a/src/mainnet_tests.rs
++++ b/src/mainnet_tests.rs
+@@ -85,6 +85,7 @@ impl Fixture {
+                 remote_signer_listen_addr: None,
+             }),
+             cancel_token: CancellationToken::new(),
++            teardown: TokioMutex::new(None),
+             unlocked_app_state: Arc::new(TokioMutex::new(None)),
+             ldk_background_services: Arc::new(Mutex::new(None)),
+             attached_external_signer: Arc::new(Mutex::new(None)),
+diff --git a/src/mainnet_vss_tests.rs b/src/mainnet_vss_tests.rs
+index f9c88b7..e040833 100644
+--- a/src/mainnet_vss_tests.rs
++++ b/src/mainnet_vss_tests.rs
+@@ -678,18 +678,20 @@ async fn mainnet_vss_concurrent_stop_keeps_fence_with_teardown_owner() {
+         .forget();
+     assert!(wallet.state.unlocked_app_state.lock().await.is_none());
+     assert!(!first.is_finished());
+-    tokio::time::timeout(
+-        Duration::from_secs(1),
+-        crate::ldk::stop_node(wallet.state.clone()),
+-    )
+-    .await
+-    .expect("second stop owns no session");
++    let second = tokio::spawn(crate::ldk::stop_node(wallet.state.clone()));
++    tokio::time::sleep(Duration::from_millis(50)).await;
++    assert!(
++        !second.is_finished(),
++        "second stop must wait for the first teardown"
++    );
+     assert_eq!(server.rows(&node_store)[FENCE], fence);
+     resume.send(()).unwrap();
+     tokio::time::timeout(Duration::from_secs(10), first)
+         .await
+         .unwrap()
++        .unwrap()
+         .unwrap();
++    second.await.unwrap().unwrap();
+     assert!(!server.rows(&node_store).contains_key(FENCE));
+     assert!(common.persistence_worker.lock().unwrap().is_none());
+ }
+diff --git a/src/node.rs b/src/node.rs
+index 18c80ee..ac6b491 100644
+--- a/src/node.rs
++++ b/src/node.rs
+@@ -3,7 +3,7 @@ use std::sync::Arc;
+ use rgb_lib::BitcoinNetwork;
+ 
+ use crate::args::UserArgs;
+-use crate::error::AppError;
++use crate::error::{APIError, AppError};
+ use crate::ldk::stop_node;
+ use crate::utils::{start_daemon, AppState};
+ 
+@@ -77,14 +77,19 @@ impl NodeHandle {
+         Ok(Self { state })
+     }
+ 
+-    pub async fn shutdown(&self) {
+-        self.state.cancel_token.cancel();
++    pub async fn shutdown(&self) -> Result<(), APIError> {
++        {
++            // Serialize the terminal marker with foreign-host signer publication.
++            // A bootstrap may run without this lock, but cannot attach after it.
++            let _attached = self.state.get_attached_external_signer();
++            self.state.cancel_token.cancel();
++        }
+         // An unlock in progress owns resources that have not been published yet. Its state-change
+         // guard finishes publication/rollback before shutdown takes the session for teardown.
+         while *self.state.get_changing_state() {
+             tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+         }
+-        stop_node(self.state.clone()).await;
++        stop_node(self.state.clone()).await
+     }
+ 
+     #[cfg(feature = "uniffi")]
+@@ -102,6 +107,86 @@ impl NodeHandle {
+ mod tests {
+     use super::*;
+ 
++    fn config(storage_dir_path: &std::path::Path) -> NodeConfig {
++        NodeConfig {
++            storage_dir_path: storage_dir_path.to_path_buf(),
++            daemon_listening_port: 0,
++            ldk_peer_listening_port: 0,
++            network: BitcoinNetwork::Regtest,
++            max_media_upload_size_mb: 1,
++            max_aggregated_media_size_per_channel_mb:
++                crate::rgb_file_transfer::MAX_MEDIA_MB_PER_CHANNEL,
++            max_pending_consignments: crate::rgb_file_transfer::MAX_PENDING_CONSIGNMENTS,
++            max_media_files_per_channel: crate::rgb_file_transfer::MAX_MEDIA_FILES_PER_CHANNEL,
++            root_public_key: None,
++            enable_virtual_channels_v0: false,
++            virtual_peer_pubkeys: vec![],
++            lsp_base_url: None,
++            lsp_bearer_token: None,
++            vss_url: None,
++            vss_allow_empty_restore: false,
++            reuse_addresses: false,
++            remote_signer_listen_addr: None,
++        }
++    }
++
++    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++    async fn terminal_shutdown_closes_database_pool_before_all_callers_return() {
++        let directory = tempfile::tempdir().unwrap();
++        let node = NodeHandle::new(config(directory.path())).await.unwrap();
++        let database = node.app_state().db();
++        let pool = database.get_sqlite_connection_pool();
++        // A real final query leaves SQLx's asynchronous return-to-pool work on
++        // the current-thread DB runtime, reproducing the parked-connection path.
++        assert!(node
++            .state
++            .get_db()
++            .get_config("close-probe")
++            .unwrap()
++            .is_none());
++        assert!(!pool.is_closed());
++        let other = node.clone();
++        let (first, second) = tokio::join!(node.shutdown(), other.shutdown());
++        first.unwrap();
++        second.unwrap();
++        assert!(pool.is_closed());
++        assert_eq!(pool.size(), 0);
++        assert!(node.state.get_db().get_config("close-probe").is_err());
++        node.shutdown().await.unwrap();
++
++        // Closure must not damage persistent state or require process restart.
++        let reopened = NodeHandle::new(config(directory.path())).await.unwrap();
++        assert!(reopened
++            .state
++            .get_db()
++            .get_config("close-probe")
++            .unwrap()
++            .is_none());
++        reopened.shutdown().await.unwrap();
++    }
++
++    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++    async fn nonterminal_stop_keeps_database_pool_usable() {
++        let directory = tempfile::tempdir().unwrap();
++        let node = NodeHandle::new(config(directory.path())).await.unwrap();
++        let database = node.app_state().db();
++        let pool = database.get_sqlite_connection_pool();
++        // REST lock shares stop_node without cancelling the AppState token.
++        stop_node(node.app_state()).await.unwrap();
++        assert!(!pool.is_closed());
++        assert!(node
++            .state
++            .get_db()
++            .get_config("close-probe")
++            .unwrap()
++            .is_none());
++        stop_node(node.app_state()).await.unwrap();
++        assert!(!pool.is_closed());
++        node.shutdown().await.unwrap();
++        assert!(pool.is_closed());
++        assert_eq!(pool.size(), 0);
++    }
++
+     /// A `NodeConfig` embedder (a direct Rust consumer, not the uniffi FFI surface — see the `None`
+     /// left in `uniffi_api::handle_from_request`) must be able to configure the remote-signer daemon
+     /// address; without this field, `NodeHandle`-embedding callers could configure external-signer
+diff --git a/src/routes.rs b/src/routes.rs
+index b6784be..5123fd2 100644
+--- a/src/routes.rs
++++ b/src/routes.rs
+@@ -1757,6 +1757,9 @@ impl From<WitnessData> for RgbLibWitnessData {
+ 
+ impl AppState {
+     fn check_changing_state(&self) -> Result<(), APIError> {
++        if self.cancel_token.is_cancelled() {
++            return Err(APIError::Unexpected("Node is shutting down".to_string()));
++        }
+         if *self.get_changing_state() {
+             return Err(APIError::ChangingState);
+         }
+@@ -2575,8 +2578,7 @@ pub(crate) async fn connect_peer(
+         let (peer_pubkey, peer_addr) = parse_peer_info(payload.peer_pubkey_and_addr.to_string())?;
+ 
+         if let Some(peer_addr) = peer_addr {
+-            connect_peer_if_necessary(peer_pubkey, peer_addr, unlocked_state.peer_manager.clone())
+-                .await?;
++            connect_peer_if_necessary(peer_pubkey, peer_addr, unlocked_state).await?;
+             let db = state.get_db();
+             db.persist_channel_peer(&peer_pubkey, &peer_addr)?;
+         } else {
+@@ -4125,7 +4127,7 @@ pub(crate) async fn lock(
+         };
+ 
+         tracing::debug!("Stopping node...");
+-        stop_node(state.clone()).await;
++        stop_node(state.clone()).await?;
+         tracing::debug!("Node stopped");
+ 
+         state.update_unlocked_app_state(None).await;
+@@ -4675,7 +4677,7 @@ pub(crate) async fn open_channel(
+             }
+         }
+         if let Some(peer_addr) = peer_addr {
+-            connect_peer_if_necessary(peer_pubkey, peer_addr, unlocked_state.peer_manager.clone())
++            connect_peer_if_necessary(peer_pubkey, peer_addr, unlocked_state)
+                 .await?;
+             db.persist_channel_peer(&peer_pubkey, &peer_addr)?;
+         } else {
+@@ -6102,6 +6104,7 @@ mod state_mocks {
+                 remote_signer_listen_addr,
+             }),
+             cancel_token: CancellationToken::new(),
++            teardown: TokioMutex::new(None),
+             unlocked_app_state: Arc::new(TokioMutex::new(None)),
+             ldk_background_services: Arc::new(Mutex::new(None)),
+             attached_external_signer: Arc::new(Mutex::new(None)),
+diff --git a/src/sdk/mod.rs b/src/sdk/mod.rs
+index 77680dd..1190b0b 100644
+--- a/src/sdk/mod.rs
++++ b/src/sdk/mod.rs
+@@ -140,6 +140,9 @@ impl Drop for OpenChannelVirtualIntentGuard {
+ }
+ 
+ fn check_changing_state(state: &AppState) -> Result<(), APIError> {
++    if state.cancel_token.is_cancelled() {
++        return Err(APIError::Unexpected("Node is shutting down".to_string()));
++    }
+     if *state.changing_state.lock().unwrap() {
+         return Err(APIError::ChangingState);
+     }
+@@ -2307,8 +2310,7 @@ pub(crate) async fn connect_peer(
+     let (peer_pubkey, peer_addr) = parse_peer_info(peer_pubkey_and_addr.to_string())?;
+ 
+     if let Some(peer_addr) = peer_addr {
+-        connect_peer_if_necessary(peer_pubkey, peer_addr, unlocked_state.peer_manager.clone())
+-            .await?;
++        connect_peer_if_necessary(peer_pubkey, peer_addr, unlocked_state).await?;
+         state
+             .get_db()
+             .persist_channel_peer(&peer_pubkey, &peer_addr)?;
+@@ -3068,8 +3070,7 @@ pub(crate) async fn open_channel(
+         }
+     }
+     if let Some(peer_addr) = peer_addr {
+-        connect_peer_if_necessary(peer_pubkey, peer_addr, unlocked_state.peer_manager.clone())
+-            .await?;
++        connect_peer_if_necessary(peer_pubkey, peer_addr, unlocked_state).await?;
+         state
+             .get_db()
+             .persist_channel_peer(&peer_pubkey, &peer_addr)?;
+@@ -4834,6 +4835,7 @@ mod tests {
+                 remote_signer_listen_addr: None,
+             }),
+             cancel_token: CancellationToken::new(),
++            teardown: tokio::sync::Mutex::new(None),
+             unlocked_app_state: Arc::new(TokioMutex::new(None)),
+             ldk_background_services: Arc::new(Mutex::new(None)),
+             attached_external_signer: Arc::new(Mutex::new(None)),
+diff --git a/src/test/auth_db_persistence.rs b/src/test/auth_db_persistence.rs
+index 535a698..0d6ace8 100644
+--- a/src/test/auth_db_persistence.rs
++++ b/src/test/auth_db_persistence.rs
+@@ -40,6 +40,7 @@ fn build_state(storage_dir_path: PathBuf, database: DatabaseConnection) -> AppSt
+             remote_signer_listen_addr: None,
+         }),
+         cancel_token: CancellationToken::new(),
++        teardown: tokio::sync::Mutex::new(None),
+         unlocked_app_state: Arc::new(TokioMutex::new(None)),
+         ldk_background_services: Arc::new(Mutex::new(None)),
+         attached_external_signer: Arc::new(Mutex::new(None)),
+diff --git a/src/test_utils.rs b/src/test_utils.rs
+index 1282ad3..888d897 100644
+--- a/src/test_utils.rs
++++ b/src/test_utils.rs
+@@ -46,6 +46,7 @@ pub fn mock_locked_app_state() -> TestAppState {
+             remote_signer_listen_addr: None,
+         }),
+         cancel_token: CancellationToken::new(),
++        teardown: TokioMutex::new(None),
+         unlocked_app_state: Arc::new(TokioMutex::new(None)),
+         ldk_background_services: Arc::new(Mutex::new(None)),
+         attached_external_signer: Arc::new(Mutex::new(None)),
+diff --git a/src/uniffi_api/mod.rs b/src/uniffi_api/mod.rs
+index 89eb544..8b946cb 100644
+--- a/src/uniffi_api/mod.rs
++++ b/src/uniffi_api/mod.rs
+@@ -71,13 +71,23 @@ fn attach_host_with_expected_key_source(
+     host: Arc<dyn ExternalSignerHost>,
+     expected: crate::signer::KeySourceFile,
+ ) -> Result<(), RlnError> {
++    if state.cancel_token.is_cancelled() {
++        return Err(RlnError::NotInitialized("node is shut down".to_string()));
++    }
+     let transport: Arc<dyn crate::signer::ExternalSignerTransport> =
+         Arc::new(UniffiExternalSignerTransport::new(host));
+     let attachment =
+         crate::ldk::attach_external_signer_transport(transport).map_err(state::map_api_error)?;
+     crate::signer::validate_key_source_matches_bootstrap(&expected, &attachment.bootstrap)
+         .map_err(|_| state::map_api_error(crate::error::APIError::ExternalSignerMismatch))?;
+-    state.set_attached_external_signer(Some(attachment));
++    let mut attached = state.get_attached_external_signer();
++    // Terminal shutdown marks cancellation under this same lock. A signer
++    // bootstrap that was already in flight may finish, but must not publish
++    // a new attachment after shutdown has taken ownership of the node.
++    if state.cancel_token.is_cancelled() {
++        return Err(RlnError::NotInitialized("node is shut down".to_string()));
++    }
++    *attached = Some(attachment);
+     Ok(())
+ }
+ 
+@@ -417,12 +427,9 @@ impl SdkNode {
+         Ok(Self { handle })
+     }
+ 
+-    pub fn shutdown(&self) {
++    pub fn shutdown(&self) -> Result<(), RlnError> {
+         let handle = self.handle.clone();
+-        let _ = block_on_sdk(async move {
+-            handle.shutdown().await;
+-            Ok::<(), crate::error::APIError>(())
+-        });
++        block_on_sdk(async move { handle.shutdown().await })
+     }
+ 
+     pub fn init(&self, password: String, mnemonic: Option<String>) -> Result<String, RlnError> {
+@@ -1795,15 +1802,18 @@ pub fn sdk_initialize(request: SdkInitRequest) -> Result<(), RlnError> {
+     Ok(())
+ }
+ 
+-pub fn sdk_shutdown() {
+-    if let Ok(state) = get_uniffi_app_state() {
+-        let _ = block_on_sdk(async move {
+-            let handle = NodeHandle::from_app_state(state);
+-            handle.shutdown().await;
+-            Ok::<(), crate::error::APIError>(())
+-        });
+-    }
++pub fn sdk_shutdown() -> Result<(), RlnError> {
++    let state = match get_uniffi_app_state() {
++        Ok(state) => state,
++        Err(RlnError::NotInitialized(_)) => return Ok(()),
++        Err(err) => return Err(err),
++    };
++    block_on_sdk(async move {
++        let handle = NodeHandle::from_app_state(state);
++        handle.shutdown().await
++    })?;
+     clear_uniffi_node_handle();
++    Ok(())
+ }
+ 
+ pub fn sdk_init_with_external_signer(
+diff --git a/src/uniffi_api/native_signer.rs b/src/uniffi_api/native_signer.rs
+index 42f6c14..2650cff 100644
+--- a/src/uniffi_api/native_signer.rs
++++ b/src/uniffi_api/native_signer.rs
+@@ -11,15 +11,61 @@ use bitcoin::Network;
+ use rand::rngs::OsRng;
+ use rand::RngCore;
+ use signer_external::contract::{BootstrapData, ExternalSignerBackend, SignerRequest};
+-use std::sync::Arc;
++use std::sync::{
++    atomic::{AtomicBool, Ordering},
++    Arc, RwLock,
++};
+ 
+-#[derive(uniffi::Object)]
+-pub struct NativeExternalSigner {
++struct NativeExternalSignerState {
+     backend: Arc<dyn ExternalSignerBackend>,
+     transport: Arc<InProcessVlsTransport>,
+ }
+ 
++#[derive(uniffi::Object)]
++pub struct NativeExternalSigner {
++    // A terminal gate prevents new readers from starving shutdown, including
++    // calls that were queued before the exclusive state lock was acquired.
++    shutting_down: AtomicBool,
++    state: RwLock<Option<NativeExternalSignerState>>,
++}
++
+ impl NativeExternalSigner {
++    fn from_backend(
++        backend: Arc<dyn ExternalSignerBackend>,
++        transport: Arc<InProcessVlsTransport>,
++    ) -> Arc<Self> {
++        Arc::new(Self {
++            shutting_down: AtomicBool::new(false),
++            state: RwLock::new(Some(NativeExternalSignerState { backend, transport })),
++        })
++    }
++
++    fn unavailable() -> RlnError {
++        RlnError::ExternalSignerUnavailable("native external signer is shut down".to_string())
++    }
++
++    fn with_state<T>(
++        &self,
++        operation: impl FnOnce(&NativeExternalSignerState) -> Result<T, RlnError>,
++    ) -> Result<T, RlnError> {
++        if self.shutting_down.load(Ordering::Acquire) {
++            return Err(Self::unavailable());
++        }
++        let guard = self.state.read().map_err(|_| {
++            RlnError::ExternalSignerUnavailable(
++                "native external signer state is poisoned".to_string(),
++            )
++        })?;
++        // Shutdown may have started while this reader waited for the lock.
++        if self.shutting_down.load(Ordering::Acquire) {
++            return Err(Self::unavailable());
++        }
++        let state = guard.as_ref().ok_or_else(Self::unavailable)?;
++        // Keep the guard alive throughout the complete backend/transport call.
++        // No backend or transport Arc may escape this closure.
++        operation(state)
++    }
++
+     fn parse_network(network: &str) -> Result<Network, RlnError> {
+         match network.to_lowercase().as_str() {
+             "mainnet" | "bitcoin" => Ok(Network::Bitcoin),
+@@ -94,7 +140,7 @@ impl NativeExternalSigner {
+                 tracing::error!(error = ?e, "native signer transport init failed");
+                 RlnError::internal(format!("native signer transport init failed: {e}"))
+             })?;
+-        Ok(Arc::new(Self { backend, transport }))
++        Ok(Self::from_backend(backend, transport))
+     }
+ 
+     /// Like [`Self::new`], but with a disk-backed VLS store under `storage_dir_path`, so a
+@@ -133,34 +179,58 @@ impl NativeExternalSigner {
+                     "native signer persistent transport init failed: {e}"
+                 ))
+             })?;
+-        Ok(Arc::new(Self { backend, transport }))
++        Ok(Self::from_backend(backend, transport))
++    }
++
++    /// Permanently revoke this signer and every outstanding `Arc` clone.
++    ///
++    /// Call only after node shutdown has finished its final state persistence.
++    /// This waits for in-flight signer calls, rejects new calls, and releases
++    /// the seed-bearing backend, transport and exclusive persistent-store lock
++    /// before returning. Repeated calls are safe. Freeing a host handle alone
++    /// remains an ownership operation and must not invoke this method.
++    pub fn shutdown(&self) -> Result<(), RlnError> {
++        self.shutting_down.store(true, Ordering::Release);
++        // A prior panic must never make revocation silently skip its cleanup.
++        // Poison recovery is safe here: no state is reused, only destroyed.
++        let mut state = self.state.write().unwrap_or_else(|err| err.into_inner());
++        // Drop under the exclusive guard, so concurrent shutdown callers also
++        // wait for backend/transport destruction before reporting success.
++        drop(state.take());
++        self.state.clear_poison();
++        Ok(())
+     }
+ 
+     pub fn bootstrap(&self) -> Result<SdkExternalSignerBootstrap, RlnError> {
+-        let bootstrap = match self.backend.call(SignerRequest::Bootstrap).map_err(|e| {
+-            tracing::error!(error = ?e, "native external signer bootstrap failed");
+-            RlnError::internal(format!("native external signer bootstrap failed: {e}"))
+-        })? {
+-            signer_external::contract::SignerResponse::Bootstrap(data) => data,
+-            other => {
+-                tracing::error!(response = ?other, "native external signer returned non-bootstrap response");
+-                return Err(RlnError::internal(
+-                    "native external signer returned non-bootstrap response",
+-                ));
++        self.with_state(|state| {
++            let response = state.backend.call(SignerRequest::Bootstrap).map_err(|e| {
++                tracing::error!(error = ?e, "native external signer bootstrap failed");
++                RlnError::internal(format!("native external signer bootstrap failed: {e}"))
++            })?;
++            match response {
++                signer_external::contract::SignerResponse::Bootstrap(data) => {
++                    Ok(Self::map_bootstrap(data))
++                }
++                other => {
++                    tracing::error!(response = ?other, "native signer returned non-bootstrap response");
++                    Err(RlnError::internal(
++                        "native external signer returned non-bootstrap response",
++                    ))
++                }
+             }
+-        };
+-        Ok(Self::map_bootstrap(bootstrap))
++        })
+     }
+ }
+ 
+ impl ExternalSignerHost for NativeExternalSigner {
+     fn call(&self, request: Vec<u8>) -> Result<Vec<u8>, RlnError> {
+-        in_process_vls::handle_envelope(self.backend.as_ref(), &self.transport, &request).map_err(
+-            |e| {
+-                tracing::error!(error = ?e, "native external signer envelope failed");
+-                RlnError::internal(format!("native external signer envelope failed: {e}"))
+-            },
+-        )
++        self.with_state(|state| {
++            in_process_vls::handle_envelope(state.backend.as_ref(), &state.transport, &request)
++                .map_err(|e| {
++                    tracing::error!(error = ?e, "native external signer envelope failed");
++                    RlnError::internal(format!("native external signer envelope failed: {e}"))
++                })
++        })
+     }
+ }
+ 
+@@ -210,4 +280,157 @@ mod tests {
+                 .expect("explicit permissive is allowed off-mainnet")
+         );
+     }
++
++    fn persistent_signer(storage_dir: &std::path::Path) -> Arc<NativeExternalSigner> {
++        NativeExternalSigner::new_with_storage(
++            "11".repeat(32),
++            "regtest".to_string(),
++            Some(true),
++            storage_dir.display().to_string(),
++        )
++        .expect("persistent signer should open")
++    }
++
++    fn assert_revoked(signer: &NativeExternalSigner) {
++        assert!(matches!(
++            signer.bootstrap(),
++            Err(RlnError::ExternalSignerUnavailable(_))
++        ));
++        assert!(matches!(
++            signer.call(sign_message_request()),
++            Err(RlnError::ExternalSignerUnavailable(_))
++        ));
++    }
++
++    fn sign_message_request() -> Vec<u8> {
++        crate::signer::proto::encode_signer_request(&SignerRequest::Node(
++            signer_external::contract::NodeRequest::SignMessage {
++                message: "native signer shutdown regression".to_string(),
++            },
++        ))
++        .unwrap()
++    }
++
++    fn assert_can_sign(signer: &NativeExternalSigner) {
++        let response = signer.call(sign_message_request()).unwrap();
++        assert!(matches!(
++            crate::signer::proto::decode_signer_response(&response).unwrap(),
++            signer_external::contract::SignerResponse::Node(
++                signer_external::contract::NodeResponse::Signature { .. }
++            )
++        ));
++    }
++
++    #[test]
++    fn shutdown_releases_store_and_revokes_every_outstanding_clone() {
++        let dir = tempfile::tempdir().unwrap();
++        let signer = persistent_signer(dir.path());
++        let retained_clone = Arc::clone(&signer);
++        let before = signer.bootstrap().unwrap();
++        assert_can_sign(&signer);
++
++        signer.shutdown().unwrap();
++        assert_revoked(&signer);
++        assert_revoked(&retained_clone);
++        // A stale clone's repeated shutdown cannot affect a new signer session.
++        let reopened = persistent_signer(dir.path());
++        retained_clone.shutdown().unwrap();
++        assert_eq!(reopened.bootstrap().unwrap().node_id, before.node_id);
++        assert_eq!(
++            reopened.bootstrap().unwrap().master_fingerprint,
++            before.master_fingerprint
++        );
++        assert_can_sign(&reopened);
++        reopened.shutdown().unwrap();
++    }
++
++    #[test]
++    fn ordinary_handle_drop_does_not_revoke_retained_signer() {
++        let dir = tempfile::tempdir().unwrap();
++        let signer = persistent_signer(dir.path());
++        let attached_clone = Arc::clone(&signer);
++        drop(signer);
++        attached_clone.bootstrap().unwrap();
++        attached_clone.shutdown().unwrap();
++        persistent_signer(dir.path()).shutdown().unwrap();
++    }
++
++    #[test]
++    fn shutdown_drains_inflight_calls_and_rejects_queued_calls() {
++        use std::sync::mpsc;
++        use std::time::{Duration, Instant};
++
++        let dir = tempfile::tempdir().unwrap();
++        let signer = persistent_signer(dir.path());
++        let (entered_tx, entered_rx) = mpsc::channel();
++        let (release_tx, release_rx) = mpsc::channel();
++        let (closed_tx, closed_rx) = mpsc::channel();
++        let active = Arc::clone(&signer);
++        let call = std::thread::spawn(move || {
++            active.with_state(|state| {
++                entered_tx.send(()).unwrap();
++                release_rx.recv().unwrap();
++                state.backend.call(SignerRequest::Bootstrap).unwrap();
++                Ok(())
++            })
++        });
++        entered_rx.recv_timeout(Duration::from_secs(10)).unwrap();
++
++        let closing = Arc::clone(&signer);
++        let close = std::thread::spawn(move || {
++            closing.shutdown().unwrap();
++            closed_tx.send(()).unwrap();
++        });
++        let deadline = Instant::now() + Duration::from_secs(10);
++        while !signer.shutting_down.load(Ordering::Acquire) {
++            assert!(Instant::now() < deadline, "shutdown did not start");
++            std::thread::yield_now();
++        }
++        assert_revoked(&signer);
++        assert!(matches!(
++            closed_rx.try_recv(),
++            Err(mpsc::TryRecvError::Empty)
++        ));
++        release_tx.send(()).unwrap();
++        call.join().unwrap().unwrap();
++        closed_rx.recv_timeout(Duration::from_secs(10)).unwrap();
++        close.join().unwrap();
++        assert_revoked(&signer);
++        persistent_signer(dir.path()).shutdown().unwrap();
++    }
++
++    #[test]
++    fn concurrent_shutdown_is_idempotent_and_waits_for_store_release() {
++        let dir = tempfile::tempdir().unwrap();
++        let signer = persistent_signer(dir.path());
++        let closes: Vec<_> = (0..8)
++            .map(|_| {
++                let signer = Arc::clone(&signer);
++                std::thread::spawn(move || signer.shutdown())
++            })
++            .collect();
++        for close in closes {
++            close.join().unwrap().unwrap();
++        }
++        assert_revoked(&signer);
++        persistent_signer(dir.path()).shutdown().unwrap();
++    }
++
++    #[test]
++    fn shutdown_recovers_poison_without_reusing_signing_state() {
++        let dir = tempfile::tempdir().unwrap();
++        let signer = persistent_signer(dir.path());
++        let poisoned = Arc::clone(&signer);
++        assert!(std::thread::spawn(move || {
++            let _guard = poisoned.state.write().unwrap();
++            panic!("exercise poisoned signer-state cleanup");
++        })
++        .join()
++        .is_err());
++        assert_revoked(&signer);
++        signer.shutdown().unwrap();
++        signer.shutdown().unwrap();
++        assert_revoked(&signer);
++        persistent_signer(dir.path()).shutdown().unwrap();
++    }
+ }
+diff --git a/src/uniffi_api/tests.rs b/src/uniffi_api/tests.rs
+index 27ea384..3556e4f 100644
+--- a/src/uniffi_api/tests.rs
++++ b/src/uniffi_api/tests.rs
+@@ -176,6 +176,74 @@ mod uniffi_smoke_tests {
+         mock_locked_state_for_network(BitcoinNetwork::Regtest)
+     }
+ 
++    #[cfg(feature = "vls")]
++    #[test]
++    fn signer_attachment_rejects_shutdown_before_calling_host() {
++        struct NeverCalledHost;
++        impl ExternalSignerHost for NeverCalledHost {
++            fn call(&self, _: Vec<u8>) -> Result<Vec<u8>, RlnError> {
++                panic!("a shut-down node must not call a new signer host");
++            }
++        }
++        let state = mock_locked_state();
++        let signer =
++            NativeExternalSigner::new("11".repeat(32), "regtest".to_string(), Some(true)).unwrap();
++        let expected = key_source_from_uniffi_bootstrap(signer.bootstrap().unwrap());
++        crate::runtime::block_on(NodeHandle::from_app_state(state.clone()).shutdown()).unwrap();
++        let error =
++            attach_host_with_expected_key_source(&state, Arc::new(NeverCalledHost), expected)
++                .unwrap_err();
++        assert!(matches!(error, RlnError::NotInitialized(_)));
++        assert!(state.get_attached_external_signer().is_none());
++        signer.shutdown().unwrap();
++    }
++
++    #[cfg(feature = "vls")]
++    #[test]
++    fn signer_attachment_bootstrap_cannot_publish_after_concurrent_shutdown() {
++        use std::sync::mpsc;
++        use std::time::Duration;
++
++        struct GatedHost {
++            signer: Arc<NativeExternalSigner>,
++            entered: Mutex<Option<mpsc::Sender<()>>>,
++            proceed: Mutex<mpsc::Receiver<()>>,
++        }
++        impl ExternalSignerHost for GatedHost {
++            fn call(&self, request: Vec<u8>) -> Result<Vec<u8>, RlnError> {
++                if let Some(entered) = self.entered.lock().unwrap().take() {
++                    entered.send(()).unwrap();
++                    self.proceed.lock().unwrap().recv().unwrap();
++                }
++                self.signer.call(request)
++            }
++        }
++        let state = mock_locked_state();
++        let signer =
++            NativeExternalSigner::new("11".repeat(32), "regtest".to_string(), Some(true)).unwrap();
++        let expected = key_source_from_uniffi_bootstrap(signer.bootstrap().unwrap());
++        let (entered_tx, entered_rx) = mpsc::channel();
++        let (proceed_tx, proceed_rx) = mpsc::channel();
++        let host = Arc::new(GatedHost {
++            signer: signer.clone(),
++            entered: Mutex::new(Some(entered_tx)),
++            proceed: Mutex::new(proceed_rx),
++        });
++        let attaching = {
++            let state = state.clone();
++            std::thread::spawn(move || attach_host_with_expected_key_source(&state, host, expected))
++        };
++        entered_rx.recv_timeout(Duration::from_secs(10)).unwrap();
++        crate::runtime::block_on(NodeHandle::from_app_state(state.clone()).shutdown()).unwrap();
++        proceed_tx.send(()).unwrap();
++        assert!(matches!(
++            attaching.join().unwrap(),
++            Err(RlnError::NotInitialized(_))
++        ));
++        assert!(state.get_attached_external_signer().is_none());
++        signer.shutdown().unwrap();
++    }
++
+     fn mock_locked_state_for_network(network: BitcoinNetwork) -> Arc<AppState> {
+         let tmp = tempfile::tempdir().unwrap();
+         let db_path = tmp.path().join("rln_db");
+@@ -207,6 +275,7 @@ mod uniffi_smoke_tests {
+                 remote_signer_listen_addr: None,
+             }),
+             cancel_token: CancellationToken::new(),
++            teardown: tokio::sync::Mutex::new(None),
+             unlocked_app_state: Arc::new(TokioMutex::new(None)),
+             ldk_background_services: Arc::new(Mutex::new(None)),
+             attached_external_signer: Arc::new(Mutex::new(None)),
+diff --git a/src/utils.rs b/src/utils.rs
+index 454f4ba..41a48ee 100644
+--- a/src/utils.rs
++++ b/src/utils.rs
+@@ -30,7 +30,7 @@ use std::{
+     path::Path,
+     path::PathBuf,
+     str::FromStr,
+-    sync::{Arc, Mutex, MutexGuard, OnceLock, RwLock},
++    sync::{Arc, Mutex, MutexGuard, OnceLock, RwLock, Weak},
+     time::{Duration, SystemTime},
+ };
+ use tokio::sync::{Mutex as TokioMutex, MutexGuard as TokioMutexGuard};
+@@ -85,6 +85,7 @@ pub(crate) fn fatal_exit_code() -> i32 {
+ pub(crate) struct AppState {
+     pub(crate) static_state: Arc<StaticState>,
+     pub(crate) cancel_token: CancellationToken,
++    pub(crate) teardown: TokioMutex<Option<Result<(), String>>>,
+     pub(crate) unlocked_app_state: Arc<TokioMutex<Option<Arc<UnlockedAppState>>>>,
+     pub(crate) ldk_background_services: Arc<Mutex<Option<LdkBackgroundServices>>>,
+     #[allow(dead_code)]
+@@ -216,6 +217,7 @@ pub(crate) struct CommonState {
+ 
+ /// A complete Lightning runtime, present only on supported non-mainnet networks.
+ pub(crate) struct LightningState {
++    pub(crate) session_tasks: Weak<crate::ldk::SessionTasks>,
+     pub(crate) common: Arc<CommonState>,
+     pub(crate) channel_manager: Arc<ChannelManager>,
+     pub(crate) gossip_source: Arc<crate::gossip::GossipSource>,
+@@ -612,14 +614,15 @@ pub(crate) fn encrypt_and_save_mnemonic(
+ pub(crate) async fn connect_peer_if_necessary(
+     pubkey: PublicKey,
+     address: SocketAddr,
+-    peer_manager: Arc<PeerManager>,
++    session: &LightningState,
+ ) -> Result<(), APIError> {
++    let peer_manager = Arc::clone(&session.peer_manager);
+     for peer_details in peer_manager.list_peers() {
+         if peer_details.counterparty_node_id == pubkey {
+             return Ok(());
+         }
+     }
+-    do_connect_peer(pubkey, address, peer_manager).await?;
++    do_connect_peer(pubkey, address, peer_manager, session.session_tasks.clone()).await?;
+     tracing::info!("connected to peer (pubkey: {pubkey}, addr: {address})");
+     Ok(())
+ }
+@@ -646,16 +649,37 @@ pub(crate) async fn do_connect_peer(
+     pubkey: PublicKey,
+     address: SocketAddr,
+     peer_manager: Arc<PeerManager>,
++    session_tasks: Weak<crate::ldk::SessionTasks>,
+ ) -> Result<(), APIError> {
+-    match lightning_net_tokio::connect_outbound(Arc::clone(&peer_manager), pubkey, address).await {
++    let tasks = session_tasks
++        .upgrade()
++        .ok_or(APIError::FailedPeerConnection)?;
++    let shutdown = tasks.cancellation();
++    let connected = tokio::select! {
++        biased;
++        _ = shutdown.cancelled() => return Err(APIError::FailedPeerConnection),
++        connected = lightning_net_tokio::connect_outbound(Arc::clone(&peer_manager), pubkey, address) => connected,
++    };
++    match connected {
+         Some(connection_closed_future) => {
+             let mut connection_closed_future = Box::pin(connection_closed_future);
+             loop {
+                 tokio::select! {
++                    biased;
++                    _ = shutdown.cancelled() => {
++                        peer_manager.disconnect_all_peers();
++                        connection_closed_future.await;
++                        return Err(APIError::FailedPeerConnection);
++                    },
+                     _ = &mut connection_closed_future => return Err(APIError::FailedPeerConnection),
+                     _ = tokio::time::sleep(Duration::from_millis(10)) => {},
+                 };
+                 if peer_manager.peer_by_node_id(&pubkey).is_some() {
++                    if let Err(completion) = tasks.spawn(connection_closed_future) {
++                        peer_manager.disconnect_all_peers();
++                        completion.await;
++                        return Err(APIError::FailedPeerConnection);
++                    }
+                     return Ok(());
+                 }
+             }
+@@ -818,6 +842,7 @@ pub(crate) async fn start_daemon(args: &UserArgs) -> Result<Arc<AppState>, AppEr
+     let app_state = Arc::new(AppState {
+         static_state,
+         cancel_token,
++        teardown: tokio::sync::Mutex::new(None),
+         unlocked_app_state: Arc::new(TokioMutex::new(None)),
+         ldk_background_services: Arc::new(Mutex::new(None)),
+         attached_external_signer: Arc::new(Mutex::new(None)),

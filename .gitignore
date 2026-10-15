@@ -1,5 +1,9 @@
 # Cargo
 target/
+target-*/
+.cargo-cache/
+.npm-cache/
+native-*.log
 # Note: Cargo.lock IS committed for this crate (Node addon is a
 # binary-shaped distribution; we need deterministic builds so CI and
 # consumers resolve the same `rgb-lib` revision, which is what fixes
@@ -8,6 +12,7 @@ target/
 
 # Native addon prebuilds — distributed via GitHub Releases
 *.node
+*.provenance.json
 
 # Node
 node_modules/

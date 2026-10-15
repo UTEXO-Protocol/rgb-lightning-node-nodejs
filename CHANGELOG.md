@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0-beta.4 (unpublished candidate)
+
+- Pin RLN SDK v0.17.0-beta.3, its released LDK submodule and rgb-lib beta.50-bfa.
+- Rebase the C-FFI-only adapter and enforce new compiled provenance. Existing API behavior and strict native artifact protection gates remain.
+
+
 All notable changes to `@utexo/rgb-lightning-node-nodejs` are
 documented here.
 
