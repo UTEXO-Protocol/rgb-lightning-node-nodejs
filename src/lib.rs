@@ -33,9 +33,10 @@ use rlncffi::{
     rln_issue_asset_uda, rln_keysend, rln_list_assets, rln_list_channels, rln_list_payments,
     rln_list_peers, rln_list_swaps, rln_list_transactions, rln_list_transfers, rln_list_unspents,
     rln_ln_invoice, rln_maker_execute, rln_maker_init, rln_native_external_signer_bootstrap,
-    rln_native_external_signer_new, rln_native_external_signer_new_with_storage, rln_network_info,
-    rln_node_info, rln_open_channel, rln_post_asset_media, rln_refresh_transfers, rln_rgb_invoice,
-    rln_rotate_address, rln_sdk_node_apay_new, rln_sdk_node_apay_new_with_address,
+    rln_native_external_signer_new, rln_native_external_signer_new_with_storage,
+    rln_native_external_signer_shutdown, rln_network_info, rln_node_info, rln_open_channel,
+    rln_post_asset_media, rln_refresh_transfers, rln_rgb_invoice, rln_rotate_address,
+    rln_sdk_node_apay_new, rln_sdk_node_apay_new_with_address,
     rln_sdk_node_attach_native_external_signer, rln_sdk_node_detach_external_signer,
     rln_sdk_node_init_with_external_signer, rln_sdk_node_init_with_native_external_signer,
     rln_sdk_node_new, rln_sdk_node_shutdown, rln_sdk_node_unlock_with_attached_external_signer,
@@ -188,6 +189,13 @@ impl NativeExternalSigner {
     pub fn bootstrap(&self) -> Result<String> {
         let res = rln_native_external_signer_bootstrap(&self.handle);
         take_cresult_string(res)
+    }
+
+    /// Terminally revoke every clone after all attached nodes have shut down.
+    /// Unlike destroy/Drop, this releases signer state even with retained Arcs.
+    #[napi]
+    pub fn shutdown(&self) -> Result<()> {
+        take_cresult_string(rln_native_external_signer_shutdown(&self.handle)).map(|_| ())
     }
 
     /// Explicit early-drop; safe to call multiple times. Mostly a hook

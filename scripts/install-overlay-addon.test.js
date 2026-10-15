@@ -15,7 +15,7 @@ test('release metadata is exact and the adapter is checksum-bound', () => {
   assert.throws(() => validateAdapter({ ...config, commit: '0'.repeat(40) }), /identity/)
 })
 
-test('adapter changes only the eight reviewed C-FFI files', () => {
+test('adapter changes only reviewed C-FFI and lifecycle files', () => {
   const patch = fs.readFileSync(readConfig().patchPath, 'utf8')
   const files = [...patch.matchAll(/^diff --git a\/(\S+) b\/(\S+)$/gm)]
   assert.equal(files.length, ALLOWED_FILES.length)
@@ -23,7 +23,7 @@ test('adapter changes only the eight reviewed C-FFI files', () => {
     assert.equal(a, b)
     assert.ok(ALLOWED_FILES.includes(a), a)
   }
-  for (const forbidden of ['src/persistence/', 'src/signer/', 'src/ldk', 'rust-lightning/']) {
+  for (const forbidden of ['src/persistence/', 'src/signer/', 'rust-lightning/']) {
     assert.ok(!files.some(([, file]) => file.startsWith(forbidden)), forbidden)
   }
 })
@@ -33,7 +33,9 @@ test('adapter contains binding repairs without a core import backport', () => {
   for (const symbol of ['rln_native_external_signer_new_with_storage', 'rln_sdk_node_apay_new_with_address',
     'rln_binding_build_info', 'min_final_cltv_expiry_delta', 'JsonDecodedRgbAssignment']) assert.ok(patch.includes(symbol))
   for (const symbol of ['rln_wallet_snapshot', 'rln_prepare_btc_send', 'native_operations.rs']) assert.ok(!patch.includes(symbol))
-  assert.doesNotMatch(patch, /diff --git a\/src\//)
+  assert.match(patch, /diff --git a\/src\/uniffi_api\/native_signer.rs/)
+  assert.match(patch, /native-signer-shutdown-v1/)
+  assert.match(patch, /owned-session-cleanup-v1/)
 })
 
 test('adapter preserves native blinded receive reservation counts', () => {

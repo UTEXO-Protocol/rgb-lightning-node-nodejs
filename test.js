@@ -53,19 +53,53 @@ try {
   node.shutdown()
   node.shutdown()
   node = undefined
+  signer.shutdown()
+  signer.shutdown()
+  assert.throws(() => signer.bootstrap(), /shut ?down|closed/i)
+  // The persistent store must reopen before the old host handle is freed.
+  const reopened = NativeExternalSigner.createWithStorage('01'.repeat(32), 'regtest', signerDir)
+  assert.deepEqual(reopened.bootstrap(), bootstrap)
   signer.destroy()
   signer.destroy()
   assert.throws(() => signer.bootstrap(), /destroyed/)
-  signer = NativeExternalSigner.createWithStorage('01'.repeat(32), 'regtest', signerDir)
+  signer = reopened
   assert.deepEqual(signer.bootstrap(), bootstrap)
   assert.equal(fs.statSync(signerDir).mode & 0o777, 0o700)
   assert.throws(() => NativeExternalSigner.create('01'.repeat(32), 'mainnet', true))
 } finally {
   if (node) node.shutdown()
-  if (signer) signer.destroy()
+  if (signer) { signer.shutdown(); signer.destroy() }
   fs.rmSync(root, { recursive: true, force: true })
 }
 console.log('Native identity, offline init, errors, disposal and persistent signer reopen passed.')
+
+const retainedRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'rln-node-host-free-'))
+let retainedNode
+let retainedSigner
+try {
+  const storage = path.join(retainedRoot, 'signer')
+  retainedSigner = NativeExternalSigner.createWithStorage('02'.repeat(32), 'regtest', storage)
+  const expectedBootstrap = retainedSigner.bootstrap()
+  retainedNode = SdkNode.create({ storage_dir_path: path.join(retainedRoot, 'node'),
+    daemon_listening_port: 0, ldk_peer_listening_port: 0, network: 'regtest',
+    max_media_upload_size_mb: 5, enable_virtual_channels_v0: false, reuse_addresses: true })
+  retainedNode.initWithNativeExternalSigner(retainedSigner)
+  retainedNode.attachNativeExternalSigner(retainedSigner)
+  retainedSigner.destroy()
+  // Freeing the host Arc must not revoke or release the still-attached signer.
+  assert.throws(() => NativeExternalSigner.createWithStorage('02'.repeat(32), 'regtest', storage),
+    /Database already open|Cannot acquire lock/)
+  retainedSigner = undefined
+  retainedNode.shutdown()
+  retainedNode = undefined
+  retainedSigner = NativeExternalSigner.createWithStorage('02'.repeat(32), 'regtest', storage)
+  assert.deepEqual(retainedSigner.bootstrap(), expectedBootstrap)
+} finally {
+  if (retainedNode) retainedNode.shutdown()
+  if (retainedSigner) { retainedSigner.shutdown(); retainedSigner.destroy() }
+  fs.rmSync(retainedRoot, { recursive: true, force: true })
+}
+console.log('Early host-handle release preserves the attached signer until node shutdown.')
 
 const mainnetRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'rln-mainnet-policy-'))
 const mainnet = SdkNode.create({ storage_dir_path: mainnetRoot,

@@ -13,6 +13,8 @@ const RELEASE = Object.freeze({
   rustToolchain: '1.94.0',
   cffiLockSha256: '5fcdc9ad9179d3230e48973cdfa514a863d13a837752027febf8ea04713bbeb5'
 })
+// Exact reviewed C adapter plus the shared native lifecycle repair. This remains
+// an upstream release with an explicitly hashed runtime overlay, not plain RLN.
 const ALLOWED_FILES = Object.freeze([
   'bindings/c-ffi/Cargo.lock',
   'bindings/c-ffi/Cargo.toml',
@@ -21,7 +23,25 @@ const ALLOWED_FILES = Object.freeze([
   'bindings/c-ffi/rln.hpp',
   'bindings/c-ffi/src/api.rs',
   'bindings/c-ffi/src/json_types.rs',
-  'bindings/c-ffi/src/lib.rs'
+  'bindings/c-ffi/src/lib.rs',
+  'bindings/c-ffi/src/utils.rs',
+  'bindings/rgb_lightning_node.udl',
+  'src/ldk.rs',
+  'src/ldk_chain_backend/block_sync.rs',
+  'src/ldk_chain_backend/transaction_sync.rs',
+  'src/main.rs',
+  'src/mainnet_startup_tests.rs',
+  'src/mainnet_tests.rs',
+  'src/mainnet_vss_tests.rs',
+  'src/node.rs',
+  'src/routes.rs',
+  'src/sdk/mod.rs',
+  'src/test/auth_db_persistence.rs',
+  'src/test_utils.rs',
+  'src/uniffi_api/mod.rs',
+  'src/uniffi_api/native_signer.rs',
+  'src/uniffi_api/tests.rs',
+  'src/utils.rs'
 ])
 const GIT_SOURCES = Object.freeze({
   'musig2': 'git+https://github.com/arik-so/rust-musig2?rev=6f95a05718cbb44d8fe3fa6021aea8117aa38d50#6f95a05718cbb44d8fe3fa6021aea8117aa38d50',
@@ -57,7 +77,7 @@ function git (root, args) {
   return execFileSync('git', ['-C', root, ...args], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 })
 }
 
-function prepareSource (root, config) {
+function prepareSource (root, config, applyIfClean = true) {
   validateAdapter(config)
   if (git(root, ['rev-parse', 'HEAD']).trim() !== RELEASE.commit) throw new Error('Unexpected RLN revision')
   if (git(root, ['ls-files', '--others', '--exclude-standard']).trim()) throw new Error('Untracked files in native source')
@@ -68,12 +88,18 @@ function prepareSource (root, config) {
   }
   const patch = fs.readFileSync(config.patchPath, 'utf8')
   const diff = git(root, ['diff', '--binary', 'HEAD'])
-  if (!diff) git(root, ['apply', '--index', config.patchPath])
+  if (!diff && applyIfClean) git(root, ['apply', '--index', config.patchPath])
   else if (diff !== patch) throw new Error('Native source has changes beyond the exact approved adapter')
   if (git(root, ['diff', '--binary', 'HEAD']) !== patch) throw new Error('Applied native adapter is not exact')
   if (sha256(path.join(root, 'bindings/c-ffi/Cargo.lock')) !== RELEASE.cffiLockSha256) {
     throw new Error('Unexpected C-FFI lock graph')
   }
+}
+
+// Final build admission must be read-only: a source reverted during compilation
+// must be rejected, rather than applying the patch after the binary was built.
+function verifyPreparedSource (root, config) {
+  prepareSource(root, config, false)
 }
 
 function verifyGraph (metadata, sourceRoot) {
@@ -103,4 +129,4 @@ function wrapperSha256 (root, files) {
   return hash.digest('hex')
 }
 
-module.exports = { RELEASE, ALLOWED_FILES, GIT_SOURCES, sha256, validateAdapter, prepareSource, wrapperSha256, verifyGraph, verifyCargoGraph }
+module.exports = { RELEASE, ALLOWED_FILES, GIT_SOURCES, sha256, validateAdapter, prepareSource, verifyPreparedSource, wrapperSha256, verifyGraph, verifyCargoGraph }

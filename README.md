@@ -2,8 +2,9 @@
 
 The **0.2.0-beta.4** candidate binds **RLN v0.17.0-beta.3**, commit
 `ecc69f20308231400561f6f060fea88acfa40cc4`. It is a breaking, release-based
-replacement for the former 0.11 behavior overlay. See
-[NATIVE-UPGRADE-20261014.md](NATIVE-UPGRADE-20261014.md) for current qualification
+replacement for the former 0.11 behavior overlay, with an explicitly hashed
+native signer/session lifecycle repair. See
+[NATIVE-UPGRADE-20261015.md](NATIVE-UPGRADE-20261015.md) for current qualification
 and [RELEASE-0.15-TRACKER.md](RELEASE-0.15-TRACKER.md) for historical restrictions.
 
 ## Installation

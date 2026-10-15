@@ -145,6 +145,7 @@ function buildAddon (config) {
     RLN_WRAPPER_SHA256: descriptor.wrapperSha256,
     RLN_LOCK_SHA256: descriptor.lockSha256
   } })
+  contract.verifyPreparedSource(sourceRoot, config)
   const extension = descriptor.target.includes('apple') ? 'dylib' : 'so'
   const built = path.join(process.env.CARGO_TARGET_DIR || path.join(packageRoot, 'target'),
     descriptor.target, descriptor.profile, `librln_node.${extension}`)

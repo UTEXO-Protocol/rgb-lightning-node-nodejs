@@ -1,5 +1,9 @@
 # Native upgrade: October 14, 2026
 
+Historical artifact/source checkpoint. The current signer/session lifecycle
+overlay and its qualification are tracked in
+[NATIVE-UPGRADE-20261015.md](NATIVE-UPGRADE-20261015.md).
+
 Candidate `0.2.0-beta.4` targets published RLN SDK `v0.17.0-beta.3`.
 The existing `release/rln-0.15.0-beta.3` branch retains its review history.
 The candidate has not been merged, tagged or published to npm or a GitHub release.

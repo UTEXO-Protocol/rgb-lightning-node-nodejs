@@ -190,6 +190,9 @@ export class NativeExternalSigner {
   ): NativeExternalSigner
 
   bootstrap(): JsonObject
+  /** Terminally revoke every clone after all attached nodes have shut down. Idempotent. */
+  shutdown(): void
+  /** Release only this host handle; does not revoke a signer retained by RLN. */
   destroy(): void
 }
 

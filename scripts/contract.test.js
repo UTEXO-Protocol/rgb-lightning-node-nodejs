@@ -172,6 +172,42 @@ test('failed shutdown retains native state for retry and reports the failure', (
   assert.equal(calls, 2)
 })
 
+test('signer revocation is explicit, terminal, retryable and separate from host-handle release', () => {
+  const calls = []
+  let fail = true
+  let revoked = false
+  const native = {
+    shutdown () {
+      calls.push('shutdown')
+      if (fail) throw new Error('revocation failed')
+      revoked = true
+    },
+    bootstrap () {
+      if (revoked) throw new Error('signer shut down')
+      return '{"node_id":"fixture"}'
+    },
+    destroy () { calls.push('free') }
+  }
+  const { NativeExternalSigner } = facade()
+  const signer = new NativeExternalSigner(native)
+  assert.throws(() => signer.shutdown(), /revocation failed/)
+  assert.equal(signer.bootstrap().node_id, 'fixture')
+  assert.equal(signer._shutdown, false)
+  fail = false
+  signer.shutdown()
+  signer.shutdown()
+  assert.throws(() => signer.bootstrap(), /shut down/)
+  signer.destroy()
+  signer.destroy()
+  assert.deepEqual(calls, ['shutdown', 'shutdown', 'free'])
+
+  calls.length = 0
+  const earlyDrop = new NativeExternalSigner(native)
+  earlyDrop.destroy()
+  assert.deepEqual(calls, ['free'])
+  assert.throws(() => earlyDrop.shutdown(), /destroyed/)
+})
+
 test('approved RGB imports preserve payloads, exact metadata and native failures', () => {
   for (const method of ['importRgbContract', 'importRgbTransferConsignment']) {
     let received

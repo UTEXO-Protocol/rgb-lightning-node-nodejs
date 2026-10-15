@@ -369,6 +369,7 @@ class NativeExternalSigner {
   constructor (inner) {
     this._inner = inner
     this._destroyed = false
+    this._shutdown = false
   }
 
   static create (seedHex, network, permissivePolicy = false) {
@@ -404,6 +405,19 @@ class NativeExternalSigner {
     return parse(this._inner.bootstrap())
   }
 
+  /**
+   * Terminally revoke every native clone and release private signer state.
+   * All attached nodes must finish shutdown first so final persistence can
+   * still use the signer. Waits for in-flight calls; safe to repeat.
+   */
+  shutdown () {
+    if (this._shutdown) return
+    if (this._destroyed) throw new Error('NativeExternalSigner already destroyed')
+    this._inner.shutdown()
+    this._shutdown = true
+  }
+
+  // Release only this host handle; RLN's retained signer remains usable.
   destroy () {
     if (this._destroyed) return
     this._inner.destroy()
