@@ -335,7 +335,7 @@ index f775f83..86daa71 100644
      println!("cargo:rerun-if-changed=cbindgen.toml");
  
 diff --git a/bindings/c-ffi/rln.h b/bindings/c-ffi/rln.h
-index c8bb08b..d3d600b 100644
+index c8bb08b..62b7e54 100644
 --- a/bindings/c-ffi/rln.h
 +++ b/bindings/c-ffi/rln.h
 @@ -42,6 +42,11 @@ struct CResultString rln_asset_link_create(const struct COpaqueStruct *node,
@@ -350,19 +350,7 @@ index c8bb08b..d3d600b 100644
  struct CResultString rln_btc_balance(const struct COpaqueStruct *node, bool skip_sync);
  
  struct CResultString rln_burn(const struct COpaqueStruct *node, const char *request_json);
-@@ -163,10 +168,26 @@ struct CResultString rln_maker_init(const struct COpaqueStruct *node, const char
- 
- struct CResultString rln_native_external_signer_bootstrap(const struct COpaqueStruct *signer);
- 
-+/**
-+ * Permanently revoke every clone of this signer and release its persistent
-+ * store. Node shutdown must finish first. This is idempotent and does not free
-+ * the host handle; ordinary handle free/GC never revokes an attached signer.
-+ * The caller must keep the host handle alive until this call returns.
-+ */
-+struct CResultString rln_native_external_signer_shutdown(const struct COpaqueStruct *signer);
-+
- struct CResult rln_native_external_signer_new(const char *seed_hex,
+@@ -167,6 +172,22 @@ struct CResult rln_native_external_signer_new(const char *seed_hex,
                                                const char *network,
                                                bool permissive_policy);
  
@@ -373,6 +361,14 @@ index c8bb08b..d3d600b 100644
 +                                                           const char *network,
 +                                                           bool permissive_policy,
 +                                                           const char *storage_dir_path);
++
++/**
++ * Permanently revoke every clone of this signer and release its persistent
++ * store. Node shutdown must finish first. This is idempotent and does not free
++ * the host handle; ordinary handle free/GC never revokes an attached signer.
++ * The caller must keep the host handle alive until this call returns.
++ */
++struct CResultString rln_native_external_signer_shutdown(const struct COpaqueStruct *signer);
 +
  struct CResultString rln_network_info(const struct COpaqueStruct *node);
  
@@ -393,7 +389,7 @@ index c8bb08b..d3d600b 100644
                                                                  const struct COpaqueStruct *signer);
  
 diff --git a/bindings/c-ffi/rln.hpp b/bindings/c-ffi/rln.hpp
-index 498a7e1..cdba36f 100644
+index 498a7e1..59f585d 100644
 --- a/bindings/c-ffi/rln.hpp
 +++ b/bindings/c-ffi/rln.hpp
 @@ -43,6 +43,9 @@ CResultString rln_asset_link_create(const COpaqueStruct *node, const char *reque
@@ -406,17 +402,7 @@ index 498a7e1..cdba36f 100644
  CResultString rln_btc_balance(const COpaqueStruct *node, bool skip_sync);
  
  CResultString rln_burn(const COpaqueStruct *node, const char *request_json);
-@@ -143,10 +146,22 @@ CResultString rln_maker_init(const COpaqueStruct *node, const char *request_json
- 
- CResultString rln_native_external_signer_bootstrap(const COpaqueStruct *signer);
- 
-+/// Permanently revoke every clone of this signer and release its persistent
-+/// store. Node shutdown must finish first. This is idempotent and does not free
-+/// the host handle; ordinary handle free/GC never revokes an attached signer.
-+/// The caller must keep the host handle alive until this call returns.
-+CResultString rln_native_external_signer_shutdown(const COpaqueStruct *signer);
-+
- CResult rln_native_external_signer_new(const char *seed_hex,
+@@ -147,6 +150,18 @@ CResult rln_native_external_signer_new(const char *seed_hex,
                                         const char *network,
                                         bool permissive_policy);
  
@@ -425,6 +411,12 @@ index 498a7e1..cdba36f 100644
 +                                                    const char *network,
 +                                                    bool permissive_policy,
 +                                                    const char *storage_dir_path);
++
++/// Permanently revoke every clone of this signer and release its persistent
++/// store. Node shutdown must finish first. This is idempotent and does not free
++/// the host handle; ordinary handle free/GC never revokes an attached signer.
++/// The caller must keep the host handle alive until this call returns.
++CResultString rln_native_external_signer_shutdown(const COpaqueStruct *signer);
 +
  CResultString rln_network_info(const COpaqueStruct *node);
  
