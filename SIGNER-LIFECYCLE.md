@@ -33,6 +33,9 @@ The native patch also owns and drains session workers and connections, releases
 the actual listener when configured with port zero, removes gossip-verifier
 strong-reference cycles and cleans partial startup. Final persistence and
 broadcast completions stay admitted until the background processor has exited.
+Terminal shutdown closes the metadata database pool on its owning runtime,
+draining parked SQLx connection-return work before reporting completion.
+Nonterminal REST wallet lock keeps its database available for the next unlock.
 Both `native-signer-shutdown-v1` and `owned-session-cleanup-v1` appear in compiled
 capabilities. Complete overlay and wrapper hashes remain mandatory admission
 checks.

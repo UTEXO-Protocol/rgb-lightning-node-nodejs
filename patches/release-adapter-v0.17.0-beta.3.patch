@@ -905,7 +905,7 @@ index df823f2..c34d5ea 100644
      [Throws=RlnError]
      NodeInfo node_info();
 diff --git a/src/ldk.rs b/src/ldk.rs
-index 2ff6e98..b716848 100644
+index 2ff6e98..314cab2 100644
 --- a/src/ldk.rs
 +++ b/src/ldk.rs
 @@ -109,8 +109,8 @@ use std::collections::HashSet;
@@ -1985,7 +1985,7 @@ index 2ff6e98..b716848 100644
      #[cfg(feature = "vss")]
      if let Some((common, monitor_store)) = common_and_monitor {
          let deadline = Instant::now() + VSS_TEARDOWN_TIMEOUT;
-@@ -7112,34 +7564,77 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
+@@ -7112,34 +7564,95 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
              .is_err()
              {
                  worker.abort();
@@ -2063,6 +2063,24 @@ index 2ff6e98..b716848 100644
 +            release_vss_fence(store, teardown).await;
 +        } else {
 +            tracing::error!("retaining VSS fence because session teardown failed");
++        }
++    }
++
++    if app_state.cancel_token.is_cancelled() {
++        // SQLx returns checked-out SQLite connections through tasks on DB_RUNTIME.
++        // That current-thread runtime is idle between database calls, so dropping
++        // the pool alone can leave its final return task and file descriptor parked.
++        // Drive closure on the owning runtime after every persistence user is done.
++        // A REST lock is nonterminal and must retain its database for the next unlock.
++        let database = app_state.db();
++        match tokio::task::spawn_blocking(move || {
++            crate::runtime::block_on(async move { database.close_by_ref().await })
++        })
++        .await
++        {
++            Ok(Ok(())) => {}
++            Ok(Err(error)) => cleanup_errors.push(format!("database pool close failed: {error}")),
++            Err(error) => cleanup_errors.push(format!("database pool close task failed: {error}")),
 +        }
 +    }
 +
@@ -2696,7 +2714,7 @@ index f9c88b7..e040833 100644
      assert!(common.persistence_worker.lock().unwrap().is_none());
  }
 diff --git a/src/node.rs b/src/node.rs
-index 18c80ee..7c0e6d1 100644
+index 18c80ee..ac6b491 100644
 --- a/src/node.rs
 +++ b/src/node.rs
 @@ -3,7 +3,7 @@ use std::sync::Arc;
@@ -2731,6 +2749,93 @@ index 18c80ee..7c0e6d1 100644
      }
  
      #[cfg(feature = "uniffi")]
+@@ -102,6 +107,86 @@ impl NodeHandle {
+ mod tests {
+     use super::*;
+ 
++    fn config(storage_dir_path: &std::path::Path) -> NodeConfig {
++        NodeConfig {
++            storage_dir_path: storage_dir_path.to_path_buf(),
++            daemon_listening_port: 0,
++            ldk_peer_listening_port: 0,
++            network: BitcoinNetwork::Regtest,
++            max_media_upload_size_mb: 1,
++            max_aggregated_media_size_per_channel_mb:
++                crate::rgb_file_transfer::MAX_MEDIA_MB_PER_CHANNEL,
++            max_pending_consignments: crate::rgb_file_transfer::MAX_PENDING_CONSIGNMENTS,
++            max_media_files_per_channel: crate::rgb_file_transfer::MAX_MEDIA_FILES_PER_CHANNEL,
++            root_public_key: None,
++            enable_virtual_channels_v0: false,
++            virtual_peer_pubkeys: vec![],
++            lsp_base_url: None,
++            lsp_bearer_token: None,
++            vss_url: None,
++            vss_allow_empty_restore: false,
++            reuse_addresses: false,
++            remote_signer_listen_addr: None,
++        }
++    }
++
++    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++    async fn terminal_shutdown_closes_database_pool_before_all_callers_return() {
++        let directory = tempfile::tempdir().unwrap();
++        let node = NodeHandle::new(config(directory.path())).await.unwrap();
++        let database = node.app_state().db();
++        let pool = database.get_sqlite_connection_pool();
++        // A real final query leaves SQLx's asynchronous return-to-pool work on
++        // the current-thread DB runtime, reproducing the parked-connection path.
++        assert!(node
++            .state
++            .get_db()
++            .get_config("close-probe")
++            .unwrap()
++            .is_none());
++        assert!(!pool.is_closed());
++        let other = node.clone();
++        let (first, second) = tokio::join!(node.shutdown(), other.shutdown());
++        first.unwrap();
++        second.unwrap();
++        assert!(pool.is_closed());
++        assert_eq!(pool.size(), 0);
++        assert!(node.state.get_db().get_config("close-probe").is_err());
++        node.shutdown().await.unwrap();
++
++        // Closure must not damage persistent state or require process restart.
++        let reopened = NodeHandle::new(config(directory.path())).await.unwrap();
++        assert!(reopened
++            .state
++            .get_db()
++            .get_config("close-probe")
++            .unwrap()
++            .is_none());
++        reopened.shutdown().await.unwrap();
++    }
++
++    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++    async fn nonterminal_stop_keeps_database_pool_usable() {
++        let directory = tempfile::tempdir().unwrap();
++        let node = NodeHandle::new(config(directory.path())).await.unwrap();
++        let database = node.app_state().db();
++        let pool = database.get_sqlite_connection_pool();
++        // REST lock shares stop_node without cancelling the AppState token.
++        stop_node(node.app_state()).await.unwrap();
++        assert!(!pool.is_closed());
++        assert!(node
++            .state
++            .get_db()
++            .get_config("close-probe")
++            .unwrap()
++            .is_none());
++        stop_node(node.app_state()).await.unwrap();
++        assert!(!pool.is_closed());
++        node.shutdown().await.unwrap();
++        assert!(pool.is_closed());
++        assert_eq!(pool.size(), 0);
++    }
++
+     /// A `NodeConfig` embedder (a direct Rust consumer, not the uniffi FFI surface — see the `None`
+     /// left in `uniffi_api::handle_from_request`) must be able to configure the remote-signer daemon
+     /// address; without this field, `NodeHandle`-embedding callers could configure external-signer
 diff --git a/src/routes.rs b/src/routes.rs
 index b6784be..5123fd2 100644
 --- a/src/routes.rs
