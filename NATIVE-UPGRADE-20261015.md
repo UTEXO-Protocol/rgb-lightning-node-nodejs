@@ -1,5 +1,57 @@
 # Signer and session lifecycle repair: October 15, 2026
 
+## Environment and erasure follow-up
+
+Current implementations are Node `6079afea5859193dea39f390376219d8dbfef332`
+(12 new terminated-worker regressions; production native ownership unchanged),
+Bare `95e2c844dc2c76e3f83d6f1a0dcf76d74f17fef7`, Iris
+`cef3e1ebfa5e4b2fafca574ea9796f559157d7c2` and unchanged WDK
+`81182153193c9910e89a9d91b1d457e0725787aa`. Bare wrapper SHA-256 is
+`ca3ac291fbb4af86fc0d091805f9f544031298f6ce94a66b99f8f1acd763d4f7`;
+the 26-file `7f89dc51` overlay, RLN/LDK/rgb-lib and C-FFI lock are unchanged.
+
+Bare fixes terminal signer ownership when a worker's external-object GC
+finalizer does not run: same-environment nodes drain before signer revocation.
+Its 100 local full-node terminations/201 OS checkpoints and separate 18 portable
+worker cases pass. The replacement [seven-target Bare build](https://github.com/UTEXO-Protocol/rgb-lightning-node-bare/actions/runs/38718114135),
+three Android staging checks, original-byte/provenance admission and isolated
+complete assembled-package gate pass. All 14 original native files were imported
+byte-for-byte through the standard installer and the repository gate passed;
+the QA app retains separately archived local Apple bytes. These cache checks
+are not Node runtime or funded app results.
+
+Node's new contract CI passes. Its [current runtime rerun](https://github.com/UTEXO-Protocol/rgb-lightning-node-nodejs/actions/runs/38718172040)
+is **4/5** completed passes with Darwin x64 still running at the recorded
+`11:24 UTC` observation; the preceding five-target pass below is historical.
+
+Subsequent fresh Iris controls confirmed app-owned Expo KV writer contention
+(`SQLITE_BUSY`). Resource serialization, storage/key quiescence and shared journal
+coordination now pass app regressions. The rebuilt iOS 27 Debug app passes cold
+authorized-journal recovery and three normal CREATE → first authenticated
+Settings erasures in one process, each `1/2/1` → `0/0/0`, with all four
+databases/keys, native directory and journal absent and no retry/reload. Five
+actual full Metro reloads pass on an unfunded wallet in PID `16174`, each
+`1/2/1` → locked `0/0/0` → normally authenticated same-store `1/2/1`, without
+injected methods, GC, restart or settling retry. Fresh BTC receipt of 2,000,000
+sat and exactly one confirmed 10,000-sat payment pass, with a 2,845-sat fee and
+1,987,155-sat change independently verified. Four 20,000-sat RGB outputs cost
+5,665 sat. BFA 2 USDT in / 0.5 USDT out settles with a 5,100-sat return fee;
+Iris 1.50 + holder 15.48 conserves the new 16.98-USDT baseline. An additional
+full reload before holder ACK preserves the same pending anchor and one send
+in PID `16174`, with locked `0/0/0` and normally reopened `1/2/1`, no resubmission.
+Three funded manual cycles pass. Short background (5.355 s) stays active without
+authentication; long background (40.422 s) reaches offscreen `0/0/0`, normally
+reopening in PID `16174`. A funded cold restart enters PID `60403` locked at
+`0/0/0` and normally reopens `1/2/1`, preserving balances. The independent ledger
+conserves BTC/USDT: Iris 1,976,390 sat (1,901,490 vanilla + 74,900 colored),
+holder 97,492 sat, external 10,000 sat and four fees 14,121 sat. Final refreshes
+and all history filters retain four unique transactions without pending or
+duplicate entries, matching the confirmed return anchor and 5,100-sat fee. See the [Iris follow-up](https://github.com/UTEXO-Protocol/utexo-mobile/blob/release/rln-0.15.0-beta.3/docs/engineering/lifecycle-recovery-validation-20261015.md)
+for exact source/evidence and build-fixture limitations. All preceding counts
+and artifacts below retain their historical scope; no production approval follows.
+
+## Preceding native qualification
+
 This unpublished `0.2.0-beta.4` candidate uses RLN `v0.17.0-beta.3`
 (`ecc69f20308231400561f6f060fea88acfa40cc4`), LDK
 `79b9eb5166546c62692d3a672986f385c7fe047d` and rgb-lib
@@ -110,8 +162,9 @@ are `bfa-setup/fresh-btc-bfa-roundtrip-ledger.json` and
 Two adverse observations remain explicit. The first normal erasure attempt
 failed verified erasure after clean native shutdown; a normal Metro reload
 resumed the already authorized journal and cleared the seed/journal, SQLCipher
-artifacts and native wallet path. Its first-failure cause remains unresolved;
-this is not a clean first-attempt erasure pass. A separate interrupted Debug
+artifacts and native wallet path. That historical exception was not captured;
+the subsequent confirmed cause and fixed erasure scope are recorded above.
+The historical attempt is not a clean first-attempt pass. A separate interrupted Debug
 reload attempt retained one signer descriptor (`1/0/0`) until cold restart and
 is excluded from the ten valid cycles. A successful retry does not relabel it.
 Final UI history has exactly four BTC/BFA receipt/payment entries; the outgoing
@@ -124,8 +177,12 @@ The explicitly user-authorized canonical local ownership overlay qualifies
 P01 for the host/native and normal iOS 27 Debug regtest scopes above; an upstream
 merge or process isolation is not a prerequisite. Android, positive funded
 Release and public-deployment closure remain open, as do P02/P03/P04/P06,
-security and distribution gates. The first erasure failure and interrupted
-Debug reload remain unqualified boundaries.
+security and distribution gates. The first erasure failure remains historical
+evidence; follow-up recovery/first-erasure, five unfunded full Metro reloads and
+fresh BTC/BFA roundtrips and an additional funded pre-ACK reload pass. Three
+funded manual cycles, short/long background, funded cold restart and final
+history/refresh checks also pass;
+arbitrary crash recovery is not qualified by those scoped cases.
 
 Iris stays on-chain only. Wallet migration is excluded because Iris has not
 shipped; local simulator state may be reset. Balances, history and signer state
