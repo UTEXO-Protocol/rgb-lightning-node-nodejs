@@ -220,8 +220,10 @@ export class SdkNode {
   shutdown(): void
 
   // VSS / APay
-  vssClearFence(request: JsonRequest): void
-  vssBackup(): JsonObject
+  /** Unavailable under the compiled VSS safety policy; no remote request is made. */
+  vssClearFence(request: JsonRequest): never
+  /** Unavailable under the compiled VSS safety policy; no remote request is made. */
+  vssBackup(): never
   /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
   vssDeleteAll(request: { password: string }): never
   apayNew(hostNodeId: string): JsonObject
@@ -359,6 +361,11 @@ export interface RuntimeInfo {
   readonly lock_sha256: string
   readonly target: string
   readonly capabilities: readonly string[]
+  readonly vss_policy: Readonly<{
+    supported: false
+    code: 'ERR_VSS_UNSAFE_UPSTREAM'
+    reason: 'VSS is unavailable until upstream backup security and recovery defects are fixed.'
+  }>
 }
 export interface RefreshTransfersResponse {
   transfers: Record<string, {

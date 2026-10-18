@@ -246,3 +246,13 @@ test('released mainnet policy errors retain their native identity', () => {
   const node = new (facade().SdkNode)({ sendPayment: () => { throw error } })
   assert.throws(() => node.sendPayment({ invoice: 'invoice' }), error)
 })
+
+
+test('compiled VSS policy metadata is exposed read-only', () => {
+  const policy = { supported: false, code: 'ERR_VSS_UNSAFE_UPSTREAM',
+    reason: 'VSS is unavailable until upstream backup security and recovery defects are fixed.' }
+  const runtime = facade({ capabilities: ['vss-safety-policy-v1'], vss_policy: policy }).getRuntimeInfo()
+  assert.deepEqual(runtime.vss_policy, policy)
+  assert.ok(Object.isFrozen(runtime.vss_policy))
+  assert.throws(() => { runtime.vss_policy.supported = true }, TypeError)
+})

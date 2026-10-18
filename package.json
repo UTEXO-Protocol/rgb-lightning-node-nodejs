@@ -30,7 +30,8 @@
     "NATIVE-UPGRADE-20261014.md",
     "SIGNER-LIFECYCLE.md",
     "NATIVE-UPGRADE-20261015.md",
-    "BIP322.md"
+    "BIP322.md",
+    "VSS-SAFETY.md"
   ],
   "scripts": {
     "prepublishOnly": "node scripts/verify-release-artifacts.js",
@@ -62,7 +63,7 @@
     "commit": "ecc69f20308231400561f6f060fea88acfa40cc4",
     "lightningCommit": "79b9eb5166546c62692d3a672986f385c7fe047d",
     "patch": "patches/release-adapter-v0.17.0-beta.3.patch",
-    "patchSha256": "58e7613b0b93eb59d470c366c463442fb04c5d130d091bef4fde895379c265ca",
+    "patchSha256": "d8b5be9809b12acd48fa5958014b4655ff94598c99800a2fafb9e3e81809aebf",
     "cffiLockSha256": "5fcdc9ad9179d3230e48973cdfa514a863d13a837752027febf8ea04713bbeb5",
     "rustToolchain": "1.94.0",
     "rlnVersion": "0.17.0-beta.3"

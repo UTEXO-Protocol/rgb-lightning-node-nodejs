@@ -65,6 +65,7 @@ for (const [key, expected] of Object.entries({
   if (runtimeInfo[key] !== expected) throw new Error(`Native artifact identity mismatch: ${key}; rebuild the package`)
 }
 Object.freeze(runtimeInfo.capabilities)
+if (runtimeInfo.vss_policy) Object.freeze(runtimeInfo.vss_policy)
 Object.freeze(runtimeInfo)
 
 // ─── 2. SdkNode wrapper ─────────────────────────────────────────────────
@@ -108,15 +109,10 @@ class SdkNode {
     this._closed = true
   }
 
-  // Forces takeover of a stale VSS ownership fence after a previous node
-  // died holding it. Throws if VSS isn't configured. Pointing two live
-  // nodes at the same VSS store corrupts state — call only when certain
-  // the previous owner is gone.
+  // Unavailable: native VSS policy rejects with ERR_VSS_UNSAFE_UPSTREAM.
   vssClearFence (request) { this._inner.vssClearFence(stringify(request)) }
 
-  // Force an immediate VSS backup flush. Returns `{ version }` where
-  // version is the snapshot index just persisted. Throws if VSS isn't
-  // configured / the flush fails. Backed by upstream vss_backup() PR.
+  // Unavailable: native VSS policy rejects with ERR_VSS_UNSAFE_UPSTREAM.
   vssBackup () { return parse(this._inner.vssBackup()) }
 
   vssDeleteAll (request) { unsupported('vssDeleteAll') }

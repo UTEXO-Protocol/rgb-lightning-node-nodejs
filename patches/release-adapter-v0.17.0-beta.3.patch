@@ -335,7 +335,7 @@ index f775f83..86daa71 100644
      println!("cargo:rerun-if-changed=cbindgen.toml");
  
 diff --git a/bindings/c-ffi/rln.h b/bindings/c-ffi/rln.h
-index c8bb08b..54d724c 100644
+index c8bb08b..0e1371b 100644
 --- a/bindings/c-ffi/rln.h
 +++ b/bindings/c-ffi/rln.h
 @@ -42,6 +42,11 @@ struct CResultString rln_asset_link_create(const struct COpaqueStruct *node,
@@ -397,7 +397,36 @@ index c8bb08b..54d724c 100644
  struct CResultString rln_sdk_node_attach_native_external_signer(const struct COpaqueStruct *node,
                                                                  const struct COpaqueStruct *signer);
  
-@@ -260,6 +291,9 @@ struct CResultString rln_send_rgb(const struct COpaqueStruct *node, const char *
+@@ -225,24 +256,14 @@ struct CResultString rln_sdk_node_unlock_with_native_external_signer(const struc
+                                                                      const char *request_json);
+ 
+ /**
+- * Force an immediate VSS backup flush. Returns `{"version": i64}` JSON
+- * where version is the snapshot index just persisted. Throws
+- * `FailedVssInit` if VSS isn't configured (vssUrl unset at init) or
+- * the flush fails (server unreachable, auth rejected, etc).
+- *
+- * Useful for app-controlled checkpoints (e.g. "save state before app
+- * suspend") rather than relying on the implicit on-write flush. The
+- * HTTP equivalent is `POST /vssbackup`; the UniFFI equivalent is
+- * `SdkNode::vss_backup()` (uniffi_api/mod.rs:346).
++ * Unavailable: native VSS safety policy rejects backup with
++ * `FailedVssInit` and `ERR_VSS_UNSAFE_UPSTREAM`. No remote request is made.
+  */
+ struct CResultString rln_sdk_node_vss_backup(const struct COpaqueStruct *node);
+ 
+ /**
+- * Take over a stale VSS ownership fence after a previous node died holding
+- * it. Request JSON: `{"password": "..."}`. Returns empty success or
+- * `FailedVssInit` if VSS isn't configured / the takeover fails. Pointing
+- * two live nodes at the same VSS store corrupts state — only call this
+- * when you're certain the previous owner is gone.
++ * Unavailable: native VSS safety policy rejects fence takeover with
++ * `FailedVssInit` and `ERR_VSS_UNSAFE_UPSTREAM`. No remote request is made.
+  */
+ struct CResultString rln_sdk_node_vss_clear_fence(const struct COpaqueStruct *node,
+                                                   const char *request_json);
+@@ -260,6 +281,9 @@ struct CResultString rln_send_rgb(const struct COpaqueStruct *node, const char *
  
  struct CResultString rln_sign_message(const struct COpaqueStruct *node, const char *message);
  
@@ -407,7 +436,7 @@ index c8bb08b..54d724c 100644
  struct CResultString rln_sync(const struct COpaqueStruct *node);
  
  struct CResultString rln_taker(const struct COpaqueStruct *node, const char *request_json);
-@@ -271,3 +305,8 @@ struct CResultString rln_uniffi_is_initialized(void);
+@@ -271,3 +295,8 @@ struct CResultString rln_uniffi_is_initialized(void);
  struct CResultString rln_verify_message(const struct COpaqueStruct *node,
                                          const char *message,
                                          const char *signature);
@@ -417,7 +446,7 @@ index c8bb08b..54d724c 100644
 +
 +struct CResultString rln_verify_message_bip322_offline(const char *request_json);
 diff --git a/bindings/c-ffi/rln.hpp b/bindings/c-ffi/rln.hpp
-index 498a7e1..36bf456 100644
+index 498a7e1..c8007bd 100644
 --- a/bindings/c-ffi/rln.hpp
 +++ b/bindings/c-ffi/rln.hpp
 @@ -43,6 +43,9 @@ CResultString rln_asset_link_create(const COpaqueStruct *node, const char *reque
@@ -471,7 +500,34 @@ index 498a7e1..36bf456 100644
  CResultString rln_sdk_node_attach_native_external_signer(const COpaqueStruct *node,
                                                           const COpaqueStruct *signer);
  
-@@ -228,6 +251,8 @@ CResultString rln_send_rgb(const COpaqueStruct *node, const char *request_json);
+@@ -198,22 +221,12 @@ CResultString rln_sdk_node_unlock_with_native_external_signer(const COpaqueStruc
+                                                               const COpaqueStruct *signer,
+                                                               const char *request_json);
+ 
+-/// Force an immediate VSS backup flush. Returns `{"version": i64}` JSON
+-/// where version is the snapshot index just persisted. Throws
+-/// `FailedVssInit` if VSS isn't configured (vssUrl unset at init) or
+-/// the flush fails (server unreachable, auth rejected, etc).
+-///
+-/// Useful for app-controlled checkpoints (e.g. "save state before app
+-/// suspend") rather than relying on the implicit on-write flush. The
+-/// HTTP equivalent is `POST /vssbackup`; the UniFFI equivalent is
+-/// `SdkNode::vss_backup()` (uniffi_api/mod.rs:346).
++/// Unavailable: native VSS safety policy rejects backup with
++/// `FailedVssInit` and `ERR_VSS_UNSAFE_UPSTREAM`. No remote request is made.
+ CResultString rln_sdk_node_vss_backup(const COpaqueStruct *node);
+ 
+-/// Take over a stale VSS ownership fence after a previous node died holding
+-/// it. Request JSON: `{"password": "..."}`. Returns empty success or
+-/// `FailedVssInit` if VSS isn't configured / the takeover fails. Pointing
+-/// two live nodes at the same VSS store corrupts state — only call this
+-/// when you're certain the previous owner is gone.
++/// Unavailable: native VSS safety policy rejects fence takeover with
++/// `FailedVssInit` and `ERR_VSS_UNSAFE_UPSTREAM`. No remote request is made.
+ CResultString rln_sdk_node_vss_clear_fence(const COpaqueStruct *node, const char *request_json);
+ 
+ CResultString rln_sdk_shutdown();
+@@ -228,6 +241,8 @@ CResultString rln_send_rgb(const COpaqueStruct *node, const char *request_json);
  
  CResultString rln_sign_message(const COpaqueStruct *node, const char *message);
  
@@ -480,7 +536,7 @@ index 498a7e1..36bf456 100644
  CResultString rln_sync(const COpaqueStruct *node);
  
  CResultString rln_taker(const COpaqueStruct *node, const char *request_json);
-@@ -240,4 +265,8 @@ CResultString rln_verify_message(const COpaqueStruct *node,
+@@ -240,4 +255,8 @@ CResultString rln_verify_message(const COpaqueStruct *node,
                                   const char *message,
                                   const char *signature);
  
@@ -768,10 +824,10 @@ index 5b606f1..b033603 100644
      }
  }
 diff --git a/bindings/c-ffi/src/lib.rs b/bindings/c-ffi/src/lib.rs
-index e1dded1..2a5c59c 100644
+index e1dded1..a0d82ce 100644
 --- a/bindings/c-ffi/src/lib.rs
 +++ b/bindings/c-ffi/src/lib.rs
-@@ -89,6 +89,26 @@ pub extern "C" fn rln_free_string(s: *mut c_char) {
+@@ -89,6 +89,32 @@ pub extern "C" fn rln_free_string(s: *mut c_char) {
  // Lifecycle
  // ---------------------------------------------------------------------------
  
@@ -791,14 +847,52 @@ index e1dded1..2a5c59c 100644
 +            "apay-address", "decoded-invoice-cltv", "tagged-rgb-assignment", "pending-blinded-v1",
 +            "rgb-contract-import-v1", "rgb-transfer-metadata-import-v1", "consignment-export-v1", "mainnet-lightning-rejection-v1",
 +            "external-signer-eth-rpc-v1", "external-signer-burn-v1",
-+            "native-signer-shutdown-v1", "owned-session-cleanup-v1", "bip322-simple-v1"]
++            "native-signer-shutdown-v1", "owned-session-cleanup-v1", "bip322-simple-v1",
++            "vss-safety-policy-v1"],
++        "vss_policy": {
++            "supported": false,
++            "code": rgb_lightning_node::VSS_SAFETY_POLICY_CODE,
++            "reason": rgb_lightning_node::VSS_SAFETY_POLICY_REASON
++        }
 +    }).to_string()))
 +}
 +
  #[unsafe(no_mangle)]
  pub extern "C" fn rln_sdk_node_new(request_json: *const c_char) -> CResult {
      ffi_call!("rln_sdk_node_new", api::sdk_node_new(request_json))
-@@ -733,6 +753,39 @@ pub extern "C" fn rln_sdk_shutdown() -> CResultString {
+@@ -122,11 +148,8 @@ pub extern "C" fn rln_sdk_node_shutdown(node: &COpaqueStruct) -> CResultString {
+     ffi_call!("rln_sdk_node_shutdown", api::sdk_node_shutdown(node))
+ }
+ 
+-/// Take over a stale VSS ownership fence after a previous node died holding
+-/// it. Request JSON: `{"password": "..."}`. Returns empty success or
+-/// `FailedVssInit` if VSS isn't configured / the takeover fails. Pointing
+-/// two live nodes at the same VSS store corrupts state — only call this
+-/// when you're certain the previous owner is gone.
++/// Unavailable: native VSS safety policy rejects fence takeover with
++/// `FailedVssInit` and `ERR_VSS_UNSAFE_UPSTREAM`. No remote request is made.
+ #[unsafe(no_mangle)]
+ pub extern "C" fn rln_sdk_node_vss_clear_fence(
+     node: &COpaqueStruct,
+@@ -138,15 +161,8 @@ pub extern "C" fn rln_sdk_node_vss_clear_fence(
+     )
+ }
+ 
+-/// Force an immediate VSS backup flush. Returns `{"version": i64}` JSON
+-/// where version is the snapshot index just persisted. Throws
+-/// `FailedVssInit` if VSS isn't configured (vssUrl unset at init) or
+-/// the flush fails (server unreachable, auth rejected, etc).
+-///
+-/// Useful for app-controlled checkpoints (e.g. "save state before app
+-/// suspend") rather than relying on the implicit on-write flush. The
+-/// HTTP equivalent is `POST /vssbackup`; the UniFFI equivalent is
+-/// `SdkNode::vss_backup()` (uniffi_api/mod.rs:346).
++/// Unavailable: native VSS safety policy rejects backup with
++/// `FailedVssInit` and `ERR_VSS_UNSAFE_UPSTREAM`. No remote request is made.
+ #[unsafe(no_mangle)]
+ pub extern "C" fn rln_sdk_node_vss_backup(node: &COpaqueStruct) -> CResultString {
+     ffi_call!("rln_sdk_node_vss_backup", api::sdk_node_vss_backup(node))
+@@ -733,6 +749,39 @@ pub extern "C" fn rln_sdk_shutdown() -> CResultString {
  // External-signer surface
  // ---------------------------------------------------------------------------
  
@@ -838,7 +932,7 @@ index e1dded1..2a5c59c 100644
  /// Drop a `NativeExternalSigner` handle. Safe to call immediately after
  /// attach / init / unlock succeeds: RLN holds its own `Arc` clone.
  #[unsafe(no_mangle)]
-@@ -754,6 +807,86 @@ mod free_tests {
+@@ -754,6 +803,86 @@ mod free_tests {
          free_sdk_node(COpaqueStruct::null());
          free_native_external_signer(COpaqueStruct::null());
      }
@@ -925,7 +1019,7 @@ index e1dded1..2a5c59c 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -776,6 +909,21 @@ pub extern "C" fn rln_native_external_signer_bootstrap(signer: &COpaqueStruct) -
+@@ -776,6 +905,21 @@ pub extern "C" fn rln_native_external_signer_bootstrap(signer: &COpaqueStruct) -
      )
  }
  
@@ -947,7 +1041,7 @@ index e1dded1..2a5c59c 100644
  #[unsafe(no_mangle)]
  pub extern "C" fn rln_sdk_node_init_with_native_external_signer(
      node: &COpaqueStruct,
-@@ -839,3 +987,20 @@ pub extern "C" fn rln_sdk_node_unlock_with_attached_external_signer(
+@@ -839,3 +983,134 @@ pub extern "C" fn rln_sdk_node_unlock_with_attached_external_signer(
          api::sdk_node_unlock_with_attached_external_signer(node, request_json)
      )
  }
@@ -967,6 +1061,120 @@ index e1dded1..2a5c59c 100644
 +#[unsafe(no_mangle)]
 +pub extern "C" fn rln_verify_message_bip322_offline(request_json: *const c_char) -> CResultString {
 +    ffi_call!("rln_verify_message_bip322_offline", api::verify_message_bip322_offline(request_json))
++}
++
++
++#[cfg(test)]
++mod vss_safety_policy_tests {
++    use super::*;
++    use std::{collections::BTreeMap, fs, path::{Path, PathBuf}, time::{SystemTime, UNIX_EPOCH}};
++
++    struct TestDirectory(PathBuf);
++    impl TestDirectory {
++        fn new() -> Self {
++            let name = format!("rln-vss-safety-{}-{}", std::process::id(),
++                SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos());
++            let root = std::env::temp_dir().join(name);
++            fs::create_dir(&root).unwrap();
++            Self(root)
++        }
++    }
++    impl Drop for TestDirectory {
++        fn drop(&mut self) { let _ = fs::remove_dir_all(&self.0); }
++    }
++    fn request(path: &Path, network: &str, url: Option<&str>) -> CString {
++        CString::new(serde_json::json!({
++            "storage_dir_path": path.to_str().unwrap(),
++            "daemon_listening_port": 0, "ldk_peer_listening_port": 0,
++            "network": network, "max_media_upload_size_mb": 1,
++            "vss_url": url, "vss_allow_http": true,
++            "vss_allow_empty_restore": true
++        }).to_string()).unwrap()
++    }
++    fn expected_error() -> String {
++        format!("Rln(FailedVssInit): {}: {}",
++            rgb_lightning_node::VSS_SAFETY_POLICY_CODE,
++            rgb_lightning_node::VSS_SAFETY_POLICY_REASON)
++    }
++    fn string(result: CResultString) -> String {
++        let text = unsafe { CStr::from_ptr(result.inner) }.to_str().unwrap().to_string();
++        rln_free_string(result.inner);
++        text
++    }
++    fn snapshot(root: &Path) -> BTreeMap<PathBuf, Vec<u8>> {
++        fn walk(root: &Path, path: &Path, out: &mut BTreeMap<PathBuf, Vec<u8>>) {
++            for row in fs::read_dir(path).unwrap() {
++                let row = row.unwrap();
++                if row.file_type().unwrap().is_dir() { walk(root, &row.path(), out); }
++                else { out.insert(row.path().strip_prefix(root).unwrap().to_owned(), fs::read(row.path()).unwrap()); }
++            }
++        }
++        let mut out = BTreeMap::new(); walk(root, root, &mut out); out
++    }
++
++    #[test]
++    fn compiled_policy_is_explicit_and_matches_native_denial() {
++        let info = rln_binding_build_info();
++        assert!(matches!(info.result, CResultValue::Ok));
++        let info: serde_json::Value = serde_json::from_str(&string(info)).unwrap();
++        assert_eq!(info["vss_policy"], serde_json::json!({
++            "supported": false,
++            "code": rgb_lightning_node::VSS_SAFETY_POLICY_CODE,
++            "reason": rgb_lightning_node::VSS_SAFETY_POLICY_REASON
++        }));
++        assert!(info["capabilities"].as_array().unwrap().iter().any(|x| x == "vss-safety-policy-v1"));
++    }
++
++    #[test]
++    fn raw_instance_and_global_vss_admission_do_not_touch_storage_or_transport() {
++        let temp = TestDirectory::new();
++        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
++        listener.set_nonblocking(true).unwrap();
++        let loopback = format!("http://{}/vss", listener.local_addr().unwrap());
++        let existing = temp.0.join("existing"); fs::create_dir(&existing).unwrap();
++        fs::write(existing.join("preserve"), b"existing wallet sentinel").unwrap();
++        let before = snapshot(&temp.0);
++        let absent = temp.0.join("must-not-exist");
++        for network in ["mainnet", "signet", "regtest", "testnet", "testnet4"] {
++            for url in [loopback.as_str(), "https://example.invalid/vss", "", " \n\t ",
++                "ftp://bad.invalid/vss", "https://private-user:private-secret@example.invalid/vss"] {
++                for target in [&existing, &absent] {
++                    let req = request(target, network, Some(url));
++                    let result = rln_sdk_node_new(req.as_ptr());
++                    assert!(matches!(result.result, CResultValue::Err));
++                    let error = unsafe { CStr::from_ptr(result.inner.as_err_string_ptr()) }.to_str().unwrap().to_string();
++                    rln_free_string(result.inner.as_err_string_ptr());
++                    assert_eq!(error, expected_error());
++                    let global = rln_sdk_initialize(req.as_ptr());
++                    assert!(matches!(global.result, CResultValue::Err));
++                    assert_eq!(string(global), expected_error());
++                    assert_eq!(snapshot(&temp.0), before);
++                }
++            }
++        }
++        assert!(matches!(listener.accept(), Err(e) if e.kind() == std::io::ErrorKind::WouldBlock));
++    }
++
++    #[test]
++    fn raw_backup_and_fence_clear_are_disabled_even_with_a_live_local_node() {
++        let temp = TestDirectory::new();
++        let req = request(&temp.0.join("local-only"), "regtest", None);
++        let result = rln_sdk_node_new(req.as_ptr());
++        assert!(matches!(result.result, CResultValue::Ok));
++        let handle = result.inner;
++        let password = CString::new(r#"{"password":"private-secret"}"#).unwrap();
++        let before = snapshot(&temp.0);
++        let backup = rln_sdk_node_vss_backup(&handle);
++        assert!(matches!(backup.result, CResultValue::Err));
++        assert_eq!(string(backup), expected_error());
++        let clear = rln_sdk_node_vss_clear_fence(&handle, password.as_ptr());
++        assert!(matches!(clear.result, CResultValue::Err));
++        assert_eq!(string(clear), expected_error());
++        assert_eq!(snapshot(&temp.0), before);
++        let stopped = rln_sdk_node_shutdown(&handle);
++        assert!(matches!(stopped.result, CResultValue::Ok)); string(stopped);
++        free_sdk_node(handle);
++    }
 +}
 diff --git a/bindings/c-ffi/src/utils.rs b/bindings/c-ffi/src/utils.rs
 index 98c3372..c4db3c0 100644
@@ -4287,7 +4495,7 @@ index 0000000..c9f968e
 +    }
 +}
 diff --git a/src/uniffi_api/mod.rs b/src/uniffi_api/mod.rs
-index 89eb544..e546bfe 100644
+index 89eb544..629afe9 100644
 --- a/src/uniffi_api/mod.rs
 +++ b/src/uniffi_api/mod.rs
 @@ -1,5 +1,6 @@
@@ -4297,7 +4505,27 @@ index 89eb544..e546bfe 100644
  pub(crate) mod state;
  mod types;
  
-@@ -71,13 +72,23 @@ fn attach_host_with_expected_key_source(
+@@ -21,6 +22,19 @@ pub(crate) use state::{clear_uniffi_app_state, set_uniffi_app_state};
+ use std::{str::FromStr, sync::Arc};
+ pub use types::*;
+ 
++/// This binding does not expose the pinned upstream VSS transport until its
++/// credential derivation and backup/recovery durability defects are resolved.
++/// Keep the machine code and public reason shared with compiled build metadata.
++pub const VSS_SAFETY_POLICY_CODE: &str = "ERR_VSS_UNSAFE_UPSTREAM";
++pub const VSS_SAFETY_POLICY_REASON: &str =
++    "VSS is unavailable until upstream backup security and recovery defects are fixed.";
++
++fn vss_safety_policy_error() -> RlnError {
++    RlnError::FailedVssInit(format!(
++        "{VSS_SAFETY_POLICY_CODE}: {VSS_SAFETY_POLICY_REASON}"
++    ))
++}
++
+ pub fn uniffi_healthcheck() -> String {
+     "rgb_lightning_node_uniffi_ready".to_string()
+ }
+@@ -71,30 +85,35 @@ fn attach_host_with_expected_key_source(
      host: Arc<dyn ExternalSignerHost>,
      expected: crate::signer::KeySourceFile,
  ) -> Result<(), RlnError> {
@@ -4322,7 +4550,31 @@ index 89eb544..e546bfe 100644
      Ok(())
  }
  
-@@ -417,12 +428,9 @@ impl SdkNode {
+ fn handle_from_request(request: SdkInitRequest) -> Result<NodeHandle, RlnError> {
+-    let network = network_from_str(&request.network)?;
+-    if let Some(url) = &request.vss_url {
+-        #[cfg(feature = "vss")]
+-        crate::utils::validate_vss_url(url, request.vss_allow_http)
+-            .map_err(|e| RlnError::InvalidRequest(e.to_string()))?;
+-        #[cfg(not(feature = "vss"))]
+-        {
+-            let _ = url;
+-            return Err(RlnError::InvalidRequest(
+-                "vss_url requires the vss feature".to_string(),
+-            ));
+-        }
++    // Deny every supplied URL, including empty/malformed values, before any
++    // runtime, storage or transport is created. Both instance and compatibility
++    // global FFI initialization use this admission point. Never silently strip
++    // the URL and open a wallet that the caller believes is backed up.
++    if request.vss_url.is_some() {
++        return Err(vss_safety_policy_error());
+     }
++    let network = network_from_str(&request.network)?;
+     let config = NodeConfig {
+         storage_dir_path: std::path::PathBuf::from(request.storage_dir_path),
+         daemon_listening_port: request.daemon_listening_port,
+@@ -417,12 +436,9 @@ impl SdkNode {
          Ok(Self { handle })
      }
  
@@ -4337,7 +4589,34 @@ index 89eb544..e546bfe 100644
      }
  
      pub fn init(&self, password: String, mnemonic: Option<String>) -> Result<String, RlnError> {
-@@ -1751,8 +1759,17 @@ impl SdkNode {
+@@ -461,21 +477,14 @@ impl SdkNode {
+         Ok(())
+     }
+ 
+-    pub fn vss_clear_fence(&self, request: SdkVssClearFenceRequest) -> Result<(), RlnError> {
+-        let state = self.handle.app_state();
+-        block_on_sdk(sdk::vss_clear_fence(
+-            state,
+-            sdk::VssClearFenceRequest {
+-                password: request.password,
+-            },
+-        ))?;
+-        Ok(())
++    /// VSS transport is disabled by this binding's compiled safety policy.
++    pub fn vss_clear_fence(&self, _request: SdkVssClearFenceRequest) -> Result<(), RlnError> {
++        Err(vss_safety_policy_error())
+     }
+ 
++    /// VSS transport is disabled by this binding's compiled safety policy.
+     pub fn vss_backup(&self) -> Result<i64, RlnError> {
+-        let state = self.handle.app_state();
+-        let version = block_on_sdk(sdk::vss_backup(state))?;
+-        Ok(version)
++        Err(vss_safety_policy_error())
+     }
+ 
+     pub fn connectpeer(&self, peer_pubkey_and_addr: String) -> Result<(), RlnError> {
+@@ -1751,8 +1760,17 @@ impl SdkNode {
      ) -> Result<(), RlnError> {
          let state = self.handle.app_state();
          let expected = key_source_from_uniffi_bootstrap(signer.bootstrap()?);
@@ -4357,7 +4636,7 @@ index 89eb544..e546bfe 100644
      }
  
      #[allow(clippy::too_many_arguments)]
-@@ -1795,15 +1812,18 @@ pub fn sdk_initialize(request: SdkInitRequest) -> Result<(), RlnError> {
+@@ -1795,15 +1813,18 @@ pub fn sdk_initialize(request: SdkInitRequest) -> Result<(), RlnError> {
      Ok(())
  }
  
@@ -4384,7 +4663,7 @@ index 89eb544..e546bfe 100644
  }
  
  pub fn sdk_init_with_external_signer(
-@@ -2053,3 +2073,67 @@ impl crate::signer::ExternalSignerTransport for UniffiExternalSignerTransport {
+@@ -2053,3 +2074,67 @@ impl crate::signer::ExternalSignerTransport for UniffiExternalSignerTransport {
  
  #[cfg(test)]
  mod tests;
@@ -4811,7 +5090,7 @@ index 42f6c14..a587e0d 100644
 +    }
  }
 diff --git a/src/uniffi_api/tests.rs b/src/uniffi_api/tests.rs
-index 27ea384..3c209c2 100644
+index 27ea384..de2daaa 100644
 --- a/src/uniffi_api/tests.rs
 +++ b/src/uniffi_api/tests.rs
 @@ -176,6 +176,101 @@ mod uniffi_smoke_tests {
@@ -4924,6 +5203,31 @@ index 27ea384..3c209c2 100644
              unlocked_app_state: Arc::new(TokioMutex::new(None)),
              ldk_background_services: Arc::new(Mutex::new(None)),
              attached_external_signer: Arc::new(Mutex::new(None)),
+@@ -608,7 +704,7 @@ mod uniffi_smoke_tests {
+     }
+ 
+     #[test]
+-    fn sdk_create_rejects_invalid_vss_url() {
++    fn sdk_create_rejects_configured_vss_url_by_safety_policy() {
+         let res = SdkNode::create(SdkInitRequest {
+             storage_dir_path: "/tmp/rln_vss_validation_test".to_string(),
+             daemon_listening_port: 3001,
+@@ -624,7 +720,14 @@ mod uniffi_smoke_tests {
+             vss_allow_empty_restore: false,
+             reuse_addresses: false,
+         });
+-        assert!(matches!(res, Err(RlnError::InvalidRequest(_))));
++        let error = match res {
++            Err(error) => error,
++            Ok(_) => panic!("VSS configuration must be denied"),
++        };
++        assert!(matches!(error, RlnError::FailedVssInit(_)));
++        assert_eq!(error.to_string(), format!(
++            "{VSS_SAFETY_POLICY_CODE}: {VSS_SAFETY_POLICY_REASON}"
++        ));
+     }
+ }
+ 
 diff --git a/src/utils.rs b/src/utils.rs
 index 454f4ba..41a48ee 100644
 --- a/src/utils.rs
