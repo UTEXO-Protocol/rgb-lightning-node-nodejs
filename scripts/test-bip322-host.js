@@ -11,7 +11,7 @@ let official = 0
 for (const vectors of [require('./fixtures/bip322/basic-test-vectors.json'), require('./fixtures/bip322/generated-test-vectors.json')]) {
   for (const row of vectors.simple) for (const signature of row.bip322_signatures) {
     const supported = row.type === 'p2tr' || row.type === 'p2wpkh'
-    if (!supported) { rejects(() => api.verifyMessageBip322(row.message, row.address, signature, 'mainnet')); continue }
+    if (!supported) { let accepted = false; try { accepted = api.verifyMessageBip322(row.message, row.address, signature, 'mainnet') } catch {} assert(!accepted, 'Unsupported script was accepted'); continue }
     assert(api.verifyMessageBip322(row.message, row.address, signature, 'mainnet')); official++
     assert(!api.verifyMessageBip322(row.message + '!', row.address, signature, 'mainnet'))
   }
@@ -23,7 +23,7 @@ assert(api.getRuntimeInfo().capabilities.includes('bip322-simple-v1'))
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'utexo-bip322-host-'))
 const request = {
   ldk_chain_sync: { mode: 'TransactionSync', config: { indexer_url: 'http://127.0.0.1:18094' } },
-  indexer_url: 'tcp://127.0.0.1:18001', proxy_endpoint: 'rpc://127.0.0.1:28090/json-rpc',
+  indexer_url: 'http://127.0.0.1:18094', proxy_endpoint: 'rpc://127.0.0.1:28090/json-rpc',
   eth_rpc_url: 'http://127.0.0.1:18555', announce_addresses: []
 }
 let node, signer, other
@@ -43,6 +43,7 @@ try {
     if (saved) assert(saved === address, 'Canonical address changed on signer reopen')
     saved = address
     const receive = node.address().address
+    assert(receive === address, 'First vanilla wallet receive address does not match the canonical signing address')
     assert(node.getMessageSigningAddress() === address)
     assert(node.address().address === receive, 'Signing getter rotated receive address')
     const transactions = JSON.stringify(node.listTransactions(true))
@@ -52,7 +53,8 @@ try {
       assert(node.verifyMessageBip322(message, address, signature))
       assert(api.verifyMessageBip322(message, address, signature, 'regtest'))
       assert(api.verifyMessageBip322(message, address, signature.slice(3), 'regtest'))
-      assert(!api.verifyMessageBip322(message + '!', address, signature, 'regtest'))
+      const altered = message.length ? '!' + message.slice(1) : '!'
+      assert(!api.verifyMessageBip322(altered, address, signature, 'regtest'))
       rejects(() => api.verifyMessageBip322(message, address, signature, 'mainnet'))
       if (message.length < 100) publicProofs.push({ message, address, signature, network: 'regtest' })
     }

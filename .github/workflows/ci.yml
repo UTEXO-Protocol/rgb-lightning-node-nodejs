@@ -30,6 +30,8 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm run check:types
       - run: npm run test:unit
+      - name: BIP-322 exact-overlay crypto vectors
+        run: npm run test:bip322:crypto
       - run: rustfmt --edition 2021 --check src/lib.rs build.rs
       - name: Build exact release graph
         env:
