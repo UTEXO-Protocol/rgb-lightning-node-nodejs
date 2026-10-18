@@ -1,0 +1,10 @@
+[package]
+name="utexo-bip322-vector-tests"
+version="0.1.0"
+edition="2021"
+[dependencies]
+bitcoin="=0.32.102"
+base64="=0.22.1"
+rand="=0.8.5"
+[dev-dependencies]
+serde_json="1"

@@ -335,7 +335,7 @@ index f775f83..86daa71 100644
      println!("cargo:rerun-if-changed=cbindgen.toml");
  
 diff --git a/bindings/c-ffi/rln.h b/bindings/c-ffi/rln.h
-index c8bb08b..62b7e54 100644
+index c8bb08b..54d724c 100644
 --- a/bindings/c-ffi/rln.h
 +++ b/bindings/c-ffi/rln.h
 @@ -42,6 +42,11 @@ struct CResultString rln_asset_link_create(const struct COpaqueStruct *node,
@@ -350,7 +350,16 @@ index c8bb08b..62b7e54 100644
  struct CResultString rln_btc_balance(const struct COpaqueStruct *node, bool skip_sync);
  
  struct CResultString rln_burn(const struct COpaqueStruct *node, const char *request_json);
-@@ -167,6 +172,22 @@ struct CResult rln_native_external_signer_new(const char *seed_hex,
+@@ -102,6 +107,8 @@ struct CResultString rln_get_consignment_path(const struct COpaqueStruct *node,
+                                               const char *asset_id,
+                                               const char *txid);
+ 
++struct CResultString rln_get_message_signing_address(const struct COpaqueStruct *node);
++
+ struct CResultString rln_get_payment(const struct COpaqueStruct *node,
+                                      const char *payment_hash_hex,
+                                      const char *payment_type);
+@@ -167,6 +174,22 @@ struct CResult rln_native_external_signer_new(const char *seed_hex,
                                                const char *network,
                                                bool permissive_policy);
  
@@ -373,7 +382,7 @@ index c8bb08b..62b7e54 100644
  struct CResultString rln_network_info(const struct COpaqueStruct *node);
  
  struct CResultString rln_node_info(const struct COpaqueStruct *node);
-@@ -195,6 +216,14 @@ struct CResultString rln_sdk_initialize(const char *request_json);
+@@ -195,6 +218,14 @@ struct CResultString rln_sdk_initialize(const char *request_json);
  struct CResultString rln_sdk_node_apay_new(const struct COpaqueStruct *node,
                                             const char *host_node_id);
  
@@ -388,8 +397,27 @@ index c8bb08b..62b7e54 100644
  struct CResultString rln_sdk_node_attach_native_external_signer(const struct COpaqueStruct *node,
                                                                  const struct COpaqueStruct *signer);
  
+@@ -260,6 +291,9 @@ struct CResultString rln_send_rgb(const struct COpaqueStruct *node, const char *
+ 
+ struct CResultString rln_sign_message(const struct COpaqueStruct *node, const char *message);
+ 
++struct CResultString rln_sign_message_bip322(const struct COpaqueStruct *node,
++                                             const char *request_json);
++
+ struct CResultString rln_sync(const struct COpaqueStruct *node);
+ 
+ struct CResultString rln_taker(const struct COpaqueStruct *node, const char *request_json);
+@@ -271,3 +305,8 @@ struct CResultString rln_uniffi_is_initialized(void);
+ struct CResultString rln_verify_message(const struct COpaqueStruct *node,
+                                         const char *message,
+                                         const char *signature);
++
++struct CResultString rln_verify_message_bip322(const struct COpaqueStruct *node,
++                                               const char *request_json);
++
++struct CResultString rln_verify_message_bip322_offline(const char *request_json);
 diff --git a/bindings/c-ffi/rln.hpp b/bindings/c-ffi/rln.hpp
-index 498a7e1..59f585d 100644
+index 498a7e1..36bf456 100644
 --- a/bindings/c-ffi/rln.hpp
 +++ b/bindings/c-ffi/rln.hpp
 @@ -43,6 +43,9 @@ CResultString rln_asset_link_create(const COpaqueStruct *node, const char *reque
@@ -402,7 +430,16 @@ index 498a7e1..59f585d 100644
  CResultString rln_btc_balance(const COpaqueStruct *node, bool skip_sync);
  
  CResultString rln_burn(const COpaqueStruct *node, const char *request_json);
-@@ -147,6 +150,18 @@ CResult rln_native_external_signer_new(const char *seed_hex,
+@@ -90,6 +93,8 @@ CResultString rln_get_consignment_path(const COpaqueStruct *node,
+                                        const char *asset_id,
+                                        const char *txid);
+ 
++CResultString rln_get_message_signing_address(const COpaqueStruct *node);
++
+ CResultString rln_get_payment(const COpaqueStruct *node,
+                               const char *payment_hash_hex,
+                               const char *payment_type);
+@@ -147,6 +152,18 @@ CResult rln_native_external_signer_new(const char *seed_hex,
                                         const char *network,
                                         bool permissive_policy);
  
@@ -421,7 +458,7 @@ index 498a7e1..59f585d 100644
  CResultString rln_network_info(const COpaqueStruct *node);
  
  CResultString rln_node_info(const COpaqueStruct *node);
-@@ -170,6 +185,12 @@ CResultString rln_sdk_initialize(const char *request_json);
+@@ -170,6 +187,12 @@ CResultString rln_sdk_initialize(const char *request_json);
  /// unused_hashes, refill_batch_size, first_hash_index). Upstream PR #51.
  CResultString rln_sdk_node_apay_new(const COpaqueStruct *node, const char *host_node_id);
  
@@ -434,8 +471,26 @@ index 498a7e1..59f585d 100644
  CResultString rln_sdk_node_attach_native_external_signer(const COpaqueStruct *node,
                                                           const COpaqueStruct *signer);
  
+@@ -228,6 +251,8 @@ CResultString rln_send_rgb(const COpaqueStruct *node, const char *request_json);
+ 
+ CResultString rln_sign_message(const COpaqueStruct *node, const char *message);
+ 
++CResultString rln_sign_message_bip322(const COpaqueStruct *node, const char *request_json);
++
+ CResultString rln_sync(const COpaqueStruct *node);
+ 
+ CResultString rln_taker(const COpaqueStruct *node, const char *request_json);
+@@ -240,4 +265,8 @@ CResultString rln_verify_message(const COpaqueStruct *node,
+                                  const char *message,
+                                  const char *signature);
+ 
++CResultString rln_verify_message_bip322(const COpaqueStruct *node, const char *request_json);
++
++CResultString rln_verify_message_bip322_offline(const char *request_json);
++
+ }  // extern "C"
 diff --git a/bindings/c-ffi/src/api.rs b/bindings/c-ffi/src/api.rs
-index 2b9e873..1d70429 100644
+index 2b9e873..d15c476 100644
 --- a/bindings/c-ffi/src/api.rs
 +++ b/bindings/c-ffi/src/api.rs
 @@ -91,7 +91,7 @@ pub(crate) fn sdk_node_unlock(
@@ -500,6 +555,42 @@ index 2b9e873..1d70429 100644
  pub(crate) fn sdk_node_init_with_native_external_signer(
      node: &COpaqueStruct,
      signer: &COpaqueStruct,
+@@ -840,3 +868,35 @@ pub(crate) fn sdk_node_unlock_with_attached_external_signer(
+     node.unlock_with_attached_external_signer_request(r.into())?;
+     ok_void()
+ }
++
++fn parse_bip322_req<T: serde::de::DeserializeOwned>(ptr: *const c_char) -> Result<T, Error> {
++    if ptr.is_null() { return Err(Error::StringParse("missing BIP-322 request".into())); }
++    // FFI callers own a valid nul-terminated string. Bound before making a Rust String.
++    let bytes = unsafe { std::ffi::CStr::from_ptr(ptr) }.to_bytes();
++    if bytes.len() > 32768 { return Err(Error::StringParse("BIP-322 request exceeds limit".into())); }
++    Ok(serde_json::from_slice(bytes)?)
++}
++#[derive(serde::Deserialize)]
++#[serde(deny_unknown_fields)]
++struct Bip322SignRequest { message: String, address: String }
++#[derive(serde::Deserialize)]
++#[serde(deny_unknown_fields)]
++struct Bip322VerifyRequest { message: String, address: String, signature: String }
++#[derive(serde::Deserialize)]
++#[serde(deny_unknown_fields)]
++struct Bip322VerifyOfflineRequest { message: String, address: String, signature: String, network: String }
++pub(crate) fn get_message_signing_address(node: &COpaqueStruct) -> Result<String, Error> {
++    json(require_handle(node)?.get_message_signing_address()?)
++}
++pub(crate) fn sign_message_bip322(node: &COpaqueStruct, request_json: *const c_char) -> Result<String, Error> {
++    let req: Bip322SignRequest = parse_bip322_req(request_json)?;
++    json(require_handle(node)?.sign_message_bip322(req.message, req.address)?)
++}
++pub(crate) fn verify_message_bip322(node: &COpaqueStruct, request_json: *const c_char) -> Result<String, Error> {
++    let req: Bip322VerifyRequest = parse_bip322_req(request_json)?;
++    json(require_handle(node)?.verify_message_bip322(req.message, req.address, req.signature)?)
++}
++pub(crate) fn verify_message_bip322_offline(request_json: *const c_char) -> Result<String, Error> {
++    let req: Bip322VerifyOfflineRequest = parse_bip322_req(request_json)?;
++    json(rln::verify_message_bip322(req.message, req.address, req.signature, req.network)?)
++}
 diff --git a/bindings/c-ffi/src/json_types.rs b/bindings/c-ffi/src/json_types.rs
 index 5b606f1..b033603 100644
 --- a/bindings/c-ffi/src/json_types.rs
@@ -677,7 +768,7 @@ index 5b606f1..b033603 100644
      }
  }
 diff --git a/bindings/c-ffi/src/lib.rs b/bindings/c-ffi/src/lib.rs
-index e1dded1..8d6a0eb 100644
+index e1dded1..2a5c59c 100644
 --- a/bindings/c-ffi/src/lib.rs
 +++ b/bindings/c-ffi/src/lib.rs
 @@ -89,6 +89,26 @@ pub extern "C" fn rln_free_string(s: *mut c_char) {
@@ -700,7 +791,7 @@ index e1dded1..8d6a0eb 100644
 +            "apay-address", "decoded-invoice-cltv", "tagged-rgb-assignment", "pending-blinded-v1",
 +            "rgb-contract-import-v1", "rgb-transfer-metadata-import-v1", "consignment-export-v1", "mainnet-lightning-rejection-v1",
 +            "external-signer-eth-rpc-v1", "external-signer-burn-v1",
-+            "native-signer-shutdown-v1", "owned-session-cleanup-v1"]
++            "native-signer-shutdown-v1", "owned-session-cleanup-v1", "bip322-simple-v1"]
 +    }).to_string()))
 +}
 +
@@ -856,6 +947,27 @@ index e1dded1..8d6a0eb 100644
  #[unsafe(no_mangle)]
  pub extern "C" fn rln_sdk_node_init_with_native_external_signer(
      node: &COpaqueStruct,
+@@ -839,3 +987,20 @@ pub extern "C" fn rln_sdk_node_unlock_with_attached_external_signer(
+         api::sdk_node_unlock_with_attached_external_signer(node, request_json)
+     )
+ }
++
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_get_message_signing_address(node: &COpaqueStruct) -> CResultString {
++    ffi_call!("rln_get_message_signing_address", api::get_message_signing_address(node))
++}
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_sign_message_bip322(node: &COpaqueStruct, request_json: *const c_char) -> CResultString {
++    ffi_call!("rln_sign_message_bip322", api::sign_message_bip322(node, request_json))
++}
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_verify_message_bip322(node: &COpaqueStruct, request_json: *const c_char) -> CResultString {
++    ffi_call!("rln_verify_message_bip322", api::verify_message_bip322(node, request_json))
++}
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_verify_message_bip322_offline(request_json: *const c_char) -> CResultString {
++    ffi_call!("rln_verify_message_bip322_offline", api::verify_message_bip322_offline(request_json))
++}
 diff --git a/bindings/c-ffi/src/utils.rs b/bindings/c-ffi/src/utils.rs
 index 98c3372..c4db3c0 100644
 --- a/bindings/c-ffi/src/utils.rs
@@ -905,7 +1017,7 @@ index df823f2..c34d5ea 100644
      [Throws=RlnError]
      NodeInfo node_info();
 diff --git a/src/ldk.rs b/src/ldk.rs
-index 2ff6e98..314cab2 100644
+index 2ff6e98..aff2a1e 100644
 --- a/src/ldk.rs
 +++ b/src/ldk.rs
 @@ -109,8 +109,8 @@ use std::collections::HashSet;
@@ -1872,7 +1984,16 @@ index 2ff6e98..314cab2 100644
              peer_manager: peer_manager.clone(),
              bp_exit,
              background_processor: Some(background_processor),
-@@ -6851,15 +7274,11 @@ impl AppState {
+@@ -6837,6 +7260,8 @@ pub(crate) fn attach_external_signer_transport(
+     Ok(ExternalSignerAttachment {
+         bootstrap,
+         transport,
++        #[cfg(all(feature = "uniffi", feature = "vls"))]
++        message_signer: None,
+     })
+ }
+ 
+@@ -6851,15 +7276,11 @@ impl AppState {
          ldk_background_services
              .stop_processing
              .store(true, Ordering::Release);
@@ -1891,7 +2012,7 @@ index 2ff6e98..314cab2 100644
          Some(ldk_background_services)
      }
  }
-@@ -6980,13 +7399,19 @@ async fn release_vss_fence(kv_store: Arc<SyncedKvStore>, teardown: VssTeardown)
+@@ -6980,13 +7401,19 @@ async fn release_vss_fence(kv_store: Arc<SyncedKvStore>, teardown: VssTeardown)
  
  // Runs while shutting down, possibly because the background processor itself
  // died, so its outcome is reported instead of unwrapped.
@@ -1916,7 +2037,7 @@ index 2ff6e98..314cab2 100644
      }
  }
  
-@@ -7052,7 +7477,16 @@ mod vss_teardown_tests {
+@@ -7052,7 +7479,16 @@ mod vss_teardown_tests {
  }
  
  /// Stop the resources owned by the unlocked session, including wallet-only persistence.
@@ -1934,7 +2055,7 @@ index 2ff6e98..314cab2 100644
      tracing::info!("Stopping node services");
      // Wait for wallet operations holding the API mutex, then remove both session owners together.
      // New callers cannot use a wallet after its VSS fence has been handed over; concurrent stops
-@@ -7074,19 +7508,33 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
+@@ -7074,19 +7510,33 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
          )
      });
  
@@ -1970,7 +2091,7 @@ index 2ff6e98..314cab2 100644
              }
          }
      }
-@@ -7095,9 +7543,13 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
+@@ -7095,9 +7545,13 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
          .as_mut()
          .and_then(|services| services.background_processor.take())
      {
@@ -1985,7 +2106,7 @@ index 2ff6e98..314cab2 100644
      #[cfg(feature = "vss")]
      if let Some((common, monitor_store)) = common_and_monitor {
          let deadline = Instant::now() + VSS_TEARDOWN_TIMEOUT;
-@@ -7112,34 +7564,95 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
+@@ -7112,34 +7566,95 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
              .is_err()
              {
                  worker.abort();
@@ -2887,7 +3008,7 @@ index b6784be..5123fd2 100644
              ldk_background_services: Arc::new(Mutex::new(None)),
              attached_external_signer: Arc::new(Mutex::new(None)),
 diff --git a/src/sdk/mod.rs b/src/sdk/mod.rs
-index 77680dd..1190b0b 100644
+index 77680dd..8f1d2d7 100644
 --- a/src/sdk/mod.rs
 +++ b/src/sdk/mod.rs
 @@ -140,6 +140,9 @@ impl Drop for OpenChannelVirtualIntentGuard {
@@ -2900,6 +3021,15 @@ index 77680dd..1190b0b 100644
      if *state.changing_state.lock().unwrap() {
          return Err(APIError::ChangingState);
      }
+@@ -159,7 +162,7 @@ async fn check_locked(
+     }
+ }
+ 
+-async fn check_unlocked(
++pub(crate) async fn check_unlocked(
+     state: &Arc<AppState>,
+ ) -> Result<tokio::sync::MutexGuard<'_, Option<Arc<crate::utils::UnlockedAppState>>>, APIError> {
+     check_changing_state(state)?;
 @@ -2307,8 +2310,7 @@ pub(crate) async fn connect_peer(
      let (peer_pubkey, peer_addr) = parse_peer_info(peer_pubkey_and_addr.to_string())?;
  
@@ -2928,6 +3058,19 @@ index 77680dd..1190b0b 100644
              unlocked_app_state: Arc::new(TokioMutex::new(None)),
              ldk_background_services: Arc::new(Mutex::new(None)),
              attached_external_signer: Arc::new(Mutex::new(None)),
+diff --git a/src/signer/external.rs b/src/signer/external.rs
+index 295d1e0..8a491bf 100644
+--- a/src/signer/external.rs
++++ b/src/signer/external.rs
+@@ -192,6 +192,8 @@ pub(crate) struct ExternalSigner {
+ pub(crate) struct ExternalSignerAttachment {
+     pub(crate) bootstrap: BootstrapData,
+     pub(crate) transport: Arc<dyn ExternalSignerTransport>,
++    #[cfg(all(feature = "uniffi", feature = "vls"))]
++    pub(crate) message_signer: Option<Arc<crate::uniffi_api::NativeExternalSigner>>,
+ }
+ 
+ impl ExternalSigner {
 diff --git a/src/test/auth_db_persistence.rs b/src/test/auth_db_persistence.rs
 index 535a698..0d6ace8 100644
 --- a/src/test/auth_db_persistence.rs
@@ -2952,11 +3095,1209 @@ index 1282ad3..888d897 100644
          unlocked_app_state: Arc::new(TokioMutex::new(None)),
          ldk_background_services: Arc::new(Mutex::new(None)),
          attached_external_signer: Arc::new(Mutex::new(None)),
+diff --git a/src/uniffi_api/bip322.rs b/src/uniffi_api/bip322.rs
+new file mode 100644
+index 0000000..c9f968e
+--- /dev/null
++++ b/src/uniffi_api/bip322.rs
+@@ -0,0 +1,1185 @@
++//! Maintained-binding BIP-322 simple implementation. No RPC, PSBT input or broadcast path.
++//! Supports P2TR key-path and compressed-key P2WPKH verification only.
++use base64::{engine::general_purpose::STANDARD, Engine};
++use bitcoin::{
++    absolute,
++    address::NetworkUnchecked,
++    bip32::{ChildNumber, Xpriv, Xpub},
++    consensus::serialize,
++    hashes::{sha256, Hash},
++    key::TapTweak,
++    opcodes::all::OP_RETURN,
++    script::Builder,
++    secp256k1::{self, Keypair, Message, Secp256k1, SecretKey, XOnlyPublicKey},
++    sighash::{Prevouts, SighashCache},
++    transaction, Address, Amount, EcdsaSighashType, Network, OutPoint, ScriptBuf, Sequence,
++    TapSighashType, Transaction, TxIn, TxOut, Witness,
++};
++use rand::RngCore;
++use std::str::FromStr;
++
++pub const MAX_MESSAGE_BYTES: usize = 4096;
++pub const MAX_SIGNATURE_CHARS: usize = 4096;
++
++fn invalid() -> String {
++    "invalid BIP-322 request or unsupported signature".to_owned()
++}
++pub fn validate_message(message: &str) -> Result<(), String> {
++    if message.len() > MAX_MESSAGE_BYTES {
++        return Err(invalid());
++    }
++    Ok(())
++}
++pub fn parse_address(value: &str, network: Network) -> Result<Address, String> {
++    if value.len() > 128 || value.bytes().any(|b| !b.is_ascii_graphic()) {
++        return Err(invalid());
++    }
++    Address::<NetworkUnchecked>::from_str(value)
++        .map_err(|_| invalid())?
++        .require_network(network)
++        .map_err(|_| invalid())
++}
++
++pub fn message_hash(message: &str) -> sha256::Hash {
++    let tag = sha256::Hash::hash(b"BIP0322-signed-message");
++    let mut bytes = Vec::with_capacity(64 + message.len());
++    bytes.extend_from_slice(tag.as_byte_array());
++    bytes.extend_from_slice(tag.as_byte_array());
++    bytes.extend_from_slice(message.as_bytes());
++    sha256::Hash::hash(&bytes)
++}
++
++pub fn virtual_transactions(message: &str, address: &Address) -> (Transaction, Transaction) {
++    let challenge = TxOut {
++        value: Amount::ZERO,
++        script_pubkey: address.script_pubkey(),
++    };
++    let to_spend = Transaction {
++        version: transaction::Version(0),
++        lock_time: absolute::LockTime::ZERO,
++        input: vec![TxIn {
++            previous_output: OutPoint::null(),
++            script_sig: Builder::new()
++                .push_int(0)
++                .push_slice(message_hash(message).to_byte_array())
++                .into_script(),
++            sequence: Sequence::ZERO,
++            witness: Witness::new(),
++        }],
++        output: vec![challenge],
++    };
++    let to_sign = Transaction {
++        version: transaction::Version(0),
++        lock_time: absolute::LockTime::ZERO,
++        input: vec![TxIn {
++            previous_output: OutPoint {
++                txid: to_spend.compute_txid(),
++                vout: 0,
++            },
++            script_sig: ScriptBuf::new(),
++            sequence: Sequence::ZERO,
++            witness: Witness::new(),
++        }],
++        output: vec![TxOut {
++            value: Amount::ZERO,
++            script_pubkey: Builder::new().push_opcode(OP_RETURN).into_script(),
++        }],
++    };
++    (to_spend, to_sign)
++}
++
++/// Only the first vanilla receive key is retained, never the master seed/account xpriv.
++/// Its account xpub must match the actual signer's bootstrap before use.
++pub struct MessageKey {
++    secret: SecretKey,
++    pub account_xpub: String,
++    pub address: Address,
++    pub network: Network,
++}
++impl Drop for MessageKey {
++    fn drop(&mut self) {
++        self.secret.non_secure_erase();
++    }
++}
++impl MessageKey {
++    pub fn from_seed(seed: &[u8; 32], network: Network) -> Result<Self, String> {
++        let secp = Secp256k1::new();
++        let mut master = Xpriv::new_master(network, seed).map_err(|_| invalid())?;
++        let path = [
++            ChildNumber::from_hardened_idx(86).unwrap(),
++            ChildNumber::from_hardened_idx(if network == Network::Bitcoin { 0 } else { 1 })
++                .unwrap(),
++            ChildNumber::from_hardened_idx(0).unwrap(),
++        ];
++        let derived = master.derive_priv(&secp, &path);
++        master.private_key.non_secure_erase();
++        let mut account = derived.map_err(|_| invalid())?;
++        let account_xpub = Xpub::from_priv(&secp, &account).to_string();
++        let derived = account.derive_priv(
++            &secp,
++            &[
++                ChildNumber::Normal { index: 0 },
++                ChildNumber::Normal { index: 0 },
++            ],
++        );
++        account.private_key.non_secure_erase();
++        let mut child = derived.map_err(|_| invalid())?;
++        let secret = child.private_key;
++        child.private_key.non_secure_erase();
++        let mut pair = Keypair::from_secret_key(&secp, &secret);
++        let (internal_key, _) = pair.x_only_public_key();
++        pair.non_secure_erase();
++        let address = Address::p2tr(&secp, internal_key, None, network);
++        Ok(Self {
++            secret,
++            account_xpub,
++            address,
++            network,
++        })
++    }
++    pub fn sign(&self, message: &str, requested_address: &str) -> Result<String, String> {
++        validate_message(message)?;
++        let address = parse_address(requested_address, self.network)?;
++        if address.script_pubkey() != self.address.script_pubkey() {
++            return Err("BIP-322 address is not the wallet signing address".to_owned());
++        }
++        let (to_spend, to_sign) = virtual_transactions(message, &address);
++        let sighash = SighashCache::new(&to_sign)
++            .taproot_key_spend_signature_hash(
++                0,
++                &Prevouts::All(&to_spend.output),
++                TapSighashType::Default,
++            )
++            .map_err(|_| invalid())?;
++        let secp = Secp256k1::new();
++        // Obtain entropy before creating temporary private keypair copies so errors cannot skip erasure.
++        let mut auxiliary = [0u8; 32];
++        rand::rngs::OsRng
++            .try_fill_bytes(&mut auxiliary)
++            .map_err(|_| "BIP-322 secure randomness is unavailable".to_owned())?;
++        let mut pair = Keypair::from_secret_key(&secp, &self.secret);
++        let mut tweaked = pair.tap_tweak(&secp, None).to_keypair();
++        pair.non_secure_erase();
++        let signature = secp.sign_schnorr_with_aux_rand(
++            &Message::from_digest(sighash.to_byte_array()),
++            &tweaked,
++            &auxiliary,
++        );
++        tweaked.non_secure_erase();
++        let witness = Witness::from_slice(&[signature.as_ref()]);
++        Ok(format!("smp{}", STANDARD.encode(serialize(&witness))))
++    }
++}
++
++pub fn verify(
++    message: &str,
++    address: &str,
++    signature: &str,
++    network: Network,
++) -> Result<bool, String> {
++    validate_message(message)?;
++    let address = parse_address(address, network)?;
++    if signature.len() > MAX_SIGNATURE_CHARS || !signature.is_ascii() {
++        return Err(invalid());
++    }
++    // Historical pre-finalization simple signatures are accepted, but never emitted.
++    let encoded = signature.strip_prefix("smp").unwrap_or(signature);
++    let raw = match STANDARD.decode(encoded) {
++        Ok(raw) => raw,
++        Err(_) => return Ok(false),
++    };
++    if STANDARD.encode(&raw) != encoded || raw.len() > 256 {
++        return Ok(false);
++    }
++    // Our supported scripts require 1 or 2 items, each below 74 bytes: all CompactSize
++    // fields must therefore be a single byte. Bound every field before allocating.
++    let count = match raw.first() {
++        Some(1) => 1,
++        Some(2) => 2,
++        _ => return Ok(false),
++    };
++    let mut offset = 1;
++    let mut items = Vec::with_capacity(count);
++    for _ in 0..count {
++        let len = match raw.get(offset) {
++            Some(n) if *n <= 73 => *n as usize,
++            _ => return Ok(false),
++        };
++        offset += 1;
++        let end = offset + len;
++        if end > raw.len() {
++            return Ok(false);
++        }
++        items.push(&raw[offset..end]);
++        offset = end;
++    }
++    if offset != raw.len() {
++        return Ok(false);
++    }
++    let witness = Witness::from_slice(&items);
++    if serialize(&witness) != raw {
++        return Ok(false);
++    }
++    let script = address.script_pubkey();
++    let (to_spend, to_sign) = virtual_transactions(message, &address);
++    let secp = Secp256k1::verification_only();
++    if script.is_p2tr() {
++        if witness.len() != 1 {
++            return Ok(false);
++        }
++        let item = witness.iter().next().unwrap();
++        let sighash_type = match item.len() {
++            64 => TapSighashType::Default,
++            65 if item[64] == 1 => TapSighashType::All,
++            _ => return Ok(false),
++        };
++        let sig = match secp256k1::schnorr::Signature::from_slice(&item[..64]) {
++            Ok(s) => s,
++            Err(_) => return Ok(false),
++        };
++        let key = XOnlyPublicKey::from_slice(&script.as_bytes()[2..]).map_err(|_| invalid())?;
++        let hash = SighashCache::new(&to_sign)
++            .taproot_key_spend_signature_hash(0, &Prevouts::All(&to_spend.output), sighash_type)
++            .map_err(|_| invalid())?;
++        return Ok(secp
++            .verify_schnorr(&sig, &Message::from_digest(hash.to_byte_array()), &key)
++            .is_ok());
++    }
++    if script.is_p2wpkh() {
++        if witness.len() != 2 {
++            return Ok(false);
++        }
++        let items: Vec<&[u8]> = witness.iter().collect();
++        let signed = items[0];
++        let public = items[1];
++        if signed.len() < 9
++            || signed.len() > 73
++            || signed.last() != Some(&1)
++            || public.len() != 33
++            || !matches!(public[0], 2 | 3)
++        {
++            return Ok(false);
++        }
++        let key = match bitcoin::PublicKey::from_slice(public) {
++            Ok(k) => k,
++            Err(_) => return Ok(false),
++        };
++        if Address::p2wpkh(&bitcoin::CompressedPublicKey(key.inner), network).script_pubkey()
++            != script
++        {
++            return Ok(false);
++        }
++        let sig = match secp256k1::ecdsa::Signature::from_der(&signed[..signed.len() - 1]) {
++            Ok(s) => s,
++            Err(_) => return Ok(false),
++        };
++        let mut normalized = sig;
++        normalized.normalize_s();
++        if normalized != sig || sig.serialize_der().as_ref() != &signed[..signed.len() - 1] {
++            return Ok(false);
++        }
++        let hash = SighashCache::new(&to_sign)
++            .p2wpkh_signature_hash(0, &script, Amount::ZERO, EcdsaSighashType::All)
++            .map_err(|_| invalid())?;
++        return Ok(secp
++            .verify_ecdsa(
++                &Message::from_digest(hash.to_byte_array()),
++                &sig,
++                &key.inner,
++            )
++            .is_ok());
++    }
++    Err("unsupported BIP-322 address type; requires P2TR key-path or P2WPKH".to_owned())
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    #[test]
++    fn official_vectors() {
++        for file in [
++            r###"{
++  "tx_hashes": [
++    {
++      "message": "",
++      "address": "bc1q9vza2e8x573nczrlzms0wvx3gsqjx7vavgkx0l",
++      "message_hash": "c90c269c4f8fcbe6880f72a721ddfbf1914268a794cbb21cfafee13770ae19f1",
++      "to_spend_tx_hash": "c5680aa69bb8d860bf82d4e9cd3504b55dde018de765a91bb566283c545a99a7",
++      "to_sign_tx_hash": "1e9654e951a5ba44c8604c4de6c67fd78a27e81dcadcfe1edf638ba3aaebaed6"
++    },
++    {
++      "message": "Hello World",
++      "address": "bc1q9vza2e8x573nczrlzms0wvx3gsqjx7vavgkx0l",
++      "message_hash": "f0eb03b1a75ac6d9847f55c624a99169b5dccba2a31f5b23bea77ba270de0a7a",
++      "to_spend_tx_hash": "b79d196740ad5217771c1098fc4a4b51e0535c32236c71f1ea4d61a2d603352b",
++      "to_sign_tx_hash": "88737ae86f2077145f93cc4b153ae9a1cb8d56afa511988c149c5c8c9d93bddf"
++    },
++    {
++      "message": "UTF-8 support: öäüéàè 测试文本 \uD83D\uDE04",
++      "address": "bc1q9vza2e8x573nczrlzms0wvx3gsqjx7vavgkx0l",
++      "message_hash": "43936b237ea38c7794eb5d755e0d220b6db92ebfc5c8f482759d22b1286376d7",
++      "to_spend_tx_hash": "c8f4f525fe8afb1bc09b44175bd2096f079c98425e8a1be676b712add1fb62f0",
++      "to_sign_tx_hash": "8f488e06b89eafd019ec528109eafaf7f1d1811fd617aa1eeb9658f1c1be6586"
++    }
++  ],
++  "simple": [
++    {
++      "message": "",
++      "private_keys": [
++        "L3VFeEujGtevx9w18HD1fhRbCH67Az2dpCymeRE1SoPK6XQtaN2k"
++      ],
++      "address": "bc1q9vza2e8x573nczrlzms0wvx3gsqjx7vavgkx0l",
++      "type": "p2wpkh",
++      "witness_script": "",
++      "bip322_signatures": [
++        "smpAkcwRAIgM2gBAQqvZX15ZiysmKmQpDrG83avLIT492QBzLnQIxYCIBaTpOaD20qRlEylyxFSeEA2ba9YOixpX8z46TSDtS40ASECx/EgAxlkQpQ9hYjgGu6EBCPMVPwVIVJqO4XCsMvViHI=",
++        "smpAkgwRQIhAPkJ1Q4oYS0htvyuSFHLxRQpFAY56b70UvE7Dxazen0ZAiAtZfFz1S6T6I23MWI2lK/pcNTWncuyL8UL+oMdydVgzAEhAsfxIAMZZEKUPYWI4BruhAQjzFT8FSFSajuFwrDL1Yhy"
++      ]
++    },
++    {
++      "message": "Hello World",
++      "private_keys": [
++        "L3VFeEujGtevx9w18HD1fhRbCH67Az2dpCymeRE1SoPK6XQtaN2k"
++      ],
++      "address": "bc1q9vza2e8x573nczrlzms0wvx3gsqjx7vavgkx0l",
++      "type": "p2wpkh",
++      "witness_script": "",
++      "bip322_signatures": [
++        "smpAkcwRAIgZRfIY3p7/DoVTty6YZbWS71bc5Vct9p9Fia83eRmw2QCICK/ENGfwLtptFluMGs2KsqoNSk89pO7F29zJLUx9a/sASECx/EgAxlkQpQ9hYjgGu6EBCPMVPwVIVJqO4XCsMvViHI=",
++        "smpAkgwRQIhAOzyynlqt93lOKJr+wmmxIens//zPzl9tqIOua93wO6MAiBi5n5EyAcPScOjf1lAqIUIQtr3zKNeavYabHyR8eGhowEhAsfxIAMZZEKUPYWI4BruhAQjzFT8FSFSajuFwrDL1Yhy"
++      ]
++    },
++    {
++      "message": "This will be a p2wsh 3-of-3 multisig BIP 322 signed message",
++      "private_keys": [
++        "L4DksdGZ4KQJfcLHD5Dv25fu8Rxyv7hHi2RjZR4TYzr8c6h9VNrp",
++        "KzSRqnCVwjzY8id2X5oHEJWXkSHwKUYaAXusjwgkES8BuQPJnPNu",
++        "L1zt9Rw7HrU7jaguMbVzhiX8ffuVkmMis5wLHddXYuHWYf8u8uRj"
++      ],
++      "address": "bc1qp0ahvfh83088w49k405szqgg4f3pptr7p2g06tdxfjcd40z4lh4q95lsz9",
++      "type": "p2wsh-multisig-3of3",
++      "witness_script": "5321027568b11f122ff8a7bc1c57e5c7642055bc618967b2f7bfe8e11fe99903c94dd321020a8bdf79cfa421d9655e9282800f115ff1d9db1e721ceb4248a3fcfec7faa67c21030c529e0ea40a00975d202624e39915daf7bdd2b71f31aa08596838781ce5f33a53ae",
++      "bip322_signatures": [
++        "smpBQBHMEQCIFX9aaqPJWq2Ff2kpen5bFDTid+ehgUOpHV0LfjncXy4AiA3GNicF7aKPzdpa9PCpmaYQs3pHd+qbvvhXdxOCKCAMAFIMEUCIQD/ELXg6CNYyUQijCg96JtgvgjZb9dsl1Ctof4QAeyTcQIgVM/1AAblFl/DCt6A1gJg+T/i2qU5SQD09+chFJzolRwBSDBFAiEAlqRfSFyWNVQhvaCnmeV5tyneiCWMTcFbuujoD/pFa3wCIGnZjfQb8NolSYq9asV+ZeBSkCGHJcqnaV4JYS5MYPEGAWlTIQJ1aLEfEi/4p7wcV+XHZCBVvGGJZ7L3v+jhH+mZA8lN0yECCovfec+kIdllXpKCgA8RX/HZ2x5yHOtCSKP8/sf6pnwhAwxSng6kCgCXXSAmJOOZFdr3vdK3HzGqCFloOHgc5fM6U64="
++      ]
++    },
++    {
++      "message": "No prefix fallback",
++      "private_keys": [
++        "KyrSGCFPhqZMjCe5fNTYddiLMp4tMj4gLKuJ26TsB2rvr1VJGPbt"
++      ],
++      "address": "bc1pss0zhytly75awhm6x2hhvd5lnzv3vssgrf9axfheq8ldyzn88ges79fler",
++      "type": "p2tr",
++      "witness_script": "",
++      "bip322_signatures": [
++        "AUCJYOwOjxYAvatTAGYaVlNXBVyFuc4MwNQkOuK2tl8xhfKDONd0NjfYyNSYcRqeCp8hsAnCEPHAVEkO9h6vbQ/R"
++      ]
++    }
++  ],
++  "error": [
++    {
++      "description": "invalid base64 encoding",
++      "message": "",
++      "address": "bc1q9vza2e8x573nczrlzms0wvx3gsqjx7vavgkx0l",
++      "signature": "not-valid-base64!!!",
++      "error_substr": "base64"
++    },
++    {
++      "description": "empty signature",
++      "message": "",
++      "address": "bc1q9vza2e8x573nczrlzms0wvx3gsqjx7vavgkx0l",
++      "signature": "",
++      "error_substr": "signature too short"
++    },
++    {
++      "description": "wrong message for valid simple p2wpkh signature (empty message was signed)",
++      "message": "Wrong message that was not signed",
++      "address": "bc1q9vza2e8x573nczrlzms0wvx3gsqjx7vavgkx0l",
++      "signature": "smpAkcwRAIgM2gBAQqvZX15ZiysmKmQpDrG83avLIT492QBzLnQIxYCIBaTpOaD20qRlEylyxFSeEA2ba9YOixpX8z46TSDtS40ASECx/EgAxlkQpQ9hYjgGu6EBCPMVPwVIVJqO4XCsMvViHI=",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong address for valid simple p2wpkh signature (signed for different address)",
++      "message": "",
++      "address": "bc1qp0ahvfh83088w49k405szqgg4f3pptr7p2g06tdxfjcd40z4lh4q95lsz9",
++      "signature": "smpAkcwRAIgM2gBAQqvZX15ZiysmKmQpDrG83avLIT492QBzLnQIxYCIBaTpOaD20qRlEylyxFSeEA2ba9YOixpX8z46TSDtS40ASECx/EgAxlkQpQ9hYjgGu6EBCPMVPwVIVJqO4XCsMvViHI=",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "empty witness stack (single zero byte)",
++      "message": "",
++      "address": "bc1q9vza2e8x573nczrlzms0wvx3gsqjx7vavgkx0l",
++      "signature": "smpAA==",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong message for valid simple p2wsh 3-of-3 multisig signature",
++      "message": "This is not the message that was signed",
++      "address": "bc1qp0ahvfh83088w49k405szqgg4f3pptr7p2g06tdxfjcd40z4lh4q95lsz9",
++      "signature": "smpBQBHMEQCIFX9aaqPJWq2Ff2kpen5bFDTid+ehgUOpHV0LfjncXy4AiA3GNicF7aKPzdpa9PCpmaYQs3pHd+qbvvhXdxOCKCAMAFIMEUCIQD/ELXg6CNYyUQijCg96JtgvgjZb9dsl1Ctof4QAeyTcQIgVM/1AAblFl/DCt6A1gJg+T/i2qU5SQD09+chFJzolRwBSDBFAiEAlqRfSFyWNVQhvaCnmeV5tyneiCWMTcFbuujoD/pFa3wCIGnZjfQb8NolSYq9asV+ZeBSkCGHJcqnaV4JYS5MYPEGAWlTIQJ1aLEfEi/4p7wcV+XHZCBVvGGJZ7L3v+jhH+mZA8lN0yECCovfec+kIdllXpKCgA8RX/HZ2x5yHOtCSKP8/sf6pnwhAwxSng6kCgCXXSAmJOOZFdr3vdK3HzGqCFloOHgc5fM6U64=",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "invalid signature prefix",
++      "message": "",
++      "address": "bc1q9vza2e8x573nczrlzms0wvx3gsqjx7vavgkx0l",
++      "signature": "fooAA==",
++      "error_substr": "error decoding signature as base64"
++    },
++    {
++      "description": "incorrect prefix type",
++      "message": "incorrect prefix",
++      "address": "bc1pyrgrm6cu6n54jrvkdjd9rvyd3xfyu84s2623awu2srn6mxhscwpsm5644w",
++      "signature": "fulAUDZwFXUp+adN+/UZj5dVrGAbB3zKs1Vcalz5fCF9srxS63eSWNGvH1NYbrBkPt1BJDUyWUz9zgUxfc63/QheT6M",
++      "error_substr": "error parsing signature as full variant"
++    }
++  ]
++}"###,
++            r###"{
++  "simple": [
++    {
++      "message": "2V6TUTMSH4VQ3Z7WZWKYD7DFNH",
++      "private_keys": [
++        "KySmn2yeCukjHXnSu3M6vX7tNok4weu1FKbNEuVvm2b3ZidKhB4L"
++      ],
++      "address": "bc1qqthe0hz8klx90e7stf6shclhsvqd5ly96pn53v",
++      "type": "p2wpkh",
++      "witness_script": "",
++      "bip322_signatures": [
++        "smpAkgwRQIhALC6hdfxNy1n45d7UXSskRBdfZW0Al259E1kDMpipdYkAiAJPfZqb+WurZuf1apU5xeE6Igui9dvt5tihQLDvxlY1AEhAqbnruyo677ktQjio7XOchO3w51Dh9AbRVngha5jtNfT"
++      ]
++    },
++    {
++      "message": "PURVOQ544B6HUATVBJZN5EZJUU",
++      "private_keys": [
++        "L5XqN6ckPPsDiTbRxcsthwiWpDBfWLo4uquUEydsPt8rSMoTpqpc"
++      ],
++      "address": "bc1pcquvhrqv0q68t4m0hfq6tpn006qrskyc7yrqnp2uyrf2emg3wynsdjyk38",
++      "type": "p2tr",
++      "witness_script": "",
++      "bip322_signatures": [
++        "smpAUB6B2Rbupzua8LTQIF06516wzl+cwKy1be8RgoiW0riyXdKwe6GTz/5Hnb37m67pJwIKCh+D5jDueG6KpvYpmu8"
++      ]
++    },
++    {
++      "message": "G7ZTXXOVJFHGDD6XYJAGBAMT5A",
++      "private_keys": [
++        "L1jKMveHa8DnPfPVcVsz5r5FHe3D6KdPyBiQSND14uGyMMc8mAcK",
++        "L3P5FL8vCZLyDYrHekomd76KTFb7dnXiiLHc1dhs4CfKKTa5BSRd"
++      ],
++      "address": "bc1qw6g0rgrpuxvj4edkwtvzpmt3c5m08mhp8nuk3mrk4erufvlczp5ssdscjd",
++      "type": "p2wsh-multisig-2of2",
++      "witness_script": "5221036cbbf3b066eac7bc9328889a120269821cba2a21ce566e587eade93eeeb84048210281856452ca5e031c117cceafe0644184dfe01b14dfa4fa99b8e9412186714c9652ae",
++      "bip322_signatures": [
++        "smpBABIMEUCIQCKl1f9Cj26k0fFWE48+O4ibhYJYPytbDZWJRaaG9BybwIgCbk+3BViWkpuu2RI+41dwtlQ/m/01G860pTFCzDFfokBSDBFAiEA0O77DJsaM7IO+Ht06sp3umzXB64CNNOwf2isZuPfdmwCIGlggOwRSkXsqlPhE1gMdd5hf7ycL33Orfrr4v/XnMGSAUdSIQNsu/OwZurHvJMoiJoSAmmCHLoqIc5Wblh+rek+7rhASCECgYVkUspeAxwRfM6v4GRBhN/gGxTfpPqZuOlBIYZxTJZSrg=="
++      ]
++    },
++    {
++      "message": "Z3SB7SRL555ZGOHVMYT5WG7RIZ",
++      "private_keys": [
++        "L3QqMaMh8XnkLFGe8gAL4J1ko1froHUzFAJBxy4u5QPNf8Cp36if",
++        "L1j2AddkFs9aKz6tCPd99CaYHUVmqVZHt1HHESWajvFsQeTobyJi",
++        "KwEoVwAeuWQBiRhp76wD6siaxkj3rCrjHeG2xRMLtngbZbq8w88a"
++      ],
++      "address": "bc1qazhmhwl9sxgjmwnd96hh926s3x5l0cf64yy6hvyn6qms438x550qy5sgva",
++      "type": "p2wsh-multisig-3of3",
++      "witness_script": "532102a8d34dd98e3f4983f913eec380edc4dd20a9b3b2b218040b8f77d863f0566e1c2102e8175a94cb706e3731daf26355e96fec1266974ad8ed0e737be3d67a7ead6f9b21032b697ab95806cebdb5b9fceadde920da97cb4373b6d2992a2e98f17f944905da53ae",
++      "bip322_signatures": [
++        "smpBQBHMEQCICNI6H6b+VCZV9Z2H6EW5hPrE1buC6SJuy2ljSNmQlGfAiASbm5UrA8KH6TwF6evx7COV+i27ubiq2v9TyLYPOO63gFIMEUCIQCMOFnJbg0sy88G6wUXjv5stjVgfvAokOogWsisdkAnlAIgETfBw7kJhISFu9vIomFcEF/1NsN6c0h3KjNcpmNAZtMBSDBFAiEA/lUU+wBeA3prt8vHRpcQN763OYZ8L61DfN0QI/gkHpMCIB2qHwgoXNTH0sdqeAMD2ah7dSTie2bflax3Q3I/GibQAWlTIQKo003Zjj9Jg/kT7sOA7cTdIKmzsrIYBAuPd9hj8FZuHCEC6BdalMtwbjcx2vJjVelv7BJml0rY7Q5ze+PWen6tb5shAytperlYBs69tbn86t3pINqXy0NzttKZKi6Y8X+USQXaU64="
++      ]
++    }
++  ],
++  "full": [
++    {
++      "message": "MOISC5NCQ42ADH2SUXLELUJOWH",
++      "private_keys": [
++        "L2yn1ozY4azVxNzF2TLzGhmWQXnR2hoCZG5hCppQ4oxLtnq2CpM7"
++      ],
++      "address": "13vU5PUSuArDXJdCWZvUFEbgJ2wcmtSJWn",
++      "type": "p2pkh",
++      "witness_script": "",
++      "bip322_signatures": [
++        "fulAgAAAAGn3Z6t/gsHNyHdgZTOVro0Hej+qbd/ilU1ACalKoHX3gAAAABqRzBEAiB+8t/tm8Jm6zYv9JGZZVlAUjmqg7ZglIA39U+bim8EKQIgDv3E5cHOagN+xYgN3ZQjTYlAJp/WyslwJWuFP1TmM3IBIQJcPK2h9SY+Ki1oussvHnMdFAhJgsYBFPl+rNcMv9P1ROAHAAABAAAAAAAAAAABauAHAAA="
++      ],
++      "sig_script": "",
++      "tx_version": 2,
++      "lock_time": 2016,
++      "sequence": 2016
++    },
++    {
++      "message": "KLE5MMJBTNF4AVZXIO3GIL5UWF",
++      "private_keys": [
++        "L35XkdYZZ9u9hj6hqDzc3iuRGGXx1GhmaMMr6sVAMMrd4AKBkhUp"
++      ],
++      "address": "bc1qrqtlzcq86850yzgsyq9sssawx2qxlx5yq3xpkd",
++      "type": "p2wpkh",
++      "witness_script": "",
++      "bip322_signatures": [
++        "fulAgAAAAABAUrfzHHOLAKmgCIFSTT3krp+cQxj1BDPBN4GBg3tRmFXAAAAAADgBwAAAQAAAAAAAAAAAWoCSDBFAiEAjYj85zyhQKa9DbMO0reDwdhkNwKJkF3q2qFcijXDgMUCIAaQ75s3fwqrCeYIUJugLvhxZFxQIVquGN90vIKCW3QLASEDMurnDzvc0zABUwVwCADfGXoDx/M3SQnYt7e3IHDoU3PgBwAA"
++      ],
++      "sig_script": "",
++      "tx_version": 2,
++      "lock_time": 2016,
++      "sequence": 2016
++    },
++    {
++      "message": "XQMVC3YR6AOGZIHLSUQ2NSSBI2",
++      "private_keys": [
++        "L5CuoheLtRPk2uVtg2Ph55QpJ3Q5yvsM3hm3ThuGdCuBwA1KS6ua"
++      ],
++      "address": "bc1pve87s3l2levjmhetzr2f9xvep3y266xty0hnefmyv8tkxc3e4qssll2kdu",
++      "type": "p2tr",
++      "witness_script": "",
++      "bip322_signatures": [
++        "fulAgAAAAABAROFPNY6Zt8hFK0YQq5Wb6wk/CnUYEPtQ0HTHDyzNROrAAAAAADgBwAAAQAAAAAAAAAAAWoBQNRdLOo5XZY0SBqAsLZNr/z3Bqrmo3OxVn7e4tD/OOD4H9U/L1unq5Nmdz+S1w7SHtt46bFwnd8xnRVan8BofFfgBwAA"
++      ],
++      "sig_script": "",
++      "tx_version": 2,
++      "lock_time": 2016,
++      "sequence": 2016
++    },
++    {
++      "message": "AY2VOQOXYI5CN2EHZKLOX7ZI37",
++      "private_keys": [
++        "Ky3KEGLA6cqhsWeBQkCEi5CjEvEP1BBR9Y5iipU6XEo6UfLXvh3e"
++      ],
++      "address": "bc1p6vffkx7vcyezrjq7pg9qqdjv7vmtanfhk8ukwsn4syejwmarmhxqp0rw5x",
++      "type": "p2tr-time-lock",
++      "witness_script": "6320ad87d784e921d02bf0b89a41f8eded6a5d8409f3b4bfb935fc0e0f4e519c42206702e007b275202632e7e2d979cad802f02353c884d79a0e2bc7d72dc4f79dc1130f101bdfa14068ac",
++      "bip322_signatures": [
++        "fulAgAAAAABAaza7/ukfX9ZdxCUvK7CPJgADDdPdF7ikXVKWctd5EHrAAAAAADgBwAAAQAAAAAAAAAAAWoEQPvuT0enYGwsab2lsPZU0U3OcRkGng+o/PAt4QU2lc8hG7lTUmflkt0To+eoipv2vptf0TlGOBCsKU5xE3kXKcMAS2MgrYfXhOkh0CvwuJpB+O3tal2ECfO0v7k1/A4PTlGcQiBnAuAHsnUgJjLn4tl5ytgC8CNTyITXmg4rx9ctxPedwRMPEBvfoUBorCHBJjLn4tl5ytgC8CNTyITXmg4rx9ctxPedwRMPEBvfoUDgBwAA"
++      ],
++      "sig_script": "",
++      "tx_version": 2,
++      "lock_time": 2016,
++      "sequence": 2016
++    },
++    {
++      "message": "EMYGZHEY3LIANYKCR7XJF3NMFQ",
++      "private_keys": [
++        "L1n3XXc2AAVq8puHyQNL9NmVNRDUox1ENeuk7muALGrEo85wGQag"
++      ],
++      "address": "32Utb7Seg6EXq7UesMNJXhQ1gdohYNyzQ9",
++      "type": "p2sh-p2wpkh",
++      "witness_script": "",
++      "bip322_signatures": [
++        "fulAgAAAAABAe5xLNMlYQH4OGjJ3h4lqQaVp0Cic7mwxkvyWswqFMXeAAAAABcWABSy/hpDH/KLAi4x25Tmb2UaO1xtWeAHAAABAAAAAAAAAAABagJHMEQCIDEleqb0n1R5c21TGkWRXNFae98wbwI0QOyh/YmRuQX1AiAcv1MhyTzPOVgZ1VIwuu0tDxrVJUHK8lhOUOXpsZnGwwEhAsjeDEoWX8hvEC8A/692yGQsPh6JBO8Zf4aITEQsKAcJ4AcAAA=="
++      ],
++      "sig_script": "0014b2fe1a431ff28b022e31db94e66f651a3b5c6d59",
++      "tx_version": 2,
++      "lock_time": 2016,
++      "sequence": 2016
++    },
++    {
++      "message": "MGKMA2MJUBDHT55J7MHOLM7UPE",
++      "private_keys": [
++        "L2FywTTh95vtPd8H2BPxFFAAR4WpuDZKygh3py6KP31zRa99PHDT"
++      ],
++      "address": "bc1qhqcmw7ud03vqde3pe6hzajaylhucmlatrkcztzpnk8vpgvhg9dzq5ydark",
++      "type": "p2wsh-time-lock",
++      "witness_script": "632103ad87d784e921d02bf0b89a41f8eded6a5d8409f3b4bfb935fc0e0f4e519c42206702e007b275210386461afa1d2a0a9e83f6587df9ba9a268a686e7b5640928e6991a6b09afae97268ac",
++      "bip322_signatures": [
++        "fulAgAAAAABAYYJeOOOi3c33O+dholAwiF51Amy/E0qIf3ew2vFtDtTAAAAAADgBwAAAQAAAAAAAAAAAWoDSDBFAiEA64MwD2HkJjPLPAc2u5ia6ZdwCVO3okzVqGPEXnuJGZQCIE27BGOBQTdwJ2M/Wdsm6nFVunqaj+xZBSG/g/64FMbtAQBNYyEDrYfXhOkh0CvwuJpB+O3tal2ECfO0v7k1/A4PTlGcQiBnAuAHsnUhA4ZGGvodKgqeg/ZYffm6miaKaG57VkCSjmmRprCa+ulyaKzgBwAA"
++      ],
++      "sig_script": "",
++      "tx_version": 2,
++      "lock_time": 2016,
++      "sequence": 2016
++    },
++    {
++      "message": "QXYOWYWO7ZGJC4OPNC367HBUQF",
++      "private_keys": [
++        "L14bn1tSDZUKYLLiTConCRHbqzGef8eqB2tU5PBPFBkyPLUyob7V",
++        "KyJnWYygb7P2P8khWyDMW9yFGA3dUe7kpkEHtLbzY6cfvvn9T5CS"
++      ],
++      "address": "bc1qg8r3cl47rrr75dwvr7jhzdukptegnmq8v0nmjd2jdn4qvlczqkts0rqtav",
++      "type": "p2wsh-multisig-2of2",
++      "witness_script": "52210244f7cb842a4ce4f352ce4062ae5e0a5d60d6faa0b07b62c2063484aa5297bbce210234eed6190efc47716b953a050b563f8b2b523addea955ae43351dd2a92aa49f452ae",
++      "bip322_signatures": [
++        "fulAgAAAAABAXshuDM6YKy1LClwk1ZOM5egX7RTFPOCvtxJkYFYk/FEAAAAAADgBwAAAQAAAAAAAAAAAWoEAEgwRQIhAI9uOxvqmBV0pldOoKWnSYhjobNhP4F+gxO0QlOdGtxFAiBROcNruLigZE4lj1DJEh8yGrqS00MeW463EO78TsaRFgFIMEUCIQCAhIqYuU4wDA2AYsU+QDVyucH4Tm/NSDP2+txyPMKEkAIgfuGlSh7ncxb2yV3S3aOF5uwHGqtIZjp3b4HW0d35EckBR1IhAkT3y4QqTOTzUs5AYq5eCl1g1vqgsHtiwgY0hKpSl7vOIQI07tYZDvxHcWuVOgULVj+LK1I63eqVWuQzUd0qkqpJ9FKu4AcAAA=="
++      ],
++      "sig_script": "",
++      "tx_version": 2,
++      "lock_time": 2016,
++      "sequence": 2016
++    },
++    {
++      "message": "3VJANNKSXPLND6YRKG6CUEUZXX",
++      "private_keys": [
++        "L5QcX4UxGQByfgW6YTVWovLUxSSWSyQksGNfAJAhP36hTRRGWyiU",
++        "Kzp3Vm4kEdakPrfPfGDq3SEeSeBhX3GPwqacMf1wLFLPEZaMjy57",
++        "L3xZwreL3S4C5V3wLaNYSFTsZiC2YW7ao94y2omZvpkBEyP5y3PY"
++      ],
++      "address": "bc1q8vy6jhfe8ca0uruvr4aqkjk75dpg5m30rnwatg60uhya00dhlyqs2xvt2a",
++      "type": "p2wsh-multisig-3of3",
++      "witness_script": "5321022506f12c84db93ed3e896b4d58807b341b7d5eb51d79a11763836249b3a1dfe4210305b153afc370cd8f2e522e6a435cf5e9726376bf556752c1a43704956af22305210242f20cbe0540cbe3d1323cf61659f236b89c2ae593ddb7e42080597994d216e053ae",
++      "bip322_signatures": [
++        "fulAgAAAAABAU2vSmP5XYqecVKygaRRribDp5piMoVxUkxUnFSff8kRAAAAAADgBwAAAQAAAAAAAAAAAWoFAEgwRQIhAKBSw74gHlx272y4RzyU/ap7iNO5rmB6XXgBOy3Qsc/EAiBUnSrF/XhvuvAwi/mMme0JDpuCvl+oZ9C4f3H8OemXCAFIMEUCIQDK3wH0l2AvJ5FZ923ZMJkY1z0MBh1Nee9wjK7tVxFz5gIgdC1XBD/IdBPtx1xmyvSFhbIJlvnz98fPTm50K6KaXpEBSDBFAiEAyP3nXTzXrTmzq54x8jAY02ERHycEYzYqT9cpRTeEWg4CIHxRk3e3oPrM9oCZ8xcgNQ3lRhyc+G0qdDIl6qa8SN4AAWlTIQIlBvEshNuT7T6Ja01YgHs0G31etR15oRdjg2JJs6Hf5CEDBbFTr8NwzY8uUi5qQ1z16XJjdr9VZ1LBpDcElWryIwUhAkLyDL4FQMvj0TI89hZZ8ja4nCrlk9235CCAWXmU0hbgU67gBwAA"
++      ],
++      "sig_script": "",
++      "tx_version": 2,
++      "lock_time": 2016,
++      "sequence": 2016
++    },
++    {
++      "message": "NQVRV3DJYLKBANM3OPTNBULEU3",
++      "private_keys": [
++        "L246N8J5x5ehwjoz97ZfHXBCELxGcK2jqRFinReMBcRnqH1X4zdc",
++        "L1WzdMN476EHhwsDLHJwVHZKrwVLFFsdvNoZFsZVk2Mb5rKst2Et"
++      ],
++      "address": "3PGZjFkYBL1m9WBWkWbCW5FEFTaS1Hj4EB",
++      "type": "p2sh-p2wsh-multisig-2of2",
++      "witness_script": "522103fb824153fc000a213c5456d01780d1f292a0cfbfbc5f6f8f1dc713706c5519d12103db88ce9fb8081e50460beb37539741b0667d6f2439dd1ca283d63182421c10b152ae",
++      "bip322_signatures": [
++        "fulAgAAAAABAVscdBvYDFN98A//Rt/fAWcN7mdM0x2yWzBjC33c7X5HAAAAACMiACDkkR/DseXy+GXBPtxHvHehUjHt+9XjRmZAgxuuomAC4eAHAAABAAAAAAAAAAABagQASDBFAiEA47YK5XeIGBMQC9bCfWb+IIfirIWlqAzQVc6E/lgBPZICIA0k/EO2t3YhqmYR5WdXUBGgAzR+IqgZ5/mxvj+4UoDTAUgwRQIhAPCIVZCSoIaOjY9BzYIXWEvbhpOl4JR88p/xYVoZObd6AiADyJXNqpDg/Lc2viPX14N2d0jQdEjamY4SmiU7GNbIOgFHUiED+4JBU/wACiE8VFbQF4DR8pKgz7+8X2+PHccTcGxVGdEhA9uIzp+4CB5QRgvrN1OXQbBmfW8kOd0cooPWMYJCHBCxUq7gBwAA"
++      ],
++      "sig_script": "0020e4911fc3b1e5f2f865c13edc47bc77a15231edfbd5e3466640831baea26002e1",
++      "tx_version": 2,
++      "lock_time": 2016,
++      "sequence": 2016
++    },
++    {
++      "message": "7OKFLKRXSP6J42VQOMSG7MVXEP",
++      "private_keys": [
++        "L5Teubyzf4mFSMHGCzADK42oRi9xz45qhBrYx2Xs8uCY6WyrymT5",
++        "L4HsBh1Rb5DWP5Hf82tPw3whgwFyt8hdRTChxZQE4HzWfdbVgiWT"
++      ],
++      "address": "3Nye4j1GUFqCEBR3do2KEFZAs9oLe8NZ6X",
++      "type": "p2sh-multisig-2of2",
++      "witness_script": "",
++      "bip322_signatures": [
++        "fulAgAAAAEvAyd4zsoz8gcVU5H19GLYokTAN5PxuKCBlEPjODJ86gAAAADaAEcwRAIgT6rcfxgCmG6b3DpzNV6UG0jiCQGclG9sfiSpV45HDXMCIGgtqjFBuJ7rbi+cgnG0TZiKZaxMk0KI+gQd0pHJfEYCAUgwRQIhANCvCLjGMuZMzH+nCEkNhWhR45T6QRYMLin8utpuF9r1AiBTjG2NLjkre7ec+HPg8UUhK1jL1vgq7YKjq5ROv+h07AFHUiEDhKjcb/Pv1/7AYutzOXwgec08wwD/VwiPm58Lc0xjohghAhycjpwdBuP33orQXAH1CAsrgSkuspxM2+FPQ4OCVhQWUq7gBwAAAQAAAAAAAAAAAWrgBwAA"
++      ],
++      "sig_script": "52210384a8dc6ff3efd7fec062eb73397c2079cd3cc300ff57088f9b9f0b734c63a21821021c9c8e9c1d06e3f7de8ad05c01f5080b2b81292eb29c4cdbe14f43838256141652ae",
++      "tx_version": 2,
++      "lock_time": 2016,
++      "sequence": 2016
++    }
++  ],
++  "proof_of_funds": [
++    {
++      "message": "2JNEDD7IJDSYLREMJ6Q7PTCQJD",
++      "private_keys": [
++        "KwJez724aMRgicAjRH5Wn4PGjzt362M4Ce16uyLFrRtefYtjeEpu",
++        "L1eU4opKaCpK3Pu3jp1yvNnCmfAFtgKcmdgapcuGPqB3fwANGTWT",
++        "Kx9Wif4uxmADZ46YBfXwDST1ZkAZFkiRzpPbK3orYGSqaEJPZLKh"
++      ],
++      "address": "1PgwDB9w9vKjqhXMaqDiZyktC4x2eC7Wkw",
++      "type": "p2pkh",
++      "witness_script": "",
++      "bip322_signatures": [
++        "pofcHNidP8BAI8CAAAAA3UzG05Nmq3GQGeM4RuOvKR3OzsxeY3Iv7WeRpsFNQM0AAAAAADIAQAADCbiUkASpwj6kUReXXcYBQYbAO9L5G7WGpFwwoySY+UAAAAAAAAAAAA3p26yqXE6EPnIIn3fG72TA/ogmgx628m04thl4j0g/gAAAAAAAAAAAAEAAAAAAAAAAAFqewAAAAABAHcAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/////yIAIB2Ij79goPLYV23iushdHloX5BnvTP3sLOG1x4L5uCYKAAAAAAEAAAAAAAAAABl2qRT44D3t4ciLKM9Jqw/cQWbMKcrdMYisAAAAAAEHa0gwRQIhAMQa+hYcQZ+v/rcrR4/cn7MthXgjlI9vdOyWaff0ytI1AiBzwJB5Sa7Gg5o5l1YRo2kvPGVjPEXlcDSRXkY/m5pEGAEhAg/lEKOLDqGSy/dJvtUFqV+b0Ibfnat6xQVm3TFbRMUHAAEAVQAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABTkYFAAAAAAAZdqkUXAydgFhnOc1o76l++wzhjwbeADKIrAAAAAABB2pHMEQCIEN2q/Y9n1JliYceYA/Lcb+lab84iq5FRGEw0QDZvCthAiBbgsbUfkt5y4PN7iBLpuW8zBARbHVBfsX/vIRcAewd8wEhAl+mkzpSHsor/2HKnlhZQjD88o2fj45Xj+PLeO0vHShBAAEBIE5GBQAAAAAAF6kUmkCp3fSiSKNrfA9wZKySQBbrBJeHAQcXFgAUYWYrEU/y0qj1P/GYS2Yc7nhhe8MBCGsCRzBEAiACr5bTFlzWGiXis1Y01AMVGVlPBEgO8G/g+6c4cNbx5wIgYqXaNnAPVNWVjfaJ8DhIuOiAUiTHeNdjdYH9IpXjK1oBIQMs7LIzDohxaDGLK3Jxlyxu/lnEh3YdmVbtOwi/9/IvuQAA"
++      ],
++      "sig_script": "",
++      "tx_version": 2,
++      "lock_time": 123,
++      "sequence": 456,
++      "additional_inputs": [
++        [
++          {
++            "private_key_index": 1,
++            "type": "p2pkh",
++            "value": 345678,
++            "pk_script": "76a9145c0c9d80586739cd68efa97efb0ce18f06de003288ac"
++          }
++        ],
++        [
++          {
++            "private_key_index": 2,
++            "type": "p2sh-p2wpkh",
++            "value": 345678,
++            "pk_script": "a9149a40a9ddf4a248a36b7c0f7064ac924016eb049787"
++          }
++        ]
++      ]
++    },
++    {
++      "message": "PMRTSXKIH4LZUEK6FSWKNVC5OJ",
++      "private_keys": [
++        "KzsKtEzbNpVXuNNk8RYP7VfmZL9DcvvzcsWCmQgsU24NkJCq2xm1",
++        "KyvKPtWqpTx3kLWcPXnSsReoaarfqEVbobUMwWDEZwwH75dzveWV",
++        "KyYzf9wsAvGPcin5YzUUCRqTHcjoG4DYhRHkwocDb2EgXgeDnPNV",
++        "KxCAEYZ9CocjcmEQzq1x3amDDVjMwiT9U6Y5C5EXmUiwRm5T7qK6",
++        "KwadXBnBmyatFEVWWBZgNpuYzDR6zA8526uDJiz1u3WPBixGUarZ"
++      ],
++      "address": "1FUGbznJZgPPNR49WGpAMWGqd2EJy7L411",
++      "type": "p2pkh",
++      "witness_script": "",
++      "bip322_signatures": [
++        "pofcHNidP8BAOECAAAABUW4YNCHQoyK7F1IWzGg2FITNBQfwfYHqccJdCb5bAXHAAAAAADIAQAA9NbnUz4hFOirIPCfd3puS86Tswp4PpGiajrMV7XvilQAAAAAAAAAAAD01udTPiEU6Ksg8J93em5LzpOzCng+kaJqOsxXte+KVAEAAAAAAAAAAPTW51M+IRToqyDwn3d6bkvOk7MKeD6Romo6zFe174pUAgAAAAAAAAAA9lQ2wLnGe0WMSw2PbknCdByQs2kNLxtiBDM+sQJAJBgAAAAAAAAAAAABAAAAAAAAAAABansAAAAAAQB3AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP////8iACBS4HdhDkJcNnd/zYxBO18MP4A5XwfMIamCtF1YNPUjwQAAAAABAAAAAAAAAAAZdqkUnroEWW1vPFZWKfJOPc5EO3LAxSCIrAAAAAABB2pHMEQCIDs7N2tmsnkvKuT1I/yNArGthDLEPCxZAp3la3W2Wo0SAiB/KqF79idpHtYTi6zf/s3JR5zHYBmP3fzgpmLxiSCDUwEhAlPjWUeiLVieRuV8JE/trdheywBquxvrxw9CoKp0eWwUAAEAmQAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADTkYFAAAAAAAZdqkUXRw/3Id1+QdWOglIjBLaBryaNa+IrE5GBQAAAAAAGXapFLiTCxADZJL19c3fKa0A4EwBeL4hiKxORgUAAAAAABl2qRRbIpISPTZsY6A99RjTl/caNrBz64isAAAAAAEHakcwRAIgKV6AGU+4LXwaNsWW6KCEMlYg+ofeoon3ngVHaq+kLn4CIBFHlP9K6vENM5lo3QvM7bITh9jDqzDMeqX3IuLyXDsZASED8CBlrMcXM6gidBwP2HZk8FQ3D2JV4eX5ct3++h7LqT8AAQdrSDBFAiEAxqn43CUk0TCc54a/k4ko++06fDv/CamisK6IdxGowNsCIHDikdfH1lfFO+CBM8nf6bp37gfgQ7GZoaMMbU0Bap7MASECEClqBF8XySkMqIUrrjXIAg/fUHiIjqCH3jDbVTSEUK4AAQdrSDBFAiEAwK0nkBarbo8wdZDg4FVeJIuP6iLp9fApYMhArfPEcfICIGgoPoco1fpw77syuPxvU5HZjYiOl4FChRfZ800L4bKKASECTFBcVWr9yTopKH4A4FZvEvmGXW06MgHwxN58FPvmQRkAAQEgTkYFAAAAAAAXqRQPyvIXY4yAKCGbkYlxD3LPMT/JSocBBxcWABRh7fUdOB8FWstJKAmt5r6qUQzMYgEIbAJIMEUCIQDd0I64asHGizPfnwvUVscgJo+8xZmv+IbtXNBXgLsdqwIgASUwxhy/0TTp/yLygwCfevxbXxoUYbIM2vdomk6jw3gBIQMchUGFw2XkvTvbr64BBBVQHRZdDv+KLY5VWN00qooCiAAA"
++      ],
++      "sig_script": "",
++      "tx_version": 2,
++      "lock_time": 123,
++      "sequence": 456,
++      "additional_inputs": [
++        [
++          {
++            "private_key_index": 1,
++            "type": "p2pkh",
++            "value": 345678,
++            "pk_script": "76a9145d1c3fdc8775f907563a09488c12da06bc9a35af88ac"
++          },
++          {
++            "private_key_index": 2,
++            "type": "p2pkh",
++            "value": 345678,
++            "pk_script": "76a914b8930b10036492f5f5cddf29ad00e04c0178be2188ac"
++          },
++          {
++            "private_key_index": 3,
++            "type": "p2pkh",
++            "value": 345678,
++            "pk_script": "76a9145b2292123d366c63a03df518d397f71a36b073eb88ac"
++          }
++        ],
++        [
++          {
++            "private_key_index": 4,
++            "type": "p2sh-p2wpkh",
++            "value": 345678,
++            "pk_script": "a9140fcaf217638c8028219b9189710f72cf313fc94a87"
++          }
++        ]
++      ]
++    },
++    {
++      "message": "FUYMQWKYGS7HJEN7YFEZU5SNR5",
++      "private_keys": [
++        "L1p7QRghEregYbBvSCp1eW4YJg2RwMYwX2uhR1eAnkVoPJBaJ7Dy",
++        "Kz5jBiqQKoppYvaxtWZJicxGZ3G3iJ4rLqNnv7MaQBusyoE731EJ",
++        "L2fNJduiUkSytUDbxa58ivWoHevB3svcWUJMxMFebdugYP5jgJr1",
++        "KxqVMn81AEYSwYuzBxe6xC4JDAgA2eU2qiNvBAgVZZwRFv1BqN3y"
++      ],
++      "address": "bc1pk3vq3wpn4txexwq4dj0k2dugzp6kfwllvs89w49cvtk3j2cndcds3l9kw9",
++      "type": "p2tr",
++      "witness_script": "",
++      "bip322_signatures": [
++        "pofcHNidP8BALgCAAAABDzMFysa2DX0k4ZymoVfzNzTIL3gsWlu03HcfI+NxhOxAAAAAADIAQAAVd4moQMhq/rd+2ecRsJ0Xeg6/SdhA+owjzyzg/Fqd/oAAAAAAAAAAABuZFRaqjWRO6kKy5hrEHAg+T12/Iuz+FZBwwMt/FQvkgAAAAAAAAAAAG5kVFqqNZE7qQrLmGsQcCD5PXb8i7P4VkHDAy38VC+SAQAAAAAAAAAAAQAAAAAAAAAAAWp7AAAAAAEBKwAAAAAAAAAAIlEgtFgIuDOqzZM4FWyfZTeIEHVku/9kDldUuGLtGSsTbhsBCEIBQKoTEBqEPkib1fLnELbmsbDVlmWGzOdiiN/XJefU3tF9AEi7PszYEPguomxXp7X2rL0dP0xkV6LbBcVz7oAEeKkAAQErTkYFAAAAAAAiUSB4i5DCtSPHOkI30E30ayMoWL47vA5l2NBJp/pZ1XGduAEIQgFAic0muhAJNc4ZlRWeJGRgkN+oE/ptV4Znyli19VAnSsHM/Pb9Mp02dd3zk3RmuT6VgjBxdJn2yURGKOka3l9cugABAStORgUAAAAAACJRIMoNyg9Pai/pn4PHTOMEsDHkuUAHt5riqU81NVVj+fXKAQhCAUCL3W2Jh3ImNRSpbp0bLe+rBE4GJw5AjwJEhakHsm83YfuQKeY1syBFrmNV2ZvLv8R8uTLcmkJ1s/lWUxZ9o4qJAAEBK05GBQAAAAAAIlEgXCutuyDOvc4hiADdov7VmOUfq4ww6HES7JZ6NAucMJkBCEIBQDqu/4oik+J+eAbvUhzzuBkoVoOgD5RySjpvJQqTKNieBda8dMTkH2avx6ghs7zd6puujlBCQw3r/NiG4VX7wAEAAA=="
++      ],
++      "sig_script": "",
++      "tx_version": 2,
++      "lock_time": 123,
++      "sequence": 456,
++      "additional_inputs": [
++        [
++          {
++            "private_key_index": 1,
++            "type": "p2tr",
++            "value": 345678,
++            "pk_script": "5120788b90c2b523c73a4237d04df46b232858be3bbc0e65d8d049a7fa59d5719db8"
++          }
++        ],
++        [
++          {
++            "private_key_index": 2,
++            "type": "p2tr",
++            "value": 345678,
++            "pk_script": "5120ca0dca0f4f6a2fe99f83c74ce304b031e4b94007b79ae2a94f35355563f9f5ca"
++          },
++          {
++            "private_key_index": 3,
++            "type": "p2tr",
++            "value": 345678,
++            "pk_script": "51205c2badbb20cebdce218800dda2fed598e51fab8c30e87112ec967a340b9c3099"
++          }
++        ]
++      ]
++    }
++  ],
++  "error": [
++    {
++      "description": "wrong message for p2wpkh simple signature",
++      "message": "EFGJ4AZYXDV7NDUDSUDB3NCDUC",
++      "address": "bc1qqthe0hz8klx90e7stf6shclhsvqd5ly96pn53v",
++      "signature": "smpAkgwRQIhALC6hdfxNy1n45d7UXSskRBdfZW0Al259E1kDMpipdYkAiAJPfZqb+WurZuf1apU5xeE6Igui9dvt5tihQLDvxlY1AEhAqbnruyo677ktQjio7XOchO3w51Dh9AbRVngha5jtNfT",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong signer for p2wpkh simple signature",
++      "message": "2V6TUTMSH4VQ3Z7WZWKYD7DFNH",
++      "address": "bc1qgg6lpr05az2l5kz402ddz5ez7fdu25kgmd40lf",
++      "signature": "smpAkgwRQIhALC6hdfxNy1n45d7UXSskRBdfZW0Al259E1kDMpipdYkAiAJPfZqb+WurZuf1apU5xeE6Igui9dvt5tihQLDvxlY1AEhAqbnruyo677ktQjio7XOchO3w51Dh9AbRVngha5jtNfT",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong message for p2tr simple signature",
++      "message": "56VM6YK6Y76XTBXNPITF232EPX",
++      "address": "bc1pcquvhrqv0q68t4m0hfq6tpn006qrskyc7yrqnp2uyrf2emg3wynsdjyk38",
++      "signature": "smpAUB6B2Rbupzua8LTQIF06516wzl+cwKy1be8RgoiW0riyXdKwe6GTz/5Hnb37m67pJwIKCh+D5jDueG6KpvYpmu8",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong signer for p2tr simple signature",
++      "message": "PURVOQ544B6HUATVBJZN5EZJUU",
++      "address": "bc1pltvk000nd54v3hrrcn7lsffdra72hphpm40rhzf9hn8arqkgermq2p9029",
++      "signature": "smpAUB6B2Rbupzua8LTQIF06516wzl+cwKy1be8RgoiW0riyXdKwe6GTz/5Hnb37m67pJwIKCh+D5jDueG6KpvYpmu8",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong message for p2wsh-multisig-2of2 simple signature",
++      "message": "DL2KXDPQAN63YIQPIP34O3XYVX",
++      "address": "bc1qw6g0rgrpuxvj4edkwtvzpmt3c5m08mhp8nuk3mrk4erufvlczp5ssdscjd",
++      "signature": "smpBABIMEUCIQCKl1f9Cj26k0fFWE48+O4ibhYJYPytbDZWJRaaG9BybwIgCbk+3BViWkpuu2RI+41dwtlQ/m/01G860pTFCzDFfokBSDBFAiEA0O77DJsaM7IO+Ht06sp3umzXB64CNNOwf2isZuPfdmwCIGlggOwRSkXsqlPhE1gMdd5hf7ycL33Orfrr4v/XnMGSAUdSIQNsu/OwZurHvJMoiJoSAmmCHLoqIc5Wblh+rek+7rhASCECgYVkUspeAxwRfM6v4GRBhN/gGxTfpPqZuOlBIYZxTJZSrg==",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong signer for p2wsh-multisig-2of2 simple signature",
++      "message": "G7ZTXXOVJFHGDD6XYJAGBAMT5A",
++      "address": "bc1q47vnwr6fsarstmmw89wrkvl89540sn5g79x75ms8aly9rrsnq8eqh3v9gz",
++      "signature": "smpBABIMEUCIQCKl1f9Cj26k0fFWE48+O4ibhYJYPytbDZWJRaaG9BybwIgCbk+3BViWkpuu2RI+41dwtlQ/m/01G860pTFCzDFfokBSDBFAiEA0O77DJsaM7IO+Ht06sp3umzXB64CNNOwf2isZuPfdmwCIGlggOwRSkXsqlPhE1gMdd5hf7ycL33Orfrr4v/XnMGSAUdSIQNsu/OwZurHvJMoiJoSAmmCHLoqIc5Wblh+rek+7rhASCECgYVkUspeAxwRfM6v4GRBhN/gGxTfpPqZuOlBIYZxTJZSrg==",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong message for p2wsh-multisig-3of3 simple signature",
++      "message": "UKLIJM5HKKQEIFJ44R7UIQFMYL",
++      "address": "bc1qazhmhwl9sxgjmwnd96hh926s3x5l0cf64yy6hvyn6qms438x550qy5sgva",
++      "signature": "smpBQBHMEQCICNI6H6b+VCZV9Z2H6EW5hPrE1buC6SJuy2ljSNmQlGfAiASbm5UrA8KH6TwF6evx7COV+i27ubiq2v9TyLYPOO63gFIMEUCIQCMOFnJbg0sy88G6wUXjv5stjVgfvAokOogWsisdkAnlAIgETfBw7kJhISFu9vIomFcEF/1NsN6c0h3KjNcpmNAZtMBSDBFAiEA/lUU+wBeA3prt8vHRpcQN763OYZ8L61DfN0QI/gkHpMCIB2qHwgoXNTH0sdqeAMD2ah7dSTie2bflax3Q3I/GibQAWlTIQKo003Zjj9Jg/kT7sOA7cTdIKmzsrIYBAuPd9hj8FZuHCEC6BdalMtwbjcx2vJjVelv7BJml0rY7Q5ze+PWen6tb5shAytperlYBs69tbn86t3pINqXy0NzttKZKi6Y8X+USQXaU64=",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong signer for p2wsh-multisig-3of3 simple signature",
++      "message": "Z3SB7SRL555ZGOHVMYT5WG7RIZ",
++      "address": "bc1qnckc2q6804depn2240l66p93e0mscp7vd9ndptfuznex86ehpcvseq6e8a",
++      "signature": "smpBQBHMEQCICNI6H6b+VCZV9Z2H6EW5hPrE1buC6SJuy2ljSNmQlGfAiASbm5UrA8KH6TwF6evx7COV+i27ubiq2v9TyLYPOO63gFIMEUCIQCMOFnJbg0sy88G6wUXjv5stjVgfvAokOogWsisdkAnlAIgETfBw7kJhISFu9vIomFcEF/1NsN6c0h3KjNcpmNAZtMBSDBFAiEA/lUU+wBeA3prt8vHRpcQN763OYZ8L61DfN0QI/gkHpMCIB2qHwgoXNTH0sdqeAMD2ah7dSTie2bflax3Q3I/GibQAWlTIQKo003Zjj9Jg/kT7sOA7cTdIKmzsrIYBAuPd9hj8FZuHCEC6BdalMtwbjcx2vJjVelv7BJml0rY7Q5ze+PWen6tb5shAytperlYBs69tbn86t3pINqXy0NzttKZKi6Y8X+USQXaU64=",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong message for p2pkh full signature",
++      "message": "TCHG6CQ5E2T5S4S7DPLAEFVDY2",
++      "address": "13vU5PUSuArDXJdCWZvUFEbgJ2wcmtSJWn",
++      "signature": "fulAgAAAAGn3Z6t/gsHNyHdgZTOVro0Hej+qbd/ilU1ACalKoHX3gAAAABqRzBEAiB+8t/tm8Jm6zYv9JGZZVlAUjmqg7ZglIA39U+bim8EKQIgDv3E5cHOagN+xYgN3ZQjTYlAJp/WyslwJWuFP1TmM3IBIQJcPK2h9SY+Ki1oussvHnMdFAhJgsYBFPl+rNcMv9P1ROAHAAABAAAAAAAAAAABauAHAAA=",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong signer for p2pkh full signature",
++      "message": "MOISC5NCQ42ADH2SUXLELUJOWH",
++      "address": "1BxMhvfWLnGLqVhJ3j39oDBk7qf5D86BFe",
++      "signature": "fulAgAAAAGn3Z6t/gsHNyHdgZTOVro0Hej+qbd/ilU1ACalKoHX3gAAAABqRzBEAiB+8t/tm8Jm6zYv9JGZZVlAUjmqg7ZglIA39U+bim8EKQIgDv3E5cHOagN+xYgN3ZQjTYlAJp/WyslwJWuFP1TmM3IBIQJcPK2h9SY+Ki1oussvHnMdFAhJgsYBFPl+rNcMv9P1ROAHAAABAAAAAAAAAAABauAHAAA=",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong message for p2wpkh full signature",
++      "message": "VENQMXVEGEJAAXJV5V24T6G5UU",
++      "address": "bc1qrqtlzcq86850yzgsyq9sssawx2qxlx5yq3xpkd",
++      "signature": "fulAgAAAAABAUrfzHHOLAKmgCIFSTT3krp+cQxj1BDPBN4GBg3tRmFXAAAAAADgBwAAAQAAAAAAAAAAAWoCSDBFAiEAjYj85zyhQKa9DbMO0reDwdhkNwKJkF3q2qFcijXDgMUCIAaQ75s3fwqrCeYIUJugLvhxZFxQIVquGN90vIKCW3QLASEDMurnDzvc0zABUwVwCADfGXoDx/M3SQnYt7e3IHDoU3PgBwAA",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong signer for p2wpkh full signature",
++      "message": "KLE5MMJBTNF4AVZXIO3GIL5UWF",
++      "address": "bc1q55chmwm4x8aeye0h9c0mryra2ly8k8fh3scqgj",
++      "signature": "fulAgAAAAABAUrfzHHOLAKmgCIFSTT3krp+cQxj1BDPBN4GBg3tRmFXAAAAAADgBwAAAQAAAAAAAAAAAWoCSDBFAiEAjYj85zyhQKa9DbMO0reDwdhkNwKJkF3q2qFcijXDgMUCIAaQ75s3fwqrCeYIUJugLvhxZFxQIVquGN90vIKCW3QLASEDMurnDzvc0zABUwVwCADfGXoDx/M3SQnYt7e3IHDoU3PgBwAA",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong message for p2tr full signature",
++      "message": "P2RQWD264CW7Z5ZSSSDRW2JEDB",
++      "address": "bc1pve87s3l2levjmhetzr2f9xvep3y266xty0hnefmyv8tkxc3e4qssll2kdu",
++      "signature": "fulAgAAAAABAROFPNY6Zt8hFK0YQq5Wb6wk/CnUYEPtQ0HTHDyzNROrAAAAAADgBwAAAQAAAAAAAAAAAWoBQNRdLOo5XZY0SBqAsLZNr/z3Bqrmo3OxVn7e4tD/OOD4H9U/L1unq5Nmdz+S1w7SHtt46bFwnd8xnRVan8BofFfgBwAA",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong signer for p2tr full signature",
++      "message": "XQMVC3YR6AOGZIHLSUQ2NSSBI2",
++      "address": "bc1py2f3exluva2yqa877qnsj3vk4lm8yatw0up4fhrx04hf8ns87weswck94p",
++      "signature": "fulAgAAAAABAROFPNY6Zt8hFK0YQq5Wb6wk/CnUYEPtQ0HTHDyzNROrAAAAAADgBwAAAQAAAAAAAAAAAWoBQNRdLOo5XZY0SBqAsLZNr/z3Bqrmo3OxVn7e4tD/OOD4H9U/L1unq5Nmdz+S1w7SHtt46bFwnd8xnRVan8BofFfgBwAA",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong message for p2tr-time-lock full signature",
++      "message": "ATGH7VC42BMKAAJAMBG3KNGQGR",
++      "address": "bc1p6vffkx7vcyezrjq7pg9qqdjv7vmtanfhk8ukwsn4syejwmarmhxqp0rw5x",
++      "signature": "fulAgAAAAABAaza7/ukfX9ZdxCUvK7CPJgADDdPdF7ikXVKWctd5EHrAAAAAADgBwAAAQAAAAAAAAAAAWoEQPvuT0enYGwsab2lsPZU0U3OcRkGng+o/PAt4QU2lc8hG7lTUmflkt0To+eoipv2vptf0TlGOBCsKU5xE3kXKcMAS2MgrYfXhOkh0CvwuJpB+O3tal2ECfO0v7k1/A4PTlGcQiBnAuAHsnUgJjLn4tl5ytgC8CNTyITXmg4rx9ctxPedwRMPEBvfoUBorCHBJjLn4tl5ytgC8CNTyITXmg4rx9ctxPedwRMPEBvfoUDgBwAA",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong signer for p2tr-time-lock full signature",
++      "message": "AY2VOQOXYI5CN2EHZKLOX7ZI37",
++      "address": "bc1pfncmfyycsv5zpnrzy3hj7qna989kymm2ekps7ph2mwwyftjy3d6s2esen0",
++      "signature": "fulAgAAAAABAaza7/ukfX9ZdxCUvK7CPJgADDdPdF7ikXVKWctd5EHrAAAAAADgBwAAAQAAAAAAAAAAAWoEQPvuT0enYGwsab2lsPZU0U3OcRkGng+o/PAt4QU2lc8hG7lTUmflkt0To+eoipv2vptf0TlGOBCsKU5xE3kXKcMAS2MgrYfXhOkh0CvwuJpB+O3tal2ECfO0v7k1/A4PTlGcQiBnAuAHsnUgJjLn4tl5ytgC8CNTyITXmg4rx9ctxPedwRMPEBvfoUBorCHBJjLn4tl5ytgC8CNTyITXmg4rx9ctxPedwRMPEBvfoUDgBwAA",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong message for p2sh-p2wpkh full signature",
++      "message": "CPVOBEXDTFAXS6N4YASD753CZV",
++      "address": "32Utb7Seg6EXq7UesMNJXhQ1gdohYNyzQ9",
++      "signature": "fulAgAAAAABAe5xLNMlYQH4OGjJ3h4lqQaVp0Cic7mwxkvyWswqFMXeAAAAABcWABSy/hpDH/KLAi4x25Tmb2UaO1xtWeAHAAABAAAAAAAAAAABagJHMEQCIDEleqb0n1R5c21TGkWRXNFae98wbwI0QOyh/YmRuQX1AiAcv1MhyTzPOVgZ1VIwuu0tDxrVJUHK8lhOUOXpsZnGwwEhAsjeDEoWX8hvEC8A/692yGQsPh6JBO8Zf4aITEQsKAcJ4AcAAA==",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong signer for p2sh-p2wpkh full signature",
++      "message": "EMYGZHEY3LIANYKCR7XJF3NMFQ",
++      "address": "3QMEQj2LTUtKKR1UatUK44z1NwrWrcVSGh",
++      "signature": "fulAgAAAAABAe5xLNMlYQH4OGjJ3h4lqQaVp0Cic7mwxkvyWswqFMXeAAAAABcWABSy/hpDH/KLAi4x25Tmb2UaO1xtWeAHAAABAAAAAAAAAAABagJHMEQCIDEleqb0n1R5c21TGkWRXNFae98wbwI0QOyh/YmRuQX1AiAcv1MhyTzPOVgZ1VIwuu0tDxrVJUHK8lhOUOXpsZnGwwEhAsjeDEoWX8hvEC8A/692yGQsPh6JBO8Zf4aITEQsKAcJ4AcAAA==",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong message for p2wsh-time-lock full signature",
++      "message": "QMSIBU4KPG4CGHGBGFRFHXVYLR",
++      "address": "bc1qhqcmw7ud03vqde3pe6hzajaylhucmlatrkcztzpnk8vpgvhg9dzq5ydark",
++      "signature": "fulAgAAAAABAYYJeOOOi3c33O+dholAwiF51Amy/E0qIf3ew2vFtDtTAAAAAADgBwAAAQAAAAAAAAAAAWoDSDBFAiEA64MwD2HkJjPLPAc2u5ia6ZdwCVO3okzVqGPEXnuJGZQCIE27BGOBQTdwJ2M/Wdsm6nFVunqaj+xZBSG/g/64FMbtAQBNYyEDrYfXhOkh0CvwuJpB+O3tal2ECfO0v7k1/A4PTlGcQiBnAuAHsnUhA4ZGGvodKgqeg/ZYffm6miaKaG57VkCSjmmRprCa+ulyaKzgBwAA",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong signer for p2wsh-time-lock full signature",
++      "message": "MGKMA2MJUBDHT55J7MHOLM7UPE",
++      "address": "bc1qlcg74qa5r0ltu6zruahaap3keqsksad6kpstqyysxu0y7tkz2jlqepjywu",
++      "signature": "fulAgAAAAABAYYJeOOOi3c33O+dholAwiF51Amy/E0qIf3ew2vFtDtTAAAAAADgBwAAAQAAAAAAAAAAAWoDSDBFAiEA64MwD2HkJjPLPAc2u5ia6ZdwCVO3okzVqGPEXnuJGZQCIE27BGOBQTdwJ2M/Wdsm6nFVunqaj+xZBSG/g/64FMbtAQBNYyEDrYfXhOkh0CvwuJpB+O3tal2ECfO0v7k1/A4PTlGcQiBnAuAHsnUhA4ZGGvodKgqeg/ZYffm6miaKaG57VkCSjmmRprCa+ulyaKzgBwAA",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong message for p2wsh-multisig-2of2 full signature",
++      "message": "OANRY57VZNHOXZNYGCGZM5ADYG",
++      "address": "bc1qg8r3cl47rrr75dwvr7jhzdukptegnmq8v0nmjd2jdn4qvlczqkts0rqtav",
++      "signature": "fulAgAAAAABAXshuDM6YKy1LClwk1ZOM5egX7RTFPOCvtxJkYFYk/FEAAAAAADgBwAAAQAAAAAAAAAAAWoEAEgwRQIhAI9uOxvqmBV0pldOoKWnSYhjobNhP4F+gxO0QlOdGtxFAiBROcNruLigZE4lj1DJEh8yGrqS00MeW463EO78TsaRFgFIMEUCIQCAhIqYuU4wDA2AYsU+QDVyucH4Tm/NSDP2+txyPMKEkAIgfuGlSh7ncxb2yV3S3aOF5uwHGqtIZjp3b4HW0d35EckBR1IhAkT3y4QqTOTzUs5AYq5eCl1g1vqgsHtiwgY0hKpSl7vOIQI07tYZDvxHcWuVOgULVj+LK1I63eqVWuQzUd0qkqpJ9FKu4AcAAA==",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong signer for p2wsh-multisig-2of2 full signature",
++      "message": "QXYOWYWO7ZGJC4OPNC367HBUQF",
++      "address": "bc1qan5sys8u4cpvgutt70fn2tgweu7as9aw0slljuz86x4nyr8myvjsgz3q2v",
++      "signature": "fulAgAAAAABAXshuDM6YKy1LClwk1ZOM5egX7RTFPOCvtxJkYFYk/FEAAAAAADgBwAAAQAAAAAAAAAAAWoEAEgwRQIhAI9uOxvqmBV0pldOoKWnSYhjobNhP4F+gxO0QlOdGtxFAiBROcNruLigZE4lj1DJEh8yGrqS00MeW463EO78TsaRFgFIMEUCIQCAhIqYuU4wDA2AYsU+QDVyucH4Tm/NSDP2+txyPMKEkAIgfuGlSh7ncxb2yV3S3aOF5uwHGqtIZjp3b4HW0d35EckBR1IhAkT3y4QqTOTzUs5AYq5eCl1g1vqgsHtiwgY0hKpSl7vOIQI07tYZDvxHcWuVOgULVj+LK1I63eqVWuQzUd0qkqpJ9FKu4AcAAA==",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong message for p2wsh-multisig-3of3 full signature",
++      "message": "UZQGB4YTYIS3PRT3UUOCO3YCX3",
++      "address": "bc1q8vy6jhfe8ca0uruvr4aqkjk75dpg5m30rnwatg60uhya00dhlyqs2xvt2a",
++      "signature": "fulAgAAAAABAU2vSmP5XYqecVKygaRRribDp5piMoVxUkxUnFSff8kRAAAAAADgBwAAAQAAAAAAAAAAAWoFAEgwRQIhAKBSw74gHlx272y4RzyU/ap7iNO5rmB6XXgBOy3Qsc/EAiBUnSrF/XhvuvAwi/mMme0JDpuCvl+oZ9C4f3H8OemXCAFIMEUCIQDK3wH0l2AvJ5FZ923ZMJkY1z0MBh1Nee9wjK7tVxFz5gIgdC1XBD/IdBPtx1xmyvSFhbIJlvnz98fPTm50K6KaXpEBSDBFAiEAyP3nXTzXrTmzq54x8jAY02ERHycEYzYqT9cpRTeEWg4CIHxRk3e3oPrM9oCZ8xcgNQ3lRhyc+G0qdDIl6qa8SN4AAWlTIQIlBvEshNuT7T6Ja01YgHs0G31etR15oRdjg2JJs6Hf5CEDBbFTr8NwzY8uUi5qQ1z16XJjdr9VZ1LBpDcElWryIwUhAkLyDL4FQMvj0TI89hZZ8ja4nCrlk9235CCAWXmU0hbgU67gBwAA",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong signer for p2wsh-multisig-3of3 full signature",
++      "message": "3VJANNKSXPLND6YRKG6CUEUZXX",
++      "address": "bc1qma94rw0f5t4l64wc6xfrjuuatqn6klcwmxvls86y9k4rjvva40wqr8u0cq",
++      "signature": "fulAgAAAAABAU2vSmP5XYqecVKygaRRribDp5piMoVxUkxUnFSff8kRAAAAAADgBwAAAQAAAAAAAAAAAWoFAEgwRQIhAKBSw74gHlx272y4RzyU/ap7iNO5rmB6XXgBOy3Qsc/EAiBUnSrF/XhvuvAwi/mMme0JDpuCvl+oZ9C4f3H8OemXCAFIMEUCIQDK3wH0l2AvJ5FZ923ZMJkY1z0MBh1Nee9wjK7tVxFz5gIgdC1XBD/IdBPtx1xmyvSFhbIJlvnz98fPTm50K6KaXpEBSDBFAiEAyP3nXTzXrTmzq54x8jAY02ERHycEYzYqT9cpRTeEWg4CIHxRk3e3oPrM9oCZ8xcgNQ3lRhyc+G0qdDIl6qa8SN4AAWlTIQIlBvEshNuT7T6Ja01YgHs0G31etR15oRdjg2JJs6Hf5CEDBbFTr8NwzY8uUi5qQ1z16XJjdr9VZ1LBpDcElWryIwUhAkLyDL4FQMvj0TI89hZZ8ja4nCrlk9235CCAWXmU0hbgU67gBwAA",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong message for p2sh-p2wsh-multisig-2of2 full signature",
++      "message": "FOQHOIFXJVPFSGGBRLAX53D6R2",
++      "address": "3PGZjFkYBL1m9WBWkWbCW5FEFTaS1Hj4EB",
++      "signature": "fulAgAAAAABAVscdBvYDFN98A//Rt/fAWcN7mdM0x2yWzBjC33c7X5HAAAAACMiACDkkR/DseXy+GXBPtxHvHehUjHt+9XjRmZAgxuuomAC4eAHAAABAAAAAAAAAAABagQASDBFAiEA47YK5XeIGBMQC9bCfWb+IIfirIWlqAzQVc6E/lgBPZICIA0k/EO2t3YhqmYR5WdXUBGgAzR+IqgZ5/mxvj+4UoDTAUgwRQIhAPCIVZCSoIaOjY9BzYIXWEvbhpOl4JR88p/xYVoZObd6AiADyJXNqpDg/Lc2viPX14N2d0jQdEjamY4SmiU7GNbIOgFHUiED+4JBU/wACiE8VFbQF4DR8pKgz7+8X2+PHccTcGxVGdEhA9uIzp+4CB5QRgvrN1OXQbBmfW8kOd0cooPWMYJCHBCxUq7gBwAA",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong signer for p2sh-p2wsh-multisig-2of2 full signature",
++      "message": "NQVRV3DJYLKBANM3OPTNBULEU3",
++      "address": "3DA7VZKYcuiaJFsDnzWjBDvh4VhBFZk6jg",
++      "signature": "fulAgAAAAABAVscdBvYDFN98A//Rt/fAWcN7mdM0x2yWzBjC33c7X5HAAAAACMiACDkkR/DseXy+GXBPtxHvHehUjHt+9XjRmZAgxuuomAC4eAHAAABAAAAAAAAAAABagQASDBFAiEA47YK5XeIGBMQC9bCfWb+IIfirIWlqAzQVc6E/lgBPZICIA0k/EO2t3YhqmYR5WdXUBGgAzR+IqgZ5/mxvj+4UoDTAUgwRQIhAPCIVZCSoIaOjY9BzYIXWEvbhpOl4JR88p/xYVoZObd6AiADyJXNqpDg/Lc2viPX14N2d0jQdEjamY4SmiU7GNbIOgFHUiED+4JBU/wACiE8VFbQF4DR8pKgz7+8X2+PHccTcGxVGdEhA9uIzp+4CB5QRgvrN1OXQbBmfW8kOd0cooPWMYJCHBCxUq7gBwAA",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong message for p2sh-multisig-2of2 full signature",
++      "message": "DAOHN7TAL75XRHJILGIO3RXAEM",
++      "address": "3Nye4j1GUFqCEBR3do2KEFZAs9oLe8NZ6X",
++      "signature": "fulAgAAAAEvAyd4zsoz8gcVU5H19GLYokTAN5PxuKCBlEPjODJ86gAAAADaAEcwRAIgT6rcfxgCmG6b3DpzNV6UG0jiCQGclG9sfiSpV45HDXMCIGgtqjFBuJ7rbi+cgnG0TZiKZaxMk0KI+gQd0pHJfEYCAUgwRQIhANCvCLjGMuZMzH+nCEkNhWhR45T6QRYMLin8utpuF9r1AiBTjG2NLjkre7ec+HPg8UUhK1jL1vgq7YKjq5ROv+h07AFHUiEDhKjcb/Pv1/7AYutzOXwgec08wwD/VwiPm58Lc0xjohghAhycjpwdBuP33orQXAH1CAsrgSkuspxM2+FPQ4OCVhQWUq7gBwAAAQAAAAAAAAAAAWrgBwAA",
++      "error_substr": "invalid signature"
++    },
++    {
++      "description": "wrong signer for p2sh-multisig-2of2 full signature",
++      "message": "7OKFLKRXSP6J42VQOMSG7MVXEP",
++      "address": "3L9uCVRBUfLgKQQK366dmutgsp3GpCwYGE",
++      "signature": "fulAgAAAAEvAyd4zsoz8gcVU5H19GLYokTAN5PxuKCBlEPjODJ86gAAAADaAEcwRAIgT6rcfxgCmG6b3DpzNV6UG0jiCQGclG9sfiSpV45HDXMCIGgtqjFBuJ7rbi+cgnG0TZiKZaxMk0KI+gQd0pHJfEYCAUgwRQIhANCvCLjGMuZMzH+nCEkNhWhR45T6QRYMLin8utpuF9r1AiBTjG2NLjkre7ec+HPg8UUhK1jL1vgq7YKjq5ROv+h07AFHUiEDhKjcb/Pv1/7AYutzOXwgec08wwD/VwiPm58Lc0xjohghAhycjpwdBuP33orQXAH1CAsrgSkuspxM2+FPQ4OCVhQWUq7gBwAAAQAAAAAAAAAAAWrgBwAA",
++      "error_substr": "invalid signature"
++    }
++  ]
++}"###,
++        ] {
++            let vectors: serde_json::Value = serde_json::from_str(file).unwrap();
++            if let Some(rows) = vectors["tx_hashes"].as_array() {
++                for row in rows {
++                    let m = row["message"].as_str().unwrap();
++                    let a =
++                        parse_address(row["address"].as_str().unwrap(), Network::Bitcoin).unwrap();
++                    assert_eq!(
++                        message_hash(m).to_string(),
++                        row["message_hash"].as_str().unwrap()
++                    );
++                    let (s, t) = virtual_transactions(m, &a);
++                    assert_eq!(
++                        s.compute_txid().to_string(),
++                        row["to_spend_tx_hash"].as_str().unwrap()
++                    );
++                    assert_eq!(
++                        t.compute_txid().to_string(),
++                        row["to_sign_tx_hash"].as_str().unwrap()
++                    );
++                }
++            }
++            for row in vectors["simple"].as_array().unwrap() {
++                let m = row["message"].as_str().unwrap();
++                let a = row["address"].as_str().unwrap();
++                let supported = matches!(row["type"].as_str().unwrap(), "p2tr" | "p2wpkh");
++                for s in row["bip322_signatures"].as_array().unwrap() {
++                    let s = s.as_str().unwrap();
++                    assert_eq!(
++                        verify(m, a, s, Network::Bitcoin).unwrap_or(false),
++                        supported,
++                        "{}",
++                        row
++                    );
++                    assert!(!verify(&format!("{}!", m), a, s, Network::Bitcoin).unwrap_or(false));
++                }
++            }
++            if let Some(rows) = vectors["error"].as_array() {
++                for row in rows {
++                    assert!(!verify(
++                        row["message"].as_str().unwrap(),
++                        row["address"].as_str().unwrap(),
++                        row["signature"].as_str().unwrap(),
++                        Network::Bitcoin
++                    )
++                    .unwrap_or(false));
++                }
++            }
++        }
++    }
++    #[test]
++    fn independent_cross_implementation_vectors() {
++        let cases: serde_json::Value = serde_json::from_str(r###"[
++  {
++    "description": "P2TR sighash 0",
++    "message": " exact bytes\nUTF-8: é é 💰\u0000 ",
++    "address": "bc1pcquvhrqv0q68t4m0hfq6tpn006qrskyc7yrqnp2uyrf2emg3wynsdjyk38",
++    "signature": "smpAUDXknSXLQosEkoUvOWhSVJ8v5XLuamj5Auy2nhiFvcUNjWtFgvSSVBEPqbcUoeuNOf4IrH0Batfgu3A3pjuDKXC",
++    "expected": true
++  },
++  {
++    "description": "P2TR forbidden explicit DEFAULT suffix",
++    "message": " exact bytes\nUTF-8: é é 💰\u0000 ",
++    "address": "bc1pcquvhrqv0q68t4m0hfq6tpn006qrskyc7yrqnp2uyrf2emg3wynsdjyk38",
++    "signature": "smpAUHXknSXLQosEkoUvOWhSVJ8v5XLuamj5Auy2nhiFvcUNjWtFgvSSVBEPqbcUoeuNOf4IrH0Batfgu3A3pjuDKXCAA==",
++    "expected": false
++  },
++  {
++    "description": "P2TR sighash 1",
++    "message": " exact bytes\nUTF-8: é é 💰\u0000 ",
++    "address": "bc1pcquvhrqv0q68t4m0hfq6tpn006qrskyc7yrqnp2uyrf2emg3wynsdjyk38",
++    "signature": "smpAUHSus/tSgNuAjSfDXso/svr/WxRfiF/TiEphtHtCaifrYhXEidnvhUJJu/OaOHS3Pn25zak4U/KOHKxHOrglEc5AQ==",
++    "expected": true
++  },
++  {
++    "description": "P2TR sighash 2",
++    "message": " exact bytes\nUTF-8: é é 💰\u0000 ",
++    "address": "bc1pcquvhrqv0q68t4m0hfq6tpn006qrskyc7yrqnp2uyrf2emg3wynsdjyk38",
++    "signature": "smpAUHACLyJeI1TnpSICeKP82iIxL+DM2eOARefPHNxFSbHNUPEgL6IwJtqjF+m3DKpN4SJi3a+Vy6nBUlqStKZCxKPAg==",
++    "expected": false
++  },
++  {
++    "description": "P2TR sighash 129",
++    "message": " exact bytes\nUTF-8: é é 💰\u0000 ",
++    "address": "bc1pcquvhrqv0q68t4m0hfq6tpn006qrskyc7yrqnp2uyrf2emg3wynsdjyk38",
++    "signature": "smpAUGdhby2tvsd3rlLrl4GRdijrzQlFi4G7PnUZyPmOamYVNVhdRJ0yfIxMEfey/raL5+07oI9Qs73xdr31PVuai78gQ==",
++    "expected": false
++  },
++  {
++    "description": "P2WPKH sighash 1",
++    "message": " exact bytes\nUTF-8: é é 💰\u0000 ",
++    "address": "bc1q9vza2e8x573nczrlzms0wvx3gsqjx7vavgkx0l",
++    "signature": "smpAkgwRQIhAJCPAbLuvFB+tPKnFfv5+fSWP+vLR58atFol+naAdsQiAiBb70ho3eKcBsKoA/PG3cpgaMkr6ugMg3mYRA2ZDkugVgEhAsfxIAMZZEKUPYWI4BruhAQjzFT8FSFSajuFwrDL1Yhy",
++    "expected": true
++  },
++  {
++    "description": "P2WPKH valid ECDSA but forbidden high S",
++    "message": " exact bytes\nUTF-8: é é 💰\u0000 ",
++    "address": "bc1q9vza2e8x573nczrlzms0wvx3gsqjx7vavgkx0l",
++    "signature": "smpAkkwRgIhAJCPAbLuvFB+tPKnFfv5+fSWP+vLR58atFol+naAdsQiAiEApBC3lyIdY/k9V/wMOSI1nlHlsPvHPBzCJ45Q88HqoOsBIQLH8SADGWRClD2FiOAa7oQEI8xU/BUhUmo7hcKwy9WIcg==",
++    "expected": false
++  },
++  {
++    "description": "P2WPKH sighash 2",
++    "message": " exact bytes\nUTF-8: é é 💰\u0000 ",
++    "address": "bc1q9vza2e8x573nczrlzms0wvx3gsqjx7vavgkx0l",
++    "signature": "smpAkgwRQIhANOCl5+Z2SrQdL4dHUx9NjVvjZg5IbiBSddNbDvrX/XsAiAWuCI798mnZne28P73dTc8ytA9w515h7Nn0xSWPV+xYgIhAsfxIAMZZEKUPYWI4BruhAQjzFT8FSFSajuFwrDL1Yhy",
++    "expected": false
++  },
++  {
++    "description": "P2WPKH sighash 129",
++    "message": " exact bytes\nUTF-8: é é 💰\u0000 ",
++    "address": "bc1q9vza2e8x573nczrlzms0wvx3gsqjx7vavgkx0l",
++    "signature": "smpAkgwRQIhAPeWapGIQSeEoV9RASOYyStbPe7SnPD/fn71kOsbhocaAiBpcaWctdOBbDSrstmEtoSaoEC3ewzFTuADFsbe7K5pqIEhAsfxIAMZZEKUPYWI4BruhAQjzFT8FSFSajuFwrDL1Yhy",
++    "expected": false
++  }
++]
++"###).unwrap();
++        for row in cases.as_array().unwrap() {
++            assert_eq!(
++                verify(
++                    row["message"].as_str().unwrap(),
++                    row["address"].as_str().unwrap(),
++                    row["signature"].as_str().unwrap(),
++                    Network::Bitcoin
++                )
++                .unwrap_or(false),
++                row["expected"].as_bool().unwrap(),
++                "{}",
++                row["description"]
++            );
++        }
++    }
++    #[test]
++    fn signed_exact_utf8_and_limits() {
++        let k = MessageKey::from_seed(&[1; 32], Network::Regtest).unwrap();
++        let a = k.address.to_string();
++        for message in [
++            "",
++            "Hello World",
++            "  exact\n",
++            "NUL\0inside",
++            "Unicode:😄ö测试",
++            "e\u{301}",
++        ] {
++            let s = k.sign(message, &a).unwrap();
++            assert!(s.starts_with("smp"));
++            assert!(verify(message, &a, &s, Network::Regtest).unwrap());
++            assert!(verify(message, &a, &s[3..], Network::Regtest).unwrap());
++            assert!(!verify(&format!("{}!", message), &a, &s, Network::Regtest).unwrap());
++            assert!(!verify(message, &a, &format!("{}=", s), Network::Regtest).unwrap());
++            assert!(verify(message, &a, &s, Network::Bitcoin).is_err());
++            let mut bytes = STANDARD.decode(&s[3..]).unwrap();
++            bytes.push(0);
++            assert!(!verify(
++                message,
++                &a,
++                &format!("smp{}", STANDARD.encode(bytes)),
++                Network::Regtest
++            )
++            .unwrap());
++        }
++        let other = MessageKey::from_seed(&[2; 32], Network::Regtest).unwrap();
++        assert!(k.sign("x", &other.address.to_string()).is_err());
++        assert!(k.sign(&"a".repeat(4096), &a).is_ok());
++        assert!(k.sign(&"a".repeat(4097), &a).is_err());
++        assert!(k.sign(&"😄".repeat(1025), &a).is_err());
++        let valid = k.sign("x", &a).unwrap();
++        let raw = STANDARD.decode(&valid[3..]).unwrap();
++        for malformed in [
++            vec![0],
++            vec![0xfd, 1, 0],
++            vec![1, 0xfd, 64, 0],
++            vec![255; 256],
++            vec![2, 64],
++            vec![1, 65],
++        ] {
++            assert!(!verify(
++                "x",
++                &a,
++                &format!("smp{}", STANDARD.encode(malformed)),
++                Network::Regtest
++            )
++            .unwrap());
++        }
++        let mut explicit_default = raw.clone();
++        explicit_default[1] = 65;
++        explicit_default.push(0);
++        assert!(!verify(
++            "x",
++            &a,
++            &format!("smp{}", STANDARD.encode(explicit_default)),
++            Network::Regtest
++        )
++        .unwrap());
++    }
++}
 diff --git a/src/uniffi_api/mod.rs b/src/uniffi_api/mod.rs
-index 89eb544..8b946cb 100644
+index 89eb544..57ac965 100644
 --- a/src/uniffi_api/mod.rs
 +++ b/src/uniffi_api/mod.rs
-@@ -71,13 +71,23 @@ fn attach_host_with_expected_key_source(
+@@ -1,5 +1,6 @@
+ #[cfg(feature = "vls")]
+ mod native_signer;
++pub(crate) mod bip322;
+ pub(crate) mod state;
+ mod types;
+ 
+@@ -71,13 +72,23 @@ fn attach_host_with_expected_key_source(
      host: Arc<dyn ExternalSignerHost>,
      expected: crate::signer::KeySourceFile,
  ) -> Result<(), RlnError> {
@@ -2981,7 +4322,7 @@ index 89eb544..8b946cb 100644
      Ok(())
  }
  
-@@ -417,12 +427,9 @@ impl SdkNode {
+@@ -417,12 +428,9 @@ impl SdkNode {
          Ok(Self { handle })
      }
  
@@ -2996,7 +4337,27 @@ index 89eb544..8b946cb 100644
      }
  
      pub fn init(&self, password: String, mnemonic: Option<String>) -> Result<String, RlnError> {
-@@ -1795,15 +1802,18 @@ pub fn sdk_initialize(request: SdkInitRequest) -> Result<(), RlnError> {
+@@ -1751,8 +1759,17 @@ impl SdkNode {
+     ) -> Result<(), RlnError> {
+         let state = self.handle.app_state();
+         let expected = key_source_from_uniffi_bootstrap(signer.bootstrap()?);
+-        let host: Arc<dyn ExternalSignerHost> = signer;
+-        attach_host_with_expected_key_source(&state, host, expected)
++        let host: Arc<dyn ExternalSignerHost> = signer.clone();
++        attach_host_with_expected_key_source(&state, host, expected)?;
++        let mut attached = state.get_attached_external_signer();
++        if state.cancel_token.is_cancelled() { return Err(RlnError::NotInitialized("node is shut down".into())); }
++        let attachment = attached.as_mut().ok_or_else(|| RlnError::ExternalSignerUnavailable("native signer detached".into()))?;
++        // Bind only after bootstrap identity has been checked by the normal attachment path.
++        crate::signer::validate_key_source_matches_bootstrap(
++            &key_source_from_uniffi_bootstrap(signer.bootstrap()?), &attachment.bootstrap,
++        ).map_err(|_| RlnError::ExternalSignerMismatch("native signer attachment changed".into()))?;
++        attachment.message_signer = Some(signer);
++        Ok(())
+     }
+ 
+     #[allow(clippy::too_many_arguments)]
+@@ -1795,15 +1812,18 @@ pub fn sdk_initialize(request: SdkInitRequest) -> Result<(), RlnError> {
      Ok(())
  }
  
@@ -3023,11 +4384,55 @@ index 89eb544..8b946cb 100644
  }
  
  pub fn sdk_init_with_external_signer(
+@@ -2053,3 +2073,43 @@ impl crate::signer::ExternalSignerTransport for UniffiExternalSignerTransport {
+ 
+ #[cfg(test)]
+ mod tests;
++
++// Maintained binding methods deliberately do not change the upstream UniFFI/remote protocol.
++impl SdkNode {
++    #[cfg(feature = "vls")]
++    pub fn get_message_signing_address(&self) -> Result<String, RlnError> {
++        let state = self.handle.app_state();
++        state::block_on_sdk(async {
++            let guard = sdk::check_unlocked(&state).await?;
++            let _unlocked = guard.as_ref().unwrap();
++            let attached = state.get_attached_external_signer();
++            let signer = attached.as_ref().and_then(|a| a.message_signer.as_ref())
++                .ok_or_else(|| crate::error::APIError::ExternalSignerUnavailable("BIP-322 requires an attached native signer".into()))?;
++            let address = signer.message_signing_address().map_err(|e| crate::error::APIError::Unexpected(e.to_string()))?;
++            bip322::parse_address(&address, state.static_state.network.into()).map_err(crate::error::APIError::Unexpected)?;
++            Ok(address)
++        })
++    }
++    #[cfg(feature = "vls")]
++    pub fn sign_message_bip322(&self, message: String, address: String) -> Result<String, RlnError> {
++        let state = self.handle.app_state();
++        state::block_on_sdk(async {
++            let guard = sdk::check_unlocked(&state).await?;
++            let _unlocked = guard.as_ref().unwrap();
++            let attached = state.get_attached_external_signer();
++            let signer = attached.as_ref().and_then(|a| a.message_signer.as_ref())
++                .ok_or_else(|| crate::error::APIError::ExternalSignerUnavailable("BIP-322 requires an attached native signer".into()))?;
++            bip322::parse_address(&address, state.static_state.network.into()).map_err(crate::error::APIError::Unexpected)?;
++            signer.sign_message_bip322(&message, &address).map_err(|e| crate::error::APIError::Unexpected(e.to_string()))
++        })
++    }
++    pub fn verify_message_bip322(&self, message: String, address: String, signature: String) -> Result<bool, RlnError> {
++        let state = self.handle.app_state();
++        bip322::verify(&message, &address, &signature, state.static_state.network.into())
++            .map_err(RlnError::InvalidRequest)
++    }
++}
++pub fn verify_message_bip322(message: String, address: String, signature: String, network: String) -> Result<bool, RlnError> {
++    let network = network_from_str(&network)?;
++    bip322::verify(&message, &address, &signature, network.into()).map_err(RlnError::InvalidRequest)
++}
 diff --git a/src/uniffi_api/native_signer.rs b/src/uniffi_api/native_signer.rs
-index 42f6c14..2650cff 100644
+index 42f6c14..a587e0d 100644
 --- a/src/uniffi_api/native_signer.rs
 +++ b/src/uniffi_api/native_signer.rs
-@@ -11,15 +11,61 @@ use bitcoin::Network;
+@@ -11,15 +11,63 @@ use bitcoin::Network;
  use rand::rngs::OsRng;
  use rand::RngCore;
  use signer_external::contract::{BootstrapData, ExternalSignerBackend, SignerRequest};
@@ -3042,24 +4447,26 @@ index 42f6c14..2650cff 100644
 +struct NativeExternalSignerState {
      backend: Arc<dyn ExternalSignerBackend>,
      transport: Arc<InProcessVlsTransport>,
- }
- 
++    message_key: super::bip322::MessageKey,
++}
++
 +#[derive(uniffi::Object)]
 +pub struct NativeExternalSigner {
 +    // A terminal gate prevents new readers from starving shutdown, including
 +    // calls that were queued before the exclusive state lock was acquired.
 +    shutting_down: AtomicBool,
 +    state: RwLock<Option<NativeExternalSignerState>>,
-+}
-+
+ }
+ 
  impl NativeExternalSigner {
 +    fn from_backend(
 +        backend: Arc<dyn ExternalSignerBackend>,
 +        transport: Arc<InProcessVlsTransport>,
++        message_key: super::bip322::MessageKey,
 +    ) -> Arc<Self> {
 +        Arc::new(Self {
 +            shutting_down: AtomicBool::new(false),
-+            state: RwLock::new(Some(NativeExternalSignerState { backend, transport })),
++            state: RwLock::new(Some(NativeExternalSignerState { backend, transport, message_key })),
 +        })
 +    }
 +
@@ -3092,21 +4499,35 @@ index 42f6c14..2650cff 100644
      fn parse_network(network: &str) -> Result<Network, RlnError> {
          match network.to_lowercase().as_str() {
              "mainnet" | "bitcoin" => Ok(Network::Bitcoin),
-@@ -94,7 +140,7 @@ impl NativeExternalSigner {
+@@ -94,7 +142,14 @@ impl NativeExternalSigner {
                  tracing::error!(error = ?e, "native signer transport init failed");
                  RlnError::internal(format!("native signer transport init failed: {e}"))
              })?;
 -        Ok(Arc::new(Self { backend, transport }))
-+        Ok(Self::from_backend(backend, transport))
++        let message_key = super::bip322::MessageKey::from_seed(&seed, network).map_err(RlnError::InvalidRequest)?;
++        let signer = Self::from_backend(backend, transport, message_key);
++        let bootstrap = signer.bootstrap()?;
++        signer.with_state(|state| {
++            if state.message_key.account_xpub != bootstrap.account_xpub_vanilla { return Err(RlnError::ExternalSignerMismatch("BIP-322 key does not match wallet bootstrap".into())); }
++            Ok(())
++        })?;
++        Ok(signer)
      }
  
      /// Like [`Self::new`], but with a disk-backed VLS store under `storage_dir_path`, so a
-@@ -133,34 +179,58 @@ impl NativeExternalSigner {
+@@ -133,34 +188,65 @@ impl NativeExternalSigner {
                      "native signer persistent transport init failed: {e}"
                  ))
              })?;
 -        Ok(Arc::new(Self { backend, transport }))
-+        Ok(Self::from_backend(backend, transport))
++        let message_key = super::bip322::MessageKey::from_seed(&seed, network).map_err(RlnError::InvalidRequest)?;
++        let signer = Self::from_backend(backend, transport, message_key);
++        let bootstrap = signer.bootstrap()?;
++        signer.with_state(|state| {
++            if state.message_key.account_xpub != bootstrap.account_xpub_vanilla { return Err(RlnError::ExternalSignerMismatch("BIP-322 key does not match wallet bootstrap".into())); }
++            Ok(())
++        })?;
++        Ok(signer)
 +    }
 +
 +    /// Permanently revoke this signer and every outstanding `Arc` clone.
@@ -3179,7 +4600,7 @@ index 42f6c14..2650cff 100644
      }
  }
  
-@@ -210,4 +280,157 @@ mod tests {
+@@ -210,4 +296,185 @@ mod tests {
                  .expect("explicit permissive is allowed off-mainnet")
          );
      }
@@ -3194,7 +4615,26 @@ index 42f6c14..2650cff 100644
 +        .expect("persistent signer should open")
 +    }
 +
++    #[test]
++    fn bip322_native_signer_is_owned_exact_and_revoked() {
++        let signer = NativeExternalSigner::new("01".repeat(32), "regtest".into(), None).unwrap();
++        let address = signer.message_signing_address().unwrap();
++        let message = "  exact\nUTF-8😄\0message";
++        let signature = signer.sign_message_bip322(message, &address).unwrap();
++        assert!(signature.starts_with("smp"));
++        assert!(super::super::bip322::verify(message, &address, &signature, Network::Regtest).unwrap());
++        assert!(!super::super::bip322::verify(message.trim(), &address, &signature, Network::Regtest).unwrap());
++        let other = NativeExternalSigner::new("02".repeat(32), "regtest".into(), None).unwrap();
++        assert!(signer.sign_message_bip322(message, &other.message_signing_address().unwrap()).is_err());
++        let clone = signer.clone();
++        signer.shutdown().unwrap();
++        assert!(clone.message_signing_address().is_err());
++        assert!(clone.sign_message_bip322(message, &address).is_err());
++    }
++
 +    fn assert_revoked(signer: &NativeExternalSigner) {
++        assert!(signer.message_signing_address().is_err());
++        assert!(signer.sign_message_bip322("test", "bcrt1pinvalid").is_err());
 +        assert!(matches!(
 +            signer.bootstrap(),
 +            Err(RlnError::ExternalSignerUnavailable(_))
@@ -3335,6 +4775,15 @@ index 42f6c14..2650cff 100644
 +        signer.shutdown().unwrap();
 +        assert_revoked(&signer);
 +        persistent_signer(dir.path()).shutdown().unwrap();
++    }
++}
++
++impl NativeExternalSigner {
++    pub(crate) fn message_signing_address(&self) -> Result<String, RlnError> {
++        self.with_state(|state| Ok(state.message_key.address.to_string()))
++    }
++    pub(crate) fn sign_message_bip322(&self, message: &str, address: &str) -> Result<String, RlnError> {
++        self.with_state(|state| state.message_key.sign(message, address).map_err(RlnError::InvalidRequest))
 +    }
  }
 diff --git a/src/uniffi_api/tests.rs b/src/uniffi_api/tests.rs

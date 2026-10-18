@@ -23,9 +23,19 @@ test('adapter changes only reviewed C-FFI and lifecycle files', () => {
     assert.equal(a, b)
     assert.ok(ALLOWED_FILES.includes(a), a)
   }
-  for (const forbidden of ['src/persistence/', 'src/signer/', 'rust-lightning/']) {
+  for (const forbidden of ['src/persistence/', 'rust-lightning/']) {
     assert.ok(!files.some(([, file]) => file.startsWith(forbidden)), forbidden)
   }
+})
+
+test('BIP-322 signer attachment only adds a revocable native signer handle', () => {
+  const patch = fs.readFileSync(readConfig().patchPath, 'utf8')
+  const section = patch.split('diff --git a/src/signer/external.rs b/src/signer/external.rs\n')[1].split('\ndiff --git ')[0]
+  const added = section.split('\n').filter(line => line.startsWith('+') && !line.startsWith('+++'))
+  assert.deepEqual(added, [
+    '+    #[cfg(all(feature = "uniffi", feature = "vls"))]',
+    '+    pub(crate) message_signer: Option<Arc<crate::uniffi_api::NativeExternalSigner>>,',
+  ])
 })
 
 test('adapter contains binding repairs without a core import backport', () => {

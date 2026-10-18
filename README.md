@@ -171,3 +171,7 @@ WDK consumers need a separately reviewed API adaptation before adopting this lin
 The last requires the compiled addon and runs an offline lifecycle canary; it does
 not fund wallets, open channels, prove network connectivity or prove migration.
 Candidate artifact builds do not publish npm packages or mutate version tags.
+
+## Bitcoin message signing
+
+Use `getMessageSigningAddress()`, `signMessageBip322(message, address)` and the offline `verifyMessageBip322(message, address, signature, network)` for BIP-322 simple address proofs. The first version signs the canonical first vanilla Taproot address with the native external signer; it preserves exact UTF-8 and emits a `smp` prefix. It does not replace the existing Lightning node-identity signing API. See [BIP322.md](./BIP322.md) for supported forms, limits, custody and verification.

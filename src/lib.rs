@@ -42,7 +42,7 @@ use rlncffi::{
     rln_sdk_node_new, rln_sdk_node_shutdown, rln_sdk_node_unlock_with_attached_external_signer,
     rln_sdk_node_unlock_with_native_external_signer, rln_sdk_node_vss_backup,
     rln_sdk_node_vss_clear_fence, rln_send_btc, rln_send_onion_message, rln_send_payment,
-    rln_send_rgb, rln_sign_message, rln_sync, rln_taker, rln_verify_message, COpaqueStruct,
+    rln_send_rgb, rln_sign_message, rln_get_message_signing_address, rln_sign_message_bip322, rln_verify_message_bip322, rln_verify_message_bip322_offline, rln_sync, rln_taker, rln_verify_message, COpaqueStruct,
     CResultString, CResultValue,
 };
 
@@ -682,6 +682,12 @@ impl SdkNode {
 
     /// Returns `{ signature: "..." }` — VLS signs in-process.
     #[napi]
+    pub fn get_message_signing_address(&self) -> Result<String> { take_cresult_string(rln_get_message_signing_address(&self.handle)) }
+    #[napi]
+    pub fn sign_message_bip322(&self, request_json: String) -> Result<String> { fwd_json_req!(self, rln_sign_message_bip322, request_json) }
+    #[napi]
+    pub fn verify_message_bip322(&self, request_json: String) -> Result<String> { fwd_json_req!(self, rln_verify_message_bip322, request_json) }
+    #[napi]
     pub fn sign_message(&self, message: String) -> Result<String> {
         fwd_str_arg!(self, rln_sign_message, message)
     }
@@ -739,3 +745,9 @@ impl SdkNode {
 // sdkShutdown once we decide whether to keep them static-lifetime. Bare
 // addon exposes them today; current callers (BareRgbLightningBinding /
 // NodeRgbLightningBinding) only use the instance methods so we can defer.
+
+#[napi]
+pub fn verify_message_bip322_offline(request_json: String) -> Result<String> {
+    let request = cstring(&request_json)?;
+    take_cresult_string(rln_verify_message_bip322_offline(request.as_ptr()))
+}
