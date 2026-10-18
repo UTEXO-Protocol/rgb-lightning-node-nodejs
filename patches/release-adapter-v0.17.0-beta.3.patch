@@ -4287,7 +4287,7 @@ index 0000000..c9f968e
 +    }
 +}
 diff --git a/src/uniffi_api/mod.rs b/src/uniffi_api/mod.rs
-index 89eb544..57ac965 100644
+index 89eb544..e546bfe 100644
 --- a/src/uniffi_api/mod.rs
 +++ b/src/uniffi_api/mod.rs
 @@ -1,5 +1,6 @@
@@ -4384,12 +4384,30 @@ index 89eb544..57ac965 100644
  }
  
  pub fn sdk_init_with_external_signer(
-@@ -2053,3 +2073,43 @@ impl crate::signer::ExternalSignerTransport for UniffiExternalSignerTransport {
+@@ -2053,3 +2073,67 @@ impl crate::signer::ExternalSignerTransport for UniffiExternalSignerTransport {
  
  #[cfg(test)]
  mod tests;
 +
 +// Maintained binding methods deliberately do not change the upstream UniFFI/remote protocol.
++#[cfg(feature = "vls")]
++fn validate_message_signer_wallet_identity(
++    storage_dir: &std::path::Path,
++    active_node_id: &bitcoin::secp256k1::PublicKey,
++    attachment: &crate::signer::ExternalSignerAttachment,
++) -> Result<(), crate::error::APIError> {
++    // A generic signer attachment can change independently of an already-unlocked wallet.
++    // Bind proofs to both the active wallet identity and the persisted descriptor bootstrap.
++    if attachment.bootstrap.identity.node_id != active_node_id.to_string() {
++        return Err(crate::error::APIError::ExternalSignerMismatch);
++    }
++    let key_source = crate::signer::read_key_source_file(storage_dir)
++        .map_err(|_| crate::error::APIError::ExternalSignerMismatch)?
++        .ok_or(crate::error::APIError::ExternalSignerMismatch)?;
++    crate::signer::validate_key_source_matches_bootstrap(&key_source, &attachment.bootstrap)
++        .map_err(|_| crate::error::APIError::ExternalSignerMismatch)
++}
++
 +impl SdkNode {
 +    #[cfg(feature = "vls")]
 +    pub fn get_message_signing_address(&self) -> Result<String, RlnError> {
@@ -4398,7 +4416,10 @@ index 89eb544..57ac965 100644
 +            let guard = sdk::check_unlocked(&state).await?;
 +            let _unlocked = guard.as_ref().unwrap();
 +            let attached = state.get_attached_external_signer();
-+            let signer = attached.as_ref().and_then(|a| a.message_signer.as_ref())
++            let attachment = attached.as_ref()
++                .ok_or_else(|| crate::error::APIError::ExternalSignerUnavailable("BIP-322 requires an attached native signer".into()))?;
++            validate_message_signer_wallet_identity(&state.static_state.storage_dir_path, &_unlocked.node_id, attachment)?;
++            let signer = attachment.message_signer.as_ref()
 +                .ok_or_else(|| crate::error::APIError::ExternalSignerUnavailable("BIP-322 requires an attached native signer".into()))?;
 +            let address = signer.message_signing_address().map_err(|e| crate::error::APIError::Unexpected(e.to_string()))?;
 +            bip322::parse_address(&address, state.static_state.network.into()).map_err(crate::error::APIError::Unexpected)?;
@@ -4412,7 +4433,10 @@ index 89eb544..57ac965 100644
 +            let guard = sdk::check_unlocked(&state).await?;
 +            let _unlocked = guard.as_ref().unwrap();
 +            let attached = state.get_attached_external_signer();
-+            let signer = attached.as_ref().and_then(|a| a.message_signer.as_ref())
++            let attachment = attached.as_ref()
++                .ok_or_else(|| crate::error::APIError::ExternalSignerUnavailable("BIP-322 requires an attached native signer".into()))?;
++            validate_message_signer_wallet_identity(&state.static_state.storage_dir_path, &_unlocked.node_id, attachment)?;
++            let signer = attachment.message_signer.as_ref()
 +                .ok_or_else(|| crate::error::APIError::ExternalSignerUnavailable("BIP-322 requires an attached native signer".into()))?;
 +            bip322::parse_address(&address, state.static_state.network.into()).map_err(crate::error::APIError::Unexpected)?;
 +            signer.sign_message_bip322(&message, &address).map_err(|e| crate::error::APIError::Unexpected(e.to_string()))
@@ -4787,10 +4811,10 @@ index 42f6c14..a587e0d 100644
 +    }
  }
 diff --git a/src/uniffi_api/tests.rs b/src/uniffi_api/tests.rs
-index 27ea384..3556e4f 100644
+index 27ea384..3c209c2 100644
 --- a/src/uniffi_api/tests.rs
 +++ b/src/uniffi_api/tests.rs
-@@ -176,6 +176,74 @@ mod uniffi_smoke_tests {
+@@ -176,6 +176,101 @@ mod uniffi_smoke_tests {
          mock_locked_state_for_network(BitcoinNetwork::Regtest)
      }
  
@@ -4814,6 +4838,33 @@ index 27ea384..3556e4f 100644
 +        assert!(matches!(error, RlnError::NotInitialized(_)));
 +        assert!(state.get_attached_external_signer().is_none());
 +        signer.shutdown().unwrap();
++    }
++
++    #[cfg(feature = "vls")]
++    #[test]
++    fn bip322_attachment_must_match_active_and_persisted_wallet_identity() {
++        let directory = tempfile::tempdir().unwrap();
++        let signer = NativeExternalSigner::new("01".repeat(32), "regtest".into(), None).unwrap();
++        let foreign = NativeExternalSigner::new("02".repeat(32), "regtest".into(), None).unwrap();
++        let key_source = key_source_from_uniffi_bootstrap(signer.bootstrap().unwrap());
++        let active_id = bitcoin::secp256k1::PublicKey::from_str(&key_source.node_id).unwrap();
++        let make_attachment = |signer: Arc<NativeExternalSigner>| {
++            let host: Arc<dyn ExternalSignerHost> = signer;
++            let transport: Arc<dyn crate::signer::ExternalSignerTransport> = Arc::new(UniffiExternalSignerTransport::new(host));
++            crate::ldk::attach_external_signer_transport(transport).unwrap()
++        };
++        let own_attachment = make_attachment(signer.clone());
++        let mut wrong_attachment = make_attachment(foreign.clone());
++        assert!(validate_message_signer_wallet_identity(directory.path(), &active_id, &own_attachment).is_err());
++        crate::signer::write_key_source_file(directory.path(), &key_source).unwrap();
++        validate_message_signer_wallet_identity(directory.path(), &active_id, &own_attachment).unwrap();
++        assert!(validate_message_signer_wallet_identity(directory.path(), &active_id, &wrong_attachment).is_err());
++        // A forged matching node ID must not conceal a different descriptor account xpub.
++        wrong_attachment.bootstrap.identity.node_id = key_source.node_id.clone();
++        assert!(validate_message_signer_wallet_identity(directory.path(), &active_id, &wrong_attachment).is_err());
++        std::fs::write(directory.path().join("key_source.json"), b"malformed").unwrap();
++        assert!(validate_message_signer_wallet_identity(directory.path(), &active_id, &own_attachment).is_err());
++        signer.shutdown().unwrap(); foreign.shutdown().unwrap();
 +    }
 +
 +    #[cfg(feature = "vls")]
@@ -4865,7 +4916,7 @@ index 27ea384..3556e4f 100644
      fn mock_locked_state_for_network(network: BitcoinNetwork) -> Arc<AppState> {
          let tmp = tempfile::tempdir().unwrap();
          let db_path = tmp.path().join("rln_db");
-@@ -207,6 +275,7 @@ mod uniffi_smoke_tests {
+@@ -207,6 +302,7 @@ mod uniffi_smoke_tests {
                  remote_signer_listen_addr: None,
              }),
              cancel_token: CancellationToken::new(),
