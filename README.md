@@ -9,12 +9,12 @@ and [RELEASE-0.15-TRACKER.md](RELEASE-0.15-TRACKER.md) for historical restrictio
 
 ## VSS availability
 
-VSS is disabled by the maintained native safety policy. Supplying any `vss_url`
-(including an empty string) rejects node creation before storage or network access.
-Omit it or pass `null` to use the normal local wallet. Backup and fence-clear
-methods remain exported for compatibility and always reject with
-`ERR_VSS_UNSAFE_UPSTREAM`. See [VSS-SAFETY.md](./VSS-SAFETY.md) for scope and the
-compiled capability contract; configuring a server does not enable protection.
+VSS backup is enabled. Set `vss_url` to an HTTPS service such as
+`https://vss-server.utexo.com/vss`, then initialize and unlock the wallet normally.
+Use `vssBackup()` for an explicit checkpoint and `vssBackupInfo()` for actual
+remote snapshot status. Omitting the URL or passing `null` keeps local-only
+operation. See [VSS-SAFETY.md](./VSS-SAFETY.md) for configuration, explicit fence
+recovery, status semantics and the upstream external-signer credential boundary.
 
 ## Installation
 
@@ -147,9 +147,9 @@ access, and their declaration return type is `never`:
 RGB contract and transfer-consignment metadata imports are released in RLN 0.15
 (PR #128). Both validate payloads and
 identity; neither creates balances. See `patches/README.md` for the exact pin.
-The maintained overlay adds a native VSS safety-policy refusal; it does not
-repair or replace upstream backup encryption, transport or persistence. No
-additional routing or signer-policy patch is included.
+The maintained adapter enables the existing upstream VSS transport and exposes
+read-only backup status; it does not replace upstream encryption or persistence.
+No additional routing or signer-policy patch is included.
 The allowlisted C-FFI adapter forwards persistent signer/APay registration,
 serializes existing invoice fields, exports build identity and corrects build
 metadata. The exact patch and dependency graph are checked before building.
@@ -172,7 +172,7 @@ Do not roll back to stale state after new channel activity. The owner confirmed
 no live wallets: this candidate is fresh-wallet only, with no legacy migration
 promise. Real local transfer and diagnostic Lightning/APay evidence is recorded
 in `RELEASE-0.15-TRACKER.md`; strict outgoing signing and same-process reopen still
-block production. VSS is excluded from this profile. Runtime, adverse recovery
+block production. VSS qualification is recorded separately in `VSS-SAFETY.md`. Runtime, adverse recovery
 and deployed LSP qualification are not implied by unit tests. Overlay-dependent
 WDK consumers need a separately reviewed API adaptation before adopting this line.
 

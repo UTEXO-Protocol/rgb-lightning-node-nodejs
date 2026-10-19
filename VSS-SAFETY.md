@@ -1,52 +1,64 @@
-# VSS safety policy
+# VSS backup integration
 
-This maintained binding disables VSS until upstream backup security and recovery
-defects are fixed. This is containment, not a replacement backup implementation.
-It applies to every signer mode and network exposed by this binding.
+VSS is enabled in this maintained binding. Configure `vss_url` when creating the
+node, initialize its normal signer, then unlock it. Omitting the URL or passing
+`null` keeps a local-only wallet. An empty or malformed URL is an error rather
+than a request to silently disable backups.
+
+Use `https://vss-server.utexo.com/vss` for the hosted Utexo service. HTTPS is
+required except for loopback HTTP or an explicitly authorized private HTTP
+endpoint (`vss_allow_http: true`). Credentials, query strings, fragments,
+whitespace and unsupported schemes are rejected before storage is opened; errors
+do not echo the supplied URL. Leave `vss_allow_empty_restore` false unless the
+caller explicitly intends to initialize a genuinely new remote namespace.
 
 ```js
 const info = getRuntimeInfo()
-// info.capabilities includes 'vss-safety-policy-v1'
-// info.vss_policy is frozen and exactly:
-// {
-//   supported: false,
-//   code: 'ERR_VSS_UNSAFE_UPSTREAM',
-//   reason: 'VSS is unavailable until upstream backup security and recovery defects are fixed.'
-// }
+// capabilities: 'vss-backup-v1', 'vss-backup-info-v1'
+// frozen vss_policy: { supported: true, code: null, reason: null }
+
+const checkpoint = node.vssBackup() // { version }
+const status = node.vssBackupInfo()
+// { backup_exists, version, backup_required, last_auto_backup_failed }
 ```
 
-Any non-null `vss_url` rejects `SdkNode.create()` and compatibility
-`sdkInitialize()` before a native handle, runtime, storage or remote transport is
-created. Empty, whitespace and malformed URLs are also rejected. The supplied URL
-and credentials are not included in the bounded denial message. Omit this field
-or pass `null` for normal local-only wallet operation; this does not claim cloud
-protection or change existing wallet data.
+Both methods require an unlocked node configured for VSS. `vssBackup()` waits
+for the native RGB snapshot upload and returns the server version.
+`vssBackupInfo()` queries the real remote RGB snapshot and local dirty/error
+state without uploading, restoring or clearing ownership. A missing remote
+snapshot returns `backup_exists: false` and `version: null`; failure to read the
+service throws rather than inventing a successful backup. Versions beyond
+JavaScript's safe integer range are exact decimal strings. The status surface
+reports whether an automatic-backup error exists; it does not expose arbitrary
+native error text, paths, credentials, or a fabricated backup timestamp.
 
-`vssBackup()` and `vssClearFence()` remain exported but are unavailable. Their
-native path returns `Rln(FailedVssInit): ERR_VSS_UNSAFE_UPSTREAM: ...` without
-accessing a remote server or clearing a fence. JavaScript facade bypasses, direct
-Bare/N-API entry points and shared C-FFI initialization follow the same native
-policy. Raw malformed arguments can still return the existing input-validation
-error; they never enable transport. There is no bypass flag, automatic takeover,
-new scheduler or new credential/backup protocol.
+The native library retains its automatic mutation hooks. Hosts may serialize
+additional explicit checkpoints after successful wallet changes and before
+normal shutdown, without changing transaction success into backup success. A
+successful RGB snapshot is not proof of full Lightning recovery or of every
+other persistence stream. The runtime capability states that the API is
+available, not that a server is healthy or a particular backup is current.
 
-The read-only policy metadata describes runtime availability. It is not a remote
-health check, proof that an existing archive is current, or verification of a
-restored wallet. Existing archives are not read, modified or deleted by this
-policy. It does not make already uploaded backups safe.
+`vssClearFence({ password })` is an explicit recovery action on a locked node.
+Only use it after verifying that the previous writer has stopped. This binding
+never clears a foreign fence automatically, changes retryable upload failures
+into success, or deletes a remote namespace. Local wallet erasure does not
+promise remote archive erasure; `vssDeleteAll` remains unavailable.
 
-The pinned upstream external-signer VSS identity derives authentication and
-encryption credentials from public bootstrap metadata. Additional upstream gaps
-include non-mainnet namespace collisions, incomplete automatic mutation hooks,
-chunked replacement atomicity and restore/fence recovery. These require a reviewed
-upstream security/recovery contract and fresh qualification before enabling VSS;
-passing a reachable URL or successful small backup is insufficient. Source pins
-and upstream repositories are unchanged.
+## External signer boundary
 
-Native C-FFI tests check all supported networks, raw instance/global entry points,
-empty/malformed URLs, an unchanged existing directory and a nonexistent directory,
-and zero accepted connections at a loopback trap. The normal host canary also
-checks the compiled policy, direct native bypass refusal, omitted/null local
-operation and backup/fence refusal. Existing local signer reopen and BIP-322
-qualification remain separate regressions. Run the normal package tests after
-building matching native artifacts; old binaries fail provenance admission.
+The pinned upstream release supports external-signer VSS operationally, but its
+VSS authentication/encryption identity is derived from the public bootstrap
+metadata (node ID, both account xpubs, fingerprint, protocol version). The
+existing SDK configuration, unlock request and external signer protocol provide
+no input for a separate private VSS derivation. The external-mode fence-clear
+path similarly reconstructs that identity from `key_source.json`, instead of
+validating a mnemonic password. This binding does not invent a new identity,
+use an internal mnemonic fallback, or upload the wallet seed to work around
+that upstream external-signer limitation. Adding private signer-derived VSS
+credentials requires a coordinated upstream signer/SDK contract.
+
+The build preserves the exact RLN, LDK and rgb-lib pins, native signer/session
+cleanup and BIP-322 support. Admission tests cover valid configuration, native
+facade bypasses, malformed/insecure configuration and untouched existing data;
+real disposable-wallet qualification is recorded separately from these tests.

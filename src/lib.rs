@@ -40,7 +40,7 @@ use rlncffi::{
     rln_sdk_node_attach_native_external_signer, rln_sdk_node_detach_external_signer,
     rln_sdk_node_init_with_external_signer, rln_sdk_node_init_with_native_external_signer,
     rln_sdk_node_new, rln_sdk_node_shutdown, rln_sdk_node_unlock_with_attached_external_signer,
-    rln_sdk_node_unlock_with_native_external_signer, rln_sdk_node_vss_backup,
+    rln_sdk_node_unlock_with_native_external_signer, rln_sdk_node_vss_backup, rln_sdk_node_vss_backup_info,
     rln_sdk_node_vss_clear_fence, rln_send_btc, rln_send_onion_message, rln_send_payment,
     rln_send_rgb, rln_sign_message, rln_sign_message_bip322, rln_sync, rln_taker,
     rln_verify_message, rln_verify_message_bip322, rln_verify_message_bip322_offline,
@@ -356,6 +356,12 @@ impl SdkNode {
     pub fn vss_backup(&self) -> Result<String> {
         let res = rln_sdk_node_vss_backup(&self.handle);
         take_cresult_string(res)
+    }
+
+    /// Read remote RGB backup status without uploading or clearing a fence.
+    #[napi]
+    pub fn vss_backup_info(&self) -> Result<String> {
+        take_cresult_string(rln_sdk_node_vss_backup_info(&self.handle))
     }
 
     /// APay receiver-side registration with an LSP. Pass the LSP's node_id

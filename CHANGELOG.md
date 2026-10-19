@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased: VSS integration
+
+- Enable configured VSS backup and explicit locked-node fence recovery through
+  the maintained native adapter; preserve local-only operation when unconfigured.
+- Add `vss-backup-v1` and `vss-backup-info-v1` compiled capabilities, explicit
+  supported policy metadata and `SdkNode.vssBackupInfo()` with real remote
+  existence/version and local dirty/automatic-error status.
+- Validate endpoint configuration before opening wallet storage and keep URL
+  credentials and raw automatic-backup errors out of the public status contract.
+- Preserve signer shutdown, owned task/listener cleanup, BIP-322 and native
+  artifact/provenance admission. No upstream source revision changes.
+
 ## 0.2.0-beta.4 (unpublished candidate)
 
 - Pin RLN SDK v0.17.0-beta.3, its released LDK submodule and rgb-lib beta.50-bfa.

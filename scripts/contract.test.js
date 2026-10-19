@@ -249,10 +249,18 @@ test('released mainnet policy errors retain their native identity', () => {
 
 
 test('compiled VSS policy metadata is exposed read-only', () => {
-  const policy = { supported: false, code: 'ERR_VSS_UNSAFE_UPSTREAM',
-    reason: 'VSS is unavailable until upstream backup security and recovery defects are fixed.' }
-  const runtime = facade({ capabilities: ['vss-safety-policy-v1'], vss_policy: policy }).getRuntimeInfo()
+  const policy = { supported: true, code: null, reason: null }
+  const runtime = facade({ capabilities: ['vss-backup-v1'], vss_policy: policy }).getRuntimeInfo()
   assert.deepEqual(runtime.vss_policy, policy)
   assert.ok(Object.isFrozen(runtime.vss_policy))
-  assert.throws(() => { runtime.vss_policy.supported = true }, TypeError)
+  assert.throws(() => { runtime.vss_policy.supported = false }, TypeError)
+})
+
+
+test('VSS checkpoint and read-only info forward exact versions and native errors', () => {
+  const payload = '{"version":9007199254740993}'
+  const info = '{"backup_exists":true,"version":9007199254740993,"backup_required":false,"last_auto_backup_failed":false}'
+  const node = new (facade().SdkNode)({ vssBackup: () => payload, vssBackupInfo: () => info })
+  assert.deepEqual(node.vssBackup(), { version: '9007199254740993' })
+  assert.deepEqual(node.vssBackupInfo(), { backup_exists: true, version: '9007199254740993', backup_required: false, last_auto_backup_failed: false })
 })
