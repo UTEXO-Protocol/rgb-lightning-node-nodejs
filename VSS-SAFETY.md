@@ -105,3 +105,65 @@ local admission limits, **not an HTTP response memory bound**. Official sanitize
 plaintext backups lack the required full wallet identity and fail closed. The
 client's `with_encryption(true)` is not proof that a server's manifest claimed
 encryption; this adapter does not invent that guarantee.
+
+## Automatic snapshot preference and completion times
+
+`setVssAutomaticBackupEnabled(boolean)` changes the snapshot scheduler for this
+wallet, Bitcoin network, VSS endpoint and signer identity. New scopes default to
+on. The native policy is saved before it is acknowledged and loaded before RGB
+wallet startup; a saved choice takes precedence over the optional initial
+`vss_automatic_backup_enabled` setting. Turning it off joins already admitted
+uploads through the same wallet mutex. It retains the VSS client, manual backup,
+remote status, restore and writer ownership. It does not disconnect VSS or stop
+independent Lightning/common KV replication.
+
+The maintained adapter owns blocking automatic snapshot admission. Its RGB SDK
+client is configured with `with_auto_backup(false)`; explicit mutation guards
+cover address rotation, receives, refresh, sync, contract and transfer imports,
+RGB stock/witness updates, issuance, UTXO creation and BTC/RGB/BFA sends. Syncing
+balance/transaction/UTXO reads are mutation admissions; `skip_sync=true` reads,
+metadata, status and signing do not schedule snapshots. A syncing read compares
+canonical local balances, transactions and UTXOs before and after synchronization;
+if the views are unchanged and there was no earlier dirty/incomplete state, its
+own intent is removed without uploading or renewing the last-backup time. Missing
+or failed comparisons conservatively require a snapshot. A private durable marker
+records admitted unsaved state, including stock changes omitted from the SDK's
+DB dirty flag. Automatic failure is reported as backup needing attention without
+turning a completed financial operation into an error or a payment retry. If the
+filesystem refuses an unsaved-state marker write, the current process retains
+unsaved/failure state in memory, but process death can lose that extra signal for
+SDK stock changes not covered by its own DB dirty flag. This rare filesystem
+failure is not claimed as durable crash recovery.
+
+Re-enabling always performs a blocking catch-up snapshot before committing the on
+preference. A rejected upload leaves the prior preference in force. A policy-file
+write failure attempts to restore the previous file; if filesystem recovery also
+fails, the outcome may be unknown. The caller must refresh native metadata instead
+of assuming the choice stayed unchanged. Native metadata refuses to claim a known
+state when the saved choice cannot be read back safely.
+
+`vssBackupMetadata()` is a separate versioned API:
+
+```ts
+{
+  schema_version: 1,
+  automatic_backup_enabled: boolean,
+  last_backup: null | {
+    version: number | string,
+    completed_at_ms: number, // Unix milliseconds at acknowledged upload completion
+    network: string,
+    vss_url: string,
+    node_id: string
+  }
+}
+```
+
+A receipt is written only after an acknowledged upload and a confirmed successor
+manifest version. The DATA counter returned by the SDK is not used as a substitute
+for the MANIFEST counter. Receipt files remain outside the exported wallet archive
+and are bound to the exact endpoint, network and signer. They are not fabricated
+from a status check, current clock, remote version or archive modification time.
+Historical/restored snapshots without a local confirmed receipt have no known
+completion time. Manual backup continues to update the receipt while automatic
+backup is off. Existing `vssBackupInfo()` retains its four-field contract, with
+`backup_required` also including maintained unsaved/incomplete-upload markers.

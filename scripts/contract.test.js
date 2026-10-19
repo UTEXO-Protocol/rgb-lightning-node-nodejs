@@ -272,3 +272,21 @@ test('restore preparation and local provenance preserve native bounded receipt',
   assert.deepEqual(node.prepareVssRestore(), receipt)
   assert.deepEqual(node.vssRestoreInfo(), { ...receipt, unlocked: false })
 })
+
+
+test('automatic backup policy is boolean-only and completion metadata preserves exact versions', () => {
+ const metadata = '{"schema_version":1,"automatic_backup_enabled":true,"last_backup":{"version":9007199254740993,"completed_at_ms":1792391012345,"network":"signet","vss_url":"https://example.com/vss","node_id":"node"}}'
+ const calls = []
+ let failure = false
+ const set = raw => { calls.push(JSON.parse(raw)); if (failure) throw new Error('native policy failed'); return JSON.stringify({ automatic_backup_enabled: JSON.parse(raw).enabled }) }
+ const node = new (facade().SdkNode)({ vssBackupMetadata: () => metadata, setVssAutomaticBackupEnabled: raw => set(raw) })
+ assert.equal(node.vssBackupMetadata().last_backup.version, '9007199254740993')
+ assert.equal(node.vssBackupMetadata().last_backup.completed_at_ms, 1792391012345)
+ assert.deepEqual(node.setVssAutomaticBackupEnabled(false), { automatic_backup_enabled: false })
+ assert.deepEqual(node.setVssAutomaticBackupEnabled(true), { automatic_backup_enabled: true })
+ assert.deepEqual(calls, [{ enabled: false }, { enabled: true }])
+ for (const value of [null,undefined,0,1,'false','true',{},[]]) assert.throws(() => node.setVssAutomaticBackupEnabled(value), /must be a boolean/)
+ assert.equal(calls.length, 2)
+ failure = true
+ assert.throws(() => node.setVssAutomaticBackupEnabled(false), /native policy failed/)
+})

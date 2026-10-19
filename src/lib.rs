@@ -42,6 +42,7 @@ use rlncffi::{
     rln_sdk_node_new, rln_sdk_node_prepare_vss_restore, rln_sdk_node_shutdown,
     rln_sdk_node_unlock_with_attached_external_signer,
     rln_sdk_node_unlock_with_native_external_signer, rln_sdk_node_vss_backup,
+    rln_sdk_node_vss_backup_metadata, rln_sdk_node_set_vss_automatic_backup_enabled,
     rln_sdk_node_vss_backup_info, rln_sdk_node_vss_clear_fence, rln_sdk_node_vss_restore_info,
     rln_send_btc, rln_send_onion_message, rln_send_payment, rln_send_rgb, rln_sign_message,
     rln_sign_message_bip322, rln_sync, rln_taker, rln_verify_message, rln_verify_message_bip322,
@@ -363,6 +364,14 @@ impl SdkNode {
     #[napi]
     pub fn vss_backup_info(&self) -> Result<String> {
         take_cresult_string(rln_sdk_node_vss_backup_info(&self.handle))
+    }
+
+    #[napi]
+    pub fn vss_backup_metadata(&self) -> Result<String> { take_cresult_string(rln_sdk_node_vss_backup_metadata(&self.handle)) }
+    #[napi]
+    pub fn set_vss_automatic_backup_enabled(&self, request_json:String) -> Result<String> {
+        let c=cstring(&request_json)?;
+        take_cresult_string(rln_sdk_node_set_vss_automatic_backup_enabled(&self.handle,c.as_ptr()))
     }
 
     #[napi]

@@ -227,6 +227,8 @@ export class SdkNode {
   /** Read actual remote RGB snapshot status without uploading or taking ownership. */
   vssBackupInfo(): { backup_exists: boolean; version: number | string | null; backup_required: boolean; last_auto_backup_failed: boolean }
   /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
+  vssBackupMetadata(): { schema_version: 1; automatic_backup_enabled: boolean; last_backup: { version: number | string; completed_at_ms: number; network: string; vss_url: string; node_id: string } | null }
+  setVssAutomaticBackupEnabled(enabled: boolean): { automatic_backup_enabled: boolean }
   prepareVssRestore(): VssRestoreResult
   vssRestoreInfo(): (VssRestoreSuccess & { unlocked: boolean }) | null
   vssDeleteAll(request: { password: string }): never

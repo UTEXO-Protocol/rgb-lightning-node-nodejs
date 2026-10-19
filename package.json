@@ -63,7 +63,7 @@
     "commit": "ecc69f20308231400561f6f060fea88acfa40cc4",
     "lightningCommit": "79b9eb5166546c62692d3a672986f385c7fe047d",
     "patch": "patches/release-adapter-v0.17.0-beta.3.patch",
-    "patchSha256": "693bed6010a651fa221e70758033ce41b9ce2d76789aeaf44c4c0b4c14dcfe3e",
+    "patchSha256": "dd26955a9a8fdb466a83043dd72f2ace3c0fdededf6bdd1e437e8ffd82840556",
     "cffiLockSha256": "5fcdc9ad9179d3230e48973cdfa514a863d13a837752027febf8ea04713bbeb5",
     "rustToolchain": "1.94.0",
     "rlnVersion": "0.17.0-beta.3"
