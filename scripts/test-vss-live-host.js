@@ -6,13 +6,13 @@ const fs = require(bare ? 'bare-fs' : 'node:fs')
 const os = require(bare ? 'bare-os' : 'node:os')
 const path = require(bare ? 'bare-path' : 'node:path')
 const api = require('../index')
-const environment = bare ? Bare.env : process.env
-const endpoint = environment.RLN_VSS_TEST_URL
+const readEnvironment = name => bare ? os.getEnv(name) : process.env[name]
+const endpoint = readEnvironment('RLN_VSS_TEST_URL')
 if (!endpoint) throw new Error('Set RLN_VSS_TEST_URL explicitly for the disposable-wallet test')
-const network = environment.RLN_VSS_TEST_NETWORK || 'regtest'
-const indexer = environment.RLN_VSS_TEST_INDEXER || 'http://127.0.0.1:18094'
-const proxy = environment.RLN_VSS_TEST_PROXY || 'rpc://127.0.0.1:28090/json-rpc'
-const eth = environment.RLN_VSS_TEST_ETH || 'http://127.0.0.1:18555'
+const network = readEnvironment('RLN_VSS_TEST_NETWORK') || 'regtest'
+const indexer = readEnvironment('RLN_VSS_TEST_INDEXER') || 'http://127.0.0.1:18094'
+const proxy = readEnvironment('RLN_VSS_TEST_PROXY') || 'rpc://127.0.0.1:28090/json-rpc'
+const eth = readEnvironment('RLN_VSS_TEST_ETH') || 'http://127.0.0.1:18555'
 const assert = (value, message) => { if (!value) throw new Error(message) }
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'utexo-vss-live-'))
 fs.chmodSync(root, 0o700)
@@ -51,7 +51,7 @@ function status () {
   return row
 }
 try {
-  open('original', true, true)
+  open('original', true, false)
   const initial = status()
   assert(initial.backup_exists, 'Initial configured wallet did not create a remote snapshot')
   const address = node.address().address
