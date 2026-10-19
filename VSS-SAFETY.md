@@ -205,3 +205,15 @@ and cold reopens preserved settled balances and completion times.
 
 These host passes do not establish mobile runtime, physical-device or full
 Lightning recovery qualification. No hosted bridge wallet was accessed.
+
+### Node wrapper formatting follow-up
+
+The CI rustfmt check required import ordering and method layout changes in
+`src/lib.rs`. The maintained adapter, dependency graph and runtime behavior are
+unchanged, but the exact wrapper identity changes, so the Darwin ARM64 release
+addon was rebuilt and admitted rather than reusing its previous provenance.
+`VSS-FORMAT-QUALIFICATION-20261019.json` records the new artifact identity and
+rerun formatting, types, JavaScript/runtime, signer-reopen, policy and funded BTC
+checks. Earlier qualification receipts retain their original identities; the
+BFA round trip and scripted funded cloud restore were not rerun for this
+formatting-only follow-up.

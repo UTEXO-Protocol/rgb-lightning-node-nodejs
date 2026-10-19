@@ -1,0 +1,288 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-19T13:04:25.400007+00:00",
+  "scope": "Node Darwin ARM64 release-profile formatting-only wrapper follow-up; adapter and Bare artifacts unchanged",
+  "baseQualifiedSourceCommit": "f1156a623d0e6c39af20a398a191e3608f15da82",
+  "originalCiFailure": {
+    "run": 39252987031,
+    "job": 118061141411,
+    "step": "rustfmt --edition 2021 --check src/lib.rs build.rs"
+  },
+  "change": "Rustfmt import ordering, whitespace and trailing argument comma in src/lib.rs; no API or runtime logic changes",
+  "sourceProof": {
+    "status": "passed",
+    "baseSourceCommit": "f1156a623d0e6c39af20a398a191e3608f15da82",
+    "path": "src/lib.rs",
+    "baseSha256": "144bf574df244333e8e36771d985f99d04cd7cc87246e0b6f8badf6309887c06",
+    "sourceSha256": "751136906dab9ed7e61d51fa0f552546ad7007f1e690abc956bdb038765990bc",
+    "importsIdentical": true,
+    "nonImportTokensIdenticalIgnoringWhitespaceAndTrailingArgumentComma": true
+  },
+  "nativeArtifact": {
+    "schemaVersion": 2,
+    "repository": "https://github.com/UTEXO-Protocol/rgb-lightning-node.git",
+    "ref": "ecc69f20308231400561f6f060fea88acfa40cc4",
+    "commit": "ecc69f20308231400561f6f060fea88acfa40cc4",
+    "lightningCommit": "79b9eb5166546c62692d3a672986f385c7fe047d",
+    "patchSha256": "dd26955a9a8fdb466a83043dd72f2ace3c0fdededf6bdd1e437e8ffd82840556",
+    "rustToolchain": "1.94.0",
+    "macosDeploymentTarget": "13.0",
+    "buildRecipeSha256": "cfaffb1a26505a7f58b9ff845dcd10a8d09f0cb38f7c1f993d08073af6b5ce3b",
+    "target": "aarch64-apple-darwin",
+    "wrapperSha256": "6e071236fea1cbb19afaeb205f794d68b830a635a0658246d8970e7063712d27",
+    "lockSha256": "de8eedbec81519cafbdf02c3445654d31ec6fbda8181be42f5926dcaf7911108",
+    "profile": "release",
+    "addonSha256": "f8cda669f1882d69e40c656a7ed2a40abe03407b1826b562f7cff2a2fd25efb1"
+  },
+  "runtimeIdentity": {
+    "abi_version": 1,
+    "rln_version": "0.17.0-beta.3",
+    "rln_commit": "ecc69f20308231400561f6f060fea88acfa40cc4",
+    "lightning_commit": "79b9eb5166546c62692d3a672986f385c7fe047d",
+    "adapter_sha256": "dd26955a9a8fdb466a83043dd72f2ace3c0fdededf6bdd1e437e8ffd82840556",
+    "wrapper_sha256": "6e071236fea1cbb19afaeb205f794d68b830a635a0658246d8970e7063712d27",
+    "lock_sha256": "de8eedbec81519cafbdf02c3445654d31ec6fbda8181be42f5926dcaf7911108",
+    "target": "aarch64-apple-darwin",
+    "capabilities": [
+      "canonical-unlock-v1",
+      "persistent-native-signer",
+      "refresh-transfers-v1",
+      "apay-address",
+      "decoded-invoice-cltv",
+      "tagged-rgb-assignment",
+      "pending-blinded-v1",
+      "rgb-contract-import-v1",
+      "rgb-transfer-metadata-import-v1",
+      "consignment-export-v1",
+      "mainnet-lightning-rejection-v1",
+      "external-signer-eth-rpc-v1",
+      "external-signer-burn-v1",
+      "native-signer-shutdown-v1",
+      "owned-session-cleanup-v1",
+      "bip322-simple-v1",
+      "vss-backup-v1",
+      "vss-backup-info-v1",
+      "vss-restore-v1",
+      "vss-automatic-backup-v1",
+      "vss-backup-metadata-v1"
+    ],
+    "vss_policy": {
+      "supported": true,
+      "code": null,
+      "reason": null
+    }
+  },
+  "previousNativeArtifact": {
+    "schemaVersion": 2,
+    "repository": "https://github.com/UTEXO-Protocol/rgb-lightning-node.git",
+    "ref": "ecc69f20308231400561f6f060fea88acfa40cc4",
+    "commit": "ecc69f20308231400561f6f060fea88acfa40cc4",
+    "lightningCommit": "79b9eb5166546c62692d3a672986f385c7fe047d",
+    "patchSha256": "dd26955a9a8fdb466a83043dd72f2ace3c0fdededf6bdd1e437e8ffd82840556",
+    "rustToolchain": "1.94.0",
+    "macosDeploymentTarget": "13.0",
+    "buildRecipeSha256": "cfaffb1a26505a7f58b9ff845dcd10a8d09f0cb38f7c1f993d08073af6b5ce3b",
+    "target": "aarch64-apple-darwin",
+    "wrapperSha256": "3c7a99ff3ba810f03cff13b6e33bd5dddfd11cad65daa0bef0f475c2081d3ac1",
+    "lockSha256": "de8eedbec81519cafbdf02c3445654d31ec6fbda8181be42f5926dcaf7911108",
+    "profile": "release",
+    "addonSha256": "f135c1b7d2f4e98d570b4f4bcc08adb57f454757c8de965f30873761f6200ff0"
+  },
+  "tests": {
+    "rustfmt": "passed with Rust 1.94.0",
+    "types": "passed",
+    "javascriptUnit": 37,
+    "constructorAdmission": 214,
+    "terminatedWorkerImmediateReopens": 12,
+    "actualRuntimeIdentityAndSignerLifecycle": "passed",
+    "bip322ExtractedSourceCrypto": 3,
+    "hostPolicy": "passed on two independent fresh scopes",
+    "receiptScopeMatchesSignerBootstrap": true
+  },
+  "hostPolicy": {
+    "hostedHttpsFundedRegtest": {
+      "vssPolicyQualification": "pass",
+      "runtime": "node",
+      "network": "regtest",
+      "defaultOn": true,
+      "pureReadsDoNotUpload": true,
+      "offPausesMutations": true,
+      "manualWhileOff": true,
+      "offPersistsAcrossReopen": true,
+      "initialConfigDoesNotOverrideSavedChoice": true,
+      "resumeCatchesUp": true,
+      "realCompletionReceipts": true,
+      "failureRollback": false,
+      "syncingPollVersionIncrease": 0,
+      "timings": [
+        {
+          "name": "initial-open",
+          "milliseconds": 11536
+        },
+        {
+          "name": "btc-balance-sync-1",
+          "milliseconds": 26
+        },
+        {
+          "name": "btc-balance-sync-2",
+          "milliseconds": 20
+        },
+        {
+          "name": "pause",
+          "milliseconds": 11
+        },
+        {
+          "name": "manual-while-off",
+          "milliseconds": 1227
+        },
+        {
+          "name": "reopen-paused",
+          "milliseconds": 4801
+        },
+        {
+          "name": "resume-catch-up",
+          "milliseconds": 1252
+        },
+        {
+          "name": "automatic-address-change",
+          "milliseconds": 1258
+        },
+        {
+          "name": "funded-incoming-btc-sync",
+          "milliseconds": 1279
+        },
+        {
+          "name": "funded-unchanged-btc-sync",
+          "milliseconds": 46
+        },
+        {
+          "name": "funded-outgoing-btc",
+          "milliseconds": 2657
+        },
+        {
+          "name": "outgoing-btc-confirmation-sync",
+          "milliseconds": 1296
+        }
+      ],
+      "funded": true,
+      "bridgeAccessed": false
+    },
+    "loopback503RollbackRegtest": {
+      "vssPolicyQualification": "pass",
+      "runtime": "node",
+      "network": "regtest",
+      "defaultOn": true,
+      "pureReadsDoNotUpload": true,
+      "offPausesMutations": true,
+      "manualWhileOff": true,
+      "offPersistsAcrossReopen": true,
+      "initialConfigDoesNotOverrideSavedChoice": true,
+      "resumeCatchesUp": true,
+      "realCompletionReceipts": true,
+      "failureRollback": true,
+      "syncingPollVersionIncrease": 0,
+      "timings": [
+        {
+          "name": "initial-open",
+          "milliseconds": 10088
+        },
+        {
+          "name": "btc-balance-sync-1",
+          "milliseconds": 24
+        },
+        {
+          "name": "btc-balance-sync-2",
+          "milliseconds": 22
+        },
+        {
+          "name": "pause",
+          "milliseconds": 8
+        },
+        {
+          "name": "manual-while-off",
+          "milliseconds": 1161
+        },
+        {
+          "name": "reopen-paused",
+          "milliseconds": 3838
+        },
+        {
+          "name": "resume-catch-up",
+          "milliseconds": 1265
+        },
+        {
+          "name": "automatic-address-change",
+          "milliseconds": 1259
+        }
+      ],
+      "funded": false,
+      "bridgeAccessed": false
+    }
+  },
+  "fundedBtc": {
+    "network": "regtest",
+    "incomingSats": 100000,
+    "outgoingSats": 50000,
+    "minedBlocksAfterEachLeg": 3,
+    "incomingArchiveAndReceiptAdvanced": true,
+    "outgoingAndConfirmationArchiveAndReceiptAdvanced": true,
+    "unchangedFundedSyncKeepsVersionAndTime": true,
+    "localStackOutgoingReceiptVerified": true,
+    "bridgeAccessed": false,
+    "simulatorWalletAccessed": false,
+    "script": "scripts/test-vss-policy-host.js",
+    "scriptSha256": "431345a83bc5691cfdde04ee4986c58de0e7e37b71a4f436aaef39f6e63b8f00"
+  },
+  "logs": {
+    "format-ci-original-failure.log": {
+      "sha256": "072050e579314a8d48a696031aef497b287f9595bf4784b5793c94d12455c518",
+      "bytes": 8385
+    },
+    "format-build.log": {
+      "sha256": "64d0a1b4203af341c785661b66297af88d467aa64880ba9cf518cb8eb86d54e7",
+      "bytes": 20994
+    },
+    "format-types.log": {
+      "sha256": "c55cd05297b1a0f15201351f53cc6a927d11333cbef7f8e0e833c3229f894eec",
+      "bytes": 191
+    },
+    "format-unit.log": {
+      "sha256": "bd5f00812b02b56a5638b80d0966fab86127db9fd074262e06fd630b6e9b5a1c",
+      "bytes": 7967
+    },
+    "format-rustfmt.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "format-bip322-crypto.log": {
+      "sha256": "0e83740efda71fd77992455671beeb97d96828e8b523ead26cdfdb99f8bf0612",
+      "bytes": 829
+    },
+    "format-runtime-and-worker.log": {
+      "sha256": "3ab8125adc2b1a5e262a570eeb62f84fef00d6b30423620932ebfabb74a630ee",
+      "bytes": 9055
+    },
+    "format-funded-policy.log": {
+      "sha256": "8d2531bbf0a5413d687997496a8eedf558b96268a34ec02929945179178b34c4",
+      "bytes": 1171
+    },
+    "format-failed-upload-policy.log": {
+      "sha256": "872c7847f3c293be04fdc45429e20132352e6eb6e2c7b5333eed7cae2b5574ea",
+      "bytes": 946
+    },
+    "format-runtime-identity.json": {
+      "sha256": "cc1043f4c6b6530bdaedbb35fea330418e86ec0f87f2236d527574a21c8ec1d6",
+      "bytes": 2207
+    },
+    "format-source-proof.json": {
+      "sha256": "ec66f8780083e425d81fa68c0a8a970dc3ad66dbbd471d790ccd49752ee487f5",
+      "bytes": 391
+    }
+  },
+  "evidenceBoundaries": [
+    "The original VSS-POLICY-QUALIFICATION-20261019.json and shared root qualification receipts are unchanged and retain their original source/artifact identities.",
+    "The prior dd269 adapter Rust65, BFA round trip and scripted funded cloud restore evidence is retained at its recorded scope; those scopes were not rerun for this wrapper-format follow-up.",
+    "Only Node Darwin ARM64 was rebuilt and executed locally in this follow-up; no new Node platform, Android runtime, iOS runtime, physical-device or arbitrary recovery claim.",
+    "The upstream external-signer complete-public-bootstrap credential boundary and signer database/seed exclusion remain unchanged."
+  ]
+}
