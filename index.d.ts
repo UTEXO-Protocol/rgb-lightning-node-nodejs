@@ -227,6 +227,8 @@ export class SdkNode {
   /** Read actual remote RGB snapshot status without uploading or taking ownership. */
   vssBackupInfo(): { backup_exists: boolean; version: number | string | null; backup_required: boolean; last_auto_backup_failed: boolean }
   /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
+  prepareVssRestore(): VssRestoreResult
+  vssRestoreInfo(): (VssRestoreSuccess & { unlocked: boolean }) | null
   vssDeleteAll(request: { password: string }): never
   apayNew(hostNodeId: string): JsonObject
   apayNewWithAddress(hostNodeId: string, username: string, domain: string): JsonObject
@@ -386,3 +388,6 @@ export function sdkShutdown(): void
 
 /** Pure offline verification; accepts smp and historical unprefixed simple proofs, never full/PoF. */
 export function verifyMessageBip322(message: string, address: string, signature: string, network: string): boolean
+
+export interface VssRestoreSuccess { restored: true; status: 'restored'; network: string; node_id: string; master_fingerprint: string; version: number | string }
+export type VssRestoreResult = VssRestoreSuccess | { restored: false; status: 'not_found'; network: string; node_id: string; master_fingerprint: string; version: null }

@@ -264,3 +264,11 @@ test('VSS checkpoint and read-only info forward exact versions and native errors
   assert.deepEqual(node.vssBackup(), { version: '9007199254740993' })
   assert.deepEqual(node.vssBackupInfo(), { backup_exists: true, version: '9007199254740993', backup_required: false, last_auto_backup_failed: false })
 })
+
+
+test('restore preparation and local provenance preserve native bounded receipt', () => {
+  const receipt = { restored: true, status: 'restored', network: 'signet', node_id: '02' + '11'.repeat(32), master_fingerprint: 'a1b2c3d4', version: 7 }
+  const node = new (facade().SdkNode)({ prepareVssRestore: () => JSON.stringify(receipt), vssRestoreInfo: () => JSON.stringify({ ...receipt, unlocked: false }) })
+  assert.deepEqual(node.prepareVssRestore(), receipt)
+  assert.deepEqual(node.vssRestoreInfo(), { ...receipt, unlocked: false })
+})

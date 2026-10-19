@@ -41,6 +41,7 @@ const ALLOWED_FILES = Object.freeze([
   'src/uniffi_api/mod.rs',
   'src/uniffi_api/native_signer.rs',
   'src/uniffi_api/bip322.rs',
+  'src/uniffi_api/vss_restore.rs',
   'src/signer/external.rs',
   'src/uniffi_api/tests.rs',
   'src/utils.rs'

@@ -118,6 +118,9 @@ class SdkNode {
   /** Read remote RGB snapshot status; requires an already-unlocked node. */
   vssBackupInfo () { return parse(this._inner.vssBackupInfo()) }
 
+  prepareVssRestore () { return parse(this._inner.prepareVssRestore()) }
+  vssRestoreInfo () { return parse(this._inner.vssRestoreInfo()) }
+
   vssDeleteAll (request) { unsupported('vssDeleteAll') }
 
   // APay receiver-side: register this node with an LSP as an async-order

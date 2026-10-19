@@ -62,3 +62,46 @@ The build preserves the exact RLN, LDK and rgb-lib pins, native signer/session
 cleanup and BIP-322 support. Admission tests cover valid configuration, native
 facade bypasses, malformed/insecure configuration and untouched existing data;
 real disposable-wallet qualification is recorded separately from these tests.
+
+## Preparing an existing cloud archive
+
+`prepareVssRestore()` runs on an initialized, locked external-signer node before
+any address load or unlock. It reads an existing positive remote archive version,
+downloads through rgb-lib's public VSS transport/decryption client, validates the
+complete wallet identity and configured network, and extracts only canonical
+entries below the expected fingerprint into a private staging directory. It
+requires the remote manifest version to remain unchanged across the download.
+The adapter does not use the convenience `restore_from_vss` extractor, whose
+server fingerprint/plaintext rename handling does not provide this containment.
+
+A missing archive returns `{ restored: false, status: 'not_found', network,
+node_id, master_fingerprint, version: null }`. This path neither unlocks nor
+creates a cloud snapshot. Successful preparation returns the same bounded
+identity fields with `restored: true`, `status: 'restored'` and the downloaded
+version. Existing unmarked local wallet directories are never overwritten.
+
+The archive is atomically promoted with no-replace semantics. A bounded, locally
+HMAC-authenticated receipt is placed inside the staged wallet before promotion;
+its random private key remains outside the archived fingerprint directory.
+The receipt binds the destination, endpoint, signer identity, network, manifest
+identity and downloaded version. Receipts arriving inside cloud archives are
+discarded and replaced after an actual validated download. A later process can
+resume an interrupted preparation only by validating this local receipt and key.
+This is local crash-recovery provenance, not remote attestation or a repair of the
+upstream external-signer backup credential protocol.
+
+`vssRestoreInfo()` returns `null` or the successful receipt's six public fields
+plus `unlocked`. That flag becomes true only when the current native node is
+actually unlocked and the normal SDK consistency check has consumed its restore
+marker. A prepared archive alone is not a verified wallet. Restoring an archive
+also does not establish a full-chain recovery scan or complete Lightning recovery.
+
+Local admission limits are 128 MiB compressed, 512 MiB expanded, 25,000 entries
+and a maximum 2,000:1 per-entry expansion ratio. Traversals, noncanonical paths,
+duplicates, symlinks, special files and foreign identity/network manifests fail
+before extraction. The existing public SDK may allocate network response/chunk
+buffers before the adapter can check compressed size; these are extraction and
+local admission limits, **not an HTTP response memory bound**. Official sanitized
+plaintext backups lack the required full wallet identity and fail closed. The
+client's `with_encryption(true)` is not proof that a server's manifest claimed
+encryption; this adapter does not invent that guarantee.

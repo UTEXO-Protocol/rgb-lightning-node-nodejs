@@ -2,6 +2,11 @@
 
 ## Unreleased: VSS integration
 
+- Add pre-unlock, identity-bound restore preparation for existing cloud archives,
+  bounded safe extraction, atomic no-overwrite promotion and durable locally
+  authenticated receipts for interrupted restore recovery. A fresh upload or
+  unmarked local directory cannot satisfy restore admission.
+
 - Enable configured VSS backup and explicit locked-node fence recovery through
   the maintained native adapter; preserve local-only operation when unconfigured.
 - Add `vss-backup-v1` and `vss-backup-info-v1` compiled capabilities, explicit

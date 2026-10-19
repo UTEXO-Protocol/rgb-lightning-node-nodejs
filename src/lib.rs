@@ -39,12 +39,13 @@ use rlncffi::{
     rln_rgb_invoice, rln_rotate_address, rln_sdk_node_apay_new, rln_sdk_node_apay_new_with_address,
     rln_sdk_node_attach_native_external_signer, rln_sdk_node_detach_external_signer,
     rln_sdk_node_init_with_external_signer, rln_sdk_node_init_with_native_external_signer,
-    rln_sdk_node_new, rln_sdk_node_shutdown, rln_sdk_node_unlock_with_attached_external_signer,
-    rln_sdk_node_unlock_with_native_external_signer, rln_sdk_node_vss_backup, rln_sdk_node_vss_backup_info,
-    rln_sdk_node_vss_clear_fence, rln_send_btc, rln_send_onion_message, rln_send_payment,
-    rln_send_rgb, rln_sign_message, rln_sign_message_bip322, rln_sync, rln_taker,
-    rln_verify_message, rln_verify_message_bip322, rln_verify_message_bip322_offline,
-    COpaqueStruct, CResultString, CResultValue,
+    rln_sdk_node_new, rln_sdk_node_prepare_vss_restore, rln_sdk_node_shutdown,
+    rln_sdk_node_unlock_with_attached_external_signer,
+    rln_sdk_node_unlock_with_native_external_signer, rln_sdk_node_vss_backup,
+    rln_sdk_node_vss_backup_info, rln_sdk_node_vss_clear_fence, rln_sdk_node_vss_restore_info,
+    rln_send_btc, rln_send_onion_message, rln_send_payment, rln_send_rgb, rln_sign_message,
+    rln_sign_message_bip322, rln_sync, rln_taker, rln_verify_message, rln_verify_message_bip322,
+    rln_verify_message_bip322_offline, COpaqueStruct, CResultString, CResultValue,
 };
 
 // ---------------------------------------------------------------------------
@@ -362,6 +363,15 @@ impl SdkNode {
     #[napi]
     pub fn vss_backup_info(&self) -> Result<String> {
         take_cresult_string(rln_sdk_node_vss_backup_info(&self.handle))
+    }
+
+    #[napi]
+    pub fn prepare_vss_restore(&self) -> Result<String> {
+        take_cresult_string(rln_sdk_node_prepare_vss_restore(&self.handle))
+    }
+    #[napi]
+    pub fn vss_restore_info(&self) -> Result<String> {
+        take_cresult_string(rln_sdk_node_vss_restore_info(&self.handle))
     }
 
     /// APay receiver-side registration with an LSP. Pass the LSP's node_id

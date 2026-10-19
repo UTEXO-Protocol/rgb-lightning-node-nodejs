@@ -32,11 +32,23 @@ const config = (directory, allowEmpty) => ({ storage_dir_path: path.join(root, d
   vss_allow_http: false, vss_allow_empty_restore: allowEmpty })
 const unlock = { ldk_chain_sync: { mode: 'TransactionSync', config: { indexer_url: indexer } },
   indexer_url: indexer, proxy_endpoint: proxy, eth_rpc_url: eth, announce_addresses: [] }
-function open (directory, initialize, allowEmpty) {
+function open (directory, initialize, allowEmpty, restore = false) {
   signer = api.NativeExternalSigner.createWithStorage(seed, network, path.join(root, directory + '-signer'))
   node = api.SdkNode.create(config(directory, allowEmpty))
   if (initialize) node.initWithNativeExternalSigner(signer)
+  if (initialize && !restore) {
+    const missing = node.prepareVssRestore()
+    assert(missing.restored === false && missing.status === 'not_found' && missing.version === null, 'Missing remote archive incorrectly claimed restore')
+    assert(node.vssRestoreInfo() === null, 'Missing archive manufactured local restore proof')
+  }
+  if (restore) {
+    const prepared = node.prepareVssRestore()
+    assert(prepared.restored === true && prepared.status === 'restored' && prepared.version > 0, 'Existing remote archive was not actually prepared')
+    assert(node.vssRestoreInfo().unlocked === false, 'Prepared archive claimed completed unlock')
+    assert(node.prepareVssRestore().version === prepared.version, 'Same-handle preparation was not idempotent')
+  }
   node.unlockWithNativeExternalSigner(signer, unlock)
+  if (restore) assert(node.vssRestoreInfo().unlocked === true, 'Normal SDK unlock did not verify prepared restore')
 }
 function close () {
   if (node) { node.shutdown(); node = undefined }
@@ -68,7 +80,7 @@ try {
   assert(status().backup_exists, 'Graceful reopen lost remote backup information')
   close()
 
-  open('restored', true, false)
+  open('restored', true, false, true)
   assert(node.address().address === address, 'Fresh-directory restore did not recover wallet address state')
   assert(status().backup_exists, 'Restored wallet did not read its remote snapshot')
   versions.push(node.vssBackup().version)
