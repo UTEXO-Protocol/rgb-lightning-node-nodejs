@@ -1,0 +1,229 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-19T13:49:30.824361+00:00",
+  "change": "Persisted confirmed upload receipt validity is independent of later device clock corrections; scope checks remain strict and old/new times must be positive and within the JavaScript Date maximum.",
+  "timestampBoundMs": 8640000000000000,
+  "maintainedAdapterSha256": "6d46717b80ffba8ed8af2de023a536af242aadcacbbb799fb9bb89f8933e4ca5",
+  "sharedNativeTests": {
+    "snapshotPolicy": 14,
+    "mutationGuard": 5,
+    "restoreAdmission": 9,
+    "uniffi": 19,
+    "cffi": 15,
+    "isolatedVssIntegration": 5,
+    "total": 67
+  },
+  "sharedNativeTestLogs": {
+    "policy-tests.log": {
+      "sha256": "fc392c6293adafb03203d2ecd2ec66daa981d4838f0f8058da42ff0607b806e5",
+      "bytes": 1631
+    },
+    "guard-tests.log": {
+      "sha256": "4ea02c23296da36df23714917e313674389f3b95666ffb2b6ef5188f751d868f",
+      "bytes": 752
+    },
+    "restore-tests.log": {
+      "sha256": "a30888312a7ba67bf8accfc63d0883c5669ecab8aeec208c6e23d0ca94109cc0",
+      "bytes": 1294
+    },
+    "uniffi-tests.log": {
+      "sha256": "61ccc2df18cfed8820974cbdd03a6341ee237a440f67c0e34326710a5fe549ab",
+      "bytes": 2315
+    },
+    "cffi-tests.log": {
+      "sha256": "9c453d7d2c5e0e19dd8624e59e1f09a6e605614c054ac8bca01e49a80a671c17",
+      "bytes": 1727
+    },
+    "local-vss-integration.log": {
+      "sha256": "af20d4614c0d94ee38fc186e5cc9b8e9db6735f31f5b1cf984476d8939f86282",
+      "bytes": 746
+    }
+  },
+  "clockRegression": {
+    "futureReceiptDoesNotInvalidateSavedPolicy": true,
+    "coldReopenPreservesExactReceipt": true,
+    "minimumAndMaximumTimeAccepted": true,
+    "zeroAndAboveMaximumRejected": true,
+    "newCompletionTimeUsesSameBound": true,
+    "observationDoesNotUploadOrRewriteReceipt": true
+  },
+  "evidenceBoundaries": [
+    "The clock fixture temporarily places an owned disposable receipt one hour in the future; this synthetic value is not an actual confirmed upload time. It restores the original file before subsequent real wallet mutation and upload assertions.",
+    "The new Darwin clock-policy fixtures are unfunded and do not access the simulator, hosted bridge, external user wallets or local bridge.",
+    "Earlier policy, funded BTC/BFA, injected rejected-upload, wrapper-formatting and restore receipts retain their original source and artifact identities; these financial and recovery scopes were not rerun for the clock-only replacement adapter.",
+    "Cross-compilation and native artifact admission do not establish Android runtime, physical-device, arbitrary crash/device-loss or full Lightning recovery qualification.",
+    "The external-signer public-bootstrap credential boundary and separate signer database/seed exclusion remain unchanged.",
+    "No all-five-platform Node publication or packed-consumer claim is made by this native host receipt; WDK final packed-consumer acceptance is recorded separately against the exact final peer source."
+  ],
+  "scope": "Node Darwin ARM64 release artifact rebuild and host runtime/clock-policy acceptance",
+  "baseQualifiedSourceCommit": "816931ef3d1167559aac2aa77e4f645a9400d542",
+  "sourceIdentityNote": "This file is committed with the complete replacement source tree. Artifact admission binds exact adapter/wrapper/lock/recipe identities; the final complete Git commit is recorded by the consumer and shared release evidence after commit.",
+  "runtimeIdentity": {
+    "abi_version": 1,
+    "rln_version": "0.17.0-beta.3",
+    "rln_commit": "ecc69f20308231400561f6f060fea88acfa40cc4",
+    "lightning_commit": "79b9eb5166546c62692d3a672986f385c7fe047d",
+    "adapter_sha256": "6d46717b80ffba8ed8af2de023a536af242aadcacbbb799fb9bb89f8933e4ca5",
+    "wrapper_sha256": "6e071236fea1cbb19afaeb205f794d68b830a635a0658246d8970e7063712d27",
+    "lock_sha256": "de8eedbec81519cafbdf02c3445654d31ec6fbda8181be42f5926dcaf7911108",
+    "target": "aarch64-apple-darwin",
+    "capabilities": [
+      "canonical-unlock-v1",
+      "persistent-native-signer",
+      "refresh-transfers-v1",
+      "apay-address",
+      "decoded-invoice-cltv",
+      "tagged-rgb-assignment",
+      "pending-blinded-v1",
+      "rgb-contract-import-v1",
+      "rgb-transfer-metadata-import-v1",
+      "consignment-export-v1",
+      "mainnet-lightning-rejection-v1",
+      "external-signer-eth-rpc-v1",
+      "external-signer-burn-v1",
+      "native-signer-shutdown-v1",
+      "owned-session-cleanup-v1",
+      "bip322-simple-v1",
+      "vss-backup-v1",
+      "vss-backup-info-v1",
+      "vss-restore-v1",
+      "vss-automatic-backup-v1",
+      "vss-backup-metadata-v1"
+    ],
+    "vss_policy": {
+      "supported": true,
+      "code": null,
+      "reason": null
+    }
+  },
+  "hostPolicy": {
+    "vssPolicyQualification": "pass",
+    "runtime": "node",
+    "network": "regtest",
+    "defaultOn": true,
+    "pureReadsDoNotUpload": true,
+    "offPausesMutations": true,
+    "manualWhileOff": true,
+    "offPersistsAcrossReopen": true,
+    "initialConfigDoesNotOverrideSavedChoice": true,
+    "resumeCatchesUp": true,
+    "realCompletionReceipts": true,
+    "failureRollback": false,
+    "syncingPollVersionIncrease": 0,
+    "timings": [
+      {
+        "name": "initial-open",
+        "milliseconds": 11167
+      },
+      {
+        "name": "btc-balance-sync-1",
+        "milliseconds": 28
+      },
+      {
+        "name": "btc-balance-sync-2",
+        "milliseconds": 23
+      },
+      {
+        "name": "pause",
+        "milliseconds": 11
+      },
+      {
+        "name": "manual-while-off",
+        "milliseconds": 1248
+      },
+      {
+        "name": "reopen-with-synthetic-clock-receipt",
+        "milliseconds": 5982
+      },
+      {
+        "name": "reopen-paused",
+        "milliseconds": 5363
+      },
+      {
+        "name": "resume-catch-up",
+        "milliseconds": 1230
+      },
+      {
+        "name": "automatic-address-change",
+        "milliseconds": 1268
+      }
+    ],
+    "funded": false,
+    "syntheticFutureReceiptReadAndColdReopen": true,
+    "bridgeAccessed": false
+  },
+  "hostHarnessSha256": "0674d84fb34ac372038d1055d8aafd6ee221d01a4c7ee087703b1f92773b43dc",
+  "nativeArtifact": {
+    "schemaVersion": 2,
+    "repository": "https://github.com/UTEXO-Protocol/rgb-lightning-node.git",
+    "ref": "ecc69f20308231400561f6f060fea88acfa40cc4",
+    "commit": "ecc69f20308231400561f6f060fea88acfa40cc4",
+    "lightningCommit": "79b9eb5166546c62692d3a672986f385c7fe047d",
+    "patchSha256": "6d46717b80ffba8ed8af2de023a536af242aadcacbbb799fb9bb89f8933e4ca5",
+    "rustToolchain": "1.94.0",
+    "macosDeploymentTarget": "13.0",
+    "buildRecipeSha256": "cfaffb1a26505a7f58b9ff845dcd10a8d09f0cb38f7c1f993d08073af6b5ce3b",
+    "target": "aarch64-apple-darwin",
+    "wrapperSha256": "6e071236fea1cbb19afaeb205f794d68b830a635a0658246d8970e7063712d27",
+    "lockSha256": "de8eedbec81519cafbdf02c3445654d31ec6fbda8181be42f5926dcaf7911108",
+    "profile": "release",
+    "addonSha256": "f7a1aed05d20459e82c1750411b3bfc5c4e37dbbd61161da3ae417ef0fcae45d"
+  },
+  "tests": {
+    "javascriptInstaller": 37,
+    "constructorAdmission": 214,
+    "terminatedWorkerImmediateReopens": 12,
+    "types": "passed",
+    "rustfmt": "passed with Rust 1.94.0",
+    "actualRuntimeIdentityAndLifecycle": "passed",
+    "bip322ExtractedSourceCrypto": 3,
+    "hostArtifactAdmission": "passed"
+  },
+  "publicationGate": {
+    "scope": "all five Node target artifacts",
+    "status": "not satisfied",
+    "reason": "Only Darwin ARM64 was rebuilt/qualified in this follow-up. Existing non-host artifacts, starting with darwin-x64, do not match the replacement adapter. No gate was weakened and no publication was attempted."
+  },
+  "logs": {
+    "node-darwin-build.log": {
+      "sha256": "dd96a81c07cf800f2c95796432543500471dfa28e60a1be9af30f693c2c0557f",
+      "bytes": 1020
+    },
+    "node-unit.log": {
+      "sha256": "b114eb19113d4f263ba811fcbbba173300e60385c141e590fbb533f01da49f05",
+      "bytes": 7960
+    },
+    "node-types.log": {
+      "sha256": "c55cd05297b1a0f15201351f53cc6a927d11333cbef7f8e0e833c3229f894eec",
+      "bytes": 191
+    },
+    "node-bip322-crypto.log": {
+      "sha256": "db9ee885c1f811edc7aacb5020dca7a378405c6eae91e89eb798e7c3f2dea4cc",
+      "bytes": 829
+    },
+    "node-rustfmt.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "node-runtime-and-worker.log": {
+      "sha256": "4425b3b18f87981ab6d4f8ac28e7c4b0e09667a707b96c52e19acc26e7da72ec",
+      "bytes": 9047
+    },
+    "node-clock-policy-host.log": {
+      "sha256": "6229a28087bbb9c58560aac5e4f908d0239c0542cb3112f08ee9327051eedd75",
+      "bytes": 1062
+    },
+    "node-runtime-identity.json": {
+      "sha256": "dcb84777dcc155a10a4820e8027a8d7278dde4f07350bda671adb0cfcbed2138",
+      "bytes": 1197
+    },
+    "node-host-admission.log": {
+      "sha256": "efa873558e8651f6d669bc6d8f70b4008688f01bf941fc956b71cc86eb5a07ad",
+      "bytes": 746
+    },
+    "node-release-admission.log": {
+      "sha256": "ee3907724f343c6933ef970aa9670e324e43afaf4e3028f57cc8fa169532d375",
+      "bytes": 981
+    }
+  }
+}

@@ -7523,10 +7523,10 @@ index 454f4ba..be65f0c 100644
          assert!(validate_vss_url("ftp://example.com/vss", true).is_err());
 diff --git a/src/vss_snapshot_policy.rs b/src/vss_snapshot_policy.rs
 new file mode 100644
-index 0000000..f5c5099
+index 0000000..77b5c8a
 --- /dev/null
 +++ b/src/vss_snapshot_policy.rs
-@@ -0,0 +1,562 @@
+@@ -0,0 +1,655 @@
 +//! Maintained snapshot policy and confirmed completion receipts. The public SDK
 +//! client remains available with its built-in scheduler disabled; our serialized
 +//! mutation guard owns blocking automatic snapshots, so policy changes are barriers.
@@ -7543,8 +7543,18 @@ index 0000000..f5c5099
 +    sync::atomic::{AtomicBool, Ordering},
 +    time::{SystemTime, UNIX_EPOCH},
 +};
++// Keep persisted upload times representable as exact JavaScript Date values.
++// Their validity must not depend on the device's subsequently corrected clock.
++const MAX_COMPLETION_TIME_MS: u64 = 8_640_000_000_000_000;
 +fn error() -> APIError {
 +    APIError::FailedVssInit("VSS snapshot policy could not be committed".into())
++}
++fn validate_completion_time_ms(value: u64) -> Result<u64, APIError> {
++    if (1..=MAX_COMPLETION_TIME_MS).contains(&value) {
++        Ok(value)
++    } else {
++        Err(error())
++    }
 +}
 +fn now_ms() -> Result<u64, APIError> {
 +    u64::try_from(
@@ -7554,6 +7564,7 @@ index 0000000..f5c5099
 +            .as_millis(),
 +    )
 +    .map_err(|_| error())
++    .and_then(validate_completion_time_ms)
 +}
 +#[derive(Clone, Serialize, Deserialize)]
 +#[serde(deny_unknown_fields)]
@@ -7836,8 +7847,7 @@ index 0000000..f5c5099
 +            Some(bytes) => {
 +                let r: Completion = serde_json::from_slice(&bytes).map_err(|_| error())?;
 +                if r.version < 1
-+                    || r.completed_at_ms == 0
-+                    || r.completed_at_ms > now_ms()?.saturating_add(300000)
++                    || validate_completion_time_ms(r.completed_at_ms).is_err()
 +                    || r.network != self.network
 +                    || r.vss_url != self.url
 +                    || r.node_id != self.node_id
@@ -7979,6 +7989,89 @@ index 0000000..f5c5099
 +        receipt.node_id = "other".into();
 +        write_atomic(&p.completion_path(), &serde_json::to_vec(&receipt).unwrap()).unwrap();
 +        assert!(p.metadata().is_err());
++    }
++    #[test]
++    fn clock_rollback_preserves_receipt_and_authoritative_policy_after_reopen() {
++        let tmp = tempfile::tempdir().unwrap();
++        let p = policy(
++            tmp.path(),
++            BitcoinNetwork::Regtest,
++            "https://example.com/vss",
++            "node",
++            true,
++        );
++        p.commit_enabled(false).unwrap();
++        // A valid upload made before a one-hour backward clock correction is
++        // now ahead of the wall clock. Neither observation nor reopen is a new
++        // upload, and this timestamp must not make the saved policy unreadable.
++        let completed_at_ms = now_ms().unwrap() + 3_600_000;
++        let receipt = Completion {
++            version: 7,
++            completed_at_ms,
++            network: p.network.clone(),
++            vss_url: p.url.clone(),
++            node_id: p.node_id.clone(),
++        };
++        let bytes = serde_json::to_vec(&receipt).unwrap();
++        write_atomic(&p.completion_path(), &bytes).unwrap();
++        for current in [
++            p,
++            policy(
++                tmp.path(),
++                BitcoinNetwork::Regtest,
++                "https://example.com/vss",
++                "node",
++                true,
++            ),
++        ] {
++            let value: serde_json::Value =
++                serde_json::from_str(&current.metadata().unwrap()).unwrap();
++            assert_eq!(value["automatic_backup_enabled"], false);
++            assert_eq!(value["last_backup"]["completed_at_ms"], completed_at_ms);
++            assert_eq!(fs::read(current.completion_path()).unwrap(), bytes);
++            current.commit_enabled(true).unwrap();
++            assert!(current.metadata().is_ok());
++            current.commit_enabled(false).unwrap();
++        }
++    }
++    #[test]
++    fn completion_time_validation_is_positive_and_bounded_without_wall_clock() {
++        let tmp = tempfile::tempdir().unwrap();
++        let p = policy(
++            tmp.path(),
++            BitcoinNetwork::Regtest,
++            "https://example.com/vss",
++            "node",
++            true,
++        );
++        for completed_at_ms in [1, MAX_COMPLETION_TIME_MS] {
++            assert_eq!(
++                validate_completion_time_ms(completed_at_ms).unwrap(),
++                completed_at_ms
++            );
++            let receipt = Completion {
++                version: 7,
++                completed_at_ms,
++                network: p.network.clone(),
++                vss_url: p.url.clone(),
++                node_id: p.node_id.clone(),
++            };
++            write_atomic(&p.completion_path(), &serde_json::to_vec(&receipt).unwrap()).unwrap();
++            let value: serde_json::Value = serde_json::from_str(&p.metadata().unwrap()).unwrap();
++            assert_eq!(value["last_backup"]["completed_at_ms"], completed_at_ms);
++        }
++        for completed_at_ms in [0, MAX_COMPLETION_TIME_MS + 1, u64::MAX] {
++            assert!(validate_completion_time_ms(completed_at_ms).is_err());
++            let receipt = Completion {
++                version: 7,
++                completed_at_ms,
++                network: p.network.clone(),
++                vss_url: p.url.clone(),
++                node_id: p.node_id.clone(),
++            };
++            write_atomic(&p.completion_path(), &serde_json::to_vec(&receipt).unwrap()).unwrap();
++            assert!(p.metadata().is_err());
++        }
 +    }
 +    #[test]
 +    fn failed_commit_preserves_memory_policy() {

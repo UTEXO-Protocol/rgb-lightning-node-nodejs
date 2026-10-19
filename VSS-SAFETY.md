@@ -217,3 +217,30 @@ rerun formatting, types, JavaScript/runtime, signer-reopen, policy and funded BT
 checks. Earlier qualification receipts retain their original identities; the
 BFA round trip and scripted funded cloud restore were not rerun for this
 formatting-only follow-up.
+
+
+### Completion-time clock correction follow-up
+
+A saved, acknowledged completion receipt remains valid when the device clock is
+subsequently corrected backwards or forwards. Receipt validation now checks its
+exact signer/network/endpoint scope and a positive timestamp within JavaScript's
+Date range (`1..=8_640_000_000_000_000` milliseconds), independently of the present
+wall clock. The same bound applies before a new completion time is persisted.
+The original upload time is preserved; no status read, clock correction or reopen
+rewrites it or creates an upload.
+
+`VSS-CLOCK-QUALIFICATION-20261019.json` records the replacement maintained adapter
+`6d46717b80ffba8ed8af2de023a536af242aadcacbbb799fb9bb89f8933e4ca5`,
+rebuilt artifacts and the new regression scopes. Shared native coverage is 67
+passing tests, including two additional completion-time policy tests. Fresh
+unfunded Darwin fixtures verify saved Off and the exact receipt through native
+metadata reads and cold reopen after temporarily placing an owned receipt one
+hour in the future. That synthetic timestamp is explicitly restored before the
+fixture's subsequent real upload assertions; it is not presented as an actual
+upload time. The fixtures also verify real completion times, unchanged-sync
+stability, manual backup while Off and catch-up on enabling automatic backup.
+
+Earlier financial BTC/BFA, failure-injection and restore receipts retain their
+original source and artifact identities. They are not relabeled as clock-fix
+financial qualification. This follow-up does not establish Android runtime,
+physical-device, arbitrary crash recovery or full Lightning recovery coverage.

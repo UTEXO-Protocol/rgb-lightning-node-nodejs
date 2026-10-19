@@ -23,6 +23,7 @@ const seed = bytes.toString('hex'); bytes.fill(0)
 let node, signer
 const timings = []
 let fundedQualified = false
+let syntheticClockReceiptQualified = false
 const config = { storage_dir_path: path.join(root, 'wallet'), network, daemon_listening_port: 0,
   ldk_peer_listening_port: 0, max_media_upload_size_mb: 5, enable_virtual_channels_v0: false,
   reuse_addresses: true, vss_url: endpoint, vss_allow_http: false, vss_allow_empty_restore: false }
@@ -87,6 +88,31 @@ try {
   const beforeManual = Date.now(); timed('manual-while-off', () => node.vssBackup()); const manualReceipt = assertReceipt(beforeManual, Date.now())
   assert(metadata().automatic_backup_enabled === false, 'Manual backup changed automatic preference')
   const manualVersion = currentVersion()
+  if (env('RLN_VSS_TEST_CLOCK_RECEIPT') === '1') {
+    // Synthetic owned-fixture data reproduces a corrected device clock. It is
+    // not presented as a confirmed upload time and is restored before any
+    // subsequent wallet mutation or actual backup assertion.
+    const files = fs.readdirSync(config.storage_dir_path).filter(name => name.startsWith('.utexo-vss-policy-v1-') && name.endsWith('.completion.json'))
+    assert(files.length === 1, 'Expected one owned completion receipt')
+    const receiptPath = path.join(config.storage_dir_path, files[0])
+    const original = fs.readFileSync(receiptPath)
+    const syntheticTime = Date.now() + 3600000
+    try {
+      fs.writeFileSync(receiptPath, JSON.stringify({ ...JSON.parse(original.toString()), completed_at_ms: syntheticTime }))
+      assert(metadata().automatic_backup_enabled === false && metadata().last_backup.completed_at_ms === syntheticTime,
+        'Clock rollback made the native policy unreadable or changed its receipt')
+      assert(currentVersion() === manualVersion, 'Reading a synthetic future receipt uploaded a snapshot')
+      close(); timed('reopen-with-synthetic-clock-receipt', () => open(false, true))
+      assert(metadata().automatic_backup_enabled === false && metadata().last_backup.completed_at_ms === syntheticTime,
+        'Cold reopen after clock rollback lost the saved choice or actual stored time')
+      assert(currentVersion() === manualVersion, 'Paused clock-rollback reopen uploaded a snapshot')
+      syntheticClockReceiptQualified = true
+    } finally {
+      fs.writeFileSync(receiptPath, original)
+    }
+    assert(metadata().last_backup.completed_at_ms === manualReceipt.completed_at_ms,
+      'Owned synthetic receipt was not restored to its actual upload time')
+  }
   close(); timed('reopen-paused', () => open(false, true))
   assert(metadata().automatic_backup_enabled === false, 'Explicit initial true overrode saved off')
   assert(currentVersion() === manualVersion, 'Paused startup silently uploaded')
@@ -156,5 +182,5 @@ try {
     defaultOn: true, pureReadsDoNotUpload: true, offPausesMutations: true, manualWhileOff: true,
     offPersistsAcrossReopen: true, initialConfigDoesNotOverrideSavedChoice: true,
     resumeCatchesUp: true, realCompletionReceipts: true, failureRollback,
-    syncingPollVersionIncrease: pollAfter - pollBefore, timings, funded: fundedQualified, bridgeAccessed: false }))
+    syncingPollVersionIncrease: pollAfter - pollBefore, timings, funded: fundedQualified, syntheticFutureReceiptReadAndColdReopen: syntheticClockReceiptQualified, bridgeAccessed: false }))
 } finally { if (failFile && fs.existsSync(failFile)) fs.unlinkSync(failFile); close(); fs.rmSync(root, { recursive: true, force: true }) }
