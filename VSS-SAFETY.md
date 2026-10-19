@@ -163,7 +163,45 @@ manifest version. The DATA counter returned by the SDK is not used as a substitu
 for the MANIFEST counter. Receipt files remain outside the exported wallet archive
 and are bound to the exact endpoint, network and signer. They are not fabricated
 from a status check, current clock, remote version or archive modification time.
+
+At this low-level binding, `vssBackup().version` preserves the public SDK return
+value: the DATA-key counter for a single upload, or the MANIFEST counter for a
+chunked upload. Those counters can differ after upload-format changes. Record or
+compare the canonical archive identity using `vssBackupInfo().version` or
+`vssBackupMetadata().last_backup.version`, which both refer to MANIFEST. WDK
+already normalizes its manual-backup result through the canonical status read.
+
 Historical/restored snapshots without a local confirmed receipt have no known
 completion time. Manual backup continues to update the receipt while automatic
 backup is off. Existing `vssBackupInfo()` retains its four-field contract, with
 `backup_required` also including maintained unsaved/incomplete-upload markers.
+
+
+## Native qualification recorded on 2026-10-19
+
+The Node runtime candidate is `0842de7c5f44be43685f1ab12e2d6ce60f6c48c2`,
+with maintained adapter SHA-256
+`dd26955a9a8fdb466a83043dd72f2ace3c0fdededf6bdd1e437e8ffd82840556`.
+`VSS-POLICY-QUALIFICATION-20261019.json` records the Darwin ARM64 release-profile
+artifact identity, source pins and sanitized disposable-wallet evidence.
+
+Verification passed 37 JavaScript installer tests, type checks, 214 VSS
+configuration admission cases, 12 terminated-worker immediate reopens and three
+BIP-322 crypto tests extracted from the frozen adapter into an isolated Rust
+harness. The live host fixture also signed and verified through the final Node
+addon with VSS configured. Shared native coverage passed 12 policy, five mutation-guard,
+nine restore-admission, 19 UniFFI, 15 CFFI and five isolated VSS integration tests.
+The integration scope includes canceled-caller backup draining, fence ownership
+and encrypted fresh-device restore.
+
+Live host tests verified default-on and initial-off startup, saved policy across
+cold reopen, pure-read and unchanged-sync stability, manual backup while off,
+catch-up on re-enable, acknowledged completion times and rejected-upload rollback.
+A fresh local wallet received 100,000 sats and sent 50,000 sats back to the local
+stack, with mined settlement and actual sync-triggered archive changes. A separate
+local BFA fixture minted 2 USDT, sent 0.5 USDT and returned 0.25 USDT; paused archive
+versions stayed unchanged, manual/off and resume uploads advanced real receipts,
+and cold reopens preserved settled balances and completion times.
+
+These host passes do not establish mobile runtime, physical-device or full
+Lightning recovery qualification. No hosted bridge wallet was accessed.
