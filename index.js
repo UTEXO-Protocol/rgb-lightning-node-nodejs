@@ -12,7 +12,7 @@
 const os = require('os')
 const path = require('path')
 const fs = require('fs')
-const { parse, stringify, paymentRequest, burnRequest, unsupported, UnsupportedCapabilityError } = require('./json-boundary')
+const { parse, stringify, bip322Request, paymentRequest, burnRequest, unsupported, UnsupportedCapabilityError } = require('./json-boundary')
 
 // ─── 1. Native addon resolution ──────────────────────────────────────────
 
@@ -65,6 +65,7 @@ for (const [key, expected] of Object.entries({
   if (runtimeInfo[key] !== expected) throw new Error(`Native artifact identity mismatch: ${key}; rebuild the package`)
 }
 Object.freeze(runtimeInfo.capabilities)
+if (runtimeInfo.vss_policy) Object.freeze(runtimeInfo.vss_policy)
 Object.freeze(runtimeInfo)
 
 // ─── 2. SdkNode wrapper ─────────────────────────────────────────────────
@@ -108,15 +109,10 @@ class SdkNode {
     this._closed = true
   }
 
-  // Forces takeover of a stale VSS ownership fence after a previous node
-  // died holding it. Throws if VSS isn't configured. Pointing two live
-  // nodes at the same VSS store corrupts state — call only when certain
-  // the previous owner is gone.
+  // Unavailable: native VSS policy rejects with ERR_VSS_UNSAFE_UPSTREAM.
   vssClearFence (request) { this._inner.vssClearFence(stringify(request)) }
 
-  // Force an immediate VSS backup flush. Returns `{ version }` where
-  // version is the snapshot index just persisted. Throws if VSS isn't
-  // configured / the flush fails. Backed by upstream vss_backup() PR.
+  // Unavailable: native VSS policy rejects with ERR_VSS_UNSAFE_UPSTREAM.
   vssBackup () { return parse(this._inner.vssBackup()) }
 
   vssDeleteAll (request) { unsupported('vssDeleteAll') }
@@ -346,6 +342,9 @@ class SdkNode {
   }
 
   // Signing / onion / diagnostics
+  getMessageSigningAddress () { return parse(this._inner.getMessageSigningAddress()) }
+  signMessageBip322 (message, address) { return parse(this._inner.signMessageBip322(bip322Request({ message, address }))) }
+  verifyMessageBip322 (message, address, signature) { return parse(this._inner.verifyMessageBip322(bip322Request({ message, address, signature }))) }
   signMessage (message) {
     return parse(this._inner.signMessage(message))
   }
@@ -437,3 +436,7 @@ exports.uniffiHealthcheck = () => napi.uniffiHealthcheck()
 exports.uniffiIsInitialized = () => parse(napi.uniffiIsInitialized())
 exports.sdkInitialize = (request) => napi.sdkInitialize(stringify(request))
 exports.sdkShutdown = () => napi.sdkShutdown()
+
+exports.verifyMessageBip322 = function (message, address, signature, network) {
+  return parse(napi.verifyMessageBip322Offline(bip322Request({ message, address, signature, network })))
+}

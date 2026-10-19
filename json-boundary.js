@@ -91,4 +91,24 @@ function burnRequest (request) {
   })
 }
 
-module.exports = { parse, stringify, paymentRequest, burnRequest, unsupported, UnsupportedCapabilityError }
+function bip322Request (request) {
+  for (const [key, value] of Object.entries(request)) {
+    if (typeof value !== 'string') throw new TypeError(`BIP-322 ${key} must be a string`)
+    const maximum = key === 'message' || key === 'signature' ? 4096 : key === 'address' ? 128 : 16
+    let bytes = 0
+    for (let i = 0; i < value.length; i++) {
+      const unit = value.charCodeAt(i)
+      if (unit >= 0xd800 && unit <= 0xdbff) {
+        const next = value.charCodeAt(++i)
+        if (!(next >= 0xdc00 && next <= 0xdfff)) throw new TypeError('BIP-322 input contains an unpaired UTF-16 surrogate')
+        bytes += 4
+      } else if (unit >= 0xdc00 && unit <= 0xdfff) {
+        throw new TypeError('BIP-322 input contains an unpaired UTF-16 surrogate')
+      } else bytes += unit < 0x80 ? 1 : unit < 0x800 ? 2 : 3
+      if (bytes > maximum) throw new RangeError(`BIP-322 ${key} exceeds its byte limit`)
+    }
+  }
+  return stringify(request)
+}
+
+module.exports = { bip322Request, parse, stringify, paymentRequest, burnRequest, unsupported, UnsupportedCapabilityError }

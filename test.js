@@ -16,6 +16,7 @@ assert.equal(info.wrapper_sha256, expected.wrapperSha256)
 assert.equal(info.lock_sha256, expected.lockSha256)
 assert.ok(info.capabilities.includes('persistent-native-signer'))
 assert.ok(info.capabilities.includes('external-signer-burn-v1'))
+require('./scripts/test-vss-safety-host')
 
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'rln-node-release-canary-'))
 const signerDir = path.join(root, 'signer')

@@ -7,6 +7,15 @@ native signer/session lifecycle repair. See
 [NATIVE-UPGRADE-20261015.md](NATIVE-UPGRADE-20261015.md) for current qualification
 and [RELEASE-0.15-TRACKER.md](RELEASE-0.15-TRACKER.md) for historical restrictions.
 
+## VSS availability
+
+VSS is disabled by the maintained native safety policy. Supplying any `vss_url`
+(including an empty string) rejects node creation before storage or network access.
+Omit it or pass `null` to use the normal local wallet. Backup and fence-clear
+methods remain exported for compatibility and always reject with
+`ERR_VSS_UNSAFE_UPSTREAM`. See [VSS-SAFETY.md](./VSS-SAFETY.md) for scope and the
+compiled capability contract; configuring a server does not enable protection.
+
 ## Installation
 
 Installation reuses matching packed release artifacts after verifying provenance
@@ -138,7 +147,9 @@ access, and their declaration return type is `never`:
 RGB contract and transfer-consignment metadata imports are released in RLN 0.15
 (PR #128). Both validate payloads and
 identity; neither creates balances. See `patches/README.md` for the exact pin.
-No additional routing, signer-policy, VSS or persistence patch is included.
+The maintained overlay adds a native VSS safety-policy refusal; it does not
+repair or replace upstream backup encryption, transport or persistence. No
+additional routing or signer-policy patch is included.
 The allowlisted C-FFI adapter forwards persistent signer/APay registration,
 serializes existing invoice fields, exports build identity and corrects build
 metadata. The exact patch and dependency graph are checked before building.
@@ -171,3 +182,7 @@ WDK consumers need a separately reviewed API adaptation before adopting this lin
 The last requires the compiled addon and runs an offline lifecycle canary; it does
 not fund wallets, open channels, prove network connectivity or prove migration.
 Candidate artifact builds do not publish npm packages or mutate version tags.
+
+## Bitcoin message signing
+
+Use `getMessageSigningAddress()`, `signMessageBip322(message, address)` and the offline `verifyMessageBip322(message, address, signature, network)` for BIP-322 simple address proofs. The first version signs the canonical first vanilla Taproot address with the native external signer; it preserves exact UTF-8 and emits a `smp` prefix. It does not replace the existing Lightning node-identity signing API. See [BIP322.md](./BIP322.md) for supported forms, limits, custody and verification.

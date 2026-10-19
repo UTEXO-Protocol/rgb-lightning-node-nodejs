@@ -220,8 +220,10 @@ export class SdkNode {
   shutdown(): void
 
   // VSS / APay
-  vssClearFence(request: JsonRequest): void
-  vssBackup(): JsonObject
+  /** Unavailable under the compiled VSS safety policy; no remote request is made. */
+  vssClearFence(request: JsonRequest): never
+  /** Unavailable under the compiled VSS safety policy; no remote request is made. */
+  vssBackup(): never
   /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
   vssDeleteAll(request: { password: string }): never
   apayNew(hostNodeId: string): JsonObject
@@ -335,6 +337,12 @@ export class SdkNode {
   postAssetMedia(request: JsonRequest): JsonValue
 
   // Signing / onion / diagnostics
+  /** Canonical first vanilla BIP86 receive address, with no allocation/rotation. Requires unlocked native signer. */
+  getMessageSigningAddress(): string
+  /** Exact UTF-8 message (0..4096 bytes); requested address must match getMessageSigningAddress(). Returns smp-prefixed proof. */
+  signMessageBip322(message: string, address: string): string
+  /** Read-only; P2TR key-path and compressed-key P2WPKH simple proofs only. */
+  verifyMessageBip322(message: string, address: string, signature: string): boolean
   signMessage(message: string): JsonObject
   verifyMessage(message: string, signature: string): { valid: boolean }
   sendOnionMessage(request: JsonRequest): JsonValue
@@ -353,6 +361,11 @@ export interface RuntimeInfo {
   readonly lock_sha256: string
   readonly target: string
   readonly capabilities: readonly string[]
+  readonly vss_policy: Readonly<{
+    supported: false
+    code: 'ERR_VSS_UNSAFE_UPSTREAM'
+    reason: 'VSS is unavailable until upstream backup security and recovery defects are fixed.'
+  }>
 }
 export interface RefreshTransfersResponse {
   transfers: Record<string, {
@@ -368,3 +381,6 @@ export function getRuntimeInfo(): RuntimeInfo
 export function uniffiIsInitialized(): boolean
 export function sdkInitialize(request?: JsonRequest): void
 export function sdkShutdown(): void
+
+/** Pure offline verification; accepts smp and historical unprefixed simple proofs, never full/PoF. */
+export function verifyMessageBip322(message: string, address: string, signature: string, network: string): boolean

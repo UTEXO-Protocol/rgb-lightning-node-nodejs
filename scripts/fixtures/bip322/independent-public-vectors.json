@@ -1,0 +1,65 @@
+[
+  {
+    "description": "P2TR sighash 0",
+    "message": " exact bytes\nUTF-8: é é 💰\u0000 ",
+    "address": "bc1pcquvhrqv0q68t4m0hfq6tpn006qrskyc7yrqnp2uyrf2emg3wynsdjyk38",
+    "signature": "smpAUDXknSXLQosEkoUvOWhSVJ8v5XLuamj5Auy2nhiFvcUNjWtFgvSSVBEPqbcUoeuNOf4IrH0Batfgu3A3pjuDKXC",
+    "expected": true
+  },
+  {
+    "description": "P2TR forbidden explicit DEFAULT suffix",
+    "message": " exact bytes\nUTF-8: é é 💰\u0000 ",
+    "address": "bc1pcquvhrqv0q68t4m0hfq6tpn006qrskyc7yrqnp2uyrf2emg3wynsdjyk38",
+    "signature": "smpAUHXknSXLQosEkoUvOWhSVJ8v5XLuamj5Auy2nhiFvcUNjWtFgvSSVBEPqbcUoeuNOf4IrH0Batfgu3A3pjuDKXCAA==",
+    "expected": false
+  },
+  {
+    "description": "P2TR sighash 1",
+    "message": " exact bytes\nUTF-8: é é 💰\u0000 ",
+    "address": "bc1pcquvhrqv0q68t4m0hfq6tpn006qrskyc7yrqnp2uyrf2emg3wynsdjyk38",
+    "signature": "smpAUHSus/tSgNuAjSfDXso/svr/WxRfiF/TiEphtHtCaifrYhXEidnvhUJJu/OaOHS3Pn25zak4U/KOHKxHOrglEc5AQ==",
+    "expected": true
+  },
+  {
+    "description": "P2TR sighash 2",
+    "message": " exact bytes\nUTF-8: é é 💰\u0000 ",
+    "address": "bc1pcquvhrqv0q68t4m0hfq6tpn006qrskyc7yrqnp2uyrf2emg3wynsdjyk38",
+    "signature": "smpAUHACLyJeI1TnpSICeKP82iIxL+DM2eOARefPHNxFSbHNUPEgL6IwJtqjF+m3DKpN4SJi3a+Vy6nBUlqStKZCxKPAg==",
+    "expected": false
+  },
+  {
+    "description": "P2TR sighash 129",
+    "message": " exact bytes\nUTF-8: é é 💰\u0000 ",
+    "address": "bc1pcquvhrqv0q68t4m0hfq6tpn006qrskyc7yrqnp2uyrf2emg3wynsdjyk38",
+    "signature": "smpAUGdhby2tvsd3rlLrl4GRdijrzQlFi4G7PnUZyPmOamYVNVhdRJ0yfIxMEfey/raL5+07oI9Qs73xdr31PVuai78gQ==",
+    "expected": false
+  },
+  {
+    "description": "P2WPKH sighash 1",
+    "message": " exact bytes\nUTF-8: é é 💰\u0000 ",
+    "address": "bc1q9vza2e8x573nczrlzms0wvx3gsqjx7vavgkx0l",
+    "signature": "smpAkgwRQIhAJCPAbLuvFB+tPKnFfv5+fSWP+vLR58atFol+naAdsQiAiBb70ho3eKcBsKoA/PG3cpgaMkr6ugMg3mYRA2ZDkugVgEhAsfxIAMZZEKUPYWI4BruhAQjzFT8FSFSajuFwrDL1Yhy",
+    "expected": true
+  },
+  {
+    "description": "P2WPKH valid ECDSA but forbidden high S",
+    "message": " exact bytes\nUTF-8: é é 💰\u0000 ",
+    "address": "bc1q9vza2e8x573nczrlzms0wvx3gsqjx7vavgkx0l",
+    "signature": "smpAkkwRgIhAJCPAbLuvFB+tPKnFfv5+fSWP+vLR58atFol+naAdsQiAiEApBC3lyIdY/k9V/wMOSI1nlHlsPvHPBzCJ45Q88HqoOsBIQLH8SADGWRClD2FiOAa7oQEI8xU/BUhUmo7hcKwy9WIcg==",
+    "expected": false
+  },
+  {
+    "description": "P2WPKH sighash 2",
+    "message": " exact bytes\nUTF-8: é é 💰\u0000 ",
+    "address": "bc1q9vza2e8x573nczrlzms0wvx3gsqjx7vavgkx0l",
+    "signature": "smpAkgwRQIhANOCl5+Z2SrQdL4dHUx9NjVvjZg5IbiBSddNbDvrX/XsAiAWuCI798mnZne28P73dTc8ytA9w515h7Nn0xSWPV+xYgIhAsfxIAMZZEKUPYWI4BruhAQjzFT8FSFSajuFwrDL1Yhy",
+    "expected": false
+  },
+  {
+    "description": "P2WPKH sighash 129",
+    "message": " exact bytes\nUTF-8: é é 💰\u0000 ",
+    "address": "bc1q9vza2e8x573nczrlzms0wvx3gsqjx7vavgkx0l",
+    "signature": "smpAkgwRQIhAPeWapGIQSeEoV9RASOYyStbPe7SnPD/fn71kOsbhocaAiBpcaWctdOBbDSrstmEtoSaoEC3ewzFTuADFsbe7K5pqIEhAsfxIAMZZEKUPYWI4BruhAQjzFT8FSFSajuFwrDL1Yhy",
+    "expected": false
+  }
+]
