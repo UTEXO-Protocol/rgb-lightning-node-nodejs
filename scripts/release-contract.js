@@ -7,8 +7,8 @@ const { execFileSync } = require('node:child_process')
 
 const RELEASE = Object.freeze({
   'rlnVersion': '0.17.0-beta.3',
-  'ref': 'cd3be114a6d0e41af8ce3f29719d210e105234dc',
-  'commit': 'cd3be114a6d0e41af8ce3f29719d210e105234dc',
+  'ref': 'c29d1b2dfe43ba95c25ced8984f09e42c789d6af',
+  'commit': 'c29d1b2dfe43ba95c25ced8984f09e42c789d6af',
   'lightningCommit': '510189d5700a6d1406229ce7523e181c3838715e',
   'rgbLibRepository': 'https://github.com/UTEXO-Protocol/rgb-lib-bfa.git',
   'rgbLibCommit': '962730a211f0f7569d7ad8ae777052f433d87655',

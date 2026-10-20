@@ -1709,7 +1709,7 @@ index 5b606f1..9c9c59e 100644
      }
  }
 diff --git a/bindings/c-ffi/src/lib.rs b/bindings/c-ffi/src/lib.rs
-index e1dded1..42e6332 100644
+index e1dded1..ecc18b1 100644
 --- a/bindings/c-ffi/src/lib.rs
 +++ b/bindings/c-ffi/src/lib.rs
 @@ -89,6 +89,33 @@ pub extern "C" fn rln_free_string(s: *mut c_char) {
@@ -1722,7 +1722,7 @@ index e1dded1..42e6332 100644
 +    ffi_call!("rln_binding_build_info", Ok::<String, utils::Error>(serde_json::json!({
 +        "abi_version": 1,
 +        "rln_version": "0.17.0-beta.3",
-+        "rln_commit": "cd3be114a6d0e41af8ce3f29719d210e105234dc",
++        "rln_commit": "c29d1b2dfe43ba95c25ced8984f09e42c789d6af",
 +        "lightning_commit": "510189d5700a6d1406229ce7523e181c3838715e",
 +        "rgb_lib_commit": "962730a211f0f7569d7ad8ae777052f433d87655",
 +        "adapter_sha256": env!("RLN_ADAPTER_SHA256"),
@@ -5031,10 +5031,10 @@ index 83202d4..be14b41 100644
      async fn wallet_source_does_not_panic_on_signetcustom() {
          let wrapper = signetcustom_wallet_source();
 diff --git a/src/rgb_import.rs b/src/rgb_import.rs
-index 225897d..00ff24e 100644
+index a665290..135045c 100644
 --- a/src/rgb_import.rs
 +++ b/src/rgb_import.rs
-@@ -205,7 +205,7 @@ pub(crate) async fn import_rgb_contract(
+@@ -209,7 +209,7 @@ pub(crate) async fn import_rgb_contract(
              .to_str()
              .ok_or_else(|| APIError::InvalidRgbContract("Invalid temporary contract path".into()))?
              .to_owned();
