@@ -220,11 +220,17 @@ export class SdkNode {
   shutdown(): void
 
   // VSS / APay
-  /** Unavailable under the compiled VSS safety policy; no remote request is made. */
-  vssClearFence(request: JsonRequest): never
-  /** Unavailable under the compiled VSS safety policy; no remote request is made. */
-  vssBackup(): never
+  /** Explicit takeover of a stale writer fence; call only on a locked node after stopping its previous writer. */
+  vssClearFence(request: { password: string }): void
+  /** Flush configured VSS backup from an unlocked node. */
+  vssBackup(): { version: number | string }
+  /** Read actual remote RGB snapshot status without uploading or taking ownership. */
+  vssBackupInfo(): { backup_exists: boolean; version: number | string | null; backup_required: boolean; last_auto_backup_failed: boolean }
   /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
+  vssBackupMetadata(): { schema_version: 1; automatic_backup_enabled: boolean; last_backup: { version: number | string; completed_at_ms: number; network: string; vss_url: string; node_id: string } | null }
+  setVssAutomaticBackupEnabled(enabled: boolean): { automatic_backup_enabled: boolean }
+  prepareVssRestore(): VssRestoreResult
+  vssRestoreInfo(): (VssRestoreSuccess & { unlocked: boolean }) | null
   vssDeleteAll(request: { password: string }): never
   apayNew(hostNodeId: string): JsonObject
   apayNewWithAddress(hostNodeId: string, username: string, domain: string): JsonObject
@@ -362,9 +368,9 @@ export interface RuntimeInfo {
   readonly target: string
   readonly capabilities: readonly string[]
   readonly vss_policy: Readonly<{
-    supported: false
-    code: 'ERR_VSS_UNSAFE_UPSTREAM'
-    reason: 'VSS is unavailable until upstream backup security and recovery defects are fixed.'
+    supported: true
+    code: null
+    reason: null
   }>
 }
 export interface RefreshTransfersResponse {
@@ -384,3 +390,6 @@ export function sdkShutdown(): void
 
 /** Pure offline verification; accepts smp and historical unprefixed simple proofs, never full/PoF. */
 export function verifyMessageBip322(message: string, address: string, signature: string, network: string): boolean
+
+export interface VssRestoreSuccess { restored: true; status: 'restored'; network: string; node_id: string; master_fingerprint: string; version: number | string }
+export type VssRestoreResult = VssRestoreSuccess | { restored: false; status: 'not_found'; network: string; node_id: string; master_fingerprint: string; version: null }

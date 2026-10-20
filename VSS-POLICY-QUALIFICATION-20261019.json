@@ -1,0 +1,438 @@
+{
+  "schemaVersion": 1,
+  "qualificationDate": "2026-10-19",
+  "scope": "Node Darwin ARM64 release-profile native artifact; shared maintained adapter tests; disposable regtest BTC/BFA and public HTTPS VSS namespaces",
+  "runtimeCodeCommit": "0842de7c5f44be43685f1ab12e2d6ce60f6c48c2",
+  "adapterSha256": "dd26955a9a8fdb466a83043dd72f2ace3c0fdededf6bdd1e437e8ffd82840556",
+  "nativeArtifact": {
+    "schemaVersion": 2,
+    "repository": "https://github.com/UTEXO-Protocol/rgb-lightning-node.git",
+    "ref": "ecc69f20308231400561f6f060fea88acfa40cc4",
+    "commit": "ecc69f20308231400561f6f060fea88acfa40cc4",
+    "lightningCommit": "79b9eb5166546c62692d3a672986f385c7fe047d",
+    "patchSha256": "dd26955a9a8fdb466a83043dd72f2ace3c0fdededf6bdd1e437e8ffd82840556",
+    "rustToolchain": "1.94.0",
+    "macosDeploymentTarget": "13.0",
+    "buildRecipeSha256": "cfaffb1a26505a7f58b9ff845dcd10a8d09f0cb38f7c1f993d08073af6b5ce3b",
+    "target": "aarch64-apple-darwin",
+    "wrapperSha256": "3c7a99ff3ba810f03cff13b6e33bd5dddfd11cad65daa0bef0f475c2081d3ac1",
+    "lockSha256": "de8eedbec81519cafbdf02c3445654d31ec6fbda8181be42f5926dcaf7911108",
+    "profile": "release",
+    "addonSha256": "f135c1b7d2f4e98d570b4f4bcc08adb57f454757c8de965f30873761f6200ff0"
+  },
+  "tests": {
+    "javascriptInstaller": 37,
+    "typeChecks": "pass",
+    "vssConstructorCases": 214,
+    "terminatedWorkerImmediateReopens": 12,
+    "bip322Crypto": 3,
+    "sharedRust": {
+      "policy": 12,
+      "guards": 5,
+      "restoreAdmission": 9,
+      "uniffi": 19,
+      "cffi": 15,
+      "isolatedVssIntegration": 5
+    }
+  },
+  "hostReceipts": {
+    "native-vss-policy-qualified-node-host.log": {
+      "sha256": "0a5181e8cf3fc0c43e0e89f33d030c69e31decb8f527fa68a0533c334e023028",
+      "receipt": {
+        "vssPolicyQualification": "pass",
+        "runtime": "node",
+        "network": "regtest",
+        "defaultOn": true,
+        "pureReadsDoNotUpload": true,
+        "offPausesMutations": true,
+        "manualWhileOff": true,
+        "offPersistsAcrossReopen": true,
+        "initialConfigDoesNotOverrideSavedChoice": true,
+        "resumeCatchesUp": true,
+        "realCompletionReceipts": true,
+        "failureRollback": false,
+        "syncingPollVersionIncrease": 0,
+        "timings": [
+          {
+            "name": "initial-open",
+            "milliseconds": 11794
+          },
+          {
+            "name": "btc-balance-sync-1",
+            "milliseconds": 30
+          },
+          {
+            "name": "btc-balance-sync-2",
+            "milliseconds": 20
+          },
+          {
+            "name": "pause",
+            "milliseconds": 12
+          },
+          {
+            "name": "manual-while-off",
+            "milliseconds": 1236
+          },
+          {
+            "name": "reopen-paused",
+            "milliseconds": 4701
+          },
+          {
+            "name": "resume-catch-up",
+            "milliseconds": 1243
+          },
+          {
+            "name": "automatic-address-change",
+            "milliseconds": 1219
+          },
+          {
+            "name": "funded-incoming-btc-sync",
+            "milliseconds": 1175
+          },
+          {
+            "name": "funded-unchanged-btc-sync",
+            "milliseconds": 38
+          },
+          {
+            "name": "funded-outgoing-btc",
+            "milliseconds": 2328
+          },
+          {
+            "name": "outgoing-btc-confirmation-sync",
+            "milliseconds": 1195
+          }
+        ],
+        "funded": true,
+        "bridgeAccessed": false
+      }
+    },
+    "native-vss-policy-qualified-node-failure-host.log": {
+      "sha256": "d52cb194cb878634f970421ec1f85823dba1697506a20836eab768c10534ee27",
+      "receipt": {
+        "vssPolicyQualification": "pass",
+        "runtime": "node",
+        "network": "regtest",
+        "defaultOn": true,
+        "pureReadsDoNotUpload": true,
+        "offPausesMutations": true,
+        "manualWhileOff": true,
+        "offPersistsAcrossReopen": true,
+        "initialConfigDoesNotOverrideSavedChoice": true,
+        "resumeCatchesUp": true,
+        "realCompletionReceipts": true,
+        "failureRollback": true,
+        "syncingPollVersionIncrease": 0,
+        "timings": [
+          {
+            "name": "initial-open",
+            "milliseconds": 25176
+          },
+          {
+            "name": "btc-balance-sync-1",
+            "milliseconds": 24
+          },
+          {
+            "name": "btc-balance-sync-2",
+            "milliseconds": 20
+          },
+          {
+            "name": "pause",
+            "milliseconds": 10
+          },
+          {
+            "name": "manual-while-off",
+            "milliseconds": 3607
+          },
+          {
+            "name": "reopen-paused",
+            "milliseconds": 13355
+          },
+          {
+            "name": "resume-catch-up",
+            "milliseconds": 3684
+          },
+          {
+            "name": "automatic-address-change",
+            "milliseconds": 3661
+          }
+        ],
+        "funded": false,
+        "bridgeAccessed": false
+      }
+    }
+  },
+  "bfaQualification": {
+    "schemaVersion": 1,
+    "status": "passed",
+    "runtime": "node",
+    "recordedAt": "2026-10-19T11:53:21.416538+00:00",
+    "scope": "Fresh host external-signer wallets on shared local regtest and local Anvil; no simulator or hosted bridge access",
+    "sharedStand": "e272d71553b32c56",
+    "assetId": "rgb:ne8SojTI-4~YawA4-1nGJnLR-uE4az~P-FdwTvos-2CQAmYY",
+    "assetSchema": "Bfa",
+    "ticker": "USDT",
+    "precision": 6,
+    "contractSha256": "dcd390835caeef3c74e62e310cfec112b8df5ae0278669232de67c39e9b554dd",
+    "runtimeIdentity": {
+      "abi_version": 1,
+      "rln_version": "0.17.0-beta.3",
+      "rln_commit": "ecc69f20308231400561f6f060fea88acfa40cc4",
+      "lightning_commit": "79b9eb5166546c62692d3a672986f385c7fe047d",
+      "adapter_sha256": "dd26955a9a8fdb466a83043dd72f2ace3c0fdededf6bdd1e437e8ffd82840556",
+      "wrapper_sha256": "3c7a99ff3ba810f03cff13b6e33bd5dddfd11cad65daa0bef0f475c2081d3ac1",
+      "lock_sha256": "de8eedbec81519cafbdf02c3445654d31ec6fbda8181be42f5926dcaf7911108",
+      "target": "aarch64-apple-darwin",
+      "capabilities": [
+        "canonical-unlock-v1",
+        "persistent-native-signer",
+        "refresh-transfers-v1",
+        "apay-address",
+        "decoded-invoice-cltv",
+        "tagged-rgb-assignment",
+        "pending-blinded-v1",
+        "rgb-contract-import-v1",
+        "rgb-transfer-metadata-import-v1",
+        "consignment-export-v1",
+        "mainnet-lightning-rejection-v1",
+        "external-signer-eth-rpc-v1",
+        "external-signer-burn-v1",
+        "native-signer-shutdown-v1",
+        "owned-session-cleanup-v1",
+        "bip322-simple-v1",
+        "vss-backup-v1",
+        "vss-backup-info-v1",
+        "vss-restore-v1",
+        "vss-automatic-backup-v1",
+        "vss-backup-metadata-v1"
+      ],
+      "vss_policy": {
+        "supported": true,
+        "code": null,
+        "reason": null
+      }
+    },
+    "nativeArtifact": {
+      "path": "/Users/hardik/Projects/WDK <> Iris/rgb-lightning-node-nodejs/index-darwin-arm64.node",
+      "sha256": "f135c1b7d2f4e98d570b4f4bcc08adb57f454757c8de965f30873761f6200ff0"
+    },
+    "sourceJournal": {
+      "path": "/Users/hardik/Projects/WDK <> Iris/.artifacts/vss-bfa-20261019/node-live-01/journal.json",
+      "sha256": "75eccae9d6d3fb4a95a5e782294c29a401417b0d3dc3a67fbf35db733746cb6f"
+    },
+    "mint": {
+      "amountAtomic": 2000000,
+      "txid": "8004a565ce0d6f22ee08fbbe55fd997b71fef9239d5ee00866ffd3b6c5fd744a",
+      "confirmed": true,
+      "blockHeight": 18326,
+      "balance": {
+        "settled": 2000000,
+        "future": 2000000,
+        "spendable": 2000000,
+        "offchain_outbound": 0,
+        "offchain_inbound": 0
+      }
+    },
+    "sends": {
+      "alice-to-bob-off": {
+        "amountAtomic": 500000,
+        "txid": "309dafb21b9103066a0ec095b7e8d95ab0ff350c723da36ade41ed39626d05fd",
+        "feeSats": 395,
+        "blockHeight": 18329,
+        "senderBalance": {
+          "settled": 1500000,
+          "future": 1500000,
+          "spendable": 1500000,
+          "offchain_outbound": 0,
+          "offchain_inbound": 0
+        },
+        "receiverBalance": {
+          "settled": 500000,
+          "future": 500000,
+          "spendable": 500000,
+          "offchain_outbound": 0,
+          "offchain_inbound": 0
+        },
+        "bothSidesSettled": true
+      },
+      "bob-to-alice-paused-receive": {
+        "amountAtomic": 250000,
+        "txid": "3d3e2cb8015d54e61aeeab99aad983b6eec4c0fadb59478917397de47a15e064",
+        "feeSats": 511,
+        "blockHeight": 18335,
+        "senderBalance": {
+          "settled": 250000,
+          "future": 250000,
+          "spendable": 250000,
+          "offchain_outbound": 0,
+          "offchain_inbound": 0
+        },
+        "receiverBalance": {
+          "settled": 1750000,
+          "future": 1750000,
+          "spendable": 1750000,
+          "offchain_outbound": 0,
+          "offchain_inbound": 0
+        },
+        "bothSidesSettled": true
+      }
+    },
+    "backupReceipts": {
+      "alice-mint-auto-receipt": {
+        "version": 19,
+        "completedAt": 1792410608583,
+        "automatic": true,
+        "backupRequired": false
+      },
+      "bob-initial-auto-receipt": {
+        "version": 6,
+        "completedAt": 1792410551051,
+        "automatic": true,
+        "backupRequired": false
+      },
+      "alice-manual-off-receipt": {
+        "version": 20,
+        "completedAt": 1792410646373,
+        "automatic": false,
+        "backupRequired": false
+      },
+      "alice-resumed-receipt": {
+        "version": 21,
+        "completedAt": 1792410674759,
+        "automatic": true,
+        "backupRequired": false
+      },
+      "bob-final-auto-receipt": {
+        "version": 13,
+        "completedAt": 1792410664515,
+        "automatic": true,
+        "backupRequired": false
+      },
+      "alice-reopened-receipt": {
+        "version": 21,
+        "completedAt": 1792410674759,
+        "automatic": true,
+        "backupRequired": false
+      },
+      "bob-reopened-receipt": {
+        "version": 13,
+        "completedAt": 1792410664515,
+        "automatic": true,
+        "backupRequired": false
+      }
+    },
+    "assertions": {
+      "newWalletsDefaultOn": true,
+      "automaticReceiptAfterBfaMint": true,
+      "offSendKeepsCloudVersion": true,
+      "offManualBackupAdvancesVersionAndClearsPending": true,
+      "offIncomingBfaKeepsCloudVersion": true,
+      "reenableBacksUpPendingState": true,
+      "lastBackupTimesFromNativeCompletedUploads": true,
+      "successfulPaymentsNotReplayed": true,
+      "bfaBalancesSurviveColdNativeReopen": true
+    },
+    "finalBalances": {
+      "alice": {
+        "settled": 1750000,
+        "future": 1750000,
+        "spendable": 1750000,
+        "offchain_outbound": 0,
+        "offchain_inbound": 0
+      },
+      "bob": {
+        "settled": 250000,
+        "future": 250000,
+        "spendable": 250000,
+        "offchain_outbound": 0,
+        "offchain_inbound": 0
+      },
+      "aliceBtc": {
+        "vanilla": {
+          "settled": 1749347,
+          "future": 1749347,
+          "spendable": 1749347
+        },
+        "colored": {
+          "settled": 249605,
+          "future": 249605,
+          "spendable": 249605
+        }
+      },
+      "bobBtc": {
+        "vanilla": {
+          "settled": 0,
+          "future": 1749347,
+          "spendable": 1749347
+        },
+        "colored": {
+          "settled": 0,
+          "future": 249489,
+          "spendable": 249489
+        }
+      }
+    },
+    "coldReopen": {
+      "alice-cold-reopen": {
+        "balance": {
+          "settled": 1750000,
+          "future": 1750000,
+          "spendable": 1750000,
+          "offchain_outbound": 0,
+          "offchain_inbound": 0
+        },
+        "receipt": {
+          "version": 21,
+          "completedAt": 1792410674759,
+          "automatic": true,
+          "backupRequired": false
+        }
+      },
+      "bob-cold-reopen": {
+        "balance": {
+          "settled": 250000,
+          "future": 250000,
+          "spendable": 250000,
+          "offchain_outbound": 0,
+          "offchain_inbound": 0
+        },
+        "receipt": {
+          "version": 13,
+          "completedAt": 1792410664515,
+          "automatic": true,
+          "backupRequired": false
+        }
+      }
+    }
+  },
+  "limitations": [
+    "Automatic switch pauses RGB wallet snapshots and WDK hooks; independent common/KV/fence VSS traffic remains enabled.",
+    "Marker persistence failure retains unsaved state in memory but process death can lose additional SDK-stock-only dirty signal.",
+    "Host success is not an Android runtime, iOS runtime, physical-device or full Lightning recovery qualification."
+  ],
+  "testExecutions": {
+    "native-vss-policy-qualified-node-runtime-tests.log": {
+      "command": "node test.js",
+      "scope": "Final dd269 Darwin addon",
+      "logSha256": "cfe6108708e66b37c2268d11f857c439a740801fcc96271e511018482680e394",
+      "logLastWrittenAt": "2026-10-19T11:48:13.471292+00:00"
+    },
+    "native-vss-policy-qualified-node-worker-tests.log": {
+      "command": "node test-worker-teardown.js",
+      "scope": "Final dd269 Darwin addon;12 offline terminated-worker immediate signer reopens",
+      "logSha256": "375f7e3e8729851fd611ae659cff5f9cfd4ac4538250ca03c5293feeadeea185",
+      "logLastWrittenAt": "2026-10-19T11:48:15.350199+00:00"
+    },
+    "native-vss-policy-qualified-node-admission-tests.log": {
+      "command": "node scripts/test-vss-safety-host.js",
+      "scope": "Final dd269 Darwin addon;214 constructor admission cases",
+      "logSha256": "5437c6e32cfc51ee491307e38c08406697394c11a00cd4b23560680632754bc9",
+      "logLastWrittenAt": "2026-10-19T11:48:15.461257+00:00"
+    },
+    "native-vss-policy-qualified-node-bip322-tests.log": {
+      "command": "npm run test:bip322:crypto",
+      "scope": "Three Rust crypto tests extracted from the final dd269 adapter patch; not additional addon runtime tests",
+      "logSha256": "7d18b6b8e19f4d01612e861221711747ebbe5fe2539da84c252cea53959d63bf",
+      "logLastWrittenAt": "2026-10-19T11:48:17.154128+00:00"
+    }
+  }
+}

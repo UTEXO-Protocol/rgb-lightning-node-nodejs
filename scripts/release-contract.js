@@ -27,6 +27,10 @@ const ALLOWED_FILES = Object.freeze([
   'bindings/c-ffi/src/utils.rs',
   'bindings/rgb_lightning_node.udl',
   'src/ldk.rs',
+  'src/lib.rs',
+  'src/rgb.rs',
+  'src/vss_snapshot_policy.rs',
+  'src/uniffi_api/types.rs',
   'src/ldk_chain_backend/block_sync.rs',
   'src/ldk_chain_backend/transaction_sync.rs',
   'src/main.rs',
@@ -41,6 +45,7 @@ const ALLOWED_FILES = Object.freeze([
   'src/uniffi_api/mod.rs',
   'src/uniffi_api/native_signer.rs',
   'src/uniffi_api/bip322.rs',
+  'src/uniffi_api/vss_restore.rs',
   'src/signer/external.rs',
   'src/uniffi_api/tests.rs',
   'src/utils.rs'

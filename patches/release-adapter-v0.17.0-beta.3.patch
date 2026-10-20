@@ -335,7 +335,7 @@ index f775f83..86daa71 100644
      println!("cargo:rerun-if-changed=cbindgen.toml");
  
 diff --git a/bindings/c-ffi/rln.h b/bindings/c-ffi/rln.h
-index c8bb08b..0e1371b 100644
+index c8bb08b..eec9243 100644
 --- a/bindings/c-ffi/rln.h
 +++ b/bindings/c-ffi/rln.h
 @@ -42,6 +42,11 @@ struct CResultString rln_asset_link_create(const struct COpaqueStruct *node,
@@ -397,7 +397,22 @@ index c8bb08b..0e1371b 100644
  struct CResultString rln_sdk_node_attach_native_external_signer(const struct COpaqueStruct *node,
                                                                  const struct COpaqueStruct *signer);
  
-@@ -225,24 +256,14 @@ struct CResultString rln_sdk_node_unlock_with_native_external_signer(const struc
+@@ -212,6 +243,14 @@ struct CResultString rln_sdk_node_init_with_native_external_signer(const struct
+ 
+ struct CResult rln_sdk_node_new(const char *request_json);
+ 
++/**
++ * Prepare a pre-existing RGB VSS archive before unlock; never creates a cloud backup.
++ */
++struct CResultString rln_sdk_node_prepare_vss_restore(const struct COpaqueStruct *node);
++
++struct CResultString rln_sdk_node_set_vss_automatic_backup_enabled(const struct COpaqueStruct *node,
++                                                                   const char *request_json);
++
+ struct CResultString rln_sdk_node_shutdown(const struct COpaqueStruct *node);
+ 
+ struct CResultString rln_sdk_node_unlock(const struct COpaqueStruct *node,
+@@ -225,28 +264,28 @@ struct CResultString rln_sdk_node_unlock_with_native_external_signer(const struc
                                                                       const char *request_json);
  
  /**
@@ -410,8 +425,7 @@ index c8bb08b..0e1371b 100644
 - * suspend") rather than relying on the implicit on-write flush. The
 - * HTTP equivalent is `POST /vssbackup`; the UniFFI equivalent is
 - * `SdkNode::vss_backup()` (uniffi_api/mod.rs:346).
-+ * Unavailable: native VSS safety policy rejects backup with
-+ * `FailedVssInit` and `ERR_VSS_UNSAFE_UPSTREAM`. No remote request is made.
++ * Flush configured VSS backup from an unlocked node; returns the snapshot version.
   */
  struct CResultString rln_sdk_node_vss_backup(const struct COpaqueStruct *node);
  
@@ -421,12 +435,27 @@ index c8bb08b..0e1371b 100644
 - * `FailedVssInit` if VSS isn't configured / the takeover fails. Pointing
 - * two live nodes at the same VSS store corrupts state — only call this
 - * when you're certain the previous owner is gone.
-+ * Unavailable: native VSS safety policy rejects fence takeover with
-+ * `FailedVssInit` and `ERR_VSS_UNSAFE_UPSTREAM`. No remote request is made.
++ * Read remote RGB snapshot status without uploading, restoring or clearing ownership.
++ */
++struct CResultString rln_sdk_node_vss_backup_info(const struct COpaqueStruct *node);
++
++struct CResultString rln_sdk_node_vss_backup_metadata(const struct COpaqueStruct *node);
++
++/**
++ * Explicitly clear a stale writer fence on a locked node after stopping its old writer.
   */
  struct CResultString rln_sdk_node_vss_clear_fence(const struct COpaqueStruct *node,
                                                    const char *request_json);
-@@ -260,6 +281,9 @@ struct CResultString rln_send_rgb(const struct COpaqueStruct *node, const char *
+ 
++/**
++ * Read bounded locally authenticated restore provenance and current unlock state.
++ */
++struct CResultString rln_sdk_node_vss_restore_info(const struct COpaqueStruct *node);
++
+ struct CResultString rln_sdk_shutdown(void);
+ 
+ struct CResultString rln_send_btc(const struct COpaqueStruct *node, const char *request_json);
+@@ -260,6 +299,9 @@ struct CResultString rln_send_rgb(const struct COpaqueStruct *node, const char *
  
  struct CResultString rln_sign_message(const struct COpaqueStruct *node, const char *message);
  
@@ -436,7 +465,7 @@ index c8bb08b..0e1371b 100644
  struct CResultString rln_sync(const struct COpaqueStruct *node);
  
  struct CResultString rln_taker(const struct COpaqueStruct *node, const char *request_json);
-@@ -271,3 +295,8 @@ struct CResultString rln_uniffi_is_initialized(void);
+@@ -271,3 +313,8 @@ struct CResultString rln_uniffi_is_initialized(void);
  struct CResultString rln_verify_message(const struct COpaqueStruct *node,
                                          const char *message,
                                          const char *signature);
@@ -446,7 +475,7 @@ index c8bb08b..0e1371b 100644
 +
 +struct CResultString rln_verify_message_bip322_offline(const char *request_json);
 diff --git a/bindings/c-ffi/rln.hpp b/bindings/c-ffi/rln.hpp
-index 498a7e1..c8007bd 100644
+index 498a7e1..84f528c 100644
 --- a/bindings/c-ffi/rln.hpp
 +++ b/bindings/c-ffi/rln.hpp
 @@ -43,6 +43,9 @@ CResultString rln_asset_link_create(const COpaqueStruct *node, const char *reque
@@ -500,7 +529,20 @@ index 498a7e1..c8007bd 100644
  CResultString rln_sdk_node_attach_native_external_signer(const COpaqueStruct *node,
                                                           const COpaqueStruct *signer);
  
-@@ -198,22 +221,12 @@ CResultString rln_sdk_node_unlock_with_native_external_signer(const COpaqueStruc
+@@ -187,6 +210,12 @@ CResultString rln_sdk_node_init_with_native_external_signer(const COpaqueStruct
+ 
+ CResult rln_sdk_node_new(const char *request_json);
+ 
++/// Prepare a pre-existing RGB VSS archive before unlock; never creates a cloud backup.
++CResultString rln_sdk_node_prepare_vss_restore(const COpaqueStruct *node);
++
++CResultString rln_sdk_node_set_vss_automatic_backup_enabled(const COpaqueStruct *node,
++                                                            const char *request_json);
++
+ CResultString rln_sdk_node_shutdown(const COpaqueStruct *node);
+ 
+ CResultString rln_sdk_node_unlock(const COpaqueStruct *node, const char *request_json);
+@@ -198,24 +227,20 @@ CResultString rln_sdk_node_unlock_with_native_external_signer(const COpaqueStruc
                                                                const COpaqueStruct *signer,
                                                                const char *request_json);
  
@@ -513,8 +555,7 @@ index 498a7e1..c8007bd 100644
 -/// suspend") rather than relying on the implicit on-write flush. The
 -/// HTTP equivalent is `POST /vssbackup`; the UniFFI equivalent is
 -/// `SdkNode::vss_backup()` (uniffi_api/mod.rs:346).
-+/// Unavailable: native VSS safety policy rejects backup with
-+/// `FailedVssInit` and `ERR_VSS_UNSAFE_UPSTREAM`. No remote request is made.
++/// Flush configured VSS backup from an unlocked node; returns the snapshot version.
  CResultString rln_sdk_node_vss_backup(const COpaqueStruct *node);
  
 -/// Take over a stale VSS ownership fence after a previous node died holding
@@ -522,12 +563,21 @@ index 498a7e1..c8007bd 100644
 -/// `FailedVssInit` if VSS isn't configured / the takeover fails. Pointing
 -/// two live nodes at the same VSS store corrupts state — only call this
 -/// when you're certain the previous owner is gone.
-+/// Unavailable: native VSS safety policy rejects fence takeover with
-+/// `FailedVssInit` and `ERR_VSS_UNSAFE_UPSTREAM`. No remote request is made.
++/// Read remote RGB snapshot status without uploading, restoring or clearing ownership.
++CResultString rln_sdk_node_vss_backup_info(const COpaqueStruct *node);
++
++CResultString rln_sdk_node_vss_backup_metadata(const COpaqueStruct *node);
++
++/// Explicitly clear a stale writer fence on a locked node after stopping its old writer.
  CResultString rln_sdk_node_vss_clear_fence(const COpaqueStruct *node, const char *request_json);
  
++/// Read bounded locally authenticated restore provenance and current unlock state.
++CResultString rln_sdk_node_vss_restore_info(const COpaqueStruct *node);
++
  CResultString rln_sdk_shutdown();
-@@ -228,6 +241,8 @@ CResultString rln_send_rgb(const COpaqueStruct *node, const char *request_json);
+ 
+ CResultString rln_send_btc(const COpaqueStruct *node, const char *request_json);
+@@ -228,6 +253,8 @@ CResultString rln_send_rgb(const COpaqueStruct *node, const char *request_json);
  
  CResultString rln_sign_message(const COpaqueStruct *node, const char *message);
  
@@ -536,7 +586,7 @@ index 498a7e1..c8007bd 100644
  CResultString rln_sync(const COpaqueStruct *node);
  
  CResultString rln_taker(const COpaqueStruct *node, const char *request_json);
-@@ -240,4 +255,8 @@ CResultString rln_verify_message(const COpaqueStruct *node,
+@@ -240,4 +267,8 @@ CResultString rln_verify_message(const COpaqueStruct *node,
                                   const char *message,
                                   const char *signature);
  
@@ -546,7 +596,7 @@ index 498a7e1..c8007bd 100644
 +
  }  // extern "C"
 diff --git a/bindings/c-ffi/src/api.rs b/bindings/c-ffi/src/api.rs
-index 2b9e873..d15c476 100644
+index 2b9e873..a0ce34f 100644
 --- a/bindings/c-ffi/src/api.rs
 +++ b/bindings/c-ffi/src/api.rs
 @@ -91,7 +91,7 @@ pub(crate) fn sdk_node_unlock(
@@ -558,7 +608,41 @@ index 2b9e873..d15c476 100644
      ok_void()
  }
  
-@@ -288,7 +288,7 @@ pub(crate) fn decode_rgb_invoice(
+@@ -122,6 +122,33 @@ pub(crate) fn sdk_node_vss_backup(node: &COpaqueStruct) -> Result<String, Error>
+     json(serde_json::json!({ "version": version }))
+ }
+ 
++pub(crate) fn sdk_node_vss_backup_info(node: &COpaqueStruct) -> Result<String, Error> {
++    let node = require_handle(node)?;
++    Ok(node.vss_backup_info()?)
++}
++
++pub(crate) fn sdk_node_vss_backup_metadata(node: &COpaqueStruct) -> Result<String, Error> {
++    Ok(require_handle(node)?.vss_backup_metadata()?)
++}
++pub(crate) fn sdk_node_set_vss_automatic_backup_enabled(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> Result<String, Error> {
++    #[derive(serde::Deserialize)]
++    #[serde(deny_unknown_fields)]
++    struct Request {
++        enabled: bool,
++    }
++    let request: Request = serde_json::from_str(&ptr_to_string(request_json))?;
++    Ok(require_handle(node)?.set_vss_automatic_backup_enabled(request.enabled)?)
++}
++pub(crate) fn sdk_node_prepare_vss_restore(node: &COpaqueStruct) -> Result<String, Error> {
++    Ok(require_handle(node)?.prepare_vss_restore()?)
++}
++pub(crate) fn sdk_node_vss_restore_info(node: &COpaqueStruct) -> Result<String, Error> {
++    Ok(require_handle(node)?.vss_restore_info()?)
++}
++
+ // APay receiver-side: register this node with an LSP as an async-order
+ // recipient. PR #51 upstream — returns AsyncOrderNewResponse (request_id,
+ // host_node_id, protocol_version, order_id, status, accepted_through_index,
+@@ -288,7 +315,7 @@ pub(crate) fn decode_rgb_invoice(
  ) -> Result<String, Error> {
      let node = require_handle(node)?;
      let resp = node.decode_rgb_invoice(ptr_to_string(invoice))?;
@@ -567,7 +651,7 @@ index 2b9e873..d15c476 100644
  }
  
  pub(crate) fn get_payment(
-@@ -749,7 +749,7 @@ pub(crate) fn sdk_global_initialize(request_json: *const c_char) -> Result<Strin
+@@ -749,7 +776,7 @@ pub(crate) fn sdk_global_initialize(request_json: *const c_char) -> Result<Strin
  }
  
  pub(crate) fn sdk_global_shutdown() -> Result<String, Error> {
@@ -576,7 +660,7 @@ index 2b9e873..d15c476 100644
      ok_void()
  }
  
-@@ -783,6 +783,34 @@ pub(crate) fn native_external_signer_bootstrap(signer: &COpaqueStruct) -> Result
+@@ -783,6 +810,34 @@ pub(crate) fn native_external_signer_bootstrap(signer: &COpaqueStruct) -> Result
      json(JsonSdkExternalSignerBootstrap::from(bootstrap))
  }
  
@@ -611,47 +695,91 @@ index 2b9e873..d15c476 100644
  pub(crate) fn sdk_node_init_with_native_external_signer(
      node: &COpaqueStruct,
      signer: &COpaqueStruct,
-@@ -840,3 +868,35 @@ pub(crate) fn sdk_node_unlock_with_attached_external_signer(
+@@ -840,3 +895,62 @@ pub(crate) fn sdk_node_unlock_with_attached_external_signer(
      node.unlock_with_attached_external_signer_request(r.into())?;
      ok_void()
  }
 +
 +fn parse_bip322_req<T: serde::de::DeserializeOwned>(ptr: *const c_char) -> Result<T, Error> {
-+    if ptr.is_null() { return Err(Error::StringParse("missing BIP-322 request".into())); }
++    if ptr.is_null() {
++        return Err(Error::StringParse("missing BIP-322 request".into()));
++    }
 +    // FFI callers own a valid nul-terminated string. Bound before making a Rust String.
 +    let bytes = unsafe { std::ffi::CStr::from_ptr(ptr) }.to_bytes();
-+    if bytes.len() > 32768 { return Err(Error::StringParse("BIP-322 request exceeds limit".into())); }
++    if bytes.len() > 32768 {
++        return Err(Error::StringParse("BIP-322 request exceeds limit".into()));
++    }
 +    Ok(serde_json::from_slice(bytes)?)
 +}
 +#[derive(serde::Deserialize)]
 +#[serde(deny_unknown_fields)]
-+struct Bip322SignRequest { message: String, address: String }
++struct Bip322SignRequest {
++    message: String,
++    address: String,
++}
 +#[derive(serde::Deserialize)]
 +#[serde(deny_unknown_fields)]
-+struct Bip322VerifyRequest { message: String, address: String, signature: String }
++struct Bip322VerifyRequest {
++    message: String,
++    address: String,
++    signature: String,
++}
 +#[derive(serde::Deserialize)]
 +#[serde(deny_unknown_fields)]
-+struct Bip322VerifyOfflineRequest { message: String, address: String, signature: String, network: String }
++struct Bip322VerifyOfflineRequest {
++    message: String,
++    address: String,
++    signature: String,
++    network: String,
++}
 +pub(crate) fn get_message_signing_address(node: &COpaqueStruct) -> Result<String, Error> {
 +    json(require_handle(node)?.get_message_signing_address()?)
 +}
-+pub(crate) fn sign_message_bip322(node: &COpaqueStruct, request_json: *const c_char) -> Result<String, Error> {
++pub(crate) fn sign_message_bip322(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> Result<String, Error> {
 +    let req: Bip322SignRequest = parse_bip322_req(request_json)?;
 +    json(require_handle(node)?.sign_message_bip322(req.message, req.address)?)
 +}
-+pub(crate) fn verify_message_bip322(node: &COpaqueStruct, request_json: *const c_char) -> Result<String, Error> {
++pub(crate) fn verify_message_bip322(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> Result<String, Error> {
 +    let req: Bip322VerifyRequest = parse_bip322_req(request_json)?;
 +    json(require_handle(node)?.verify_message_bip322(req.message, req.address, req.signature)?)
 +}
 +pub(crate) fn verify_message_bip322_offline(request_json: *const c_char) -> Result<String, Error> {
 +    let req: Bip322VerifyOfflineRequest = parse_bip322_req(request_json)?;
-+    json(rln::verify_message_bip322(req.message, req.address, req.signature, req.network)?)
++    json(rln::verify_message_bip322(
++        req.message,
++        req.address,
++        req.signature,
++        req.network,
++    )?)
 +}
 diff --git a/bindings/c-ffi/src/json_types.rs b/bindings/c-ffi/src/json_types.rs
-index 5b606f1..b033603 100644
+index 5b606f1..b235b6e 100644
 --- a/bindings/c-ffi/src/json_types.rs
 +++ b/bindings/c-ffi/src/json_types.rs
-@@ -812,6 +812,7 @@ pub(crate) struct JsonDecodeLnInvoiceResponse {
+@@ -136,6 +136,8 @@ pub(crate) struct JsonSdkInitRequest {
+     #[serde(default)]
+     pub vss_allow_http: bool,
+     #[serde(default)]
++    pub vss_automatic_backup_enabled: Option<bool>,
++    #[serde(default)]
+     pub vss_allow_empty_restore: bool,
+     #[serde(default)]
+     pub reuse_addresses: bool,
+@@ -164,6 +166,7 @@ impl TryFrom<JsonSdkInitRequest> for SdkInitRequest {
+             lsp_bearer_token: j.lsp_bearer_token,
+             vss_url: j.vss_url,
+             vss_allow_http: j.vss_allow_http,
++            vss_automatic_backup_enabled: j.vss_automatic_backup_enabled,
+             vss_allow_empty_restore: j.vss_allow_empty_restore,
+             reuse_addresses: j.reuse_addresses,
+         })
+@@ -812,6 +815,7 @@ pub(crate) struct JsonDecodeLnInvoiceResponse {
      pub asset_amount: Option<u64>,
      pub description: Option<String>,
      pub description_hash: Option<String>,
@@ -659,7 +787,7 @@ index 5b606f1..b033603 100644
      pub payment_hash: String,
      pub payment_secret: String,
      pub payee_pubkey: Option<String>,
-@@ -828,6 +829,7 @@ impl From<DecodeLnInvoiceResponse> for JsonDecodeLnInvoiceResponse {
+@@ -828,6 +832,7 @@ impl From<DecodeLnInvoiceResponse> for JsonDecodeLnInvoiceResponse {
              asset_amount: r.asset_amount,
              description: r.description,
              description_hash: r.description_hash,
@@ -667,7 +795,7 @@ index 5b606f1..b033603 100644
              payment_hash: fmt_payment_hash(&r.payment_hash),
              payment_secret: r.payment_secret,
              payee_pubkey: r.payee_pubkey.as_ref().map(fmt_pubkey),
-@@ -836,6 +838,45 @@ impl From<DecodeLnInvoiceResponse> for JsonDecodeLnInvoiceResponse {
+@@ -836,6 +841,45 @@ impl From<DecodeLnInvoiceResponse> for JsonDecodeLnInvoiceResponse {
      }
  }
  
@@ -713,7 +841,7 @@ index 5b606f1..b033603 100644
  #[derive(Debug, Serialize)]
  pub(crate) struct JsonDecodeRgbInvoiceResponse {
      pub recipient_id: String,
-@@ -843,24 +884,65 @@ pub(crate) struct JsonDecodeRgbInvoiceResponse {
+@@ -843,24 +887,65 @@ pub(crate) struct JsonDecodeRgbInvoiceResponse {
      pub recipient_type: String,
      pub asset_schema: Option<String>,
      pub asset_id: Option<String>,
@@ -784,7 +912,7 @@ index 5b606f1..b033603 100644
          }
      }
  }
-@@ -2208,6 +2290,7 @@ impl From<Utxo> for JsonUtxo {
+@@ -2208,6 +2293,7 @@ impl From<Utxo> for JsonUtxo {
  pub(crate) struct JsonUnspent {
      pub utxo: JsonUtxo,
      pub rgb_allocations: Vec<JsonRgbAllocation>,
@@ -792,7 +920,7 @@ index 5b606f1..b033603 100644
  }
  
  impl From<Unspent> for JsonUnspent {
-@@ -2215,6 +2298,30 @@ impl From<Unspent> for JsonUnspent {
+@@ -2215,6 +2301,30 @@ impl From<Unspent> for JsonUnspent {
          JsonUnspent {
              utxo: u.utxo.into(),
              rgb_allocations: u.rgb_allocations.into_iter().map(Into::into).collect(),
@@ -824,7 +952,7 @@ index 5b606f1..b033603 100644
      }
  }
 diff --git a/bindings/c-ffi/src/lib.rs b/bindings/c-ffi/src/lib.rs
-index e1dded1..a0d82ce 100644
+index e1dded1..6eef53f 100644
 --- a/bindings/c-ffi/src/lib.rs
 +++ b/bindings/c-ffi/src/lib.rs
 @@ -89,6 +89,32 @@ pub extern "C" fn rln_free_string(s: *mut c_char) {
@@ -848,11 +976,11 @@ index e1dded1..a0d82ce 100644
 +            "rgb-contract-import-v1", "rgb-transfer-metadata-import-v1", "consignment-export-v1", "mainnet-lightning-rejection-v1",
 +            "external-signer-eth-rpc-v1", "external-signer-burn-v1",
 +            "native-signer-shutdown-v1", "owned-session-cleanup-v1", "bip322-simple-v1",
-+            "vss-safety-policy-v1"],
++            "vss-backup-v1", "vss-backup-info-v1", "vss-restore-v1", "vss-automatic-backup-v1", "vss-backup-metadata-v1"],
 +        "vss_policy": {
-+            "supported": false,
-+            "code": rgb_lightning_node::VSS_SAFETY_POLICY_CODE,
-+            "reason": rgb_lightning_node::VSS_SAFETY_POLICY_REASON
++            "supported": true,
++            "code": null,
++            "reason": null
 +        }
 +    }).to_string()))
 +}
@@ -860,7 +988,7 @@ index e1dded1..a0d82ce 100644
  #[unsafe(no_mangle)]
  pub extern "C" fn rln_sdk_node_new(request_json: *const c_char) -> CResult {
      ffi_call!("rln_sdk_node_new", api::sdk_node_new(request_json))
-@@ -122,11 +148,8 @@ pub extern "C" fn rln_sdk_node_shutdown(node: &COpaqueStruct) -> CResultString {
+@@ -122,11 +148,7 @@ pub extern "C" fn rln_sdk_node_shutdown(node: &COpaqueStruct) -> CResultString {
      ffi_call!("rln_sdk_node_shutdown", api::sdk_node_shutdown(node))
  }
  
@@ -869,12 +997,11 @@ index e1dded1..a0d82ce 100644
 -/// `FailedVssInit` if VSS isn't configured / the takeover fails. Pointing
 -/// two live nodes at the same VSS store corrupts state — only call this
 -/// when you're certain the previous owner is gone.
-+/// Unavailable: native VSS safety policy rejects fence takeover with
-+/// `FailedVssInit` and `ERR_VSS_UNSAFE_UPSTREAM`. No remote request is made.
++/// Explicitly clear a stale writer fence on a locked node after stopping its old writer.
  #[unsafe(no_mangle)]
  pub extern "C" fn rln_sdk_node_vss_clear_fence(
      node: &COpaqueStruct,
-@@ -138,15 +161,8 @@ pub extern "C" fn rln_sdk_node_vss_clear_fence(
+@@ -138,20 +160,55 @@ pub extern "C" fn rln_sdk_node_vss_clear_fence(
      )
  }
  
@@ -887,12 +1014,59 @@ index e1dded1..a0d82ce 100644
 -/// suspend") rather than relying on the implicit on-write flush. The
 -/// HTTP equivalent is `POST /vssbackup`; the UniFFI equivalent is
 -/// `SdkNode::vss_backup()` (uniffi_api/mod.rs:346).
-+/// Unavailable: native VSS safety policy rejects backup with
-+/// `FailedVssInit` and `ERR_VSS_UNSAFE_UPSTREAM`. No remote request is made.
++/// Flush configured VSS backup from an unlocked node; returns the snapshot version.
  #[unsafe(no_mangle)]
  pub extern "C" fn rln_sdk_node_vss_backup(node: &COpaqueStruct) -> CResultString {
      ffi_call!("rln_sdk_node_vss_backup", api::sdk_node_vss_backup(node))
-@@ -733,6 +749,39 @@ pub extern "C" fn rln_sdk_shutdown() -> CResultString {
+ }
+ 
++/// Read remote RGB snapshot status without uploading, restoring or clearing ownership.
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_sdk_node_vss_backup_info(node: &COpaqueStruct) -> CResultString {
++    ffi_call!(
++        "rln_sdk_node_vss_backup_info",
++        api::sdk_node_vss_backup_info(node)
++    )
++}
++
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_sdk_node_vss_backup_metadata(node: &COpaqueStruct) -> CResultString {
++    ffi_call!(
++        "rln_sdk_node_vss_backup_metadata",
++        api::sdk_node_vss_backup_metadata(node)
++    )
++}
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_sdk_node_set_vss_automatic_backup_enabled(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> CResultString {
++    ffi_call!(
++        "rln_sdk_node_set_vss_automatic_backup_enabled",
++        api::sdk_node_set_vss_automatic_backup_enabled(node, request_json)
++    )
++}
++/// Prepare a pre-existing RGB VSS archive before unlock; never creates a cloud backup.
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_sdk_node_prepare_vss_restore(node: &COpaqueStruct) -> CResultString {
++    ffi_call!(
++        "rln_sdk_node_prepare_vss_restore",
++        api::sdk_node_prepare_vss_restore(node)
++    )
++}
++/// Read bounded locally authenticated restore provenance and current unlock state.
++#[unsafe(no_mangle)]
++pub extern "C" fn rln_sdk_node_vss_restore_info(node: &COpaqueStruct) -> CResultString {
++    ffi_call!(
++        "rln_sdk_node_vss_restore_info",
++        api::sdk_node_vss_restore_info(node)
++    )
++}
++
+ /// APay receiver-side registration with an LSP. Argument is the LSP's
+ /// node_id as a hex string (compressed secp256k1). Returns JSON of
+ /// `AsyncOrderNewResponse` (request_id, host_node_id, protocol_version,
+@@ -733,6 +790,39 @@ pub extern "C" fn rln_sdk_shutdown() -> CResultString {
  // External-signer surface
  // ---------------------------------------------------------------------------
  
@@ -932,7 +1106,7 @@ index e1dded1..a0d82ce 100644
  /// Drop a `NativeExternalSigner` handle. Safe to call immediately after
  /// attach / init / unlock succeeds: RLN holds its own `Arc` clone.
  #[unsafe(no_mangle)]
-@@ -754,6 +803,86 @@ mod free_tests {
+@@ -754,6 +844,86 @@ mod free_tests {
          free_sdk_node(COpaqueStruct::null());
          free_native_external_signer(COpaqueStruct::null());
      }
@@ -1019,7 +1193,7 @@ index e1dded1..a0d82ce 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -776,6 +905,21 @@ pub extern "C" fn rln_native_external_signer_bootstrap(signer: &COpaqueStruct) -
+@@ -776,6 +946,21 @@ pub extern "C" fn rln_native_external_signer_bootstrap(signer: &COpaqueStruct) -
      )
  }
  
@@ -1041,139 +1215,72 @@ index e1dded1..a0d82ce 100644
  #[unsafe(no_mangle)]
  pub extern "C" fn rln_sdk_node_init_with_native_external_signer(
      node: &COpaqueStruct,
-@@ -839,3 +983,134 @@ pub extern "C" fn rln_sdk_node_unlock_with_attached_external_signer(
+@@ -839,3 +1024,67 @@ pub extern "C" fn rln_sdk_node_unlock_with_attached_external_signer(
          api::sdk_node_unlock_with_attached_external_signer(node, request_json)
      )
  }
 +
 +#[unsafe(no_mangle)]
 +pub extern "C" fn rln_get_message_signing_address(node: &COpaqueStruct) -> CResultString {
-+    ffi_call!("rln_get_message_signing_address", api::get_message_signing_address(node))
++    ffi_call!(
++        "rln_get_message_signing_address",
++        api::get_message_signing_address(node)
++    )
 +}
 +#[unsafe(no_mangle)]
-+pub extern "C" fn rln_sign_message_bip322(node: &COpaqueStruct, request_json: *const c_char) -> CResultString {
-+    ffi_call!("rln_sign_message_bip322", api::sign_message_bip322(node, request_json))
++pub extern "C" fn rln_sign_message_bip322(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> CResultString {
++    ffi_call!(
++        "rln_sign_message_bip322",
++        api::sign_message_bip322(node, request_json)
++    )
 +}
 +#[unsafe(no_mangle)]
-+pub extern "C" fn rln_verify_message_bip322(node: &COpaqueStruct, request_json: *const c_char) -> CResultString {
-+    ffi_call!("rln_verify_message_bip322", api::verify_message_bip322(node, request_json))
++pub extern "C" fn rln_verify_message_bip322(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> CResultString {
++    ffi_call!(
++        "rln_verify_message_bip322",
++        api::verify_message_bip322(node, request_json)
++    )
 +}
 +#[unsafe(no_mangle)]
 +pub extern "C" fn rln_verify_message_bip322_offline(request_json: *const c_char) -> CResultString {
-+    ffi_call!("rln_verify_message_bip322_offline", api::verify_message_bip322_offline(request_json))
++    ffi_call!(
++        "rln_verify_message_bip322_offline",
++        api::verify_message_bip322_offline(request_json)
++    )
 +}
 +
-+
 +#[cfg(test)]
-+mod vss_safety_policy_tests {
++mod vss_availability_tests {
 +    use super::*;
-+    use std::{collections::BTreeMap, fs, path::{Path, PathBuf}, time::{SystemTime, UNIX_EPOCH}};
-+
-+    struct TestDirectory(PathBuf);
-+    impl TestDirectory {
-+        fn new() -> Self {
-+            let name = format!("rln-vss-safety-{}-{}", std::process::id(),
-+                SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos());
-+            let root = std::env::temp_dir().join(name);
-+            fs::create_dir(&root).unwrap();
-+            Self(root)
-+        }
-+    }
-+    impl Drop for TestDirectory {
-+        fn drop(&mut self) { let _ = fs::remove_dir_all(&self.0); }
-+    }
-+    fn request(path: &Path, network: &str, url: Option<&str>) -> CString {
-+        CString::new(serde_json::json!({
-+            "storage_dir_path": path.to_str().unwrap(),
-+            "daemon_listening_port": 0, "ldk_peer_listening_port": 0,
-+            "network": network, "max_media_upload_size_mb": 1,
-+            "vss_url": url, "vss_allow_http": true,
-+            "vss_allow_empty_restore": true
-+        }).to_string()).unwrap()
-+    }
-+    fn expected_error() -> String {
-+        format!("Rln(FailedVssInit): {}: {}",
-+            rgb_lightning_node::VSS_SAFETY_POLICY_CODE,
-+            rgb_lightning_node::VSS_SAFETY_POLICY_REASON)
-+    }
-+    fn string(result: CResultString) -> String {
-+        let text = unsafe { CStr::from_ptr(result.inner) }.to_str().unwrap().to_string();
-+        rln_free_string(result.inner);
-+        text
-+    }
-+    fn snapshot(root: &Path) -> BTreeMap<PathBuf, Vec<u8>> {
-+        fn walk(root: &Path, path: &Path, out: &mut BTreeMap<PathBuf, Vec<u8>>) {
-+            for row in fs::read_dir(path).unwrap() {
-+                let row = row.unwrap();
-+                if row.file_type().unwrap().is_dir() { walk(root, &row.path(), out); }
-+                else { out.insert(row.path().strip_prefix(root).unwrap().to_owned(), fs::read(row.path()).unwrap()); }
-+            }
-+        }
-+        let mut out = BTreeMap::new(); walk(root, root, &mut out); out
-+    }
-+
 +    #[test]
-+    fn compiled_policy_is_explicit_and_matches_native_denial() {
-+        let info = rln_binding_build_info();
-+        assert!(matches!(info.result, CResultValue::Ok));
-+        let info: serde_json::Value = serde_json::from_str(&string(info)).unwrap();
-+        assert_eq!(info["vss_policy"], serde_json::json!({
-+            "supported": false,
-+            "code": rgb_lightning_node::VSS_SAFETY_POLICY_CODE,
-+            "reason": rgb_lightning_node::VSS_SAFETY_POLICY_REASON
-+        }));
-+        assert!(info["capabilities"].as_array().unwrap().iter().any(|x| x == "vss-safety-policy-v1"));
-+    }
-+
-+    #[test]
-+    fn raw_instance_and_global_vss_admission_do_not_touch_storage_or_transport() {
-+        let temp = TestDirectory::new();
-+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
-+        listener.set_nonblocking(true).unwrap();
-+        let loopback = format!("http://{}/vss", listener.local_addr().unwrap());
-+        let existing = temp.0.join("existing"); fs::create_dir(&existing).unwrap();
-+        fs::write(existing.join("preserve"), b"existing wallet sentinel").unwrap();
-+        let before = snapshot(&temp.0);
-+        let absent = temp.0.join("must-not-exist");
-+        for network in ["mainnet", "signet", "regtest", "testnet", "testnet4"] {
-+            for url in [loopback.as_str(), "https://example.invalid/vss", "", " \n\t ",
-+                "ftp://bad.invalid/vss", "https://private-user:private-secret@example.invalid/vss"] {
-+                for target in [&existing, &absent] {
-+                    let req = request(target, network, Some(url));
-+                    let result = rln_sdk_node_new(req.as_ptr());
-+                    assert!(matches!(result.result, CResultValue::Err));
-+                    let error = unsafe { CStr::from_ptr(result.inner.as_err_string_ptr()) }.to_str().unwrap().to_string();
-+                    rln_free_string(result.inner.as_err_string_ptr());
-+                    assert_eq!(error, expected_error());
-+                    let global = rln_sdk_initialize(req.as_ptr());
-+                    assert!(matches!(global.result, CResultValue::Err));
-+                    assert_eq!(string(global), expected_error());
-+                    assert_eq!(snapshot(&temp.0), before);
-+                }
-+            }
-+        }
-+        assert!(matches!(listener.accept(), Err(e) if e.kind() == std::io::ErrorKind::WouldBlock));
-+    }
-+
-+    #[test]
-+    fn raw_backup_and_fence_clear_are_disabled_even_with_a_live_local_node() {
-+        let temp = TestDirectory::new();
-+        let req = request(&temp.0.join("local-only"), "regtest", None);
-+        let result = rln_sdk_node_new(req.as_ptr());
++    fn compiled_vss_backup_capability_is_explicit() {
++        let result = rln_binding_build_info();
 +        assert!(matches!(result.result, CResultValue::Ok));
-+        let handle = result.inner;
-+        let password = CString::new(r#"{"password":"private-secret"}"#).unwrap();
-+        let before = snapshot(&temp.0);
-+        let backup = rln_sdk_node_vss_backup(&handle);
-+        assert!(matches!(backup.result, CResultValue::Err));
-+        assert_eq!(string(backup), expected_error());
-+        let clear = rln_sdk_node_vss_clear_fence(&handle, password.as_ptr());
-+        assert!(matches!(clear.result, CResultValue::Err));
-+        assert_eq!(string(clear), expected_error());
-+        assert_eq!(snapshot(&temp.0), before);
-+        let stopped = rln_sdk_node_shutdown(&handle);
-+        assert!(matches!(stopped.result, CResultValue::Ok)); string(stopped);
-+        free_sdk_node(handle);
++        let text = unsafe { CStr::from_ptr(result.inner) }.to_str().unwrap();
++        let info: serde_json::Value = serde_json::from_str(text).unwrap();
++        rln_free_string(result.inner);
++        assert_eq!(
++            info["vss_policy"],
++            serde_json::json!({
++                "supported": true, "code": null, "reason": null
++            })
++        );
++        assert!(info["capabilities"]
++            .as_array()
++            .unwrap()
++            .iter()
++            .any(|x| x == "vss-backup-v1"));
++        assert!(!info["capabilities"]
++            .as_array()
++            .unwrap()
++            .iter()
++            .any(|x| x == "vss-safety-policy-v1"));
 +    }
 +}
 diff --git a/bindings/c-ffi/src/utils.rs b/bindings/c-ffi/src/utils.rs
@@ -1213,7 +1320,7 @@ index 98c3372..c4db3c0 100644
  
  #[cfg(test)]
 diff --git a/bindings/rgb_lightning_node.udl b/bindings/rgb_lightning_node.udl
-index df823f2..c34d5ea 100644
+index df823f2..3c09f98 100644
 --- a/bindings/rgb_lightning_node.udl
 +++ b/bindings/rgb_lightning_node.udl
 @@ -5,6 +5,7 @@ namespace rgb_lightning_node {
@@ -1224,8 +1331,36 @@ index df823f2..c34d5ea 100644
      void shutdown();
      [Throws=RlnError]
      NodeInfo node_info();
+@@ -46,6 +47,19 @@ interface SdkNode {
+     void vss_clear_fence(SdkVssClearFenceRequest request);
+     [Throws=RlnError]
+     i64 vss_backup();
++
++    [Throws=RlnError]
++    string vss_backup_info();
++    [Throws=RlnError]
++    string vss_backup_metadata();
++    [Throws=RlnError]
++    string set_vss_automatic_backup_enabled(boolean enabled);
++
++    [Throws=RlnError]
++    string prepare_vss_restore();
++
++    [Throws=RlnError]
++    string vss_restore_info();
+     [Throws=RlnError]
+     void connectpeer(string peer_pubkey_and_addr);
+     [Throws=RlnError]
+@@ -636,6 +650,7 @@ dictionary SdkInitRequest {
+     string? lsp_bearer_token;
+     string? vss_url = null;
+     boolean vss_allow_http = false;
++    boolean? vss_automatic_backup_enabled = null;
+     boolean vss_allow_empty_restore = false;
+     boolean reuse_addresses = false;
+ };
 diff --git a/src/ldk.rs b/src/ldk.rs
-index 2ff6e98..aff2a1e 100644
+index 2ff6e98..619b628 100644
 --- a/src/ldk.rs
 +++ b/src/ldk.rs
 @@ -109,8 +109,8 @@ use std::collections::HashSet;
@@ -1608,7 +1743,116 @@ index 2ff6e98..aff2a1e 100644
          }
          Event::SplicePending { .. } => {
              // We don't use the splice feature, so this event should never be seen.
-@@ -5518,6 +5803,44 @@ async fn prepare_node(
+@@ -4992,6 +5277,19 @@ impl NodeStartup {
+                     Some(mnemonic_str.clone()),
+                 )
+             };
++        let node_id = match self.external_node_id.as_deref() {
++            Some(node_id) => PublicKey::from_str(node_id).map_err(|error| {
++                APIError::ExternalSignerProtocolError(format!(
++                    "invalid bootstrap node identity: {error}"
++                ))
++            })?,
++            None => signer
++                .get_node_id(lightning::sign::Recipient::Node)
++                .map_err(|_| {
++                    APIError::Unexpected("failed to read signer node identity".to_string())
++                })?,
++        };
++
+         let data_dir = static_state
+             .storage_dir_path
+             .clone()
+@@ -5040,6 +5338,23 @@ impl NodeStartup {
+             )),
+             _ => None,
+         };
++        #[cfg(feature = "vss")]
++        let snapshot_policy = match (&static_state.vss_url, &vss_identity) {
++            (Some(url), Some(_identity)) => {
++                Some(Arc::new(crate::vss_snapshot_policy::SnapshotPolicy::load(
++                    &static_state.storage_dir_path,
++                    bitcoin_network,
++                    url.clone(),
++                    node_id.to_string(),
++                    static_state
++                        .vss_automatic_backup_initial
++                        .load(std::sync::atomic::Ordering::SeqCst),
++                )?))
++            }
++            _ => None,
++        };
++        #[cfg(feature = "vss")]
++        let startup_snapshot_policy = snapshot_policy.clone();
+         // go_online and configure_vss_backup drive blocking rgb-lib HTTP clients;
+         // run them off the async runtime so they don't fail on a single-vCPU host.
+         let (rgb_wallet, rgb_online) = tokio::task::spawn_blocking(move || {
+@@ -5069,7 +5384,7 @@ impl NodeStartup {
+                 let vss_config =
+                     rgb_lib::wallet::vss::VssBackupConfig::new(vss_url, rgb_store_id, signing_key)
+                         .with_encryption(true)
+-                        .with_auto_backup(true)
++                        .with_auto_backup(false)
+                         .with_backup_mode(rgb_lib::wallet::vss::VssBackupMode::Blocking);
+                 // Fail closed: a misconfigured backup must not silently run local-only.
+                 rgb_wallet.configure_vss_backup(vss_config).map_err(|e| {
+@@ -5077,7 +5392,7 @@ impl NodeStartup {
+                         "Failed to configure VSS backup for RGB wallet: {e}"
+                     ))
+                 })?;
+-                tracing::info!("VSS auto-backup (blocking) enabled for RGB wallet");
++                tracing::info!("VSS snapshot client configured; maintained mutation policy owns automatic uploads");
+                 // Auto-backup only tracks local changes; an empty remote (fresh
+                 // wallet or wiped store) needs an explicit upload.
+                 if let Some(client) = rgb_wallet.vss_client() {
+@@ -5085,11 +5400,11 @@ impl NodeStartup {
+                     let info = rt
+                         .block_on(rgb_wallet.vss_backup_info(&client))
+                         .map_err(|e| APIError::FailedVssInit(format!("VSS backup info: {e}")))?;
+-                    if !info.backup_exists {
+-                        rt.block_on(rgb_wallet.vss_backup(&client)).map_err(|e| {
+-                            APIError::FailedVssInit(format!("initial RGB VSS backup failed: {e}"))
+-                        })?;
+-                        tracing::info!("Uploaded RGB wallet backup to empty VSS store");
++                    if let Some(policy) = &startup_snapshot_policy {
++                      if policy.enabled.load(std::sync::atomic::Ordering::SeqCst) && (!info.backup_exists || info.backup_required || policy.pending()) {
++                        policy.backup(&rgb_wallet)?;
++                        tracing::info!("Uploaded initial RGB wallet snapshot");
++                      }
+                     }
+                 }
+             }
+@@ -5133,23 +5448,13 @@ impl NodeStartup {
+         // client per stream avoids running two tokio runtimes for the same
+         // backups and removes the race between the two clients writing
+         // overlapping state.
+-        let rgb_wallet_wrapper = Arc::new(RgbLibWalletWrapper::new(
+-            Arc::new(Mutex::new(rgb_wallet)),
+-            rgb_online,
+-        ));
++        let mut wrapper = RgbLibWalletWrapper::new(Arc::new(Mutex::new(rgb_wallet)), rgb_online);
++        #[cfg(feature = "vss")]
++        {
++            wrapper.snapshot_policy = snapshot_policy;
++        }
++        let rgb_wallet_wrapper = Arc::new(wrapper);
+ 
+-        let node_id = match self.external_node_id.as_deref() {
+-            Some(node_id) => PublicKey::from_str(node_id).map_err(|error| {
+-                APIError::ExternalSignerProtocolError(format!(
+-                    "invalid bootstrap node identity: {error}"
+-                ))
+-            })?,
+-            None => signer
+-                .get_node_id(lightning::sign::Recipient::Node)
+-                .map_err(|_| {
+-                    APIError::Unexpected("failed to read signer node identity".to_string())
+-                })?,
+-        };
+         Ok(Arc::new(CommonState {
+             config: Arc::clone(&static_state.config),
+             signer,
+@@ -5518,6 +5823,44 @@ async fn prepare_node(
  
  async fn start_lightning(
      #[allow(unused_mut)] mut setup: NodeStartup,
@@ -1653,7 +1897,7 @@ index 2ff6e98..aff2a1e 100644
  ) -> Result<(Option<LdkBackgroundServices>, Arc<UnlockedAppState>), APIError> {
      // Defense in depth: no chain backend, manager or worker precedes this check.
      setup.app_state.check_lightning_supported()?;
-@@ -5525,6 +5848,29 @@ async fn start_lightning(
+@@ -5525,6 +5868,29 @@ async fn start_lightning(
      let static_state = &app_state.static_state;
      let unlock_request = setup.unlock_request.clone();
      let gossip_source_config = unlock_request.gossip_source.clone().unwrap_or_default();
@@ -1683,7 +1927,7 @@ index 2ff6e98..aff2a1e 100644
      let kv_store = Arc::clone(&setup.kv_store);
      let external_signer_mode = setup.external_signer_mode;
      let internal_mnemonic = setup.internal_mnemonic.clone();
-@@ -5541,6 +5887,19 @@ async fn start_lightning(
+@@ -5541,6 +5907,19 @@ async fn start_lightning(
      let bitcoin_network = static_state.network;
      let network: Network = bitcoin_network.into();
      let ldk_peer_listening_port = static_state.ldk_peer_listening_port;
@@ -1703,7 +1947,7 @@ index 2ff6e98..aff2a1e 100644
      #[cfg(feature = "vss")]
      let monitor_kv_store = setup.monitor_kv_store.clone().ok_or_else(|| {
          APIError::Unexpected("Lightning monitor store is not available".to_string())
-@@ -5582,6 +5941,9 @@ async fn start_lightning(
+@@ -5582,6 +5961,9 @@ async fn start_lightning(
                  handle.clone(),
                  Arc::clone(&logger),
                  static_state.config.chain.fee_refresh_interval_secs,
@@ -1713,7 +1957,7 @@ index 2ff6e98..aff2a1e 100644
              )
              .await
              {
-@@ -5590,7 +5952,11 @@ async fn start_lightning(
+@@ -5590,7 +5972,11 @@ async fn start_lightning(
              };
  
              // Check that the bitcoind we've connected to is running the network we expect
@@ -1726,7 +1970,7 @@ index 2ff6e98..aff2a1e 100644
              if bitcoind_chain
                  != match bitcoin_network {
                      BitcoinNetwork::Mainnet => "main",
-@@ -5606,7 +5972,11 @@ async fn start_lightning(
+@@ -5606,7 +5992,11 @@ async fn start_lightning(
              // Poll for the best chain tip, used by the channel manager & spv client
              let polled_chain_tip = init::validate_best_block_header(bitcoind_client.as_ref())
                  .await
@@ -1739,7 +1983,7 @@ index 2ff6e98..aff2a1e 100644
              let initial_best_block = polled_chain_tip.to_best_block();
  
              ChainSetup {
-@@ -5639,16 +6009,14 @@ async fn start_lightning(
+@@ -5639,16 +6029,14 @@ async fn start_lightning(
                      Arc::clone(&logger),
                      static_state.config.chain.indexer_timeout_secs,
                      static_state.config.chain.fee_refresh_interval_secs,
@@ -1760,7 +2004,7 @@ index 2ff6e98..aff2a1e 100644
              );
              let initial_best_block = indexer_client
                  .get_best_block()
-@@ -5684,7 +6052,7 @@ async fn start_lightning(
+@@ -5684,7 +6072,7 @@ async fn start_lightning(
      let (chain_monitor, mut channelmonitors): (Arc<ChainMonitor>, _) = {
          let persister = MonitorUpdatingPersisterAsync::new(
              Arc::clone(&monitor_kv_store),
@@ -1769,7 +2013,7 @@ index 2ff6e98..aff2a1e 100644
              Arc::clone(&logger),
              1000,
              Arc::clone(&keys_manager),
-@@ -6090,7 +6458,7 @@ async fn start_lightning(
+@@ -6090,7 +6478,7 @@ async fn start_lightning(
      });
  
      // The UTXO verifier can only attach to a P2P sync, and only after PeerManager
@@ -1778,7 +2022,7 @@ index 2ff6e98..aff2a1e 100644
      let (p2p_gossip_sync_for_verifier, route_handler): (
          Option<Arc<P2PGossipSync>>,
          Arc<RoutingMessageHandler>,
-@@ -6205,61 +6573,110 @@ async fn start_lightning(
+@@ -6205,61 +6593,110 @@ async fn start_lightning(
      // provide a verifier, so announcements are checked whatever the sync mode is.
      if let Some(p2p) = &p2p_gossip_sync_for_verifier {
          let peer_manager_wake = Arc::new({
@@ -1918,7 +2162,7 @@ index 2ff6e98..aff2a1e 100644
      match backend {
          #[cfg(feature = "block-sync")]
          ChainBackend::BlockSync { client, .. } => {
-@@ -6269,7 +6686,7 @@ async fn start_lightning(
+@@ -6269,7 +6706,7 @@ async fn start_lightning(
              let chain_tip =
                  block_sync_chain_tip.expect("block-sync chain tip is set while syncing listeners");
              let mut cache = block_sync_cache;
@@ -1927,7 +2171,7 @@ index 2ff6e98..aff2a1e 100644
                  let chain_poller = poll::ChainPoller::new(client.as_ref(), network);
                  let chain_listener = (
                      chain_monitor_listener,
-@@ -6278,13 +6695,21 @@ async fn start_lightning(
+@@ -6278,13 +6715,21 @@ async fn start_lightning(
                  let mut spv_client =
                      SpvClient::new(chain_tip, chain_poller, &mut cache, &chain_listener);
                  loop {
@@ -1953,7 +2197,7 @@ index 2ff6e98..aff2a1e 100644
                  }
              });
          }
-@@ -6295,19 +6720,19 @@ async fn start_lightning(
+@@ -6295,19 +6740,19 @@ async fn start_lightning(
                  chain_monitor.clone(),
                  output_sweeper.clone(),
              ];
@@ -1980,7 +2224,7 @@ index 2ff6e98..aff2a1e 100644
                  }
              });
          }
-@@ -6508,6 +6933,7 @@ async fn start_lightning(
+@@ -6508,6 +6953,7 @@ async fn start_lightning(
  
      let unlocked_state = Arc::new(LightningState {
          common: Arc::clone(&common),
@@ -1988,7 +2232,7 @@ index 2ff6e98..aff2a1e 100644
          channel_manager: Arc::clone(&channel_manager),
          gossip_source: Arc::clone(&gossip_source),
          inbound_payments,
-@@ -6540,15 +6966,19 @@ async fn start_lightning(
+@@ -6540,15 +6986,19 @@ async fn start_lightning(
          taker_swaps: Arc::clone(&taker_swaps),
      }));
  
@@ -2016,7 +2260,7 @@ index 2ff6e98..aff2a1e 100644
      }
  
      let recent_payments_payment_ids = channel_manager
-@@ -6615,17 +7045,22 @@ async fn start_lightning(
+@@ -6615,17 +7065,22 @@ async fn start_lightning(
      let connect_cm = Arc::clone(&channel_manager);
      let connect_pm = Arc::clone(&peer_manager);
      let connect_db = static_state.db();
@@ -2043,7 +2287,7 @@ index 2ff6e98..aff2a1e 100644
                  return;
              }
              let db = RlnDatabase::new((*connect_db).clone());
-@@ -6637,14 +7072,18 @@ async fn start_lightning(
+@@ -6637,14 +7092,18 @@ async fn start_lightning(
                          .map(|chan| chan.counterparty.node_id)
                          .filter(|id| connect_pm.peer_by_node_id(id).is_none())
                      {
@@ -2066,7 +2310,7 @@ index 2ff6e98..aff2a1e 100644
                              }
                          }
                      }
-@@ -6676,16 +7115,16 @@ async fn start_lightning(
+@@ -6676,16 +7135,16 @@ async fn start_lightning(
      if let Some(link) = external_signer_link_watch {
          let su_channel_manager = Arc::clone(&channel_manager);
          let su_chain_monitor = Arc::clone(&chain_monitor);
@@ -2087,7 +2331,7 @@ index 2ff6e98..aff2a1e 100644
                      return;
                  }
                  if link_event && link.is_connected() {
-@@ -6707,10 +7146,12 @@ async fn start_lightning(
+@@ -6707,10 +7166,12 @@ async fn start_lightning(
                  interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
                  loop {
                      tokio::select! {
@@ -2101,7 +2345,7 @@ index 2ff6e98..aff2a1e 100644
                          return;
                      }
                      su_chain_monitor.signer_unblocked(None);
-@@ -6723,45 +7164,17 @@ async fn start_lightning(
+@@ -6723,45 +7184,17 @@ async fn start_lightning(
          });
      }
  
@@ -2153,7 +2397,7 @@ index 2ff6e98..aff2a1e 100644
              }
              sweep_handler.sweep_stale_state();
          }
-@@ -6771,15 +7184,24 @@ async fn start_lightning(
+@@ -6771,15 +7204,24 @@ async fn start_lightning(
      let chan_man = Arc::clone(&channel_manager);
      let announce_initial_delay_secs = static_state.config.node.announce_initial_delay_secs;
      let announce_refresh_interval_secs = static_state.config.node.announce_refresh_interval_secs;
@@ -2182,7 +2426,7 @@ index 2ff6e98..aff2a1e 100644
              // Don't bother trying to announce if we don't have any public channls, though our
              // peers should drop such an announcement anyway. Note that announcement may not
              // propagate until we have a channel with 6+ confirmations.
-@@ -6808,7 +7230,8 @@ async fn start_lightning(
+@@ -6808,7 +7250,8 @@ async fn start_lightning(
      Ok((
          Some(LdkBackgroundServices {
              stop_processing,
@@ -2192,7 +2436,7 @@ index 2ff6e98..aff2a1e 100644
              peer_manager: peer_manager.clone(),
              bp_exit,
              background_processor: Some(background_processor),
-@@ -6837,6 +7260,8 @@ pub(crate) fn attach_external_signer_transport(
+@@ -6837,6 +7280,8 @@ pub(crate) fn attach_external_signer_transport(
      Ok(ExternalSignerAttachment {
          bootstrap,
          transport,
@@ -2201,7 +2445,7 @@ index 2ff6e98..aff2a1e 100644
      })
  }
  
-@@ -6851,15 +7276,11 @@ impl AppState {
+@@ -6851,15 +7296,11 @@ impl AppState {
          ldk_background_services
              .stop_processing
              .store(true, Ordering::Release);
@@ -2220,7 +2464,7 @@ index 2ff6e98..aff2a1e 100644
          Some(ldk_background_services)
      }
  }
-@@ -6980,13 +7401,19 @@ async fn release_vss_fence(kv_store: Arc<SyncedKvStore>, teardown: VssTeardown)
+@@ -6980,13 +7421,19 @@ async fn release_vss_fence(kv_store: Arc<SyncedKvStore>, teardown: VssTeardown)
  
  // Runs while shutting down, possibly because the background processor itself
  // died, so its outcome is reported instead of unwrapped.
@@ -2245,7 +2489,7 @@ index 2ff6e98..aff2a1e 100644
      }
  }
  
-@@ -7052,7 +7479,16 @@ mod vss_teardown_tests {
+@@ -7052,7 +7499,16 @@ mod vss_teardown_tests {
  }
  
  /// Stop the resources owned by the unlocked session, including wallet-only persistence.
@@ -2263,7 +2507,7 @@ index 2ff6e98..aff2a1e 100644
      tracing::info!("Stopping node services");
      // Wait for wallet operations holding the API mutex, then remove both session owners together.
      // New callers cannot use a wallet after its VSS fence has been handed over; concurrent stops
-@@ -7074,19 +7510,33 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
+@@ -7074,19 +7530,33 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
          )
      });
  
@@ -2299,7 +2543,7 @@ index 2ff6e98..aff2a1e 100644
              }
          }
      }
-@@ -7095,9 +7545,13 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
+@@ -7095,9 +7565,13 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
          .as_mut()
          .and_then(|services| services.background_processor.take())
      {
@@ -2314,7 +2558,7 @@ index 2ff6e98..aff2a1e 100644
      #[cfg(feature = "vss")]
      if let Some((common, monitor_store)) = common_and_monitor {
          let deadline = Instant::now() + VSS_TEARDOWN_TIMEOUT;
-@@ -7112,34 +7566,95 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
+@@ -7112,34 +7586,95 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
              .is_err()
              {
                  worker.abort();
@@ -2963,11 +3207,33 @@ index cadf7fb..3903882 100644
          }
      });
  }
+diff --git a/src/lib.rs b/src/lib.rs
+index 5279eed..f848a55 100644
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -69,6 +69,8 @@ pub mod test_utils;
+ mod uniffi_api;
+ mod utils;
+ #[cfg(feature = "vss")]
++mod vss_snapshot_policy;
++#[cfg(feature = "vss")]
+ mod vss_kv_store;
+ 
+ pub use node::{NodeConfig, NodeHandle};
 diff --git a/src/main.rs b/src/main.rs
-index 027aab1..e34cb3f 100644
+index 027aab1..b6a58d9 100644
 --- a/src/main.rs
 +++ b/src/main.rs
-@@ -362,7 +362,9 @@ async fn shutdown_signal(app_state: Arc<AppState>) {
+@@ -41,6 +41,8 @@ mod swap;
+ mod synced_kv_store;
+ mod utils;
+ #[cfg(feature = "vss")]
++mod vss_snapshot_policy;
++#[cfg(feature = "vss")]
+ mod vss_kv_store;
+ 
+ // the test suite calls into `electrum_client` to wait for electrs to catch up with bitcoind, and
+@@ -362,7 +364,9 @@ async fn shutdown_signal(app_state: Arc<AppState>) {
          tracing::info!("Will shutdown after change state is complete");
          tokio::time::sleep(Duration::from_millis(300)).await;
      }
@@ -3000,10 +3266,16 @@ index 0c75b17..ab46500 100644
      assert!(!*fixture.state.changing_state.lock().unwrap());
  }
 diff --git a/src/mainnet_tests.rs b/src/mainnet_tests.rs
-index ee431cf..8e04a86 100644
+index ee431cf..3655d0b 100644
 --- a/src/mainnet_tests.rs
 +++ b/src/mainnet_tests.rs
-@@ -85,6 +85,7 @@ impl Fixture {
+@@ -80,11 +80,13 @@ impl Fixture {
+                 lsp_base_url: None,
+                 lsp_bearer_token: None,
+                 vss_url: None,
++                vss_automatic_backup_initial: std::sync::atomic::AtomicBool::new(true),
+                 vss_allow_empty_restore: false,
+                 reuse_addresses: false,
                  remote_signer_listen_addr: None,
              }),
              cancel_token: CancellationToken::new(),
@@ -3165,8 +3437,724 @@ index 18c80ee..ac6b491 100644
      /// A `NodeConfig` embedder (a direct Rust consumer, not the uniffi FFI surface — see the `None`
      /// left in `uniffi_api::handle_from_request`) must be able to configure the remote-signer daemon
      /// address; without this field, `NodeHandle`-embedding callers could configure external-signer
+diff --git a/src/rgb.rs b/src/rgb.rs
+index 05dc358..11c3457 100644
+--- a/src/rgb.rs
++++ b/src/rgb.rs
+@@ -283,7 +283,7 @@ impl CommonState {
+             // Keep preparation, signing and completion serialized against other wallet operations.
+             // Persist Initiated before asking the signer: an interrupted call must retain its inputs.
+             let wrapper = &self.rgb_wallet_wrapper;
+-            let mut wallet = wrapper.get_rgb_wallet();
++            let mut wallet = wrapper.get_rgb_wallet_mutating();
+             let prepared = wallet.burn_begin(
+                 wrapper.online,
+                 asset_id,
+@@ -690,14 +690,156 @@ fn validate_burn_signed_psbt(unsigned: &str, signed: &str) -> Result<String, Rgb
+ pub(crate) struct RgbLibWalletWrapper {
+     pub(crate) wallet: Arc<Mutex<RgbLibWallet>>,
+     pub(crate) online: Online,
++    #[cfg(feature = "vss")]
++    pub(crate) snapshot_policy: Option<Arc<crate::vss_snapshot_policy::SnapshotPolicy>>,
++}
++
++/// Public wallet views cover balances, transaction identities/confirmation
++/// state and every known colored/vanilla UTXO. Sync changes no RGB stock data;
++/// stock/contract/receive operations use unconditional mutation admission.
++#[cfg(feature = "vss")]
++fn sync_snapshot(wallet: &mut RgbLibWallet, online: Online) -> Option<serde_json::Value> {
++    std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
++        sync_snapshot_inner(wallet, online)
++    }))
++    .ok()
++    .flatten()
++}
++#[cfg(feature = "vss")]
++fn sync_snapshot_inner(wallet: &mut RgbLibWallet, online: Online) -> Option<serde_json::Value> {
++    let balance = wallet.get_btc_balance(Some(online), true).ok()?;
++    let transactions = wallet.list_transactions(Some(online), true).ok()?;
++    let unspents = wallet.list_unspents(Some(online), false, true).ok()?;
++    fn canonical(value: &mut serde_json::Value) {
++        match value {
++            serde_json::Value::Array(items) => {
++                for item in items.iter_mut() {
++                    canonical(item);
++                }
++                items.sort_by_cached_key(|item| item.to_string());
++            }
++            serde_json::Value::Object(map) => {
++                for item in map.values_mut() {
++                    canonical(item);
++                }
++            }
++            _ => {}
++        }
++    }
++    let mut state = serde_json::to_value((balance, transactions, unspents)).ok()?;
++    canonical(&mut state);
++    Some(state)
++}
++
++pub(crate) struct RgbWalletGuard<'a> {
++    guard: MutexGuard<'a, RgbLibWallet>,
++    mutated: bool,
++    wrapper: &'a RgbLibWalletWrapper,
++    sync_before: Option<(Option<serde_json::Value>, bool)>,
++}
++impl std::ops::Deref for RgbWalletGuard<'_> {
++    type Target = RgbLibWallet;
++    fn deref(&self) -> &Self::Target {
++        &self.guard
++    }
++}
++impl std::ops::DerefMut for RgbWalletGuard<'_> {
++    fn deref_mut(&mut self) -> &mut Self::Target {
++        &mut self.guard
++    }
++}
++impl Drop for RgbWalletGuard<'_> {
++    fn drop(&mut self) {
++        #[cfg(feature = "vss")]
++        if !std::thread::panicking() {
++            if let Some((Some(before), had_pending)) = self.sync_before.take() {
++                if !had_pending
++                    && sync_snapshot(&mut self.guard, self.wrapper.online)
++                        .is_some_and(|after| after == before)
++                {
++                    if let Some(policy) = &self.wrapper.snapshot_policy {
++                        if policy.clear_unchanged_intent().is_ok() {
++                            self.mutated = false;
++                        }
++                    }
++                }
++            }
++        }
++        #[cfg(feature = "vss")]
++        if self.mutated {
++            if let Some(policy) = &self.wrapper.snapshot_policy {
++                if std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
++                    policy.after_mutation(&self.guard)
++                }))
++                .is_err()
++                {
++                    policy
++                        .failed
++                        .store(true, std::sync::atomic::Ordering::SeqCst);
++                    tracing::error!(
++                        "Automatic snapshot task panicked; financial operation result is preserved"
++                    );
++                }
++            }
++        }
++    }
+ }
+ 
+ impl RgbLibWalletWrapper {
+     pub(crate) fn new(wallet: Arc<Mutex<RgbLibWallet>>, online: Online) -> Self {
+-        RgbLibWalletWrapper { wallet, online }
++        RgbLibWalletWrapper {
++            wallet,
++            online,
++            #[cfg(feature = "vss")]
++            snapshot_policy: None,
++        }
++    }
++
++    pub(crate) fn get_rgb_wallet(&self) -> RgbWalletGuard<'_> {
++        let guard = self.lock_rgb_wallet();
++        RgbWalletGuard {
++            guard,
++            mutated: false,
++            wrapper: self,
++            sync_before: None,
++        }
++    }
++
++    /// Explicit admission covers SDK mutators taking &self as well as &mut self.
++    pub(crate) fn get_rgb_wallet_mutating(&self) -> RgbWalletGuard<'_> {
++        let mut guard = self.get_rgb_wallet();
++        guard.mutated = true;
++        #[cfg(feature = "vss")]
++        if let Some(policy) = &self.snapshot_policy {
++            policy.before_mutation();
++        }
++        guard
+     }
+ 
+-    pub(crate) fn get_rgb_wallet(&self) -> MutexGuard<'_, RgbLibWallet> {
++    fn get_rgb_wallet_for_sync(&self, skip_sync: bool) -> RgbWalletGuard<'_> {
++        if skip_sync {
++            return self.get_rgb_wallet();
++        }
++        let mut guard = self.get_rgb_wallet();
++        #[cfg(feature = "vss")]
++        if let Some(policy) = &self.snapshot_policy {
++            let had_pending = policy.pending()
++                || !matches!(
++                    std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| guard
++                        .guard
++                        .backup_info())),
++                    Ok(Ok(false))
++                );
++            let before = sync_snapshot(&mut guard.guard, self.online);
++            // Persist an intent before sync so a process death cannot hide an
++            // incoming transaction merely because the SDK dirty flag omitted it.
++            policy.before_mutation();
++            guard.mutated = true;
++            guard.sync_before = Some((before, had_pending));
++        }
++        guard
++    }
++    fn lock_rgb_wallet(&self) -> MutexGuard<'_, RgbLibWallet> {
+         // In FFI builds a panic crossing `extern "C"` frames aborts via
+         // `panic_cannot_unwind`, cascading to every subsequent wallet op,
+         // so we recover from mutex poisoning instead of propagating.
+@@ -731,7 +873,8 @@ impl RgbLibWalletWrapper {
+     // Upstream API retained through the merge; not yet wired into utexo's flow.
+     #[allow(dead_code)]
+     pub(crate) fn abort_pending_vanilla_tx(&self, txid: String) -> Result<(), RgbLibError> {
+-        self.get_rgb_wallet().abort_pending_vanilla_tx(txid)
++        self.get_rgb_wallet_mutating()
++            .abort_pending_vanilla_tx(txid)
+     }
+ 
+     pub(crate) fn bitcoin_network(&self) -> BitcoinNetwork {
+@@ -746,7 +889,7 @@ impl RgbLibWalletWrapper {
+         transport_endpoints: Vec<String>,
+         min_confirmations: u8,
+     ) -> Result<ReceiveData, RgbLibError> {
+-        self.get_rgb_wallet().blind_receive(
++        self.get_rgb_wallet_mutating().blind_receive(
+             asset_id,
+             assignment,
+             expiration_timestamp,
+@@ -760,7 +903,8 @@ impl RgbLibWalletWrapper {
+         fascia: Fascia,
+         witness_ord: Option<WitnessOrd>,
+     ) -> Result<(), RgbLibError> {
+-        self.get_rgb_wallet().consume_fascia(fascia, witness_ord)
++        self.get_rgb_wallet_mutating()
++            .consume_fascia(fascia, witness_ord)
+     }
+ 
+     pub(crate) fn color_psbt_and_prepare_consume(
+@@ -768,7 +912,7 @@ impl RgbLibWalletWrapper {
+         psbt_to_color: &mut BitcoinPsbt,
+         coloring_info: ColoringInfo,
+     ) -> Result<ColorPrepareResult, RgbLibError> {
+-        self.get_rgb_wallet()
++        self.get_rgb_wallet_mutating()
+             .color_psbt_and_prepare_consume(psbt_to_color, coloring_info, 0, None)
+     }
+ 
+@@ -776,12 +920,12 @@ impl RgbLibWalletWrapper {
+         &self,
+         batch_transfer_idx: i32,
+     ) -> Result<(), RgbLibError> {
+-        self.get_rgb_wallet()
++        self.get_rgb_wallet_mutating()
+             .consume_transfer_fascia(self.online, batch_transfer_idx)
+     }
+ 
+     pub(crate) fn create_consigments(&self, psbt: String) -> Result<(), RgbLibError> {
+-        self.get_rgb_wallet().create_consignments(psbt)
++        self.get_rgb_wallet_mutating().create_consignments(psbt)
+     }
+ 
+     pub(crate) fn create_utxos(
+@@ -792,7 +936,7 @@ impl RgbLibWalletWrapper {
+         fee_rate: u64,
+         skip_sync: bool,
+     ) -> Result<u8, RgbLibError> {
+-        self.get_rgb_wallet().create_utxos(
++        self.get_rgb_wallet_mutating().create_utxos(
+             self.online,
+             up_to,
+             Some(num),
+@@ -810,7 +954,7 @@ impl RgbLibWalletWrapper {
+         fee_rate: u64,
+         skip_sync: bool,
+     ) -> Result<String, RgbLibError> {
+-        self.get_rgb_wallet().create_utxos_begin(
++        self.get_rgb_wallet_mutating().create_utxos_begin(
+             self.online,
+             up_to,
+             Some(num),
+@@ -826,7 +970,7 @@ impl RgbLibWalletWrapper {
+         signed_psbt: String,
+         _skip_sync: bool,
+     ) -> Result<u8, RgbLibError> {
+-        self.get_rgb_wallet()
++        self.get_rgb_wallet_mutating()
+             .create_utxos_end(self.online, signed_psbt)
+     }
+ 
+@@ -836,7 +980,7 @@ impl RgbLibWalletWrapper {
+         no_asset_only: bool,
+         skip_sync: bool,
+     ) -> Result<bool, RgbLibError> {
+-        self.get_rgb_wallet().fail_transfers(
++        self.get_rgb_wallet_mutating().fail_transfers(
+             self.online,
+             batch_transfer_idx,
+             no_asset_only,
+@@ -845,11 +989,12 @@ impl RgbLibWalletWrapper {
+     }
+ 
+     pub(crate) fn get_address(&self) -> Result<String, RgbLibError> {
+-        self.get_rgb_wallet().get_address()
++        self.get_rgb_wallet_mutating().get_address()
+     }
+ 
+     pub(crate) fn rotate_address(&self) -> Result<String, RgbLibError> {
+-        self.get_rgb_wallet().rotate_address(KeychainKind::Internal)
++        self.get_rgb_wallet_mutating()
++            .rotate_address(KeychainKind::Internal)
+     }
+ 
+     pub(crate) fn get_asset_balance(
+@@ -870,7 +1015,8 @@ impl RgbLibWalletWrapper {
+ 
+     pub(crate) fn get_btc_balance(&self, skip_sync: bool) -> Result<BtcBalance, RgbLibError> {
+         let online = if skip_sync { None } else { Some(self.online) };
+-        self.get_rgb_wallet().get_btc_balance(online, skip_sync)
++        self.get_rgb_wallet_for_sync(skip_sync)
++            .get_btc_balance(online, skip_sync)
+     }
+ 
+     pub(crate) fn get_fee_estimation(&self, blocks: u16) -> Result<f64, RgbLibError> {
+@@ -903,7 +1049,7 @@ impl RgbLibWalletWrapper {
+         fee_rate: u64,
+         min_confirmations: u8,
+     ) -> Result<OperationResult, RgbLibError> {
+-        self.get_rgb_wallet().burn(
++        self.get_rgb_wallet_mutating().burn(
+             self.online,
+             asset_id,
+             amount,
+@@ -920,7 +1066,7 @@ impl RgbLibWalletWrapper {
+         fee_rate: u64,
+         min_confirmations: u8,
+     ) -> Result<OperationResult, RgbLibError> {
+-        self.get_rgb_wallet().inflate(
++        self.get_rgb_wallet_mutating().inflate(
+             self.online,
+             asset_id,
+             inflation_amounts,
+@@ -937,7 +1083,7 @@ impl RgbLibWalletWrapper {
+         amounts: Vec<u64>,
+         file_path: Option<String>,
+     ) -> Result<AssetCFA, RgbLibError> {
+-        self.get_rgb_wallet()
++        self.get_rgb_wallet_mutating()
+             .issue_asset_cfa(name, details, precision, amounts, file_path)
+     }
+ 
+@@ -952,7 +1098,7 @@ impl RgbLibWalletWrapper {
+         reject_list_url: Option<String>,
+         issuance_type: Option<IfaIssuanceType>,
+     ) -> Result<AssetIFA, RgbLibError> {
+-        self.get_rgb_wallet().issue_asset_ifa(
++        self.get_rgb_wallet_mutating().issue_asset_ifa(
+             ticker,
+             name,
+             precision,
+@@ -972,7 +1118,7 @@ impl RgbLibWalletWrapper {
+         fee_rate: u64,
+         min_confirmations: u8,
+     ) -> Result<OperationResult, RgbLibError> {
+-        self.get_rgb_wallet().link_ifa(
++        self.get_rgb_wallet_mutating().link_ifa(
+             self.online,
+             parent_contract_id,
+             child_contract_id,
+@@ -989,7 +1135,7 @@ impl RgbLibWalletWrapper {
+         precision: u8,
+         amounts: Vec<u64>,
+     ) -> Result<AssetNIA, RgbLibError> {
+-        self.get_rgb_wallet()
++        self.get_rgb_wallet_mutating()
+             .issue_asset_nia(ticker, name, precision, amounts)
+     }
+ 
+@@ -1002,7 +1148,7 @@ impl RgbLibWalletWrapper {
+         media_file_path: Option<String>,
+         attachments_file_paths: Vec<String>,
+     ) -> Result<AssetUDA, RgbLibError> {
+-        self.get_rgb_wallet().issue_asset_uda(
++        self.get_rgb_wallet_mutating().issue_asset_uda(
+             ticker,
+             name,
+             details,
+@@ -1028,7 +1174,8 @@ impl RgbLibWalletWrapper {
+         skip_sync: bool,
+     ) -> Result<Vec<RgbLibTransaction>, RgbLibError> {
+         let online = if skip_sync { None } else { Some(self.online) };
+-        self.get_rgb_wallet().list_transactions(online, skip_sync)
++        self.get_rgb_wallet_for_sync(skip_sync)
++            .list_transactions(online, skip_sync)
+     }
+ 
+     pub(crate) fn list_transfers(
+@@ -1045,7 +1192,7 @@ impl RgbLibWalletWrapper {
+         skip_sync: bool,
+     ) -> Result<Vec<Unspent>, RgbLibError> {
+         let online = if skip_sync { None } else { Some(self.online) };
+-        self.get_rgb_wallet()
++        self.get_rgb_wallet_for_sync(skip_sync)
+             .list_unspents(online, settled_only, skip_sync)
+     }
+ 
+@@ -1056,7 +1203,7 @@ impl RgbLibWalletWrapper {
+         vout: u32,
+         blinding: u64,
+     ) -> Result<(RgbTransfer, Vec<Assignment>, HashSet<String>), RgbLibError> {
+-        self.get_rgb_wallet().accept_transfer_consignment(
++        self.get_rgb_wallet_mutating().accept_transfer_consignment(
+             self.online,
+             consignment_path,
+             txid,
+@@ -1069,7 +1216,7 @@ impl RgbLibWalletWrapper {
+         &self,
+         recipient_id: String,
+     ) -> Result<Option<OperationResult>, RgbLibError> {
+-        self.get_rgb_wallet()
++        self.get_rgb_wallet_mutating()
+             .provide_out_of_band_ack(self.online, recipient_id)
+     }
+ 
+@@ -1078,11 +1225,8 @@ impl RgbLibWalletWrapper {
+         consignment_path: String,
+         media_file_paths: Vec<String>,
+     ) -> Result<HashMap<i32, RefreshedTransfer>, RgbLibError> {
+-        self.get_rgb_wallet().provide_out_of_band_consignment(
+-            self.online,
+-            consignment_path,
+-            media_file_paths,
+-        )
++        self.get_rgb_wallet_mutating()
++            .provide_out_of_band_consignment(self.online, consignment_path, media_file_paths)
+     }
+ 
+     pub(crate) fn refresh(
+@@ -1091,7 +1235,7 @@ impl RgbLibWalletWrapper {
+         filter: Vec<RefreshFilter>,
+         skip_sync: bool,
+     ) -> Result<RefreshResult, RgbLibError> {
+-        self.get_rgb_wallet()
++        self.get_rgb_wallet_mutating()
+             .refresh(self.online, asset_id, filter, skip_sync)
+     }
+ 
+@@ -1100,7 +1244,7 @@ impl RgbLibWalletWrapper {
+         consignment: RgbTransfer,
+         offchain_txid: String,
+     ) -> Result<(), RgbLibError> {
+-        self.get_rgb_wallet()
++        self.get_rgb_wallet_mutating()
+             .save_new_asset(self.online, consignment, offchain_txid)
+     }
+ 
+@@ -1108,7 +1252,8 @@ impl RgbLibWalletWrapper {
+         &self,
+         contract: RgbContract,
+     ) -> Result<rgb_lib::wallet::rust_only::ImportAssetContractResult, RgbLibError> {
+-        self.get_rgb_wallet().import_asset_contract(contract)
++        self.get_rgb_wallet_mutating()
++            .import_asset_contract(contract)
+     }
+ 
+     pub(crate) fn send(
+@@ -1119,7 +1264,7 @@ impl RgbLibWalletWrapper {
+         min_confirmations: u8,
+         expiration_timestamp: u64,
+     ) -> Result<OperationResult, RgbLibError> {
+-        self.get_rgb_wallet().send(
++        self.get_rgb_wallet_mutating().send(
+             self.online,
+             recipient_map,
+             donation,
+@@ -1141,7 +1286,7 @@ impl RgbLibWalletWrapper {
+         dry_run: bool,
+         lock_time: Option<u32>,
+     ) -> Result<SendBeginResult, RgbLibError> {
+-        self.get_rgb_wallet().send_begin(
++        self.get_rgb_wallet_mutating().send_begin(
+             self.online,
+             recipient_map,
+             donation,
+@@ -1160,8 +1305,14 @@ impl RgbLibWalletWrapper {
+         fee_rate: u64,
+         skip_sync: bool,
+     ) -> Result<String, RgbLibError> {
+-        self.get_rgb_wallet()
+-            .send_btc(self.online, address, amount, fee_rate, skip_sync, None)
++        self.get_rgb_wallet_mutating().send_btc(
++            self.online,
++            address,
++            amount,
++            fee_rate,
++            skip_sync,
++            None,
++        )
+     }
+ 
+     pub(crate) fn send_btc_begin(
+@@ -1173,7 +1324,7 @@ impl RgbLibWalletWrapper {
+     ) -> Result<String, RgbLibError> {
+         // Funding-only path: pin a final (zero) locktime so LDK accepts the
+         // vanilla channel funding tx regardless of the node's chain-tip lag.
+-        self.get_rgb_wallet().send_btc_begin(
++        self.get_rgb_wallet_mutating().send_btc_begin(
+             self.online,
+             address,
+             amount,
+@@ -1185,18 +1336,20 @@ impl RgbLibWalletWrapper {
+     }
+ 
+     pub(crate) fn send_btc_end(&self, signed_psbt: String) -> Result<String, RgbLibError> {
+-        self.get_rgb_wallet().send_btc_end(self.online, signed_psbt)
++        self.get_rgb_wallet_mutating()
++            .send_btc_end(self.online, signed_psbt)
+     }
+ 
+     pub(crate) fn send_end(&self, signed_psbt: String) -> Result<OperationResult, RgbLibError> {
+-        self.get_rgb_wallet().send_end(self.online, signed_psbt)
++        self.get_rgb_wallet_mutating()
++            .send_end(self.online, signed_psbt)
+     }
+ 
+     pub(crate) fn send_end_db_update_only(
+         &self,
+         signed_psbt: String,
+     ) -> Result<OperationResult, RgbLibError> {
+-        self.get_rgb_wallet()
++        self.get_rgb_wallet_mutating()
+             .send_end_db_update_only(self.online, signed_psbt)
+     }
+ 
+@@ -1205,7 +1358,7 @@ impl RgbLibWalletWrapper {
+     }
+ 
+     pub(crate) fn sync(&self, options: SyncOptions) -> Result<(), RgbLibError> {
+-        self.get_rgb_wallet().sync(self.online, options)
++        self.get_rgb_wallet_mutating().sync(self.online, options)
+     }
+ 
+     pub(crate) fn update_witnesses(
+@@ -1213,7 +1366,7 @@ impl RgbLibWalletWrapper {
+         after_height: u32,
+         force_witnesses: Vec<RgbTxid>,
+     ) -> Result<UpdateRes, RgbLibError> {
+-        self.get_rgb_wallet()
++        self.get_rgb_wallet_mutating()
+             .update_witnesses(self.online, after_height, force_witnesses)
+     }
+ 
+@@ -1222,7 +1375,7 @@ impl RgbLibWalletWrapper {
+         witness_id: RgbTxid,
+         witness_ord: WitnessOrd,
+     ) -> Result<(), RgbLibError> {
+-        self.get_rgb_wallet()
++        self.get_rgb_wallet_mutating()
+             .upsert_witness(witness_id, witness_ord)
+     }
+ 
+@@ -1234,7 +1387,7 @@ impl RgbLibWalletWrapper {
+         transport_endpoints: Vec<String>,
+         min_confirmations: u8,
+     ) -> Result<ReceiveData, RgbLibError> {
+-        self.get_rgb_wallet().witness_receive(
++        self.get_rgb_wallet_mutating().witness_receive(
+             asset_id,
+             assignment,
+             expiration_timestamp,
+@@ -1335,7 +1488,7 @@ impl WalletSource for RgbLibWalletWrapper {
+         Box::pin(async move {
+             let network = Network::from(self.bitcoin_network());
+             let unspents = self
+-                .get_rgb_wallet()
++                .get_rgb_wallet_for_sync(false)
+                 .list_unspents_vanilla(self.online, 1, false)
+                 .map_err(|e| {
+                     tracing::error!(error = %e, "failed to list unspents for fee bumping");
+@@ -1378,7 +1531,7 @@ impl WalletSource for RgbLibWalletWrapper {
+ 
+     fn get_change_script<'a>(&'a self) -> AsyncResult<'a, ScriptBuf, ()> {
+         Box::pin(async move {
+-            let address = self.get_rgb_wallet().get_address().map_err(|e| {
++            let address = self.get_rgb_wallet_mutating().get_address().map_err(|e| {
+                 tracing::error!(error = %e, "failed to get change address for fee bumping");
+             })?;
+             let parsed = Address::from_str(&address).map_err(|e| {
+@@ -1643,6 +1796,165 @@ mod wallet_source_tests {
+         RgbLibWalletWrapper::new(Arc::new(Mutex::new(wallet)), Online { id: 0 })
+     }
+ 
++    #[cfg(feature = "vss")]
++    #[test]
++    fn explicit_mutation_marks_paused_wallet_while_read_guards_remain_pure() {
++        let tmp = tempfile::tempdir().unwrap();
++        let policy = Arc::new(
++            crate::vss_snapshot_policy::SnapshotPolicy::load(
++                tmp.path(),
++                BitcoinNetwork::SignetCustom,
++                "https://example.invalid/vss".into(),
++                "test-node".into(),
++                false,
++            )
++            .unwrap(),
++        );
++        let mut wrapper = signetcustom_wallet_source();
++        wrapper.snapshot_policy = Some(policy.clone());
++        {
++            let guard = wrapper.get_rgb_wallet();
++            let _ = guard.get_wallet_data();
++        }
++        assert!(!policy.pending());
++        // A plain guard never auto-admits a mutation simply because an SDK
++        // getter requires &mut self. Admission belongs to the named adapter.
++        {
++            let mut guard = wrapper.get_rgb_wallet();
++            let _ = &mut *guard;
++        }
++        assert!(!policy.pending());
++        wrapper.get_address().unwrap();
++        assert!(policy.pending());
++        assert!(!policy.enabled.load(std::sync::atomic::Ordering::SeqCst));
++        let metadata: serde_json::Value =
++            serde_json::from_str(&policy.metadata().unwrap()).unwrap();
++        assert!(metadata["last_backup"].is_null());
++    }
++
++    #[cfg(feature = "vss")]
++    #[test]
++    fn unchanged_sync_intent_clears_only_its_own_marker() {
++        let tmp = tempfile::tempdir().unwrap();
++        let policy = Arc::new(
++            crate::vss_snapshot_policy::SnapshotPolicy::load(
++                tmp.path(),
++                BitcoinNetwork::SignetCustom,
++                "https://example.invalid/vss".into(),
++                "test-node".into(),
++                true,
++            )
++            .unwrap(),
++        );
++        let mut wrapper = signetcustom_wallet_source();
++        wrapper.snapshot_policy = Some(policy.clone());
++        {
++            let _guard = wrapper.get_rgb_wallet_for_sync(false);
++        }
++        assert!(!policy.pending());
++        assert!(!policy.failed.load(std::sync::atomic::Ordering::SeqCst));
++        // An earlier admitted change/incomplete upload must survive a no-op sync.
++        policy.commit_enabled(false).unwrap();
++        wrapper.get_address().unwrap();
++        assert!(policy.pending());
++        {
++            let _guard = wrapper.get_rgb_wallet_for_sync(false);
++        }
++        assert!(policy.pending());
++        assert!(policy.metadata().unwrap().contains("\"last_backup\":null"));
++    }
++
++    #[cfg(feature = "vss")]
++    #[test]
++    fn every_adapter_state_mutator_uses_explicit_snapshot_admission() {
++        let source = include_str!("rgb.rs");
++        let adapter = source
++            .split("impl RgbLibWalletWrapper {")
++            .nth(1)
++            .unwrap()
++            .split("impl WalletSource")
++            .next()
++            .unwrap();
++        for method in [
++            "abort_pending_vanilla_tx",
++            "blind_receive",
++            "consume_fascia",
++            "color_psbt_and_prepare_consume",
++            "consume_transfer_fascia",
++            "create_consigments",
++            "create_utxos",
++            "create_utxos_begin",
++            "create_utxos_end",
++            "fail_transfers",
++            "get_address",
++            "rotate_address",
++            "burn",
++            "inflate",
++            "issue_asset_cfa",
++            "issue_asset_ifa",
++            "link_ifa",
++            "issue_asset_nia",
++            "issue_asset_uda",
++            "accept_transfer_consignment",
++            "provide_out_of_band_ack",
++            "provide_out_of_band_consignment",
++            "refresh",
++            "save_new_asset",
++            "import_asset_contract",
++            "send",
++            "send_begin",
++            "send_btc",
++            "send_btc_begin",
++            "send_btc_end",
++            "send_end",
++            "send_end_db_update_only",
++            "sync",
++            "update_witnesses",
++            "upsert_witness",
++            "witness_receive",
++        ] {
++            let signature = format!("fn {method}(");
++            let body = adapter
++                .split(&signature)
++                .nth(1)
++                .unwrap_or_else(|| panic!("missing {method}"));
++            let body = body.split("pub(crate) fn ").next().unwrap();
++            assert!(
++                body.contains("get_rgb_wallet_mutating()"),
++                "{method} lacks snapshot admission"
++            );
++        }
++        for method in [
++            "get_asset_balance",
++            "get_asset_metadata",
++            "get_btc_balance",
++            "get_fee_estimation",
++            "get_keys",
++            "get_media_dir",
++            "get_send_consignment_path",
++            "get_tx_height",
++            "list_assets",
++            "list_asset_media",
++            "list_transactions",
++            "list_transfers",
++            "list_unspents",
++            "sign_psbt",
++        ] {
++            let signature = format!("fn {method}(");
++            let body = adapter
++                .split(&signature)
++                .nth(1)
++                .unwrap()
++                .split("pub(crate) fn ")
++                .next()
++                .unwrap();
++            assert!(
++                !body.contains("get_rgb_wallet_mutating()"),
++                "{method} unexpectedly uploads on read"
++            );
++        }
++    }
++
+     #[tokio::test]
+     async fn wallet_source_does_not_panic_on_signetcustom() {
+         let wrapper = signetcustom_wallet_source();
 diff --git a/src/routes.rs b/src/routes.rs
-index b6784be..5123fd2 100644
+index b6784be..a0b28a8 100644
 --- a/src/routes.rs
 +++ b/src/routes.rs
 @@ -1757,6 +1757,9 @@ impl From<WitnessData> for RgbLibWitnessData {
@@ -3207,7 +4195,29 @@ index b6784be..5123fd2 100644
                  .await?;
              db.persist_channel_peer(&peer_pubkey, &peer_addr)?;
          } else {
-@@ -6102,6 +6104,7 @@ mod state_mocks {
+@@ -5789,7 +5791,14 @@ pub(crate) async fn vss_backup(
+         let version = tokio::task::spawn_blocking(move || {
+             let wallet = wrapper.get_rgb_wallet();
+             let rt = vss_client.handle().clone();
+-            rt.block_on(wallet.vss_backup(&vss_client))
++            match &wrapper.snapshot_policy {
++                Some(policy) => policy
++                    .backup(&wallet)
++                    .map_err(|e| rgb_lib::Error::Internal {
++                        details: e.to_string(),
++                    }),
++                None => rt.block_on(wallet.vss_backup(&vss_client)),
++            }
+         })
+         .await
+         .map_err(|e| APIError::Unexpected(format!("VSS backup task failed: {e}")))?
+@@ -6097,11 +6106,13 @@ mod state_mocks {
+                 lsp_base_url: None,
+                 lsp_bearer_token: None,
+                 vss_url: None,
++                vss_automatic_backup_initial: std::sync::atomic::AtomicBool::new(true),
+                 vss_allow_empty_restore: false,
+                 reuse_addresses: false,
                  remote_signer_listen_addr,
              }),
              cancel_token: CancellationToken::new(),
@@ -3216,7 +4226,7 @@ index b6784be..5123fd2 100644
              ldk_background_services: Arc::new(Mutex::new(None)),
              attached_external_signer: Arc::new(Mutex::new(None)),
 diff --git a/src/sdk/mod.rs b/src/sdk/mod.rs
-index 77680dd..8f1d2d7 100644
+index 77680dd..5e96268 100644
 --- a/src/sdk/mod.rs
 +++ b/src/sdk/mod.rs
 @@ -140,6 +140,9 @@ impl Drop for OpenChannelVirtualIntentGuard {
@@ -3238,7 +4248,121 @@ index 77680dd..8f1d2d7 100644
      state: &Arc<AppState>,
  ) -> Result<tokio::sync::MutexGuard<'_, Option<Arc<crate::utils::UnlockedAppState>>>, APIError> {
      check_changing_state(state)?;
-@@ -2307,8 +2310,7 @@ pub(crate) async fn connect_peer(
+@@ -2058,7 +2061,14 @@ pub(crate) async fn vss_backup(state: Arc<AppState>) -> Result<i64, APIError> {
+             let version = tokio::task::spawn_blocking(move || {
+                 let wallet = wrapper.get_rgb_wallet();
+                 let rt = vss_client.handle().clone();
+-                rt.block_on(wallet.vss_backup(&vss_client))
++                match &wrapper.snapshot_policy {
++                    Some(policy) => policy
++                        .backup(&wallet)
++                        .map_err(|e| rgb_lib::Error::Internal {
++                            details: e.to_string(),
++                        }),
++                    None => rt.block_on(wallet.vss_backup(&vss_client)),
++                }
+             })
+             .await
+             .map_err(|e| APIError::Unexpected(format!("VSS backup task failed: {e}")))?
+@@ -2070,6 +2080,97 @@ pub(crate) async fn vss_backup(state: Arc<AppState>) -> Result<i64, APIError> {
+     .await
+ }
+ 
++/// Read the actual remote RGB snapshot status without uploading or clearing a fence.
++/// Raw automatic-backup errors stay private; only their presence crosses the binding.
++pub(crate) async fn vss_backup_info(state: Arc<AppState>) -> Result<String, APIError> {
++    let guard = check_unlocked(&state).await?;
++    let unlocked_state = guard.as_ref().unwrap().clone();
++    #[cfg(not(feature = "vss"))]
++    {
++        let _ = unlocked_state;
++        Err(APIError::Unexpected(
++            "VSS support is not compiled in".to_string(),
++        ))
++    }
++    #[cfg(feature = "vss")]
++    {
++        let vss_client = unlocked_state
++            .rgb_wallet_wrapper
++            .vss_client()
++            .ok_or_else(|| APIError::FailedVssInit("VSS is not configured".to_string()))?;
++        let wrapper = unlocked_state.rgb_wallet_wrapper.clone();
++        let info = tokio::task::spawn_blocking(move || {
++            let wallet = wrapper.get_rgb_wallet();
++            let rt = vss_client.handle().clone();
++            rt.block_on(wallet.vss_backup_info(&vss_client))
++        })
++        .await
++        .map_err(|_| APIError::FailedVssInit("VSS backup status task failed".to_string()))?
++        .map_err(|_| APIError::FailedVssInit("VSS backup status could not be read".to_string()))?;
++        Ok(serde_json::json!({
++            "backup_exists": info.backup_exists,
++            "version": info.server_version,
++            "backup_required": info.backup_required || unlocked_state.rgb_wallet_wrapper.snapshot_policy.as_ref().is_some_and(|p| p.pending()),
++            "last_auto_backup_failed": info.last_auto_backup_error.is_some() || unlocked_state.rgb_wallet_wrapper.snapshot_policy.as_ref().is_some_and(|p| p.failed.load(std::sync::atomic::Ordering::SeqCst))
++        }).to_string())
++    }
++}
++
++#[cfg(feature = "vss")]
++pub(crate) async fn vss_backup_metadata(state: Arc<AppState>) -> Result<String, APIError> {
++    let guard = check_unlocked(&state).await?;
++    let wrapper = guard.as_ref().unwrap().rgb_wallet_wrapper.clone();
++    tokio::task::spawn_blocking(move || {
++        let _wallet = wrapper.get_rgb_wallet();
++        wrapper
++            .snapshot_policy
++            .as_ref()
++            .ok_or_else(|| APIError::FailedVssInit("VSS is not configured".into()))?
++            .metadata()
++    })
++    .await
++    .map_err(|_| APIError::FailedVssInit("VSS metadata task failed".into()))?
++}
++#[cfg(feature = "vss")]
++pub(crate) async fn set_vss_automatic_backup_enabled(
++    state: Arc<AppState>,
++    enabled: bool,
++) -> Result<String, APIError> {
++    crate::utils::no_cancel(async move {
++        let guard = check_unlocked(&state).await?;
++        let wrapper = guard.as_ref().unwrap().rgb_wallet_wrapper.clone();
++        tokio::task::spawn_blocking(move || {
++            let wallet = wrapper.get_rgb_wallet();
++            let policy = wrapper
++                .snapshot_policy
++                .as_ref()
++                .ok_or_else(|| APIError::FailedVssInit("VSS is not configured".into()))?;
++            let previous = policy.enabled.load(std::sync::atomic::Ordering::SeqCst);
++            // Re-enabling checkpoints all pending state before the policy can be acknowledged on.
++            if enabled && !previous {
++                policy.backup(&wallet)?;
++            }
++            policy.commit_enabled(enabled)?;
++            Ok(serde_json::json!({"automatic_backup_enabled":enabled}).to_string())
++        })
++        .await
++        .map_err(|_| APIError::FailedVssInit("VSS policy task failed".into()))?
++    })
++    .await
++}
++
++#[cfg(not(feature = "vss"))]
++pub(crate) async fn vss_backup_metadata(_state: Arc<AppState>) -> Result<String, APIError> {
++    Err(APIError::FailedVssInit("VSS is not compiled in".into()))
++}
++#[cfg(not(feature = "vss"))]
++pub(crate) async fn set_vss_automatic_backup_enabled(
++    _state: Arc<AppState>,
++    _enabled: bool,
++) -> Result<String, APIError> {
++    Err(APIError::FailedVssInit("VSS is not compiled in".into()))
++}
++
+ /// Clears the VSS single-writer fence so a fresh instance can take over a
+ /// store whose previous owner did not release it, for example after a crash
+ /// or an incomplete persistence flush during shutdown.
+@@ -2307,8 +2408,7 @@ pub(crate) async fn connect_peer(
      let (peer_pubkey, peer_addr) = parse_peer_info(peer_pubkey_and_addr.to_string())?;
  
      if let Some(peer_addr) = peer_addr {
@@ -3248,7 +4372,7 @@ index 77680dd..8f1d2d7 100644
          state
              .get_db()
              .persist_channel_peer(&peer_pubkey, &peer_addr)?;
-@@ -3068,8 +3070,7 @@ pub(crate) async fn open_channel(
+@@ -3068,8 +3168,7 @@ pub(crate) async fn open_channel(
          }
      }
      if let Some(peer_addr) = peer_addr {
@@ -3258,7 +4382,13 @@ index 77680dd..8f1d2d7 100644
          state
              .get_db()
              .persist_channel_peer(&peer_pubkey, &peer_addr)?;
-@@ -4834,6 +4835,7 @@ mod tests {
+@@ -4829,11 +4928,13 @@ mod tests {
+                 lsp_bearer_token: None,
+                 database: RwLock::new(Arc::new(database)),
+                 vss_url: None,
++                vss_automatic_backup_initial: std::sync::atomic::AtomicBool::new(true),
+                 vss_allow_empty_restore: false,
+                 reuse_addresses: false,
                  remote_signer_listen_addr: None,
              }),
              cancel_token: CancellationToken::new(),
@@ -3292,10 +4422,16 @@ index 535a698..0d6ace8 100644
          ldk_background_services: Arc::new(Mutex::new(None)),
          attached_external_signer: Arc::new(Mutex::new(None)),
 diff --git a/src/test_utils.rs b/src/test_utils.rs
-index 1282ad3..888d897 100644
+index 1282ad3..257addf 100644
 --- a/src/test_utils.rs
 +++ b/src/test_utils.rs
-@@ -46,6 +46,7 @@ pub fn mock_locked_app_state() -> TestAppState {
+@@ -41,11 +41,13 @@ pub fn mock_locked_app_state() -> TestAppState {
+             lsp_base_url: None,
+             lsp_bearer_token: None,
+             vss_url: None,
++            vss_automatic_backup_initial: std::sync::atomic::AtomicBool::new(true),
+             vss_allow_empty_restore: false,
+             reuse_addresses: false,
              remote_signer_listen_addr: None,
          }),
          cancel_token: CancellationToken::new(),
@@ -4495,37 +5631,21 @@ index 0000000..c9f968e
 +    }
 +}
 diff --git a/src/uniffi_api/mod.rs b/src/uniffi_api/mod.rs
-index 89eb544..629afe9 100644
+index 89eb544..7765237 100644
 --- a/src/uniffi_api/mod.rs
 +++ b/src/uniffi_api/mod.rs
-@@ -1,5 +1,6 @@
+@@ -1,7 +1,10 @@
++pub(crate) mod bip322;
  #[cfg(feature = "vls")]
  mod native_signer;
-+pub(crate) mod bip322;
  pub(crate) mod state;
  mod types;
++#[cfg(feature = "vss")]
++mod vss_restore;
  
-@@ -21,6 +22,19 @@ pub(crate) use state::{clear_uniffi_app_state, set_uniffi_app_state};
- use std::{str::FromStr, sync::Arc};
- pub use types::*;
- 
-+/// This binding does not expose the pinned upstream VSS transport until its
-+/// credential derivation and backup/recovery durability defects are resolved.
-+/// Keep the machine code and public reason shared with compiled build metadata.
-+pub const VSS_SAFETY_POLICY_CODE: &str = "ERR_VSS_UNSAFE_UPSTREAM";
-+pub const VSS_SAFETY_POLICY_REASON: &str =
-+    "VSS is unavailable until upstream backup security and recovery defects are fixed.";
-+
-+fn vss_safety_policy_error() -> RlnError {
-+    RlnError::FailedVssInit(format!(
-+        "{VSS_SAFETY_POLICY_CODE}: {VSS_SAFETY_POLICY_REASON}"
-+    ))
-+}
-+
- pub fn uniffi_healthcheck() -> String {
-     "rgb_lightning_node_uniffi_ready".to_string()
- }
-@@ -71,30 +85,35 @@ fn attach_host_with_expected_key_source(
+ use crate::async_order::AsyncOrderNewHashWire;
+ use crate::core_types::asset_link::{AssetLinkRequest, AssetLinkResponse};
+@@ -71,13 +74,23 @@ fn attach_host_with_expected_key_source(
      host: Arc<dyn ExternalSignerHost>,
      expected: crate::signer::KeySourceFile,
  ) -> Result<(), RlnError> {
@@ -4550,31 +5670,25 @@ index 89eb544..629afe9 100644
      Ok(())
  }
  
- fn handle_from_request(request: SdkInitRequest) -> Result<NodeHandle, RlnError> {
--    let network = network_from_str(&request.network)?;
--    if let Some(url) = &request.vss_url {
--        #[cfg(feature = "vss")]
--        crate::utils::validate_vss_url(url, request.vss_allow_http)
--            .map_err(|e| RlnError::InvalidRequest(e.to_string()))?;
--        #[cfg(not(feature = "vss"))]
--        {
--            let _ = url;
--            return Err(RlnError::InvalidRequest(
--                "vss_url requires the vss feature".to_string(),
--            ));
--        }
-+    // Deny every supplied URL, including empty/malformed values, before any
-+    // runtime, storage or transport is created. Both instance and compatibility
-+    // global FFI initialization use this admission point. Never silently strip
-+    // the URL and open a wallet that the caller believes is backed up.
-+    if request.vss_url.is_some() {
-+        return Err(vss_safety_policy_error());
-     }
-+    let network = network_from_str(&request.network)?;
-     let config = NodeConfig {
-         storage_dir_path: std::path::PathBuf::from(request.storage_dir_path),
-         daemon_listening_port: request.daemon_listening_port,
-@@ -417,12 +436,9 @@ impl SdkNode {
+@@ -119,7 +132,16 @@ fn handle_from_request(request: SdkInitRequest) -> Result<NodeHandle, RlnError>
+         // surface (and mobile-side bindings) for remote-signer support is a separate, larger change.
+         remote_signer_listen_addr: None,
+     };
+-    block_on_app(NodeHandle::new(config))
++    let handle = block_on_app(NodeHandle::new(config))?;
++    handle
++        .app_state()
++        .static_state
++        .vss_automatic_backup_initial
++        .store(
++            request.vss_automatic_backup_enabled.unwrap_or(true),
++            std::sync::atomic::Ordering::SeqCst,
++        );
++    Ok(handle)
+ }
+ 
+ fn send_rgb_from_state(
+@@ -417,12 +439,9 @@ impl SdkNode {
          Ok(Self { handle })
      }
  
@@ -4589,34 +5703,53 @@ index 89eb544..629afe9 100644
      }
  
      pub fn init(&self, password: String, mnemonic: Option<String>) -> Result<String, RlnError> {
-@@ -461,21 +477,14 @@ impl SdkNode {
-         Ok(())
+@@ -478,6 +497,45 @@ impl SdkNode {
+         Ok(version)
      }
  
--    pub fn vss_clear_fence(&self, request: SdkVssClearFenceRequest) -> Result<(), RlnError> {
--        let state = self.handle.app_state();
--        block_on_sdk(sdk::vss_clear_fence(
--            state,
--            sdk::VssClearFenceRequest {
--                password: request.password,
--            },
--        ))?;
--        Ok(())
-+    /// VSS transport is disabled by this binding's compiled safety policy.
-+    pub fn vss_clear_fence(&self, _request: SdkVssClearFenceRequest) -> Result<(), RlnError> {
-+        Err(vss_safety_policy_error())
-     }
- 
-+    /// VSS transport is disabled by this binding's compiled safety policy.
-     pub fn vss_backup(&self) -> Result<i64, RlnError> {
--        let state = self.handle.app_state();
--        let version = block_on_sdk(sdk::vss_backup(state))?;
--        Ok(version)
-+        Err(vss_safety_policy_error())
-     }
- 
++    /// Read remote backup status; requires an already-unlocked node.
++    pub fn vss_backup_info(&self) -> Result<String, RlnError> {
++        block_on_sdk(sdk::vss_backup_info(self.handle.app_state()))
++    }
++
++    pub fn vss_backup_metadata(&self) -> Result<String, RlnError> {
++        block_on_sdk(sdk::vss_backup_metadata(self.handle.app_state()))
++    }
++    pub fn set_vss_automatic_backup_enabled(&self, enabled: bool) -> Result<String, RlnError> {
++        block_on_sdk(sdk::set_vss_automatic_backup_enabled(
++            self.handle.app_state(),
++            enabled,
++        ))
++    }
++
++    /// Restore a pre-existing authenticated RGB archive before any wallet unlock.
++    pub fn prepare_vss_restore(&self) -> Result<String, RlnError> {
++        #[cfg(feature = "vss")]
++        {
++            block_on_sdk(vss_restore::prepare(self.handle.app_state()))
++        }
++        #[cfg(not(feature = "vss"))]
++        {
++            Err(RlnError::FailedVssInit("VSS is not compiled in".into()))
++        }
++    }
++
++    /// Read locally authenticated restore provenance and actual current unlock state.
++    pub fn vss_restore_info(&self) -> Result<String, RlnError> {
++        #[cfg(feature = "vss")]
++        {
++            block_on_sdk(vss_restore::info(self.handle.app_state()))
++        }
++        #[cfg(not(feature = "vss"))]
++        {
++            Ok("null".into())
++        }
++    }
++
      pub fn connectpeer(&self, peer_pubkey_and_addr: String) -> Result<(), RlnError> {
-@@ -1751,8 +1760,17 @@ impl SdkNode {
+         let state = self.handle.app_state();
+         block_on_sdk(sdk::connect_peer(state, peer_pubkey_and_addr))?;
+@@ -1751,8 +1809,23 @@ impl SdkNode {
      ) -> Result<(), RlnError> {
          let state = self.handle.app_state();
          let expected = key_source_from_uniffi_bootstrap(signer.bootstrap()?);
@@ -4625,18 +5758,24 @@ index 89eb544..629afe9 100644
 +        let host: Arc<dyn ExternalSignerHost> = signer.clone();
 +        attach_host_with_expected_key_source(&state, host, expected)?;
 +        let mut attached = state.get_attached_external_signer();
-+        if state.cancel_token.is_cancelled() { return Err(RlnError::NotInitialized("node is shut down".into())); }
-+        let attachment = attached.as_mut().ok_or_else(|| RlnError::ExternalSignerUnavailable("native signer detached".into()))?;
++        if state.cancel_token.is_cancelled() {
++            return Err(RlnError::NotInitialized("node is shut down".into()));
++        }
++        let attachment = attached
++            .as_mut()
++            .ok_or_else(|| RlnError::ExternalSignerUnavailable("native signer detached".into()))?;
 +        // Bind only after bootstrap identity has been checked by the normal attachment path.
 +        crate::signer::validate_key_source_matches_bootstrap(
-+            &key_source_from_uniffi_bootstrap(signer.bootstrap()?), &attachment.bootstrap,
-+        ).map_err(|_| RlnError::ExternalSignerMismatch("native signer attachment changed".into()))?;
++            &key_source_from_uniffi_bootstrap(signer.bootstrap()?),
++            &attachment.bootstrap,
++        )
++        .map_err(|_| RlnError::ExternalSignerMismatch("native signer attachment changed".into()))?;
 +        attachment.message_signer = Some(signer);
 +        Ok(())
      }
  
      #[allow(clippy::too_many_arguments)]
-@@ -1795,15 +1813,18 @@ pub fn sdk_initialize(request: SdkInitRequest) -> Result<(), RlnError> {
+@@ -1795,15 +1868,18 @@ pub fn sdk_initialize(request: SdkInitRequest) -> Result<(), RlnError> {
      Ok(())
  }
  
@@ -4663,7 +5802,7 @@ index 89eb544..629afe9 100644
  }
  
  pub fn sdk_init_with_external_signer(
-@@ -2053,3 +2074,67 @@ impl crate::signer::ExternalSignerTransport for UniffiExternalSignerTransport {
+@@ -2053,3 +2129,112 @@ impl crate::signer::ExternalSignerTransport for UniffiExternalSignerTransport {
  
  #[cfg(test)]
  mod tests;
@@ -4695,39 +5834,84 @@ index 89eb544..629afe9 100644
 +            let guard = sdk::check_unlocked(&state).await?;
 +            let _unlocked = guard.as_ref().unwrap();
 +            let attached = state.get_attached_external_signer();
-+            let attachment = attached.as_ref()
-+                .ok_or_else(|| crate::error::APIError::ExternalSignerUnavailable("BIP-322 requires an attached native signer".into()))?;
-+            validate_message_signer_wallet_identity(&state.static_state.storage_dir_path, &_unlocked.node_id, attachment)?;
-+            let signer = attachment.message_signer.as_ref()
-+                .ok_or_else(|| crate::error::APIError::ExternalSignerUnavailable("BIP-322 requires an attached native signer".into()))?;
-+            let address = signer.message_signing_address().map_err(|e| crate::error::APIError::Unexpected(e.to_string()))?;
-+            bip322::parse_address(&address, state.static_state.network.into()).map_err(crate::error::APIError::Unexpected)?;
++            let attachment = attached.as_ref().ok_or_else(|| {
++                crate::error::APIError::ExternalSignerUnavailable(
++                    "BIP-322 requires an attached native signer".into(),
++                )
++            })?;
++            validate_message_signer_wallet_identity(
++                &state.static_state.storage_dir_path,
++                &_unlocked.node_id,
++                attachment,
++            )?;
++            let signer = attachment.message_signer.as_ref().ok_or_else(|| {
++                crate::error::APIError::ExternalSignerUnavailable(
++                    "BIP-322 requires an attached native signer".into(),
++                )
++            })?;
++            let address = signer
++                .message_signing_address()
++                .map_err(|e| crate::error::APIError::Unexpected(e.to_string()))?;
++            bip322::parse_address(&address, state.static_state.network.into())
++                .map_err(crate::error::APIError::Unexpected)?;
 +            Ok(address)
 +        })
 +    }
 +    #[cfg(feature = "vls")]
-+    pub fn sign_message_bip322(&self, message: String, address: String) -> Result<String, RlnError> {
++    pub fn sign_message_bip322(
++        &self,
++        message: String,
++        address: String,
++    ) -> Result<String, RlnError> {
 +        let state = self.handle.app_state();
 +        state::block_on_sdk(async {
 +            let guard = sdk::check_unlocked(&state).await?;
 +            let _unlocked = guard.as_ref().unwrap();
 +            let attached = state.get_attached_external_signer();
-+            let attachment = attached.as_ref()
-+                .ok_or_else(|| crate::error::APIError::ExternalSignerUnavailable("BIP-322 requires an attached native signer".into()))?;
-+            validate_message_signer_wallet_identity(&state.static_state.storage_dir_path, &_unlocked.node_id, attachment)?;
-+            let signer = attachment.message_signer.as_ref()
-+                .ok_or_else(|| crate::error::APIError::ExternalSignerUnavailable("BIP-322 requires an attached native signer".into()))?;
-+            bip322::parse_address(&address, state.static_state.network.into()).map_err(crate::error::APIError::Unexpected)?;
-+            signer.sign_message_bip322(&message, &address).map_err(|e| crate::error::APIError::Unexpected(e.to_string()))
++            let attachment = attached.as_ref().ok_or_else(|| {
++                crate::error::APIError::ExternalSignerUnavailable(
++                    "BIP-322 requires an attached native signer".into(),
++                )
++            })?;
++            validate_message_signer_wallet_identity(
++                &state.static_state.storage_dir_path,
++                &_unlocked.node_id,
++                attachment,
++            )?;
++            let signer = attachment.message_signer.as_ref().ok_or_else(|| {
++                crate::error::APIError::ExternalSignerUnavailable(
++                    "BIP-322 requires an attached native signer".into(),
++                )
++            })?;
++            bip322::parse_address(&address, state.static_state.network.into())
++                .map_err(crate::error::APIError::Unexpected)?;
++            signer
++                .sign_message_bip322(&message, &address)
++                .map_err(|e| crate::error::APIError::Unexpected(e.to_string()))
 +        })
 +    }
-+    pub fn verify_message_bip322(&self, message: String, address: String, signature: String) -> Result<bool, RlnError> {
++    pub fn verify_message_bip322(
++        &self,
++        message: String,
++        address: String,
++        signature: String,
++    ) -> Result<bool, RlnError> {
 +        let state = self.handle.app_state();
-+        bip322::verify(&message, &address, &signature, state.static_state.network.into())
-+            .map_err(RlnError::InvalidRequest)
++        bip322::verify(
++            &message,
++            &address,
++            &signature,
++            state.static_state.network.into(),
++        )
++        .map_err(RlnError::InvalidRequest)
 +    }
 +}
-+pub fn verify_message_bip322(message: String, address: String, signature: String, network: String) -> Result<bool, RlnError> {
++pub fn verify_message_bip322(
++    message: String,
++    address: String,
++    signature: String,
++    network: String,
++) -> Result<bool, RlnError> {
 +    let network = network_from_str(&network)?;
 +    bip322::verify(&message, &address, &signature, network.into()).map_err(RlnError::InvalidRequest)
 +}
@@ -5090,10 +6274,10 @@ index 42f6c14..a587e0d 100644
 +    }
  }
 diff --git a/src/uniffi_api/tests.rs b/src/uniffi_api/tests.rs
-index 27ea384..de2daaa 100644
+index 27ea384..d4abc7f 100644
 --- a/src/uniffi_api/tests.rs
 +++ b/src/uniffi_api/tests.rs
-@@ -176,6 +176,101 @@ mod uniffi_smoke_tests {
+@@ -176,6 +176,124 @@ mod uniffi_smoke_tests {
          mock_locked_state_for_network(BitcoinNetwork::Regtest)
      }
  
@@ -5129,21 +6313,44 @@ index 27ea384..de2daaa 100644
 +        let active_id = bitcoin::secp256k1::PublicKey::from_str(&key_source.node_id).unwrap();
 +        let make_attachment = |signer: Arc<NativeExternalSigner>| {
 +            let host: Arc<dyn ExternalSignerHost> = signer;
-+            let transport: Arc<dyn crate::signer::ExternalSignerTransport> = Arc::new(UniffiExternalSignerTransport::new(host));
++            let transport: Arc<dyn crate::signer::ExternalSignerTransport> =
++                Arc::new(UniffiExternalSignerTransport::new(host));
 +            crate::ldk::attach_external_signer_transport(transport).unwrap()
 +        };
 +        let own_attachment = make_attachment(signer.clone());
 +        let mut wrong_attachment = make_attachment(foreign.clone());
-+        assert!(validate_message_signer_wallet_identity(directory.path(), &active_id, &own_attachment).is_err());
++        assert!(validate_message_signer_wallet_identity(
++            directory.path(),
++            &active_id,
++            &own_attachment
++        )
++        .is_err());
 +        crate::signer::write_key_source_file(directory.path(), &key_source).unwrap();
-+        validate_message_signer_wallet_identity(directory.path(), &active_id, &own_attachment).unwrap();
-+        assert!(validate_message_signer_wallet_identity(directory.path(), &active_id, &wrong_attachment).is_err());
++        validate_message_signer_wallet_identity(directory.path(), &active_id, &own_attachment)
++            .unwrap();
++        assert!(validate_message_signer_wallet_identity(
++            directory.path(),
++            &active_id,
++            &wrong_attachment
++        )
++        .is_err());
 +        // A forged matching node ID must not conceal a different descriptor account xpub.
 +        wrong_attachment.bootstrap.identity.node_id = key_source.node_id.clone();
-+        assert!(validate_message_signer_wallet_identity(directory.path(), &active_id, &wrong_attachment).is_err());
++        assert!(validate_message_signer_wallet_identity(
++            directory.path(),
++            &active_id,
++            &wrong_attachment
++        )
++        .is_err());
 +        std::fs::write(directory.path().join("key_source.json"), b"malformed").unwrap();
-+        assert!(validate_message_signer_wallet_identity(directory.path(), &active_id, &own_attachment).is_err());
-+        signer.shutdown().unwrap(); foreign.shutdown().unwrap();
++        assert!(validate_message_signer_wallet_identity(
++            directory.path(),
++            &active_id,
++            &own_attachment
++        )
++        .is_err());
++        signer.shutdown().unwrap();
++        foreign.shutdown().unwrap();
 +    }
 +
 +    #[cfg(feature = "vls")]
@@ -5195,7 +6402,13 @@ index 27ea384..de2daaa 100644
      fn mock_locked_state_for_network(network: BitcoinNetwork) -> Arc<AppState> {
          let tmp = tempfile::tempdir().unwrap();
          let db_path = tmp.path().join("rln_db");
-@@ -207,6 +302,7 @@ mod uniffi_smoke_tests {
+@@ -202,11 +320,13 @@ mod uniffi_smoke_tests {
+                 lsp_base_url: None,
+                 lsp_bearer_token: None,
+                 vss_url: None,
++                vss_automatic_backup_initial: std::sync::atomic::AtomicBool::new(true),
+                 vss_allow_empty_restore: false,
+                 reuse_addresses: false,
                  remote_signer_listen_addr: None,
              }),
              cancel_token: CancellationToken::new(),
@@ -5203,33 +6416,913 @@ index 27ea384..de2daaa 100644
              unlocked_app_state: Arc::new(TokioMutex::new(None)),
              ldk_background_services: Arc::new(Mutex::new(None)),
              attached_external_signer: Arc::new(Mutex::new(None)),
-@@ -608,7 +704,7 @@ mod uniffi_smoke_tests {
+@@ -608,7 +728,7 @@ mod uniffi_smoke_tests {
      }
  
      #[test]
 -    fn sdk_create_rejects_invalid_vss_url() {
-+    fn sdk_create_rejects_configured_vss_url_by_safety_policy() {
++    fn sdk_create_rejects_insecure_vss_url_before_storage() {
          let res = SdkNode::create(SdkInitRequest {
              storage_dir_path: "/tmp/rln_vss_validation_test".to_string(),
              daemon_listening_port: 3001,
-@@ -624,7 +720,14 @@ mod uniffi_smoke_tests {
+@@ -621,10 +741,16 @@ mod uniffi_smoke_tests {
+             lsp_bearer_token: None,
+             vss_url: Some("http://example.com/vss".to_string()),
+             vss_allow_http: false,
++            vss_automatic_backup_enabled: None,
              vss_allow_empty_restore: false,
              reuse_addresses: false,
          });
 -        assert!(matches!(res, Err(RlnError::InvalidRequest(_))));
 +        let error = match res {
 +            Err(error) => error,
-+            Ok(_) => panic!("VSS configuration must be denied"),
++            Ok(_) => panic!("Insecure VSS configuration must be denied"),
 +        };
-+        assert!(matches!(error, RlnError::FailedVssInit(_)));
-+        assert_eq!(error.to_string(), format!(
-+            "{VSS_SAFETY_POLICY_CODE}: {VSS_SAFETY_POLICY_REASON}"
-+        ));
++        assert!(matches!(error, RlnError::InvalidRequest(_)));
++        assert!(error.to_string().contains("HTTPS"));
      }
  }
  
+diff --git a/src/uniffi_api/types.rs b/src/uniffi_api/types.rs
+index fb7517b..eb597f4 100644
+--- a/src/uniffi_api/types.rs
++++ b/src/uniffi_api/types.rs
+@@ -861,6 +861,7 @@ pub struct SdkInitRequest {
+     pub lsp_bearer_token: Option<String>,
+     pub vss_url: Option<String>,
+     pub vss_allow_http: bool,
++    pub vss_automatic_backup_enabled: Option<bool>,
+     pub vss_allow_empty_restore: bool,
+     pub reuse_addresses: bool,
+ }
+diff --git a/src/uniffi_api/vss_restore.rs b/src/uniffi_api/vss_restore.rs
+new file mode 100644
+index 0000000..e500852
+--- /dev/null
++++ b/src/uniffi_api/vss_restore.rs
+@@ -0,0 +1,860 @@
++//! Maintained external-signer RGB restore admission. Uses public transport and
++//! crypto APIs, with bounded extraction and a local, destination-bound receipt.
++use crate::{error::APIError, signer::read_key_source_file, utils::AppState};
++use bitcoin::hashes::{
++    hmac::{Hmac, HmacEngine},
++    sha256, Hash, HashEngine,
++};
++use rand::RngCore;
++use rgb_lib::wallet::vss::{VssBackupClient, VssBackupConfig};
++use serde::{Deserialize, Serialize};
++#[cfg(unix)]
++use std::os::{
++    fd::AsRawFd,
++    unix::fs::{MetadataExt, OpenOptionsExt, PermissionsExt},
++};
++use std::{
++    collections::HashSet,
++    fs::{self, File, OpenOptions},
++    io::{Cursor, Read, Write},
++    path::{Path, PathBuf},
++    sync::Arc,
++};
++
++const RECEIPT: &str = ".utexo-vss-restore-v1.json";
++const KEY: &str = ".utexo-vss-restore-key-v1";
++const MAX_COMPRESSED: usize = 128 * 1024 * 1024;
++const MAX_INFLATED: u64 = 512 * 1024 * 1024;
++const MAX_ENTRIES: usize = 25000;
++const MAX_MANIFEST: u64 = 65536;
++const MAX_RECEIPT: u64 = 4096;
++
++fn error(code: &str) -> APIError {
++    APIError::FailedVssInit(code.to_owned())
++}
++fn digest(bytes: &[u8]) -> String {
++    sha256::Hash::hash(bytes).to_string()
++}
++fn valid_fp(s: &str) -> bool {
++    s.len() == 8
++        && s.bytes()
++            .all(|c| c.is_ascii_digit() || (b'a'..=b'f').contains(&c))
++}
++
++struct Context {
++    base: PathBuf,
++    network: String,
++    node_id: String,
++    fp: String,
++    vanilla: String,
++    colored: String,
++    endpoint: String,
++    endpoint_hash: String,
++    target_hash: String,
++    signing_key: rgb_lib::bitcoin::secp256k1::SecretKey,
++    store_id: String,
++}
++impl Context {
++    fn new(state: &AppState) -> Result<Self, APIError> {
++        let configured = &state.static_state;
++        let endpoint = configured
++            .vss_url
++            .clone()
++            .ok_or_else(|| error("VSS_RESTORE_NOT_CONFIGURED"))?;
++        let meta = fs::symlink_metadata(&configured.storage_dir_path)
++            .map_err(|_| error("VSS_RESTORE_INVALID_TARGET"))?;
++        if !meta.is_dir() || meta.file_type().is_symlink() {
++            return Err(error("VSS_RESTORE_INVALID_TARGET"));
++        }
++        let base = fs::canonicalize(&configured.storage_dir_path)
++            .map_err(|_| error("VSS_RESTORE_INVALID_TARGET"))?;
++        let source = read_key_source_file(&base)
++            .map_err(|_| error("VSS_RESTORE_INVALID_IDENTITY"))?
++            .ok_or_else(|| error("VSS_RESTORE_EXTERNAL_SIGNER_REQUIRED"))?;
++        if source.mode != crate::signer::key_source::EXTERNAL_SIGNER_MODE_V1
++            || !valid_fp(&source.master_fingerprint)
++            || source
++                .node_id
++                .parse::<bitcoin::secp256k1::PublicKey>()
++                .is_err()
++            || source
++                .account_xpub_vanilla
++                .parse::<bitcoin::bip32::Xpub>()
++                .is_err()
++            || source
++                .account_xpub_colored
++                .parse::<bitcoin::bip32::Xpub>()
++                .is_err()
++        {
++            return Err(error("VSS_RESTORE_INVALID_IDENTITY"));
++        }
++        let identity = crate::ldk::derive_vss_identity_from_key_source(&source)?;
++        let network = format!("{:?}", configured.network).to_lowercase();
++        let target_hash = digest(
++            base.join(&source.master_fingerprint)
++                .as_os_str()
++                .as_encoded_bytes(),
++        );
++        let endpoint_hash = digest(endpoint.as_bytes());
++        Ok(Self {
++            base,
++            network,
++            node_id: source.node_id,
++            fp: source.master_fingerprint,
++            vanilla: source.account_xpub_vanilla,
++            colored: source.account_xpub_colored,
++            endpoint,
++            endpoint_hash,
++            target_hash,
++            signing_key: identity.signing_key,
++            store_id: format!("{}_rgb", identity.pubkey_hex),
++        })
++    }
++    fn config(&self) -> VssBackupConfig {
++        VssBackupConfig::new(
++            self.endpoint.clone(),
++            self.store_id.clone(),
++            self.signing_key,
++        )
++        .with_encryption(true)
++    }
++    fn result(&self, version: Option<i64>) -> serde_json::Value {
++        serde_json::json!({
++        "restored": version.is_some(), "status": if version.is_some() {"restored"} else {"not_found"},
++        "network": self.network, "node_id": self.node_id, "master_fingerprint": self.fp, "version": version })
++    }
++}
++
++#[derive(Clone, Serialize, Deserialize)]
++#[serde(deny_unknown_fields)]
++struct Fields {
++    schema_version: u8,
++    network: String,
++    node_id: String,
++    master_fingerprint: String,
++    version: i64,
++    endpoint_sha256: String,
++    target_sha256: String,
++    manifest_identity_sha256: String,
++}
++#[derive(Serialize, Deserialize)]
++#[serde(deny_unknown_fields)]
++struct Receipt {
++    fields: Fields,
++    mac: String,
++}
++fn mac(key: &[u8], fields: &Fields) -> Result<String, APIError> {
++    let bytes = serde_json::to_vec(fields).map_err(|_| error("VSS_RESTORE_INVALID_RECEIPT"))?;
++    let mut engine = HmacEngine::<sha256::Hash>::new(key);
++    engine.input(&bytes);
++    Ok(Hmac::<sha256::Hash>::from_engine(engine).to_string())
++}
++fn private_read(path: &Path, maximum: u64) -> Result<Vec<u8>, APIError> {
++    let mut options = OpenOptions::new();
++    options.read(true);
++    #[cfg(unix)]
++    options.custom_flags(libc::O_NOFOLLOW);
++    let file = options
++        .open(path)
++        .map_err(|_| error("VSS_RESTORE_INVALID_RECEIPT"))?;
++    let meta = file
++        .metadata()
++        .map_err(|_| error("VSS_RESTORE_INVALID_RECEIPT"))?;
++    #[cfg(unix)]
++    if meta.uid() != unsafe { libc::geteuid() } || meta.mode() & 0o777 != 0o600 || meta.nlink() != 1
++    {
++        return Err(error("VSS_RESTORE_INVALID_RECEIPT"));
++    }
++    if !meta.is_file() || meta.len() > maximum {
++        return Err(error("VSS_RESTORE_INVALID_RECEIPT"));
++    }
++    let mut bytes = Vec::new();
++    file.take(maximum + 1)
++        .read_to_end(&mut bytes)
++        .map_err(|_| error("VSS_RESTORE_INVALID_RECEIPT"))?;
++    if bytes.len() as u64 > maximum {
++        return Err(error("VSS_RESTORE_INVALID_RECEIPT"));
++    }
++    Ok(bytes)
++}
++fn read_key(ctx: &Context) -> Result<Vec<u8>, APIError> {
++    let key = private_read(&ctx.base.join(KEY), 32)?;
++    if key.len() != 32 {
++        return Err(error("VSS_RESTORE_INVALID_RECEIPT"));
++    }
++    Ok(key)
++}
++#[cfg(unix)]
++fn promote(
++    source_parent: &File,
++    source: &str,
++    target_parent: &File,
++    target: &str,
++) -> Result<(), APIError> {
++    let a = std::ffi::CString::new(source).map_err(|_| error("VSS_RESTORE_INVALID_TARGET"))?;
++    let b = std::ffi::CString::new(target).map_err(|_| error("VSS_RESTORE_INVALID_TARGET"))?;
++    #[cfg(target_vendor = "apple")]
++    let result = unsafe {
++        libc::renameatx_np(
++            source_parent.as_raw_fd(),
++            a.as_ptr(),
++            target_parent.as_raw_fd(),
++            b.as_ptr(),
++            libc::RENAME_EXCL,
++        )
++    };
++    #[cfg(any(target_os = "linux", target_os = "android"))]
++    let result = unsafe {
++        libc::syscall(
++            libc::SYS_renameat2,
++            source_parent.as_raw_fd(),
++            a.as_ptr(),
++            target_parent.as_raw_fd(),
++            b.as_ptr(),
++            libc::RENAME_NOREPLACE,
++        ) as libc::c_int
++    };
++    #[cfg(not(any(target_vendor = "apple", target_os = "linux", target_os = "android")))]
++    return Err(error("VSS_RESTORE_ATOMIC_PROMOTION_UNAVAILABLE"));
++    if result != 0 {
++        return Err(error("VSS_RESTORE_TARGET_CONFLICT"));
++    }
++    Ok(())
++}
++#[cfg(not(unix))]
++fn promote(_: &File, _: &str, _: &File, _: &str) -> Result<(), APIError> {
++    Err(error("VSS_RESTORE_ATOMIC_PROMOTION_UNAVAILABLE"))
++}
++fn open_directory(path: &Path) -> Result<File, APIError> {
++    let mut options = OpenOptions::new();
++    options.read(true);
++    #[cfg(unix)]
++    options.custom_flags(libc::O_DIRECTORY | libc::O_NOFOLLOW);
++    let file = options
++        .open(path)
++        .map_err(|_| error("VSS_RESTORE_INVALID_TARGET"))?;
++    let meta = file
++        .metadata()
++        .map_err(|_| error("VSS_RESTORE_INVALID_TARGET"))?;
++    if !meta.is_dir() {
++        return Err(error("VSS_RESTORE_INVALID_TARGET"));
++    }
++    #[cfg(unix)]
++    if meta.uid() != unsafe { libc::geteuid() } {
++        return Err(error("VSS_RESTORE_INVALID_TARGET"));
++    }
++    Ok(file)
++}
++fn receipt_key(ctx: &Context, base: &File) -> Result<Vec<u8>, APIError> {
++    if fs::symlink_metadata(ctx.base.join(KEY)).is_ok() {
++        return read_key(ctx);
++    }
++    let mut temp = tempfile::Builder::new()
++        .prefix(".vss-receipt-key-")
++        .tempfile_in(&ctx.base)
++        .map_err(|_| error("VSS_RESTORE_LOCAL_WRITE_FAILED"))?;
++    let mut key = [0u8; 32];
++    rand::thread_rng().fill_bytes(&mut key);
++    temp.write_all(&key)
++        .and_then(|_| temp.as_file().sync_all())
++        .map_err(|_| error("VSS_RESTORE_LOCAL_WRITE_FAILED"))?;
++    let filename = temp
++        .path()
++        .file_name()
++        .and_then(|v| v.to_str())
++        .ok_or_else(|| error("VSS_RESTORE_LOCAL_WRITE_FAILED"))?;
++    match promote(base, filename, base, KEY) {
++        Ok(()) => {}
++        Err(_) if fs::symlink_metadata(ctx.base.join(KEY)).is_ok() => return read_key(ctx),
++        Err(e) => return Err(e),
++    }
++    base.sync_all()
++        .map_err(|_| error("VSS_RESTORE_LOCAL_WRITE_FAILED"))?;
++    Ok(key.to_vec())
++}
++fn manifest_identity(bytes: &[u8], ctx: &Context) -> Result<String, APIError> {
++    let value: serde_json::Value =
++        serde_json::from_slice(bytes).map_err(|_| error("VSS_RESTORE_INVALID_MANIFEST"))?;
++    let expected = match ctx.network.as_str() {
++        "mainnet" => "Mainnet",
++        "testnet" => "Testnet",
++        "testnet4" => "Testnet4",
++        "signet" => "Signet",
++        "regtest" => "Regtest",
++        _ => return Err(error("VSS_RESTORE_IDENTITY_MISMATCH")),
++    };
++    if value["version"] != 1 || value["bitcoin_network"] != expected {
++        return Err(error("VSS_RESTORE_IDENTITY_MISMATCH"));
++    }
++    if value["master_fingerprint"] != ctx.fp
++        || value["account_xpub_vanilla"] != ctx.vanilla
++        || value["account_xpub_colored"] != ctx.colored
++    {
++        return Err(error("VSS_RESTORE_IDENTITY_MISMATCH"));
++    }
++    let identity = serde_json::json!([
++        value["version"],
++        value["bitcoin_network"],
++        value["master_fingerprint"],
++        value["account_xpub_vanilla"],
++        value["account_xpub_colored"],
++        value["vanilla_keychain"],
++        value["witness_version"]
++    ]);
++    Ok(digest(identity.to_string().as_bytes()))
++}
++fn load_receipt(ctx: &Context) -> Result<Fields, APIError> {
++    let target = ctx.base.join(&ctx.fp);
++    let _dir = open_directory(&target)?;
++    let receipt: Receipt =
++        serde_json::from_slice(&private_read(&target.join(RECEIPT), MAX_RECEIPT)?)
++            .map_err(|_| error("VSS_RESTORE_INVALID_RECEIPT"))?;
++    let f = &receipt.fields;
++    if f.schema_version != 1
++        || f.version <= 0
++        || f.network != ctx.network
++        || f.node_id != ctx.node_id
++        || f.master_fingerprint != ctx.fp
++        || f.endpoint_sha256 != ctx.endpoint_hash
++        || f.target_sha256 != ctx.target_hash
++    {
++        return Err(error("VSS_RESTORE_INVALID_RECEIPT"));
++    }
++    let expected = mac(&read_key(ctx)?, f)?;
++    if receipt.mac.len() != expected.len()
++        || receipt
++            .mac
++            .bytes()
++            .zip(expected.bytes())
++            .fold(0u8, |n, (a, b)| n | (a ^ b))
++            != 0
++    {
++        return Err(error("VSS_RESTORE_INVALID_RECEIPT"));
++    }
++    let manifest = private_read(&target.join("wallet_manifest.json"), MAX_MANIFEST)?;
++    if manifest.len() as u64 > MAX_MANIFEST
++        || manifest_identity(&manifest, ctx)? != f.manifest_identity_sha256
++    {
++        return Err(error("VSS_RESTORE_IDENTITY_MISMATCH"));
++    }
++    Ok(receipt.fields)
++}
++
++fn archive_plan(bytes: &[u8], ctx: &Context) -> Result<String, APIError> {
++    if bytes.len() > MAX_COMPRESSED {
++        return Err(error("VSS_RESTORE_ARCHIVE_LIMIT"));
++    }
++    let mut archive = zip::ZipArchive::new(Cursor::new(bytes))
++        .map_err(|_| error("VSS_RESTORE_INVALID_ARCHIVE"))?;
++    if archive.len() == 0 || archive.len() > MAX_ENTRIES {
++        return Err(error("VSS_RESTORE_ARCHIVE_LIMIT"));
++    }
++    let mut paths = HashSet::new();
++    let mut total = 0u64;
++    let mut manifest = None;
++    for i in 0..archive.len() {
++        let entry = archive
++            .by_index(i)
++            .map_err(|_| error("VSS_RESTORE_INVALID_ARCHIVE"))?;
++        let name = std::str::from_utf8(entry.name_raw())
++            .map_err(|_| error("VSS_RESTORE_INVALID_ARCHIVE"))?
++            .to_owned();
++        let clean = name.trim_end_matches('/');
++        if name.ends_with("//")
++            || name.contains('\\')
++            || name.contains('\0')
++            || name.starts_with('/')
++            || clean
++                .split('/')
++                .any(|p| p.is_empty() || p == "." || p == "..")
++            || clean.split('/').next() != Some(ctx.fp.as_str())
++            || !paths.insert(clean.to_owned())
++            || entry.enclosed_name().is_none()
++        {
++            return Err(error("VSS_RESTORE_INVALID_ARCHIVE_PATH"));
++        }
++        if (clean == ctx.fp && !entry.is_dir()) || (entry.is_dir() && entry.size() != 0) {
++            return Err(error("VSS_RESTORE_INVALID_ARCHIVE_PATH"));
++        }
++        let mode = entry.unix_mode().unwrap_or(0) & 0o170000;
++        if ![0, 0o040000, 0o100000].contains(&mode)
++            || (entry.is_dir() && mode == 0o100000)
++            || (!entry.is_dir() && mode == 0o040000)
++        {
++            return Err(error("VSS_RESTORE_INVALID_ARCHIVE_PATH"));
++        }
++        if clean.split('/').any(|p| p == KEY)
++            || (clean.split('/').any(|p| p == RECEIPT) && clean != format!("{}/{RECEIPT}", ctx.fp))
++        {
++            return Err(error("VSS_RESTORE_INVALID_ARCHIVE_PATH"));
++        }
++        total = total
++            .checked_add(entry.size())
++            .ok_or_else(|| error("VSS_RESTORE_ARCHIVE_LIMIT"))?;
++        if total > MAX_INFLATED
++            || entry.size() > entry.compressed_size().max(1).saturating_mul(2000)
++        {
++            return Err(error("VSS_RESTORE_ARCHIVE_LIMIT"));
++        }
++        if clean == format!("{}/wallet_manifest.json", ctx.fp) {
++            if entry.is_dir() || entry.size() > MAX_MANIFEST {
++                return Err(error("VSS_RESTORE_INVALID_MANIFEST"));
++            }
++            let mut data = Vec::new();
++            entry
++                .take(MAX_MANIFEST + 1)
++                .read_to_end(&mut data)
++                .map_err(|_| error("VSS_RESTORE_INVALID_ARCHIVE"))?;
++            manifest = Some(manifest_identity(&data, ctx)?);
++        }
++    }
++    manifest.ok_or_else(|| error("VSS_RESTORE_INVALID_MANIFEST"))
++}
++fn extract(bytes: &[u8], stage: &Path, ctx: &Context) -> Result<(), APIError> {
++    let mut archive = zip::ZipArchive::new(Cursor::new(bytes))
++        .map_err(|_| error("VSS_RESTORE_INVALID_ARCHIVE"))?;
++    let mut total = 0u64;
++    for i in 0..archive.len() {
++        let entry = archive
++            .by_index(i)
++            .map_err(|_| error("VSS_RESTORE_INVALID_ARCHIVE"))?;
++        let name = entry.name().trim_end_matches('/').to_owned();
++        if name == format!("{}/{RECEIPT}", ctx.fp) {
++            continue;
++        }
++        let target = stage.join(&name);
++        let directory = if entry.is_dir() {
++            &target
++        } else {
++            target
++                .parent()
++                .ok_or_else(|| error("VSS_RESTORE_INVALID_ARCHIVE_PATH"))?
++        };
++        fs::create_dir_all(directory).map_err(|_| error("VSS_RESTORE_LOCAL_WRITE_FAILED"))?;
++        #[cfg(unix)]
++        {
++            for path in directory.ancestors().take_while(|p| *p != stage) {
++                fs::set_permissions(path, fs::Permissions::from_mode(0o700))
++                    .map_err(|_| error("VSS_RESTORE_LOCAL_WRITE_FAILED"))?;
++            }
++        }
++        if entry.is_dir() {
++            continue;
++        }
++        let mut options = OpenOptions::new();
++        options.write(true).create_new(true);
++        #[cfg(unix)]
++        options.mode(0o600).custom_flags(libc::O_NOFOLLOW);
++        let mut file = options
++            .open(&target)
++            .map_err(|_| error("VSS_RESTORE_INVALID_ARCHIVE_PATH"))?;
++        let declared = entry.size();
++        let count = std::io::copy(&mut entry.take(declared + 1), &mut file)
++            .map_err(|_| error("VSS_RESTORE_INVALID_ARCHIVE"))?;
++        total = total
++            .checked_add(count)
++            .ok_or_else(|| error("VSS_RESTORE_ARCHIVE_LIMIT"))?;
++        if count != declared || total > MAX_INFLATED {
++            return Err(error("VSS_RESTORE_ARCHIVE_LIMIT"));
++        }
++        file.sync_all()
++            .map_err(|_| error("VSS_RESTORE_LOCAL_WRITE_FAILED"))?;
++    }
++    Ok(())
++}
++fn check_state(state: &AppState) -> Result<(), APIError> {
++    if state.cancel_token.is_cancelled() || *state.get_changing_state() {
++        return Err(error("VSS_RESTORE_NODE_UNAVAILABLE"));
++    }
++    Ok(())
++}
++
++pub(crate) async fn prepare(state: Arc<AppState>) -> Result<String, APIError> {
++    check_state(&state)?;
++    let guard = state.get_unlocked_app_state().await;
++    check_state(&state)?;
++    if guard.is_some() {
++        return Err(error("VSS_RESTORE_REQUIRES_LOCKED"));
++    }
++    let ctx = Context::new(&state)?;
++    let base = open_directory(&ctx.base)?;
++    if fs::symlink_metadata(ctx.base.join(&ctx.fp)).is_ok() {
++        let receipt = load_receipt(&ctx)?;
++        return Ok(ctx.result(Some(receipt.version)).to_string());
++    }
++    for entry in fs::read_dir(&ctx.base).map_err(|_| error("VSS_RESTORE_INVALID_TARGET"))? {
++        let entry = entry.map_err(|_| error("VSS_RESTORE_INVALID_TARGET"))?;
++        if entry.file_name().to_str().is_some_and(valid_fp) {
++            return Err(error("VSS_RESTORE_TARGET_CONFLICT"));
++        }
++    }
++    let client =
++        VssBackupClient::new(ctx.config()).map_err(|_| error("VSS_RESTORE_REMOTE_READ_FAILED"))?;
++    let before = client
++        .get_backup_version()
++        .await
++        .map_err(|_| error("VSS_RESTORE_REMOTE_READ_FAILED"))?;
++    let Some(version) = before else {
++        return Ok(ctx.result(None).to_string());
++    };
++    if version <= 0 {
++        return Err(error("VSS_RESTORE_INVALID_VERSION"));
++    }
++    // Public SDK transport may allocate this response before the local cap is checked.
++    let bytes = client
++        .download_backup()
++        .await
++        .map_err(|_| error("VSS_RESTORE_DOWNLOAD_FAILED"))?;
++    let manifest_hash = archive_plan(&bytes, &ctx)?;
++    let stage = tempfile::Builder::new()
++        .prefix(".vss-restore-")
++        .tempdir_in(&ctx.base)
++        .map_err(|_| error("VSS_RESTORE_LOCAL_WRITE_FAILED"))?;
++    extract(&bytes, stage.path(), &ctx)?;
++    let after = client
++        .get_backup_version()
++        .await
++        .map_err(|_| error("VSS_RESTORE_REMOTE_READ_FAILED"))?;
++    if after != Some(version) {
++        return Err(error("VSS_RESTORE_VERSION_CHANGED"));
++    }
++    check_state(&state)?;
++    let fields = Fields {
++        schema_version: 1,
++        network: ctx.network.clone(),
++        node_id: ctx.node_id.clone(),
++        master_fingerprint: ctx.fp.clone(),
++        version,
++        endpoint_sha256: ctx.endpoint_hash.clone(),
++        target_sha256: ctx.target_hash.clone(),
++        manifest_identity_sha256: manifest_hash,
++    };
++    let receipt = Receipt {
++        mac: mac(&receipt_key(&ctx, &base)?, &fields)?,
++        fields,
++    };
++    let restored = stage.path().join(&ctx.fp);
++    let restored_dir = open_directory(&restored)?;
++    let mut options = OpenOptions::new();
++    options.write(true).create_new(true);
++    #[cfg(unix)]
++    options.mode(0o600).custom_flags(libc::O_NOFOLLOW);
++    let mut output = options
++        .open(restored.join(RECEIPT))
++        .map_err(|_| error("VSS_RESTORE_LOCAL_WRITE_FAILED"))?;
++    output
++        .write_all(&serde_json::to_vec(&receipt).map_err(|_| error("VSS_RESTORE_INVALID_RECEIPT"))?)
++        .and_then(|_| output.sync_all())
++        .map_err(|_| error("VSS_RESTORE_LOCAL_WRITE_FAILED"))?;
++    fs::write(restored.join(".vss_restored"), b"")
++        .map_err(|_| error("VSS_RESTORE_LOCAL_WRITE_FAILED"))?;
++    #[cfg(unix)]
++    fs::set_permissions(
++        restored.join(".vss_restored"),
++        fs::Permissions::from_mode(0o600),
++    )
++    .map_err(|_| error("VSS_RESTORE_LOCAL_WRITE_FAILED"))?;
++    for entry in walkdir::WalkDir::new(&restored)
++        .follow_links(false)
++        .contents_first(true)
++    {
++        let entry = entry.map_err(|_| error("VSS_RESTORE_LOCAL_WRITE_FAILED"))?;
++        if entry.file_type().is_symlink()
++            || !(entry.file_type().is_dir() || entry.file_type().is_file())
++        {
++            return Err(error("VSS_RESTORE_INVALID_ARCHIVE_PATH"));
++        }
++        File::open(entry.path())
++            .and_then(|file| file.sync_all())
++            .map_err(|_| error("VSS_RESTORE_LOCAL_WRITE_FAILED"))?;
++    }
++    restored_dir
++        .sync_all()
++        .map_err(|_| error("VSS_RESTORE_LOCAL_WRITE_FAILED"))?;
++    let staging_dir = open_directory(stage.path())?;
++    check_state(&state)?;
++    #[cfg(unix)]
++    {
++        let actual =
++            fs::symlink_metadata(&ctx.base).map_err(|_| error("VSS_RESTORE_TARGET_CONFLICT"))?;
++        let original = base
++            .metadata()
++            .map_err(|_| error("VSS_RESTORE_TARGET_CONFLICT"))?;
++        if actual.file_type().is_symlink()
++            || actual.dev() != original.dev()
++            || actual.ino() != original.ino()
++        {
++            return Err(error("VSS_RESTORE_TARGET_CONFLICT"));
++        }
++    }
++    promote(&staging_dir, &ctx.fp, &base, &ctx.fp)?;
++    base.sync_all()
++        .map_err(|_| error("VSS_RESTORE_LOCAL_WRITE_FAILED"))?;
++    Ok(ctx.result(Some(version)).to_string())
++}
++
++pub(crate) async fn info(state: Arc<AppState>) -> Result<String, APIError> {
++    check_state(&state)?;
++    let guard = state.get_unlocked_app_state().await;
++    check_state(&state)?;
++    let ctx = Context::new(&state)?;
++    if !ctx.base.join(&ctx.fp).exists() || !ctx.base.join(&ctx.fp).join(RECEIPT).exists() {
++        return Ok("null".into());
++    }
++    let receipt = load_receipt(&ctx)?;
++    let mut result = ctx.result(Some(receipt.version));
++    result["unlocked"] = serde_json::json!(
++        guard.is_some() && !ctx.base.join(&ctx.fp).join(".vss_restored").exists()
++    );
++    Ok(result.to_string())
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    use zip::write::SimpleFileOptions;
++    fn context(base: &Path) -> Context {
++        Context {
++            base: base.to_path_buf(),
++            network: "signet".into(),
++            node_id: "02".repeat(33),
++            fp: "a1b2c3d4".into(),
++            vanilla: "vanilla-xpub".into(),
++            colored: "colored-xpub".into(),
++            endpoint: "https://example.invalid/vss".into(),
++            endpoint_hash: digest(b"https://example.invalid/vss"),
++            target_hash: digest(base.join("a1b2c3d4").as_os_str().as_encoded_bytes()),
++            signing_key: rgb_lib::bitcoin::secp256k1::SecretKey::from_slice(&[1; 32]).unwrap(),
++            store_id: "test_rgb".into(),
++        }
++    }
++    fn manifest(ctx: &Context) -> Vec<u8> {
++        serde_json::to_vec(&serde_json::json!({"version":1,"bitcoin_network":"Signet","master_fingerprint":ctx.fp,
++            "account_xpub_vanilla":ctx.vanilla,"account_xpub_colored":ctx.colored,"vanilla_keychain":0,"witness_version":"Taproot"})).unwrap()
++    }
++    fn archive(ctx: &Context, extra: &[(&str, &[u8])]) -> Vec<u8> {
++        let mut zip = zip::ZipWriter::new(Cursor::new(Vec::new()));
++        let options = SimpleFileOptions::default();
++        zip.add_directory(format!("{}/", ctx.fp), options).unwrap();
++        zip.start_file(format!("{}/wallet_manifest.json", ctx.fp), options)
++            .unwrap();
++        zip.write_all(&manifest(ctx)).unwrap();
++        for (path, bytes) in extra {
++            zip.start_file(*path, options).unwrap();
++            zip.write_all(bytes).unwrap();
++        }
++        zip.finish().unwrap().into_inner()
++    }
++    fn private_file(path: &Path, bytes: &[u8]) {
++        fs::write(path, bytes).unwrap();
++        #[cfg(unix)]
++        fs::set_permissions(path, fs::Permissions::from_mode(0o600)).unwrap();
++    }
++    fn install_receipt(ctx: &Context) -> Fields {
++        let target = ctx.base.join(&ctx.fp);
++        fs::create_dir(&target).unwrap();
++        #[cfg(unix)]
++        fs::set_permissions(&target, fs::Permissions::from_mode(0o700)).unwrap();
++        private_file(&target.join("wallet_manifest.json"), &manifest(ctx));
++        let fields = Fields {
++            schema_version: 1,
++            network: ctx.network.clone(),
++            node_id: ctx.node_id.clone(),
++            master_fingerprint: ctx.fp.clone(),
++            version: 7,
++            endpoint_sha256: ctx.endpoint_hash.clone(),
++            target_sha256: ctx.target_hash.clone(),
++            manifest_identity_sha256: manifest_identity(&manifest(ctx), ctx).unwrap(),
++        };
++        let key = receipt_key(ctx, &open_directory(&ctx.base).unwrap()).unwrap();
++        private_file(
++            &target.join(RECEIPT),
++            &serde_json::to_vec(&Receipt {
++                fields: fields.clone(),
++                mac: mac(&key, &fields).unwrap(),
++            })
++            .unwrap(),
++        );
++        fields
++    }
++    #[test]
++    fn archive_requires_correct_network_and_complete_public_identity() {
++        let temp = tempfile::tempdir().unwrap();
++        let ctx = context(temp.path());
++        let bytes = archive(&ctx, &[]);
++        assert!(archive_plan(&bytes, &ctx).is_ok());
++        let mut other = context(temp.path());
++        other.network = "regtest".into();
++        assert!(archive_plan(&bytes, &other).is_err());
++        other = context(temp.path());
++        other.vanilla = "other".into();
++        assert!(archive_plan(&bytes, &other).is_err());
++        other = context(temp.path());
++        other.colored = "other".into();
++        assert!(archive_plan(&bytes, &other).is_err());
++    }
++    #[test]
++    fn archive_rejects_traversal_absolute_unknown_roots_duplicates_and_reserved_keys() {
++        let temp = tempfile::tempdir().unwrap();
++        let ctx = context(temp.path());
++        for path in [
++            "../outside",
++            "/outside",
++            "a1b2c3d4/../outside",
++            "a1b2c3d4/./file",
++            "a1b2c3d4//file",
++            "wrongroot/file",
++            "a1b2c3d4\\file",
++            "a1b2c3d4/.utexo-vss-restore-key-v1",
++            "a1b2c3d4/nested/.utexo-vss-restore-v1.json",
++        ] {
++            assert!(
++                archive_plan(&archive(&ctx, &[(path, b"bad")]), &ctx).is_err(),
++                "accepted {path}"
++            );
++        }
++        let mut duplicate = archive(&ctx, &[("a1b2c3d4/wallet_manifesu.json", b"bad")]);
++        let old = b"wallet_manifesu.json";
++        let new = b"wallet_manifest.json";
++        for i in 0..=duplicate.len() - old.len() {
++            if &duplicate[i..i + old.len()] == old {
++                duplicate[i..i + old.len()].copy_from_slice(new);
++            }
++        }
++        assert!(archive_plan(&duplicate, &ctx).is_err());
++        assert!(fs::read_dir(temp.path()).unwrap().next().is_none());
++    }
++    #[test]
++    fn archive_rejects_symlinks_and_excessive_inflation_before_extraction() {
++        let temp = tempfile::tempdir().unwrap();
++        let ctx = context(temp.path());
++        for symlink in [true, false] {
++            let mut zip = zip::ZipWriter::new(Cursor::new(Vec::new()));
++            let options = SimpleFileOptions::default();
++            zip.add_directory(format!("{}/", ctx.fp), options).unwrap();
++            zip.start_file(format!("{}/wallet_manifest.json", ctx.fp), options)
++                .unwrap();
++            zip.write_all(&manifest(&ctx)).unwrap();
++            if symlink {
++                zip.add_symlink(format!("{}/link", ctx.fp), "../../outside", options)
++                    .unwrap();
++            } else {
++                zip.start_file(
++                    format!("{}/bomb", ctx.fp),
++                    options.compression_method(zip::CompressionMethod::Zstd),
++                )
++                .unwrap();
++                zip.write_all(&vec![0u8; 5 * 1024 * 1024]).unwrap();
++            }
++            let bytes = zip.finish().unwrap().into_inner();
++            assert!(archive_plan(&bytes, &ctx).is_err());
++        }
++        assert!(fs::read_dir(temp.path()).unwrap().next().is_none());
++    }
++    #[test]
++    fn extraction_is_private_and_never_reuses_an_archived_receipt() {
++        let temp = tempfile::tempdir().unwrap();
++        let ctx = context(temp.path());
++        let bytes = archive(
++            &ctx,
++            &[
++                ("a1b2c3d4/sub/data", b"ok"),
++                ("a1b2c3d4/.utexo-vss-restore-v1.json", b"untrusted"),
++            ],
++        );
++        archive_plan(&bytes, &ctx).unwrap();
++        extract(&bytes, temp.path(), &ctx).unwrap();
++        assert_eq!(
++            fs::read(temp.path().join("a1b2c3d4/sub/data")).unwrap(),
++            b"ok"
++        );
++        assert!(!temp.path().join("a1b2c3d4").join(RECEIPT).exists());
++        #[cfg(unix)]
++        assert_eq!(
++            fs::metadata(temp.path().join("a1b2c3d4/sub/data"))
++                .unwrap()
++                .mode()
++                & 0o777,
++            0o600
++        );
++    }
++    #[test]
++    fn atomic_promotion_never_clobbers_existing_data_or_an_empty_directory() {
++        let temp = tempfile::tempdir().unwrap();
++        let source = temp.path().join("source");
++        let target = temp.path().join("target");
++        fs::create_dir(&source).unwrap();
++        fs::create_dir(&target).unwrap();
++        fs::create_dir(source.join("wallet")).unwrap();
++        fs::write(source.join("wallet/new"), b"new").unwrap();
++        fs::create_dir(target.join("wallet")).unwrap();
++        let a = open_directory(&source).unwrap();
++        let b = open_directory(&target).unwrap();
++        assert!(promote(&a, "wallet", &b, "wallet").is_err());
++        fs::write(target.join("wallet/sentinel"), b"existing").unwrap();
++        assert!(promote(&a, "wallet", &b, "wallet").is_err());
++        assert_eq!(
++            fs::read(target.join("wallet/sentinel")).unwrap(),
++            b"existing"
++        );
++        assert!(source.join("wallet/new").exists());
++    }
++    #[test]
++    fn durable_receipt_survives_handle_reopen_but_binds_target_endpoint_and_identity() {
++        let temp = tempfile::tempdir().unwrap();
++        let ctx = context(temp.path());
++        install_receipt(&ctx);
++        assert_eq!(load_receipt(&context(temp.path())).unwrap().version, 7);
++        let mut other = context(temp.path());
++        other.endpoint_hash = digest(b"other");
++        assert!(load_receipt(&other).is_err());
++        other = context(temp.path());
++        other.target_hash = digest(b"other");
++        assert!(load_receipt(&other).is_err());
++        other = context(temp.path());
++        other.node_id = "03".repeat(33);
++        assert!(load_receipt(&other).is_err());
++        private_file(&ctx.base.join(&ctx.fp).join("wallet_manifest.json"), b"{}");
++        assert!(load_receipt(&ctx).is_err());
++    }
++    #[test]
++    fn archived_or_tampered_receipt_is_not_local_restore_proof() {
++        let temp = tempfile::tempdir().unwrap();
++        let ctx = context(temp.path());
++        install_receipt(&ctx);
++        let receipt = ctx.base.join(&ctx.fp).join(RECEIPT);
++        let mut value: serde_json::Value =
++            serde_json::from_slice(&fs::read(&receipt).unwrap()).unwrap();
++        value["fields"]["version"] = serde_json::json!(8);
++        private_file(&receipt, &serde_json::to_vec(&value).unwrap());
++        assert!(load_receipt(&ctx).is_err());
++        fs::remove_file(ctx.base.join(KEY)).unwrap();
++        assert!(load_receipt(&ctx).is_err());
++    }
++    #[test]
++    fn receipt_key_creation_before_promotion_is_reusable_after_interruption() {
++        let temp = tempfile::tempdir().unwrap();
++        let ctx = context(temp.path());
++        let base = open_directory(temp.path()).unwrap();
++        let first = receipt_key(&ctx, &base).unwrap();
++        let second = receipt_key(&context(temp.path()), &base).unwrap();
++        assert_eq!(first, second);
++        assert_eq!(first.len(), 32);
++        assert!(!ctx.base.join(&ctx.fp).exists());
++    }
++    #[cfg(unix)]
++    #[test]
++    fn local_receipt_key_and_receipt_reject_symlinks_and_public_permissions() {
++        let temp = tempfile::tempdir().unwrap();
++        let ctx = context(temp.path());
++        install_receipt(&ctx);
++        let key = ctx.base.join(KEY);
++        fs::set_permissions(&key, fs::Permissions::from_mode(0o644)).unwrap();
++        assert!(load_receipt(&ctx).is_err());
++        fs::set_permissions(&key, fs::Permissions::from_mode(0o600)).unwrap();
++        let saved = ctx.base.join("savedkey");
++        fs::rename(&key, &saved).unwrap();
++        std::os::unix::fs::symlink(&saved, &key).unwrap();
++        assert!(load_receipt(&ctx).is_err());
++    }
++}
 diff --git a/src/utils.rs b/src/utils.rs
-index 454f4ba..41a48ee 100644
+index 454f4ba..be65f0c 100644
 --- a/src/utils.rs
 +++ b/src/utils.rs
 @@ -30,7 +30,7 @@ use std::{
@@ -5249,7 +7342,15 @@ index 454f4ba..41a48ee 100644
      pub(crate) unlocked_app_state: Arc<TokioMutex<Option<Arc<UnlockedAppState>>>>,
      pub(crate) ldk_background_services: Arc<Mutex<Option<LdkBackgroundServices>>>,
      #[allow(dead_code)]
-@@ -216,6 +217,7 @@ pub(crate) struct CommonState {
+@@ -170,6 +171,7 @@ pub(crate) struct StaticState {
+     /// `vss` feature flag; only the consumer in `start_node` is feature-gated.
+     #[cfg_attr(not(feature = "vss"), allow(dead_code))]
+     pub(crate) vss_url: Option<String>,
++    pub(crate) vss_automatic_backup_initial: std::sync::atomic::AtomicBool,
+     /// When true, a failed VSS restore on a fresh device logs a warning and
+     /// continues with empty local state instead of aborting unlock.
+     #[cfg_attr(not(feature = "vss"), allow(dead_code))]
+@@ -216,6 +218,7 @@ pub(crate) struct CommonState {
  
  /// A complete Lightning runtime, present only on supported non-mainnet networks.
  pub(crate) struct LightningState {
@@ -5257,7 +7358,72 @@ index 454f4ba..41a48ee 100644
      pub(crate) common: Arc<CommonState>,
      pub(crate) channel_manager: Arc<ChannelManager>,
      pub(crate) gossip_source: Arc<crate::gossip::GossipSource>,
-@@ -612,14 +614,15 @@ pub(crate) fn encrypt_and_save_mnemonic(
+@@ -560,37 +563,34 @@ pub(crate) fn check_port_is_available(port: u16) -> Result<(), AppError> {
+ /// accepted; pass `allow_http = true` to allow `http://` on any host (for
+ /// private networks with out-of-band trust).
+ pub(crate) fn validate_vss_url(url: &str, allow_http: bool) -> Result<(), AppError> {
+-    let trimmed = url.trim();
+-    if let Some(rest) = trimmed.strip_prefix("https://") {
+-        if rest.is_empty() {
+-            return Err(AppError::InvalidVssConfig(format!(
+-                "VSS URL `{url}` has no host"
+-            )));
+-        }
+-        return Ok(());
+-    }
+-    if let Some(rest) = trimmed.strip_prefix("http://") {
+-        // Strip any optional userinfo (`user:pass@`) and trailing path/query.
+-        let authority = rest.split(['/', '?', '#']).next().unwrap_or("");
+-        let host_with_port = authority
+-            .rsplit_once('@')
+-            .map(|(_, after)| after)
+-            .unwrap_or(authority);
+-        let is_loopback_host = ["localhost", "127.0.0.1", "[::1]", "0.0.0.0"]
+-            .iter()
+-            .any(|h| host_with_port == *h || host_with_port.starts_with(&format!("{h}:")));
+-        if is_loopback_host || allow_http {
+-            return Ok(());
+-        }
+-        return Err(AppError::InvalidVssConfig(format!(
+-            "VSS URL `{url}` uses http:// on non-loopback host `{host_with_port}`. \
+-             Use https:// in production, or pass --vss-allow-http to allow http:// \
+-             on a private network you trust out-of-band."
+-        )));
++    let invalid = || {
++        AppError::InvalidVssConfig(
++        "VSS URL must be an absolute HTTPS endpoint (HTTP requires loopback or explicit permission), without credentials, query, fragment or whitespace".to_string()
++    )
++    };
++    if url.is_empty() || url.chars().any(char::is_whitespace) || url.contains('\\') {
++        return Err(invalid());
++    }
++    let endpoint = reqwest::Url::parse(url).map_err(|_| invalid())?;
++    if endpoint.host_str().is_none()
++        || !endpoint.username().is_empty()
++        || endpoint.password().is_some()
++        || endpoint.query().is_some()
++        || endpoint.fragment().is_some()
++    {
++        return Err(invalid());
++    }
++    let loopback = match endpoint.host_str().unwrap() {
++        "localhost" | "[::1]" | "::1" => true,
++        host => host
++            .parse::<std::net::IpAddr>()
++            .is_ok_and(|ip| ip.is_loopback()),
++    };
++    match endpoint.scheme() {
++        "https" => Ok(()),
++        "http" if loopback || allow_http => Ok(()),
++        _ => Err(invalid()),
+     }
+-    Err(AppError::InvalidVssConfig(format!(
+-        "VSS URL `{url}` must start with http:// or https://"
+-    )))
+ }
+ 
+ pub(crate) fn get_db_path(storage_dir_path: &Path) -> PathBuf {
+@@ -612,14 +612,15 @@ pub(crate) fn encrypt_and_save_mnemonic(
  pub(crate) async fn connect_peer_if_necessary(
      pubkey: PublicKey,
      address: SocketAddr,
@@ -5275,7 +7441,7 @@ index 454f4ba..41a48ee 100644
      tracing::info!("connected to peer (pubkey: {pubkey}, addr: {address})");
      Ok(())
  }
-@@ -646,16 +649,37 @@ pub(crate) async fn do_connect_peer(
+@@ -646,16 +647,37 @@ pub(crate) async fn do_connect_peer(
      pubkey: PublicKey,
      address: SocketAddr,
      peer_manager: Arc<PeerManager>,
@@ -5314,7 +7480,15 @@ index 454f4ba..41a48ee 100644
                      return Ok(());
                  }
              }
-@@ -818,6 +842,7 @@ pub(crate) async fn start_daemon(args: &UserArgs) -> Result<Arc<AppState>, AppEr
+@@ -807,6 +829,7 @@ pub(crate) async fn start_daemon(args: &UserArgs) -> Result<Arc<AppState>, AppEr
+         lsp_base_url: args.lsp_base_url.clone(),
+         lsp_bearer_token: args.lsp_bearer_token.clone(),
+         vss_url: args.vss_url.clone(),
++        vss_automatic_backup_initial: std::sync::atomic::AtomicBool::new(true),
+         vss_allow_empty_restore: args.vss_allow_empty_restore,
+         reuse_addresses: args.reuse_addresses,
+         remote_signer_listen_addr: args.remote_signer_listen_addr,
+@@ -818,6 +841,7 @@ pub(crate) async fn start_daemon(args: &UserArgs) -> Result<Arc<AppState>, AppEr
      let app_state = Arc::new(AppState {
          static_state,
          cancel_token,
@@ -5322,3 +7496,689 @@ index 454f4ba..41a48ee 100644
          unlocked_app_state: Arc::new(TokioMutex::new(None)),
          ldk_background_services: Arc::new(Mutex::new(None)),
          attached_external_signer: Arc::new(Mutex::new(None)),
+@@ -1070,6 +1094,24 @@ mod utils_tests {
+         assert!(validate_vss_url("http://example.com/vss", true).is_ok());
+     }
+ 
++    #[test]
++    fn vss_url_rejects_malformed_and_sensitive_configuration_without_echoing_it() {
++        for url in [
++            "",
++            " ",
++            " https://example.com/vss",
++            "https://",
++            "https://user:private-secret@example.com/vss",
++            "https://example.com/vss?private-secret",
++            "https://example.com/vss#private-secret",
++            "http://0.0.0.0/vss",
++            "https://example.com/\nprivate-secret",
++        ] {
++            let err = validate_vss_url(url, false).unwrap_err();
++            assert!(!err.to_string().contains("private-secret"));
++        }
++    }
++
+     #[test]
+     fn vss_url_other_schemes_rejected() {
+         assert!(validate_vss_url("ftp://example.com/vss", true).is_err());
+diff --git a/src/vss_snapshot_policy.rs b/src/vss_snapshot_policy.rs
+new file mode 100644
+index 0000000..77b5c8a
+--- /dev/null
++++ b/src/vss_snapshot_policy.rs
+@@ -0,0 +1,655 @@
++//! Maintained snapshot policy and confirmed completion receipts. The public SDK
++//! client remains available with its built-in scheduler disabled; our serialized
++//! mutation guard owns blocking automatic snapshots, so policy changes are barriers.
++use crate::error::APIError;
++use bitcoin::hashes::{sha256, Hash};
++use rgb_lib::{wallet::Wallet, BitcoinNetwork};
++use serde::{Deserialize, Serialize};
++#[cfg(unix)]
++use std::os::unix::fs::OpenOptionsExt;
++use std::{
++    fs::{self, OpenOptions},
++    io::{Read, Write},
++    path::{Path, PathBuf},
++    sync::atomic::{AtomicBool, Ordering},
++    time::{SystemTime, UNIX_EPOCH},
++};
++// Keep persisted upload times representable as exact JavaScript Date values.
++// Their validity must not depend on the device's subsequently corrected clock.
++const MAX_COMPLETION_TIME_MS: u64 = 8_640_000_000_000_000;
++fn error() -> APIError {
++    APIError::FailedVssInit("VSS snapshot policy could not be committed".into())
++}
++fn validate_completion_time_ms(value: u64) -> Result<u64, APIError> {
++    if (1..=MAX_COMPLETION_TIME_MS).contains(&value) {
++        Ok(value)
++    } else {
++        Err(error())
++    }
++}
++fn now_ms() -> Result<u64, APIError> {
++    u64::try_from(
++        SystemTime::now()
++            .duration_since(UNIX_EPOCH)
++            .map_err(|_| error())?
++            .as_millis(),
++    )
++    .map_err(|_| error())
++    .and_then(validate_completion_time_ms)
++}
++#[derive(Clone, Serialize, Deserialize)]
++#[serde(deny_unknown_fields)]
++pub(crate) struct Completion {
++    pub version: i64,
++    pub completed_at_ms: u64,
++    pub network: String,
++    pub vss_url: String,
++    pub node_id: String,
++}
++#[derive(Serialize, Deserialize)]
++#[serde(deny_unknown_fields)]
++struct PolicyFile {
++    schema_version: u32,
++    automatic_backup_enabled: bool,
++    network: String,
++    vss_url: String,
++    node_id: String,
++}
++pub(crate) struct SnapshotPolicy {
++    path: PathBuf,
++    network: String,
++    url: String,
++    node_id: String,
++    pub enabled: AtomicBool,
++    pub failed: AtomicBool,
++    unknown: AtomicBool,
++    unsaved: AtomicBool,
++}
++fn read_bounded(path: &Path) -> Result<Option<Vec<u8>>, APIError> {
++    let meta = match fs::symlink_metadata(path) {
++        Ok(v) => v,
++        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(None),
++        Err(_) => return Err(error()),
++    };
++    if !meta.is_file() || meta.len() > 4096 {
++        return Err(error());
++    }
++    let mut options = OpenOptions::new();
++    options.read(true);
++    #[cfg(unix)]
++    options.custom_flags(libc::O_NOFOLLOW);
++    let mut f = options.open(path).map_err(|_| error())?;
++    let mut bytes = Vec::new();
++    std::io::Read::by_ref(&mut f)
++        .take(4097)
++        .read_to_end(&mut bytes)
++        .map_err(|_| error())?;
++    if bytes.len() > 4096 {
++        return Err(error());
++    }
++    Ok(Some(bytes))
++}
++#[cfg(test)]
++thread_local! { static FAIL_AFTER_RENAME: std::cell::Cell<bool> = const { std::cell::Cell::new(false) }; }
++fn sync_parent(path: &Path) -> Result<(), APIError> {
++    fs::File::open(path.parent().ok_or_else(error)?)
++        .and_then(|f| f.sync_all())
++        .map_err(|_| error())
++}
++fn replace_once(path: &Path, bytes: &[u8], inject_fault: bool) -> (Result<(), APIError>, bool) {
++    let tmp = path.with_extension(format!("tmp-{}", rand::random::<u64>()));
++    let mut renamed = false;
++    let result = (|| {
++        let mut options = OpenOptions::new();
++        options.write(true).create_new(true);
++        #[cfg(unix)]
++        options.mode(0o600).custom_flags(libc::O_NOFOLLOW);
++        let mut file = options.open(&tmp).map_err(|_| error())?;
++        file.write_all(bytes).map_err(|_| error())?;
++        file.sync_all().map_err(|_| error())?;
++        if let Ok(meta) = fs::symlink_metadata(path) {
++            if !meta.is_file() {
++                return Err(error());
++            }
++        }
++        sync_parent(path)?;
++        fs::rename(&tmp, path).map_err(|_| error())?;
++        renamed = true;
++        #[cfg(test)]
++        if inject_fault && FAIL_AFTER_RENAME.with(|flag| flag.replace(false)) {
++            return Err(error());
++        }
++        #[cfg(not(test))]
++        let _ = inject_fault;
++        sync_parent(path)
++    })();
++    if result.is_err() {
++        let _ = fs::remove_file(tmp);
++    }
++    (result, renamed)
++}
++fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), APIError> {
++    let old = read_bounded(path)?;
++    let (result, renamed) = replace_once(path, bytes, true);
++    if result.is_err() && renamed {
++        // A failed durability barrier is not an acknowledgement. Restore the previous
++        // file before returning when possible. The policy setter independently reads
++        // back the actual choice if rollback itself encountered a filesystem failure.
++        let rollback = match old {
++            Some(previous) => replace_once(path, &previous, false).0,
++            None => fs::remove_file(path)
++                .map_err(|_| error())
++                .and_then(|_| sync_parent(path)),
++        };
++        if rollback.is_err() {
++            tracing::error!("VSS metadata write outcome is unknown after rollback failure");
++        }
++    }
++    result
++}
++fn confirmed_manifest_successor(before: i64, after: i64) -> Result<i64, APIError> {
++    if before.checked_add(1) == Some(after) && after > 0 {
++        Ok(after)
++    } else {
++        Err(error())
++    }
++}
++impl SnapshotPolicy {
++    pub(crate) fn load(
++        storage: &Path,
++        network: BitcoinNetwork,
++        url: String,
++        node_id: String,
++        initial: bool,
++    ) -> Result<Self, APIError> {
++        let network = network.to_string().to_lowercase();
++        let scope = format!("{network}\n{url}\n{node_id}");
++        let path = storage.join(format!(
++            ".utexo-vss-policy-v1-{}.json",
++            sha256::Hash::hash(scope.as_bytes())
++        ));
++        let enabled = if let Some(bytes) = read_bounded(&path)? {
++            let saved: PolicyFile = serde_json::from_slice(&bytes).map_err(|_| error())?;
++            if saved.schema_version != 1
++                || saved.network != network
++                || saved.vss_url != url
++                || saved.node_id != node_id
++            {
++                return Err(error());
++            }
++            saved.automatic_backup_enabled
++        } else {
++            initial
++        };
++        let policy = Self {
++            path,
++            network,
++            url,
++            node_id,
++            enabled: AtomicBool::new(enabled),
++            failed: AtomicBool::new(false),
++            unknown: AtomicBool::new(false),
++            unsaved: AtomicBool::new(false),
++        };
++        if !policy.path.exists() {
++            policy.commit_enabled(enabled)?;
++        }
++        Ok(policy)
++    }
++    fn completion_path(&self) -> PathBuf {
++        self.path.with_extension("completion.json")
++    }
++    pub(crate) fn pending(&self) -> bool {
++        self.unsaved.load(Ordering::SeqCst)
++            || match fs::symlink_metadata(self.path.with_extension("pending")) {
++                Err(error) if error.kind() == std::io::ErrorKind::NotFound => false,
++                _ => true,
++            }
++    }
++    pub(crate) fn before_mutation(&self) {
++        self.unsaved.store(true, Ordering::SeqCst);
++        if write_atomic(&self.path.with_extension("pending"), b"1").is_err() {
++            self.failed.store(true, Ordering::SeqCst);
++            tracing::error!("VSS unsaved-state marker could not be persisted");
++        }
++    }
++    pub(crate) fn clear_unchanged_intent(&self) -> Result<(), APIError> {
++        fs::remove_file(self.path.with_extension("pending")).map_err(|_| error())?;
++        sync_parent(&self.path)?;
++        self.unsaved.store(false, Ordering::SeqCst);
++        Ok(())
++    }
++    pub(crate) fn commit_enabled(&self, enabled: bool) -> Result<(), APIError> {
++        let saved = PolicyFile {
++            schema_version: 1,
++            automatic_backup_enabled: enabled,
++            network: self.network.clone(),
++            vss_url: self.url.clone(),
++            node_id: self.node_id.clone(),
++        };
++        if self.unknown.load(Ordering::SeqCst) {
++            return Err(error());
++        }
++        if let Err(failure) = write_atomic(
++            &self.path,
++            &serde_json::to_vec(&saved).map_err(|_| error())?,
++        ) {
++            let actual = read_bounded(&self.path)
++                .ok()
++                .flatten()
++                .and_then(|bytes| serde_json::from_slice::<PolicyFile>(&bytes).ok())
++                .filter(|value| {
++                    value.schema_version == 1
++                        && value.network == self.network
++                        && value.vss_url == self.url
++                        && value.node_id == self.node_id
++                });
++            if let Some(actual) = actual {
++                self.enabled
++                    .store(actual.automatic_backup_enabled, Ordering::SeqCst);
++            } else {
++                self.unknown.store(true, Ordering::SeqCst);
++                self.failed.store(true, Ordering::SeqCst);
++            }
++            return Err(failure);
++        }
++        self.enabled.store(enabled, Ordering::SeqCst);
++        Ok(())
++    }
++    pub(crate) fn backup(&self, wallet: &Wallet) -> Result<i64, APIError> {
++        let client = wallet.vss_client().ok_or_else(error)?;
++        let handle = client.handle().clone();
++        write_atomic(&self.path.with_extension("pending"), b"1")?;
++        // Completion time is captured after the acknowledged upload, before any later status read.
++        let _runtime_context = handle.enter();
++        // The client owns a live multi-thread runtime. Poll on this calling thread
++        // without nesting Tokio block_on, and let its workers drive network IO.
++        let before = futures::executor::block_on(client.get_backup_version())
++            .map_err(|_| error())?
++            .unwrap_or(0);
++        let version = futures::executor::block_on(wallet.vss_backup(&client)).map_err(|_| {
++            self.failed.store(true, Ordering::SeqCst);
++            error()
++        })?;
++        let completed_at_ms = now_ms()?;
++        let canonical = futures::executor::block_on(client.get_backup_version())
++            .map_err(|_| error())?
++            .ok_or_else(error)?;
++        let canonical = confirmed_manifest_successor(before, canonical)?;
++        let receipt = Completion {
++            version: canonical,
++            completed_at_ms,
++            network: self.network.clone(),
++            vss_url: self.url.clone(),
++            node_id: self.node_id.clone(),
++        };
++        write_atomic(
++            &self.completion_path(),
++            &serde_json::to_vec(&receipt).map_err(|_| error())?,
++        )?;
++        fs::remove_file(self.path.with_extension("pending")).map_err(|_| error())?;
++        fs::File::open(self.path.parent().ok_or_else(error)?)
++            .and_then(|f| f.sync_all())
++            .map_err(|_| error())?;
++        self.unsaved.store(false, Ordering::SeqCst);
++        self.failed.store(false, Ordering::SeqCst);
++        Ok(version)
++    }
++    pub(crate) fn after_mutation(&self, wallet: &Wallet) {
++        if self.unknown.load(Ordering::SeqCst)
++            || !self.enabled.load(Ordering::SeqCst)
++            || std::thread::panicking()
++        {
++            return;
++        }
++        // Explicit mutation admission also covers RGB stock/witness changes
++        // that the pinned SDK does not include in its database dirty flag.
++        if self.backup(wallet).is_err() {
++            self.failed.store(true, Ordering::SeqCst);
++            tracing::warn!("Automatic VSS snapshot failed; wallet operation result is preserved");
++        }
++    }
++    pub(crate) fn metadata(&self) -> Result<String, APIError> {
++        if self.unknown.load(Ordering::SeqCst) {
++            return Err(error());
++        }
++        let receipt = match read_bounded(&self.completion_path())? {
++            None => None,
++            Some(bytes) => {
++                let r: Completion = serde_json::from_slice(&bytes).map_err(|_| error())?;
++                if r.version < 1
++                    || validate_completion_time_ms(r.completed_at_ms).is_err()
++                    || r.network != self.network
++                    || r.vss_url != self.url
++                    || r.node_id != self.node_id
++                {
++                    return Err(error());
++                }
++                Some(r)
++            }
++        };
++        Ok(serde_json::json!({"schema_version":1,"automatic_backup_enabled":self.enabled.load(Ordering::SeqCst),"last_backup":receipt}).to_string())
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    fn policy(
++        path: &Path,
++        net: BitcoinNetwork,
++        url: &str,
++        id: &str,
++        initial: bool,
++    ) -> SnapshotPolicy {
++        SnapshotPolicy::load(path, net, url.into(), id.into(), initial).unwrap()
++    }
++    #[test]
++    fn default_on_is_durable() {
++        let tmp = tempfile::tempdir().unwrap();
++        let p = policy(
++            tmp.path(),
++            BitcoinNetwork::Regtest,
++            "https://example.com/vss",
++            "node",
++            true,
++        );
++        assert!(p.enabled.load(Ordering::SeqCst));
++        assert!(p.path.is_file());
++    }
++    #[test]
++    fn stored_off_wins_initial_config_and_reopen() {
++        let tmp = tempfile::tempdir().unwrap();
++        let p = policy(
++            tmp.path(),
++            BitcoinNetwork::Regtest,
++            "https://example.com/vss",
++            "node",
++            true,
++        );
++        p.commit_enabled(false).unwrap();
++        let q = policy(
++            tmp.path(),
++            BitcoinNetwork::Regtest,
++            "https://example.com/vss",
++            "node",
++            true,
++        );
++        assert!(!q.enabled.load(Ordering::SeqCst));
++    }
++    #[test]
++    fn initial_off_does_not_default_on_on_second_open() {
++        let tmp = tempfile::tempdir().unwrap();
++        let p = policy(
++            tmp.path(),
++            BitcoinNetwork::Regtest,
++            "https://example.com/vss",
++            "node",
++            false,
++        );
++        assert!(!p.enabled.load(Ordering::SeqCst));
++        assert!(!policy(
++            tmp.path(),
++            BitcoinNetwork::Regtest,
++            "https://example.com/vss",
++            "node",
++            true
++        )
++        .enabled
++        .load(Ordering::SeqCst));
++    }
++    #[test]
++    fn network_endpoint_and_identity_are_separate_scopes() {
++        let tmp = tempfile::tempdir().unwrap();
++        policy(
++            tmp.path(),
++            BitcoinNetwork::Regtest,
++            "https://example.com/vss",
++            "one",
++            true,
++        )
++        .commit_enabled(false)
++        .unwrap();
++        for (net, url, id) in [
++            (BitcoinNetwork::Signet, "https://example.com/vss", "one"),
++            (BitcoinNetwork::Regtest, "https://two.example/vss", "one"),
++            (BitcoinNetwork::Regtest, "https://example.com/vss", "two"),
++        ] {
++            assert!(policy(tmp.path(), net, url, id, true)
++                .enabled
++                .load(Ordering::SeqCst));
++        }
++    }
++    #[test]
++    fn unknown_time_is_null_and_read_is_pure() {
++        let tmp = tempfile::tempdir().unwrap();
++        let p = policy(
++            tmp.path(),
++            BitcoinNetwork::Regtest,
++            "https://example.com/vss",
++            "node",
++            true,
++        );
++        let before = fs::read(&p.path).unwrap();
++        let value: serde_json::Value = serde_json::from_str(&p.metadata().unwrap()).unwrap();
++        assert!(value["last_backup"].is_null());
++        assert_eq!(fs::read(&p.path).unwrap(), before);
++        assert!(!p.completion_path().exists());
++    }
++    #[test]
++    fn receipt_is_scoped_and_real_time_is_not_observed_at() {
++        let tmp = tempfile::tempdir().unwrap();
++        let p = policy(
++            tmp.path(),
++            BitcoinNetwork::Regtest,
++            "https://example.com/vss",
++            "node",
++            true,
++        );
++        let at = now_ms().unwrap() - 10000;
++        let mut receipt = Completion {
++            version: 7,
++            completed_at_ms: at,
++            network: p.network.clone(),
++            vss_url: p.url.clone(),
++            node_id: p.node_id.clone(),
++        };
++        write_atomic(&p.completion_path(), &serde_json::to_vec(&receipt).unwrap()).unwrap();
++        let value: serde_json::Value = serde_json::from_str(&p.metadata().unwrap()).unwrap();
++        assert_eq!(value["last_backup"]["completed_at_ms"], at);
++        receipt.node_id = "other".into();
++        write_atomic(&p.completion_path(), &serde_json::to_vec(&receipt).unwrap()).unwrap();
++        assert!(p.metadata().is_err());
++    }
++    #[test]
++    fn clock_rollback_preserves_receipt_and_authoritative_policy_after_reopen() {
++        let tmp = tempfile::tempdir().unwrap();
++        let p = policy(
++            tmp.path(),
++            BitcoinNetwork::Regtest,
++            "https://example.com/vss",
++            "node",
++            true,
++        );
++        p.commit_enabled(false).unwrap();
++        // A valid upload made before a one-hour backward clock correction is
++        // now ahead of the wall clock. Neither observation nor reopen is a new
++        // upload, and this timestamp must not make the saved policy unreadable.
++        let completed_at_ms = now_ms().unwrap() + 3_600_000;
++        let receipt = Completion {
++            version: 7,
++            completed_at_ms,
++            network: p.network.clone(),
++            vss_url: p.url.clone(),
++            node_id: p.node_id.clone(),
++        };
++        let bytes = serde_json::to_vec(&receipt).unwrap();
++        write_atomic(&p.completion_path(), &bytes).unwrap();
++        for current in [
++            p,
++            policy(
++                tmp.path(),
++                BitcoinNetwork::Regtest,
++                "https://example.com/vss",
++                "node",
++                true,
++            ),
++        ] {
++            let value: serde_json::Value =
++                serde_json::from_str(&current.metadata().unwrap()).unwrap();
++            assert_eq!(value["automatic_backup_enabled"], false);
++            assert_eq!(value["last_backup"]["completed_at_ms"], completed_at_ms);
++            assert_eq!(fs::read(current.completion_path()).unwrap(), bytes);
++            current.commit_enabled(true).unwrap();
++            assert!(current.metadata().is_ok());
++            current.commit_enabled(false).unwrap();
++        }
++    }
++    #[test]
++    fn completion_time_validation_is_positive_and_bounded_without_wall_clock() {
++        let tmp = tempfile::tempdir().unwrap();
++        let p = policy(
++            tmp.path(),
++            BitcoinNetwork::Regtest,
++            "https://example.com/vss",
++            "node",
++            true,
++        );
++        for completed_at_ms in [1, MAX_COMPLETION_TIME_MS] {
++            assert_eq!(
++                validate_completion_time_ms(completed_at_ms).unwrap(),
++                completed_at_ms
++            );
++            let receipt = Completion {
++                version: 7,
++                completed_at_ms,
++                network: p.network.clone(),
++                vss_url: p.url.clone(),
++                node_id: p.node_id.clone(),
++            };
++            write_atomic(&p.completion_path(), &serde_json::to_vec(&receipt).unwrap()).unwrap();
++            let value: serde_json::Value = serde_json::from_str(&p.metadata().unwrap()).unwrap();
++            assert_eq!(value["last_backup"]["completed_at_ms"], completed_at_ms);
++        }
++        for completed_at_ms in [0, MAX_COMPLETION_TIME_MS + 1, u64::MAX] {
++            assert!(validate_completion_time_ms(completed_at_ms).is_err());
++            let receipt = Completion {
++                version: 7,
++                completed_at_ms,
++                network: p.network.clone(),
++                vss_url: p.url.clone(),
++                node_id: p.node_id.clone(),
++            };
++            write_atomic(&p.completion_path(), &serde_json::to_vec(&receipt).unwrap()).unwrap();
++            assert!(p.metadata().is_err());
++        }
++    }
++    #[test]
++    fn failed_commit_preserves_memory_policy() {
++        let tmp = tempfile::tempdir().unwrap();
++        let p = policy(
++            tmp.path(),
++            BitcoinNetwork::Regtest,
++            "https://example.com/vss",
++            "node",
++            true,
++        );
++        fs::remove_file(&p.path).unwrap();
++        fs::create_dir(&p.path).unwrap();
++        assert!(p.commit_enabled(false).is_err());
++        assert!(p.enabled.load(Ordering::SeqCst));
++    }
++    #[test]
++    fn post_rename_failure_rolls_back_and_reopens_prior_choice() {
++        let tmp = tempfile::tempdir().unwrap();
++        let p = policy(
++            tmp.path(),
++            BitcoinNetwork::Regtest,
++            "https://example.com/vss",
++            "node",
++            true,
++        );
++        FAIL_AFTER_RENAME.with(|flag| flag.set(true));
++        assert!(p.commit_enabled(false).is_err());
++        assert!(p.enabled.load(Ordering::SeqCst));
++        assert!(policy(
++            tmp.path(),
++            BitcoinNetwork::Regtest,
++            "https://example.com/vss",
++            "node",
++            false
++        )
++        .enabled
++        .load(Ordering::SeqCst));
++        assert!(p.metadata().is_ok());
++    }
++    #[test]
++    fn marker_write_failure_retains_unsaved_in_memory() {
++        let tmp = tempfile::tempdir().unwrap();
++        let path = tmp.path().join("wallet");
++        fs::create_dir(&path).unwrap();
++        let p = policy(
++            &path,
++            BitcoinNetwork::Regtest,
++            "https://example.com/vss",
++            "node",
++            true,
++        );
++        fs::remove_dir_all(&path).unwrap();
++        p.before_mutation();
++        assert!(p.pending());
++        assert!(p.failed.load(Ordering::SeqCst));
++    }
++    #[test]
++    fn only_the_manifest_successor_can_receive_a_completion_time() {
++        assert_eq!(confirmed_manifest_successor(0, 1).unwrap(), 1);
++        assert_eq!(confirmed_manifest_successor(6, 7).unwrap(), 7);
++        for (before, after) in [(0, 0), (6, 6), (6, 8), (6, 5), (i64::MAX, 1)] {
++            assert!(confirmed_manifest_successor(before, after).is_err());
++        }
++    }
++    #[test]
++    fn malformed_policy_rejected_not_reset_to_default() {
++        let tmp = tempfile::tempdir().unwrap();
++        let p = policy(
++            tmp.path(),
++            BitcoinNetwork::Regtest,
++            "https://example.com/vss",
++            "node",
++            true,
++        );
++        fs::write(&p.path, b"{}").unwrap();
++        assert!(SnapshotPolicy::load(
++            tmp.path(),
++            BitcoinNetwork::Regtest,
++            "https://example.com/vss".into(),
++            "node".into(),
++            true
++        )
++        .is_err());
++    }
++    #[cfg(unix)]
++    #[test]
++    fn symlink_policy_rejected() {
++        use std::os::unix::fs::symlink;
++        let tmp = tempfile::tempdir().unwrap();
++        let p = policy(
++            tmp.path(),
++            BitcoinNetwork::Regtest,
++            "https://example.com/vss",
++            "node",
++            true,
++        );
++        let target = tmp.path().join("target");
++        fs::rename(&p.path, &target).unwrap();
++        symlink(target, &p.path).unwrap();
++        assert!(SnapshotPolicy::load(
++            tmp.path(),
++            BitcoinNetwork::Regtest,
++            "https://example.com/vss".into(),
++            "node".into(),
++            true
++        )
++        .is_err());
++    }
++}
