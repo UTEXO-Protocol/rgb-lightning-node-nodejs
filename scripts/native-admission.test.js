@@ -22,7 +22,7 @@ function setup (t) {
   fs.writeFileSync(sidecar, JSON.stringify({ ...expected, addonSha256: sha256(artifact) }))
   let loaded = 0
   let initialized = 0
-  const info = { abi_version: 1, rln_version: config.rlnVersion, rln_commit: expected.commit, lightning_commit: expected.lightningCommit,
+  const info = { abi_version: 1, rln_version: config.rlnVersion, rln_commit: expected.commit, lightning_commit: expected.lightningCommit, rgb_lib_commit: expected.rgbLibCommit,
     adapter_sha256: expected.patchSha256, wrapper_sha256: expected.wrapperSha256,
     lock_sha256: expected.lockSha256, target: expected.target, capabilities: [] }
   const localRequire = createRequire(path.resolve(__dirname, '../index.js'))

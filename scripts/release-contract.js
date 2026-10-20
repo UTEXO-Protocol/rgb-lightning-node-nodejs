@@ -6,12 +6,14 @@ const path = require('node:path')
 const { execFileSync } = require('node:child_process')
 
 const RELEASE = Object.freeze({
-  rlnVersion: '0.17.0-beta.3',
-  ref: 'ecc69f20308231400561f6f060fea88acfa40cc4',
-  commit: 'ecc69f20308231400561f6f060fea88acfa40cc4',
-  lightningCommit: '79b9eb5166546c62692d3a672986f385c7fe047d',
-  rustToolchain: '1.94.0',
-  cffiLockSha256: '5fcdc9ad9179d3230e48973cdfa514a863d13a837752027febf8ea04713bbeb5'
+  'rlnVersion': '0.17.0-beta.3',
+  'ref': 'cd3be114a6d0e41af8ce3f29719d210e105234dc',
+  'commit': 'cd3be114a6d0e41af8ce3f29719d210e105234dc',
+  'lightningCommit': '510189d5700a6d1406229ce7523e181c3838715e',
+  'rgbLibRepository': 'https://github.com/UTEXO-Protocol/rgb-lib-bfa.git',
+  'rgbLibCommit': '962730a211f0f7569d7ad8ae777052f433d87655',
+  'rustToolchain': '1.94.0',
+  'cffiLockSha256': '460728009d9c1db3abf9a2f2ad4d76f777589b55eff96ff7be1f3c4d301dab30'
 })
 // Exact reviewed C adapter plus the shared native lifecycle repair. This remains
 // an upstream release with an explicitly hashed runtime overlay, not plain RLN.
@@ -29,6 +31,7 @@ const ALLOWED_FILES = Object.freeze([
   'src/ldk.rs',
   'src/lib.rs',
   'src/rgb.rs',
+  'src/rgb_import.rs',
   'src/vss_snapshot_policy.rs',
   'src/uniffi_api/types.rs',
   'src/ldk_chain_backend/block_sync.rs',
@@ -52,15 +55,11 @@ const ALLOWED_FILES = Object.freeze([
 ])
 const GIT_SOURCES = Object.freeze({
   'musig2': 'git+https://github.com/arik-so/rust-musig2?rev=6f95a05718cbb44d8fe3fa6021aea8117aa38d50#6f95a05718cbb44d8fe3fa6021aea8117aa38d50',
-  'rgb-consensus': 'git+https://github.com/UTEXO-Protocol/rgb-consensus-s-bfa?rev=2faf6118b2f5fe30dd90dd5244d5a7dc32bcd757#2faf6118b2f5fe30dd90dd5244d5a7dc32bcd757',
-  'rgb-invoicing': 'git+https://github.com/UTEXO-Protocol/rgb-ops-s-bfa?rev=773766b5ca7a9e705ec68c2f9ed0917f505cd6e3#773766b5ca7a9e705ec68c2f9ed0917f505cd6e3',
-  'rgb-lib': 'git+https://github.com/UTEXO-Protocol/rgb-lib.git?tag=v0.3.0-beta.50-bfa#1b951af0c8233308c919975552487be19ad2a930',
-  'rgb-lib-migration': 'git+https://github.com/UTEXO-Protocol/rgb-lib.git?tag=v0.3.0-beta.50-bfa#1b951af0c8233308c919975552487be19ad2a930',
-  'rgb-ops': 'git+https://github.com/UTEXO-Protocol/rgb-ops-s-bfa?rev=773766b5ca7a9e705ec68c2f9ed0917f505cd6e3#773766b5ca7a9e705ec68c2f9ed0917f505cd6e3',
-  'rgb-schemas': 'git+https://github.com/UTEXO-Protocol/rgb-schemas-s-bfa?rev=238dfe7a89db998107fd87d919bf2757a2746d7f#238dfe7a89db998107fd87d919bf2757a2746d7f',
-  'signer-external': 'git+https://github.com/UTEXO-Protocol/rln-external-signer.git?branch=main#0fb005ec4b927ddbe13e1646d247b5bb11e8ffed',
-  'vls-core': 'git+https://github.com/UTEXO-Protocol/vls-core.git?branch=feat/rgb-compatibility#45c72edfd58620849eb486925439a76526b415ae',
-  'vls-protocol-signer': 'git+https://github.com/UTEXO-Protocol/vls-protocol-signer.git?branch=feat/rgb-compatibility#dddd336fcdf84c4febdd7af8363bda8d1721d893',
+  'rgb-lib': 'git+https://github.com/UTEXO-Protocol/rgb-lib-bfa.git?rev=962730a211f0f7569d7ad8ae777052f433d87655#962730a211f0f7569d7ad8ae777052f433d87655',
+  'rgb-lib-migration': 'git+https://github.com/UTEXO-Protocol/rgb-lib-bfa.git?rev=962730a211f0f7569d7ad8ae777052f433d87655#962730a211f0f7569d7ad8ae777052f433d87655',
+  'signer-external': 'git+https://github.com/UTEXO-Protocol/rln-external-signer.git?rev=0fb005ec4b927ddbe13e1646d247b5bb11e8ffed#0fb005ec4b927ddbe13e1646d247b5bb11e8ffed',
+  'vls-core': 'git+https://github.com/UTEXO-Protocol/vls-core.git?rev=45c72edfd58620849eb486925439a76526b415ae#45c72edfd58620849eb486925439a76526b415ae',
+  'vls-protocol-signer': 'git+https://github.com/UTEXO-Protocol/vls-protocol-signer.git?rev=dddd336fcdf84c4febdd7af8363bda8d1721d893#dddd336fcdf84c4febdd7af8363bda8d1721d893',
   'vss-client-ng': 'git+https://github.com/lightningdevkit/vss-client?rev=ad63805047561dcf3117cd992ad6d8bc3881adef#ad63805047561dcf3117cd992ad6d8bc3881adef'
 })
 

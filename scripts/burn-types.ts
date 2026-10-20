@@ -20,3 +20,11 @@ node.burn({ ...request, min_confirmations: '1' })
 node.burnAsset({ ...request, burn_recipient: new Uint8Array(32) })
 // @ts-expect-error Decimal strings must be integer text.
 node.burn({ ...request, amount: '1.5' })
+
+const sent = node.sendRgbInvoice({ invoice: 'rgb:invoice', asset_id: 'rgb:test', amount: '18446744073709551615', donation: false, fee_rate: '1', min_confirmations: 6 })
+const rgbTxid: string = sent.txid
+void rgbTxid
+// @ts-expect-error Confirmation policy is a numeric u8, never a decimal string.
+node.sendRgbInvoice({ invoice: 'rgb:invoice', asset_id: 'rgb:test', amount: 1, donation: false, fee_rate: 1, min_confirmations: '6' })
+// @ts-expect-error Callers cannot override the invoice encryption policy.
+node.sendRgbInvoice({ invoice: 'rgb:invoice', asset_id: 'rgb:test', amount: 1, donation: false, fee_rate: 1, min_confirmations: 6, encryption: 'Optional' })
