@@ -4213,7 +4213,7 @@ index d504a55..9294786 100644
      /// left in `uniffi_api::handle_from_request`) must be able to configure the remote-signer daemon
      /// address; without this field, `NodeHandle`-embedding callers could configure external-signer
 diff --git a/src/rgb.rs b/src/rgb.rs
-index 83202d4..be14b41 100644
+index 83202d4..8afd8bf 100644
 --- a/src/rgb.rs
 +++ b/src/rgb.rs
 @@ -285,7 +285,7 @@ impl CommonState {
@@ -4650,16 +4650,19 @@ index 83202d4..be14b41 100644
      }
  
      pub(crate) fn refresh(
-@@ -1161,7 +1226,7 @@ impl RgbLibWalletWrapper {
+@@ -1161,7 +1226,10 @@ impl RgbLibWalletWrapper {
          filter: Vec<RefreshFilter>,
          skip_sync: bool,
      ) -> Result<RefreshResult, RgbLibError> {
 -        self.get_rgb_wallet()
-+        self.get_rgb_wallet_mutating()
++        // Even skip_sync refresh can receive proxy consignments/keys or settle a transfer.
++        // Admit that mutation before dispatch, but suppress an upload only when the full
++        // acknowledged snapshot identity proves that all wallet content stayed unchanged.
++        self.get_rgb_wallet_for_sync(false)
              .refresh(self.online, asset_id, filter, skip_sync)
      }
  
-@@ -1170,7 +1235,7 @@ impl RgbLibWalletWrapper {
+@@ -1170,7 +1238,7 @@ impl RgbLibWalletWrapper {
          consignment: RgbTransfer,
          offchain_txid: String,
      ) -> Result<(), RgbLibError> {
@@ -4668,7 +4671,7 @@ index 83202d4..be14b41 100644
              .save_new_asset(self.online, consignment, offchain_txid)
      }
  
-@@ -1183,7 +1248,7 @@ impl RgbLibWalletWrapper {
+@@ -1183,7 +1251,7 @@ impl RgbLibWalletWrapper {
          expiration_timestamp: u64,
          sender_endpoint: Option<String>,
      ) -> Result<OperationResult, RgbLibError> {
@@ -4677,7 +4680,7 @@ index 83202d4..be14b41 100644
              self.online,
              recipient_map,
              donation,
-@@ -1211,7 +1276,7 @@ impl RgbLibWalletWrapper {
+@@ -1211,7 +1279,7 @@ impl RgbLibWalletWrapper {
                  details: "Custom RGB funding locktime is unavailable in the BFA RGB library".into(),
              });
          }
@@ -4686,7 +4689,7 @@ index 83202d4..be14b41 100644
              self.online,
              recipient_map,
              donation,
-@@ -1230,7 +1295,7 @@ impl RgbLibWalletWrapper {
+@@ -1230,7 +1298,7 @@ impl RgbLibWalletWrapper {
          fee_rate: u64,
          skip_sync: bool,
      ) -> Result<String, RgbLibError> {
@@ -4695,7 +4698,7 @@ index 83202d4..be14b41 100644
              .send_btc(self.online, address, amount, fee_rate, skip_sync)
      }
  
-@@ -1241,8 +1306,14 @@ impl RgbLibWalletWrapper {
+@@ -1241,8 +1309,14 @@ impl RgbLibWalletWrapper {
          fee_rate: u64,
          dry_run: bool,
      ) -> Result<String, RgbLibError> {
@@ -4712,7 +4715,7 @@ index 83202d4..be14b41 100644
      }
  
      pub(crate) fn send_btc_channel_funding_begin(
-@@ -1261,18 +1332,20 @@ impl RgbLibWalletWrapper {
+@@ -1261,18 +1335,20 @@ impl RgbLibWalletWrapper {
      }
  
      pub(crate) fn send_btc_end(&self, signed_psbt: String) -> Result<String, RgbLibError> {
@@ -4736,7 +4739,7 @@ index 83202d4..be14b41 100644
              .send_end_db_update_only(self.online, signed_psbt)
      }
  
-@@ -1281,7 +1354,7 @@ impl RgbLibWalletWrapper {
+@@ -1281,7 +1357,7 @@ impl RgbLibWalletWrapper {
      }
  
      pub(crate) fn sync(&self, options: SyncOptions) -> Result<(), RgbLibError> {
@@ -4745,7 +4748,7 @@ index 83202d4..be14b41 100644
      }
  
      pub(crate) fn update_witnesses(
-@@ -1289,7 +1362,7 @@ impl RgbLibWalletWrapper {
+@@ -1289,7 +1365,7 @@ impl RgbLibWalletWrapper {
          after_height: u32,
          force_witnesses: Vec<RgbTxid>,
      ) -> Result<UpdateRes, RgbLibError> {
@@ -4754,7 +4757,7 @@ index 83202d4..be14b41 100644
              .update_witnesses(self.online, after_height, force_witnesses)
      }
  
-@@ -1298,7 +1371,7 @@ impl RgbLibWalletWrapper {
+@@ -1298,7 +1374,7 @@ impl RgbLibWalletWrapper {
          witness_id: RgbTxid,
          witness_ord: WitnessOrd,
      ) -> Result<(), RgbLibError> {
@@ -4763,7 +4766,7 @@ index 83202d4..be14b41 100644
              .upsert_witness(witness_id, witness_ord)
      }
  
-@@ -1310,7 +1383,7 @@ impl RgbLibWalletWrapper {
+@@ -1310,7 +1386,7 @@ impl RgbLibWalletWrapper {
          transport_endpoints: Vec<String>,
          min_confirmations: u8,
      ) -> Result<ReceiveData, RgbLibError> {
@@ -4772,7 +4775,7 @@ index 83202d4..be14b41 100644
              Some(self.online),
              asset_id,
              assignment,
-@@ -1413,7 +1486,7 @@ impl WalletSource for RgbLibWalletWrapper {
+@@ -1413,7 +1489,7 @@ impl WalletSource for RgbLibWalletWrapper {
          Box::pin(async move {
              let network = Network::from(self.bitcoin_network());
              let unspents = self
@@ -4781,7 +4784,7 @@ index 83202d4..be14b41 100644
                  .list_unspents_vanilla(self.online, 1, false)
                  .map_err(|e| {
                      tracing::error!(error = %e, "failed to list unspents for fee bumping");
-@@ -1456,7 +1529,7 @@ impl WalletSource for RgbLibWalletWrapper {
+@@ -1456,7 +1532,7 @@ impl WalletSource for RgbLibWalletWrapper {
  
      fn get_change_script<'a>(&'a self) -> AsyncResult<'a, ScriptBuf, ()> {
          Box::pin(async move {
@@ -4790,7 +4793,7 @@ index 83202d4..be14b41 100644
                  tracing::error!(error = %e, "failed to get change address for fee bumping");
              })?;
              let parsed = Address::from_str(&address).map_err(|e| {
-@@ -1725,6 +1798,239 @@ mod wallet_source_tests {
+@@ -1725,6 +1801,368 @@ mod wallet_source_tests {
          RgbLibWalletWrapper::new(Arc::new(Mutex::new(wallet)), Online { id: 0 })
      }
  
@@ -4942,6 +4945,128 @@ index 83202d4..be14b41 100644
 +
 +    #[cfg(feature = "vss")]
 +    #[test]
++    fn refresh_error_without_content_change_preserves_clean_acknowledged_snapshot() {
++        for skip_sync in [false, true] {
++            let tmp = tempfile::tempdir().unwrap();
++            let policy = Arc::new(
++                crate::vss_snapshot_policy::SnapshotPolicy::load(
++                    tmp.path(),
++                    BitcoinNetwork::SignetCustom,
++                    "https://example.invalid/vss".into(),
++                    "test-node".into(),
++                    true,
++                )
++                .unwrap(),
++            );
++            let mut wrapper = signetcustom_wallet_source();
++            wrapper.snapshot_policy = Some(policy.clone());
++            completed_snapshot_fixture(&wrapper, tmp.path());
++            // Exercise the actual named refresh adapter. Its offline fixture error does
++            // not change content, so neither a pending marker nor an attempted automatic
++            // upload may remain. No client is attached: an attempted upload would fail.
++            assert!(matches!(
++                wrapper.refresh(None, vec![], skip_sync),
++                Err(RgbLibError::Offline)
++            ));
++            assert!(!policy.pending());
++            assert!(!policy.failed.load(std::sync::atomic::Ordering::SeqCst));
++            assert!(!wrapper.get_rgb_wallet().backup_info().unwrap());
++        }
++    }
++
++    #[cfg(feature = "vss")]
++    #[test]
++    fn refresh_preserves_fresh_missing_receipt_prior_pending_and_failed_states() {
++        for state in ["fresh", "missing_receipt", "pending", "failed"] {
++            for skip_sync in [false, true] {
++                let tmp = tempfile::tempdir().unwrap();
++                let policy = Arc::new(
++                    crate::vss_snapshot_policy::SnapshotPolicy::load(
++                        tmp.path(),
++                        BitcoinNetwork::SignetCustom,
++                        "https://example.invalid/vss".into(),
++                        "test-node".into(),
++                        false,
++                    )
++                    .unwrap(),
++                );
++                let mut wrapper = signetcustom_wallet_source();
++                wrapper.snapshot_policy = Some(policy.clone());
++                if state != "fresh" {
++                    completed_snapshot_fixture(&wrapper, tmp.path());
++                }
++                if state == "missing_receipt" {
++                    let receipt = std::fs::read_dir(tmp.path())
++                        .unwrap()
++                        .map(|entry| entry.unwrap().path())
++                        .find(|path| path.to_string_lossy().ends_with(".completion.json"))
++                        .unwrap();
++                    std::fs::remove_file(receipt).unwrap();
++                }
++                if state == "pending" || state == "failed" {
++                    policy.before_mutation();
++                }
++                if state == "failed" {
++                    policy
++                        .failed
++                        .store(true, std::sync::atomic::Ordering::SeqCst);
++                }
++                assert!(matches!(
++                    wrapper.refresh(None, vec![], skip_sync),
++                    Err(RgbLibError::Offline)
++                ));
++                assert!(policy.pending(), "lost {state}, skip_sync={skip_sync}");
++                assert_eq!(
++                    policy.failed.load(std::sync::atomic::Ordering::SeqCst),
++                    state == "failed"
++                );
++            }
++        }
++    }
++
++    #[cfg(feature = "vss")]
++    #[test]
++    fn content_aware_refresh_guard_retains_secret_file_and_derivation_mutations() {
++        for mutation in ["secret_file", "derivation"] {
++            let tmp = tempfile::tempdir().unwrap();
++            let policy = Arc::new(
++                crate::vss_snapshot_policy::SnapshotPolicy::load(
++                    tmp.path(),
++                    BitcoinNetwork::SignetCustom,
++                    "https://example.invalid/vss".into(),
++                    "test-node".into(),
++                    false,
++                )
++                .unwrap(),
++            );
++            let mut wrapper = signetcustom_wallet_source();
++            wrapper.snapshot_policy = Some(policy.clone());
++            completed_snapshot_fixture(&wrapper, tmp.path());
++            let before = wrapper.get_btc_balance(true).unwrap();
++            {
++                let mut guard = wrapper.get_rgb_wallet_for_sync(false);
++                if mutation == "secret_file" {
++                    // Stand-in for a newly persisted operation key. Its bytes must
++                    // participate without any balance/history/derivation change.
++                    std::fs::write(
++                        guard
++                            .get_wallet_dir()
++                            .join("proxy-operation-secret.fixture"),
++                        [0x55; 32],
++                    )
++                    .unwrap();
++                } else {
++                    guard.get_address().unwrap();
++                }
++            }
++            assert_eq!(wrapper.get_btc_balance(true).unwrap(), before);
++            assert!(policy.pending(), "lost {mutation}");
++            assert!(wrapper.get_rgb_wallet().backup_info().unwrap());
++        }
++    }
++
++    #[cfg(feature = "vss")]
++    #[test]
 +    fn every_adapter_state_mutator_uses_explicit_snapshot_admission() {
 +        let source = include_str!("rgb.rs");
 +        let adapter = source
@@ -4971,7 +5096,6 @@ index 83202d4..be14b41 100644
 +            "accept_transfer_consignment",
 +            "provide_out_of_band_ack",
 +            "provide_out_of_band_consignment",
-+            "refresh",
 +            "save_new_asset",
 +            "send",
 +            "send_begin",
@@ -4996,6 +5120,14 @@ index 83202d4..be14b41 100644
 +                "{method} lacks snapshot admission"
 +            );
 +        }
++        let refresh = adapter
++            .split("fn refresh(")
++            .nth(1)
++            .unwrap()
++            .split("pub(crate) fn ")
++            .next()
++            .unwrap();
++        assert!(refresh.contains("get_rgb_wallet_for_sync(false)"));
 +        for method in [
 +            "get_asset_balance",
 +            "get_asset_metadata",
