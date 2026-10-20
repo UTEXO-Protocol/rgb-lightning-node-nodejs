@@ -37,7 +37,7 @@ jobs:
           - runner: ubuntu-24.04-arm
             target: linux-arm64-gnu
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 90
+    timeout-minutes: ${{ matrix.target == 'darwin-x64' && 150 || 90 }}
     env:
       CARGO_BUILD_JOBS: 2
       CARGO_PROFILE_RELEASE_DEBUG: 0
@@ -54,7 +54,13 @@ jobs:
         with:
           toolchain: '1.94.0'
           rustflags: ''
-      - run: node scripts/with-source-access.js bash scripts/runtime-matrix.sh
+      - run: |
+          if [[ "$EXPECTED_TARGET" == "darwin-x64" ]]; then
+            mkdir -p "$RUNNER_TEMP/node-runtime-timing"
+            exec /usr/bin/time -l -o "$RUNNER_TEMP/node-runtime-timing/darwin-x64.txt" \
+              node scripts/with-source-access.js bash scripts/runtime-matrix.sh
+          fi
+          exec node scripts/with-source-access.js bash scripts/runtime-matrix.sh
         if: runner.os == 'macOS'
         env:
           ORG_READ_TOKEN: ${{ secrets.ORG_READ_TOKEN }}
@@ -77,6 +83,12 @@ jobs:
             linux-runtime-compatibility.json
             index-*.provenance.json
             *.tgz
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always() && matrix.target == 'darwin-x64'
+        with:
+          name: ci-timing-darwin-x64-${{ github.sha }}
+          path: ${{ runner.temp }}/node-runtime-timing/darwin-x64.txt
           if-no-files-found: warn
 
   musl-runtime:
