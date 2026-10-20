@@ -1,13 +1,358 @@
-name: Build Candidate Artifacts (No Publication)
+name: Verify or publish native Node beta.5
 
 on:
   workflow_dispatch:
+    inputs:
+      operation:
+        description: Verify only, or publish the verified package
+        type: choice
+        options: [verify, publish]
+        default: verify
+        required: true
+      confirm_version:
+        description: For publication, enter exactly 0.2.0-beta.5
+        type: string
+        default: ''
+        required: false
 
 permissions:
   contents: read
+  actions: read
+  id-token: write
+
+concurrency:
+  group: native-node-beta5-publication
+  cancel-in-progress: false
 
 jobs:
-  candidate:
-    uses: ./.github/workflows/runtime-matrix.yml
-    secrets:
-      ORG_READ_TOKEN: ${{ secrets.ORG_READ_TOKEN }}
+  release:
+    runs-on: macos-15
+    timeout-minutes: 30
+    env:
+      PACKAGE_NAME: '@utexo/rgb-lightning-node-nodejs'
+      PACKAGE_VERSION: 0.2.0-beta.5
+      PACKAGE_COMMIT: 8b78387df4c33140a52c19c6de6fcc8d4aa7595c
+      ARTIFACT_RUN: '39263641585'
+      ARTIFACT_COMMIT: a1fb8291d946685e2e668156ac520f0581302b96
+      OPERATION: ${{ inputs.operation }}
+      CONFIRM_VERSION: ${{ inputs.confirm_version }}
+    steps:
+      - name: Validate request
+        env:
+          WORKFLOW_REF: ${{ github.ref }}
+        run: |
+          set -euo pipefail
+          test "$WORKFLOW_REF" = refs/heads/ci/publish-native-beta5-20261020
+          case "$OPERATION" in
+            verify) ;;
+            publish) test "$CONFIRM_VERSION" = "$PACKAGE_VERSION" ;;
+            *) echo 'Unsupported operation'; exit 1 ;;
+          esac
+
+      - name: Checkout reviewed publication workflow
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          path: automation
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Checkout immutable merged main package source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.2.2
+        with:
+          ref: 8b78387df4c33140a52c19c6de6fcc8d4aa7595c
+          path: package
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup release Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22.23.3
+
+      - name: Pin release npm
+        run: |
+          set -euo pipefail
+          npm install --global npm@12.0.1
+          test "$(node --version)" = v22.23.3
+          test "$(npm --version)" = 12.0.1
+          test "$(npm config get ignore-scripts)" = false
+          test "$(npm config get dangerously-allow-all-scripts)" = false
+          mkdir -p "$RUNNER_TEMP/publication-evidence" "$RUNNER_TEMP/original-artifacts" "$RUNNER_TEMP/npm-package"
+
+      - name: Verify source ancestry and native source equivalence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha)" = "$PACKAGE_COMMIT"
+          test "$(git -C package rev-parse HEAD)" = "$PACKAGE_COMMIT"
+          test "$(git -C automation rev-parse HEAD)" = "$GITHUB_SHA"
+          git -C automation merge-base --is-ancestor "$PACKAGE_COMMIT" HEAD
+          test "$(git -C automation diff --name-only "$PACKAGE_COMMIT" HEAD)" = .github/workflows/release.yml
+          test -z "$(git -C package status --porcelain)"
+          python3 - <<'PYCODE'
+          import hashlib, json, os, pathlib, subprocess
+          package = pathlib.Path('package')
+          def git(*args):
+              return subprocess.check_output(['git', '-C', str(package), *args])
+          source = os.environ['ARTIFACT_COMMIT']
+          files = ['src/lib.rs', 'build.rs', 'Cargo.toml', 'Cargo.lock', 'index.js', 'index.d.ts',
+                   'json-boundary.js', 'scripts/install-overlay-addon.js', 'scripts/macho-linkedit.js',
+                   'scripts/release-contract.js', 'patches/release-adapter-v0.17.0-beta.3.patch']
+          checked = []
+          for name in files:
+              original = git('show', f'{source}:{name}')
+              current = (package / name).read_bytes()
+              if original != current:
+                  raise SystemExit(f'Native build/admission source changed: {name}')
+              checked.append({'path': name, 'sha256': hashlib.sha256(current).hexdigest()})
+          original = json.loads(git('show', f'{source}:package.json'))
+          current = json.loads((package / 'package.json').read_text())
+          if original['version'] != '0.2.0-beta.4' or current['version'] != os.environ['PACKAGE_VERSION'] or current['name'] != os.environ['PACKAGE_NAME']:
+              raise SystemExit('Wrong original/candidate package identity')
+          for metadata in (original, current):
+              metadata.pop('scripts', None)
+              metadata.pop('version')
+          if original != current:
+              raise SystemExit('Native package or dependency identity changed beyond the reviewed beta.5 version')
+          receipt = {'packageCommit': os.environ['PACKAGE_COMMIT'],
+                     'packageTree': git('rev-parse', 'HEAD^{tree}').decode().strip(),
+                     'builderWorkflowCommit': os.environ['GITHUB_SHA'],
+                     'builderWorkflowRef': os.environ['GITHUB_WORKFLOW_REF'],
+                     'originalArtifactRun': int(os.environ['ARTIFACT_RUN']),
+                     'originalArtifactSourceCommit': source, 'unchangedNativeInputs': checked,
+                     'scope': 'Original CI native bytes admitted by exact merged main; no rebuild or relabel'}
+          out = pathlib.Path(os.environ['RUNNER_TEMP']) / 'publication-evidence/source-proof.json'
+          out.write_text(json.dumps(receipt, indent=2) + '\n')
+          PYCODE
+
+      - name: Admit all five original artifact archives
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PYCODE'
+          import hashlib, io, json, os, pathlib, subprocess, tarfile, zipfile
+          root = pathlib.Path(os.environ['RUNNER_TEMP'])
+          package = pathlib.Path('package')
+          repo = os.environ['GITHUB_REPOSITORY']
+          run_id = int(os.environ['ARTIFACT_RUN'])
+          def api(endpoint):
+              return json.loads(subprocess.check_output(['gh', 'api', f'repos/{repo}/{endpoint}']))
+          run = api(f'actions/runs/{run_id}')
+          if run['conclusion'] != 'success' or run['head_sha'] != os.environ['ARTIFACT_COMMIT']:
+              raise SystemExit('Original artifact workflow identity or result changed')
+          expected = [
+            {
+              "id": 12196715285,
+              "name": "runtime-linux-x64-musl-e2f0ae761db82c0d4554972d669797bef3c5ca11",
+              "digest": "sha256:fba17c71dfc4209c8d2a96327a60ba8dfefb8df29f39bfd2ea84d6fa955c6726",
+              "target": "linux-x64-musl",
+              "addonSha256": "bf39d4c6d764d09c9889d82762f21281103b1d19d137df32377b4f204452cff6",
+              "sidecarSha256": "68c3a4d98bd0d9d6b20f2fb1eb16c483b23022c3ae927b48456342a670d07539"
+            },
+            {
+              "id": 12196215464,
+              "name": "runtime-darwin-x64-e2f0ae761db82c0d4554972d669797bef3c5ca11",
+              "digest": "sha256:549d17a5d21ad6b45a55d9cd4def2d3525c8b2a8ad0c5866dfd9d50732e10c67",
+              "target": "darwin-x64",
+              "addonSha256": "d0742ec3d821c36eeb0b0ebf5071417f157872a5bde2e35a6fc182e03c299bdd",
+              "sidecarSha256": "ab582674c9b9ba76747bfdb3ddfe77faf5fbcc285370e86dceb4f52ce79c2a2d"
+            },
+            {
+              "id": 12194635116,
+              "name": "runtime-linux-x64-gnu-e2f0ae761db82c0d4554972d669797bef3c5ca11",
+              "digest": "sha256:5ee1beafef3715afce3ec287f400b5ae5cb003c63d4b1c2d2ae01bdebd2b1576",
+              "target": "linux-x64-gnu",
+              "addonSha256": "e35974417bf4658ebe87f35da8d8e14628f7a65e8054c43d225c2f6b77fbb45a",
+              "sidecarSha256": "bdd1b2997f89ca47f0783cda4eb776333361b5cccdadfe8ddb10e066375579a2"
+            },
+            {
+              "id": 12194516367,
+              "name": "runtime-darwin-arm64-e2f0ae761db82c0d4554972d669797bef3c5ca11",
+              "digest": "sha256:072c94466b999fd204bec44d3410bcc4bd35f9c61e128d18d42c3e0a3bc28c5b",
+              "target": "darwin-arm64",
+              "addonSha256": "5245b725928fca1f383820347a6a8b4ad20f87e97c0337b4d937b9205277af46",
+              "sidecarSha256": "08f9dfaa6938d21d1da85f2e6bfc1c5ace99f92c14f363105ebe5710d56bbe39"
+            },
+            {
+              "id": 12194053613,
+              "name": "runtime-linux-arm64-gnu-e2f0ae761db82c0d4554972d669797bef3c5ca11",
+              "digest": "sha256:bd1ee1ff9d7032d26f3bd063e553db80972b9486905b6259024fe92bd124a64d",
+              "target": "linux-arm64-gnu",
+              "addonSha256": "3d6a60aa60df577124124a0e174a1281a8b243a96bd2eaf3868e527ad0054a11",
+              "sidecarSha256": "61c799a39d9831ef416479d5f8ab8a422260d6bdbba75b2b81cad5149e36607f"
+            }
+          ]
+          catalog = api(f'actions/runs/{run_id}/artifacts?per_page=100')
+          actual = {item['id']: item for item in catalog['artifacts']}
+          if catalog['total_count'] != len(expected) or set(actual) != {item['id'] for item in expected}:
+              raise SystemExit('Unexpected original artifact set')
+          receipts = []
+          for pinned in expected:
+              artifact = actual[pinned['id']]
+              if artifact['name'] != pinned['name'] or artifact['digest'] != pinned['digest'] or artifact['expired']:
+                  raise SystemExit('Original artifact name, digest or availability changed')
+              if artifact['workflow_run']['id'] != run_id or artifact['workflow_run']['head_sha'] != os.environ['ARTIFACT_COMMIT']:
+                  raise SystemExit('Artifact workflow source mismatch')
+              archive = root / 'original-artifacts' / (pinned['name'] + '.zip')
+              with archive.open('xb') as output:
+                  subprocess.run(['gh', 'api', f'repos/{repo}/actions/artifacts/{pinned["id"]}/zip'], stdout=output, check=True)
+              digest = 'sha256:' + hashlib.sha256(archive.read_bytes()).hexdigest()
+              if digest != pinned['digest']:
+                  raise SystemExit('Downloaded GitHub artifact ZIP digest mismatch')
+              suffix = pinned['target']
+              binary = f'index-{suffix}.node'
+              sidecar = f'index-{suffix}.provenance.json'
+              tarball = 'utexo-rgb-lightning-node-nodejs-0.2.0-beta.4.tgz'  # Original CI input retains its original package label.
+              with zipfile.ZipFile(archive) as zipped:
+                  names = zipped.namelist()
+                  allowed = {sidecar, tarball, 'runtime-evidence.json', 'linux-runtime-compatibility.json'}
+                  if len(names) != len(set(names)) or not {sidecar, tarball, 'runtime-evidence.json'} <= set(names) or not set(names) <= allowed:
+                      raise SystemExit('Unexpected original ZIP contents')
+                  runtime = json.loads(zipped.read('runtime-evidence.json'))
+                  if runtime['target'] != suffix or runtime['info']['rln_commit'] != 'ecc69f20308231400561f6f060fea88acfa40cc4':
+                      raise SystemExit('Original runtime receipt identity mismatch')
+                  with tarfile.open(fileobj=io.BytesIO(zipped.read(tarball)), mode='r:gz') as packed:
+                      native = [item.name for item in packed.getmembers() if item.name.endswith(('.node', '.provenance.json'))]
+                      if sorted(native) != sorted([f'package/{binary}', f'package/{sidecar}']):
+                          raise SystemExit('Unexpected native members in original target package')
+                      payload = {}
+                      for name in (binary, sidecar):
+                          member = packed.getmember(f'package/{name}')
+                          if not member.isfile():
+                              raise SystemExit('Native artifact is not a regular file')
+                          payload[name] = packed.extractfile(member).read()
+                  if payload[sidecar] != zipped.read(sidecar):
+                      raise SystemExit('Paired provenance sidecars disagree')
+              for name, key in ((binary, 'addonSha256'), (sidecar, 'sidecarSha256')):
+                  if hashlib.sha256(payload[name]).hexdigest() != pinned[key]:
+                      raise SystemExit('Original native payload digest mismatch')
+                  destination = package / name
+                  if destination.exists():
+                      raise SystemExit('Refusing to overwrite native artifact')
+                  destination.write_bytes(payload[name])
+                  destination.chmod(0o644)
+              provenance = json.loads(payload[sidecar])
+              if provenance['profile'] != 'release' or provenance['addonSha256'] != pinned['addonSha256']:
+                  raise SystemExit('Original native provenance is not a paired release artifact')
+              receipts.append({**pinned, 'verifiedZipDigest': digest, 'copiedOriginalBytes': True})
+          (root / 'publication-evidence/original-artifact-receipt.json').write_text(json.dumps(receipts, indent=2) + '\n')
+          PYCODE
+
+      - name: Install development tools without lifecycle builds
+        working-directory: package
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Check declarations and native regressions
+        working-directory: package
+        run: |
+          set -euo pipefail
+          npm run check:types
+          npm test
+          npm run prepublishOnly
+          test -z "$(git status --porcelain)"
+
+      - name: Pack exact main and record publication metadata
+        working-directory: package
+        run: |
+          set -euo pipefail
+          npm pack --ignore-scripts --json --pack-destination "$RUNNER_TEMP/npm-package" > "$RUNNER_TEMP/publication-evidence/npm-pack.json"
+          node - <<'JSCODE'
+          const fs = require('node:fs')
+          const path = require('node:path')
+          const crypto = require('node:crypto')
+          const cp = require('node:child_process')
+          const npmRoot = path.resolve(path.dirname(fs.realpathSync(cp.execFileSync('which', ['npm'], { encoding: 'utf8' }).trim())), '..')
+          const PackageJson = require(path.join(npmRoot, 'node_modules/@npmcli/package-json'))
+          const evidence = path.join(process.env.RUNNER_TEMP, 'publication-evidence')
+          ;(async () => {
+            const { content } = await PackageJson.prepare(process.cwd())
+            if (content.gitHead !== process.env.PACKAGE_COMMIT || content.name !== process.env.PACKAGE_NAME || content.version !== process.env.PACKAGE_VERSION) throw new Error('Directory publication metadata mismatch')
+            const raw = JSON.parse(fs.readFileSync(path.join(evidence, 'npm-pack.json')))
+            const packed = Array.isArray(raw) ? raw : Object.values(raw)
+            if (packed.length !== 1 || packed[0].name !== content.name || packed[0].version !== content.version) throw new Error('Packed identity mismatch')
+            const tarball = path.join(process.env.RUNNER_TEMP, 'npm-package', packed[0].filename)
+            const sha256 = crypto.createHash('sha256').update(fs.readFileSync(tarball)).digest('hex')
+            const native = fs.readdirSync('.').filter(name => /^index-.*\.(node|provenance\.json)$/.test(name)).sort().map(name => ({ name, sha256: crypto.createHash('sha256').update(fs.readFileSync(name)).digest('hex') }))
+            if (native.length !== 10) throw new Error('Expected five native binaries and five sidecars')
+            const receipt = { name: content.name, version: content.version, packageGitHead: content.gitHead, builderWorkflowCommit: process.env.GITHUB_SHA, builderWorkflowRef: process.env.GITHUB_WORKFLOW_REF, integrity: packed[0].integrity, shasum: packed[0].shasum, tarballSha256: sha256, native, node: process.version, npm: cp.execFileSync('npm', ['--version'], { encoding: 'utf8' }).trim(), publicationCommand: 'npm publish . --provenance --access public --tag beta --registry https://registry.npmjs.org/', provenanceScope: 'Workflow branch is the actual builder; package gitHead is independently checked immutable main; native bytes retain original CI provenance' }
+            fs.writeFileSync(path.join(evidence, 'publication-plan.json'), JSON.stringify(receipt, null, 2) + '\n')
+            console.log(JSON.stringify(receipt, null, 2))
+          })().catch(error => { console.error(error.message); process.exitCode = 1 })
+          JSCODE
+          test -z "$(git status --porcelain)"
+
+      - name: Require version absent from npm
+        run: |
+          set -euo pipefail
+          node - <<'JSCODE'
+          const fs = require('node:fs')
+          const path = require('node:path')
+          ;(async () => {
+            const url = `https://registry.npmjs.org/${encodeURIComponent(process.env.PACKAGE_NAME)}/${encodeURIComponent(process.env.PACKAGE_VERSION)}`
+            const response = await fetch(url, { signal: AbortSignal.timeout(30000) })
+            if (response.status !== 404) throw new Error(`Publication requires an absent version; registry status ${response.status}`)
+            fs.writeFileSync(path.join(process.env.RUNNER_TEMP, 'publication-evidence/registry-absence.json'), JSON.stringify({ name: process.env.PACKAGE_NAME, version: process.env.PACKAGE_VERSION, status: response.status, observedAt: new Date().toISOString() }, null, 2) + '\n')
+          })().catch(error => { console.error(error.message); process.exitCode = 1 })
+          JSCODE
+
+      - name: Prepare isolated npm authentication configuration
+        run: |
+          set -euo pipefail
+          umask 077
+          printf '%s\n' 'registry=https://registry.npmjs.org/' '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}' > "$RUNNER_TEMP/native-publication.npmrc"
+
+      - name: Verify repository npm publishing identity
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_USERCONFIG: ${{ runner.temp }}/native-publication.npmrc
+        run: |
+          set -euo pipefail
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo 'Repository NPM_TOKEN is missing; no publication attempted.'
+            exit 1
+          fi
+          npm whoami --registry https://registry.npmjs.org/ > "$RUNNER_TEMP/publication-evidence/npm-identity.txt"
+          echo 'Repository npm token authenticated successfully.'
+
+      - name: Save reviewable publication evidence before publishing
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: node-beta5-publication-plan-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/publication-evidence/
+            ${{ runner.temp }}/npm-package/
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Publish exact main package once with GitHub provenance
+        if: ${{ success() && inputs.operation == 'publish' }}
+        working-directory: package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_USERCONFIG: ${{ runner.temp }}/native-publication.npmrc
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$CONFIRM_VERSION" = "$PACKAGE_VERSION"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha)" = "$PACKAGE_COMMIT"
+          test "$(git rev-parse HEAD)" = "$PACKAGE_COMMIT"
+          test -z "$(git status --porcelain)"
+          npm run prepublishOnly
+          node - <<'JSCODE'
+          const fs = require('node:fs')
+          const path = require('node:path')
+          const crypto = require('node:crypto')
+          ;(async () => {
+            const plan = JSON.parse(fs.readFileSync(path.join(process.env.RUNNER_TEMP, 'publication-evidence/publication-plan.json')))
+            for (const file of plan.native) {
+              if (crypto.createHash('sha256').update(fs.readFileSync(file.name)).digest('hex') !== file.sha256) throw new Error('Native artifact changed after qualification')
+            }
+            const response = await fetch(`https://registry.npmjs.org/${encodeURIComponent(plan.name)}/${encodeURIComponent(plan.version)}`, { signal: AbortSignal.timeout(30000) })
+            if (response.status !== 404) throw new Error(`Version is no longer absent; registry status ${response.status}`)
+          })().catch(error => { console.error(error.message); process.exitCode = 1 })
+          JSCODE
+          npm publish . --provenance --access public --tag beta --registry https://registry.npmjs.org/
