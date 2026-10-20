@@ -1,23 +1,44 @@
 # Changelog
 
-## Unreleased: VSS integration
+## [0.2.0-beta.5] — 2026-10-20
 
-- Add pre-unlock, identity-bound restore preparation for existing cloud archives,
-  bounded safe extraction, atomic no-overwrite promotion and durable locally
-  authenticated receipts for interrupted restore recovery. A fresh upload or
-  unmarked local directory cannot satisfy restore admission.
+### Added
 
-- Enable configured VSS backup and explicit locked-node fence recovery through
-  the maintained native adapter; preserve local-only operation when unconfigured.
-- Add `vss-backup-v1` and `vss-backup-info-v1` compiled capabilities, explicit
-  supported policy metadata and `SdkNode.vssBackupInfo()` with real remote
-  existence/version and local dirty/automatic-error status.
-- Validate endpoint configuration before opening wallet storage and keep URL
-  credentials and raw automatic-backup errors out of the public status contract.
-- Preserve signer shutdown, owned task/listener cleanup, BIP-322 and native
-  artifact/provenance admission. No upstream source revision changes.
+- BIP-322 v2 simple Bitcoin address proofs using the owned first vanilla BIP86
+  Taproot address, exact UTF-8 messages and native signing. Offline verification
+  supports P2TR key-path and P2WPKH simple proofs. Existing Lightning node-identity
+  signing retains its original semantics.
+- Explicitly configured VSS backup and pre-unlock cloud restore, with bounded
+  archive-path validation, wallet/network identity checks, no-overwrite promotion
+  and authenticated local restore receipts.
+- Durable, default-on automatic RGB backup preference scoped to wallet, network
+  and exact VSS endpoint. Pausing retains manual backup and pending changes;
+  re-enabling checkpoints current state before confirming the preference.
+- Separate remote backup-health and versioned local upload-receipt APIs. Receipts
+  contain the canonical manifest version and actual upload completion time, and
+  remain readable after device clock corrections.
 
-## 0.2.0-beta.4 (unpublished candidate)
+### Fixed
+
+- Serialize backup policy, admitted mutations, checkpoints and shutdown. Failed
+  uploads retain pending state and the prior preference; read-only status does
+  not manufacture a new backup time or repeat a financial operation.
+- Retain terminal signer shutdown, session task/listener cleanup and explicit
+  locked-node writer recovery. No automatic foreign-writer takeover is added.
+
+### Compatibility and distribution
+
+- Continue RLN v0.17.0-beta.3, rgb-lib v0.3.0-beta.50-bfa and the same pinned LDK.
+  Native runtime/build inputs and previously qualified binary bytes are preserved;
+  package versioning does not relabel their original compilation provenance.
+- VSS does not back up the mnemonic, separate VLS signer database or application
+  journals. Upstream public-derived external-signer credentials, interrupted
+  chunk replacement and broader crash/device-loss recovery remain limitations.
+
+- Retain the complete five-target Node package: Darwin ARM64/x64, Linux
+  ARM64/x64 GNU and Linux x64 musl. Published beta.4 artifacts remain unchanged.
+
+## 0.2.0-beta.4
 
 - Pin RLN SDK v0.17.0-beta.3, its released LDK submodule and rgb-lib beta.50-bfa.
 - Rebase the C-FFI-only adapter and enforce new compiled provenance. Existing API behavior and strict native artifact protection gates remain.
@@ -30,7 +51,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 while pre-`1.0`.
 
-## [Unreleased]
+## Historical pre-0.17 API work (superseded)
+
+These development notes retain earlier API history; they are not the current
+0.2.0-beta.5 API reference. See the README and current declarations.
 
 ### Added
 - `SdkNode.apayNewWithAddress(hostNodeId, username, domain)` with the generated
