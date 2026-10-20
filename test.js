@@ -1,4 +1,5 @@
 'use strict'
+// rgb-lib-bfa requires fresh addresses; address reuse is explicitly unsupported.
 
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
@@ -29,6 +30,9 @@ try {
   signer = NativeExternalSigner.createWithStorage('01'.repeat(32), 'regtest', signerDir)
   bootstrap = signer.bootstrap()
   assert.match(bootstrap.node_id, /^(02|03)[a-f0-9]{64}$/)
+  assert.throws(() => SdkNode.create({ storage_dir_path: path.join(root, 'unsupported-reuse'),
+    network: 'regtest', daemon_listening_port: 0, ldk_peer_listening_port: 0,
+    max_media_upload_size_mb: 5, reuse_addresses: true }), /Address reuse is not supported by rgb-lib-bfa/)
   node = SdkNode.create({
     storage_dir_path: nodeDir,
     daemon_listening_port: 0,
@@ -36,7 +40,7 @@ try {
     network: 'regtest',
     max_media_upload_size_mb: 5,
     enable_virtual_channels_v0: false,
-    reuse_addresses: true
+    reuse_addresses: false
   })
   assert.throws(() => node.apayNewWithAddress('02'.repeat(33), 'canary', 'example.com'), /NotInitialized/)
   assert.equal(typeof node.burn, 'function')
@@ -83,7 +87,7 @@ try {
   const expectedBootstrap = retainedSigner.bootstrap()
   retainedNode = SdkNode.create({ storage_dir_path: path.join(retainedRoot, 'node'),
     daemon_listening_port: 0, ldk_peer_listening_port: 0, network: 'regtest',
-    max_media_upload_size_mb: 5, enable_virtual_channels_v0: false, reuse_addresses: true })
+    max_media_upload_size_mb: 5, enable_virtual_channels_v0: false, reuse_addresses: false })
   retainedNode.initWithNativeExternalSigner(retainedSigner)
   retainedNode.attachNativeExternalSigner(retainedSigner)
   retainedSigner.destroy()
@@ -105,7 +109,7 @@ console.log('Early host-handle release preserves the attached signer until node 
 const mainnetRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'rln-mainnet-policy-'))
 const mainnet = SdkNode.create({ storage_dir_path: mainnetRoot,
   daemon_listening_port: 0, ldk_peer_listening_port: 0, network: 'mainnet',
-  max_media_upload_size_mb: 5, enable_virtual_channels_v0: false, reuse_addresses: true })
+  max_media_upload_size_mb: 5, enable_virtual_channels_v0: false, reuse_addresses: false })
 try {
   assert.throws(() => mainnet.lnInvoice({ amt_msat: 1000, expiry_sec: 3600 }), /LightningUnsupportedOnMainnet/)
   assert.throws(() => mainnet.listChannels(), /LightningUnsupportedOnMainnet/)

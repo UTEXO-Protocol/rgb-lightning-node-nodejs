@@ -1,5 +1,6 @@
 /* global Bare */
 'use strict'
+// rgb-lib-bfa requires fresh addresses; address reuse is explicitly unsupported.
 // Opt-in disposable-wallet qualification. Never runs during package installation.
 const bare = typeof Bare !== 'undefined'
 const fs = require(bare ? 'bare-fs' : 'node:fs')
@@ -28,7 +29,7 @@ const versions = []
 const infoRows = []
 const config = (directory, allowEmpty) => ({ storage_dir_path: path.join(root, directory), network,
   daemon_listening_port: 0, ldk_peer_listening_port: 0, max_media_upload_size_mb: 5,
-  enable_virtual_channels_v0: false, reuse_addresses: true, vss_url: endpoint,
+  enable_virtual_channels_v0: false, reuse_addresses: false, vss_url: endpoint,
   vss_allow_http: false, vss_allow_empty_restore: allowEmpty })
 const unlock = { ldk_chain_sync: { mode: 'TransactionSync', config: { indexer_url: indexer } },
   indexer_url: indexer, proxy_endpoint: proxy, eth_rpc_url: eth, announce_addresses: [] }
@@ -66,6 +67,7 @@ try {
   open('original', true, false)
   const initial = status()
   assert(initial.backup_exists, 'Initial configured wallet did not create a remote snapshot')
+  const signingAddress = node.getMessageSigningAddress()
   const address = node.address().address
   const checkpoint = node.vssBackup()
   assert(checkpoint.version !== undefined, 'Checkpoint returned no version')
@@ -76,18 +78,28 @@ try {
   close()
 
   open('original', false, false)
-  assert(node.address().address === address, 'Graceful reopen changed the wallet address')
+  assert(node.getMessageSigningAddress() === signingAddress, 'Graceful reopen changed the canonical signing key')
+  const reopenedAddress = node.address().address
+  assert(reopenedAddress !== address, 'Graceful reopen reused an already revealed receive address')
   assert(status().backup_exists, 'Graceful reopen lost remote backup information')
+  versions.push(node.vssBackup().version)
+  // Keep the remote checkpoint fixed, then observe the next local receive key.
+  // A fresh-directory restore must recover that exact derivation cursor.
+  node.setVssAutomaticBackupEnabled(false)
+  const checkpointVersion = status().version
+  const restoredNextAddress = node.address().address
+  assert(status().version === checkpointVersion && status().backup_required, 'Paused local derivation unexpectedly replaced the remote checkpoint')
   close()
 
   open('restored', true, false, true)
-  assert(node.address().address === address, 'Fresh-directory restore did not recover wallet address state')
+  assert(node.getMessageSigningAddress() === signingAddress, 'Fresh-directory restore changed the canonical signing key')
+  assert(node.address().address === restoredNextAddress, 'Fresh-directory restore did not recover the fresh-address derivation cursor')
   assert(status().backup_exists, 'Restored wallet did not read its remote snapshot')
   versions.push(node.vssBackup().version)
   close()
   console.log(JSON.stringify({ vssLiveQualification: 'pass', runtime: bare ? 'bare' : 'node', network,
     initialBackup: true, explicitCheckpoint: true, gracefulReopen: true,
-    freshDirectoryAddressRestore: true, versions, infoRows, funded: false, bridgeAccessed: false,
+    freshDirectoryAddressRestore: true, freshAddressCursorRestore: true, versions, infoRows, funded: false, bridgeAccessed: false,
     remoteErasureClaimed: false }))
 } finally {
   close()
