@@ -7451,10 +7451,10 @@ index 1bf91a1..2251e5b 100644
  }
 diff --git a/src/uniffi_api/vss_restore.rs b/src/uniffi_api/vss_restore.rs
 new file mode 100644
-index 0000000..913f303
+index 0000000..1d36b2c
 --- /dev/null
 +++ b/src/uniffi_api/vss_restore.rs
-@@ -0,0 +1,1030 @@
+@@ -0,0 +1,1216 @@
 +//! Maintained external-signer RGB restore admission. Uses public transport and
 +//! crypto APIs, with bounded extraction and a local, destination-bound receipt.
 +use crate::rgb_vss::{VssBackupClient, VssBackupConfig};
@@ -7608,11 +7608,20 @@ index 0000000..913f303
 +    engine.input(&bytes);
 +    Ok(Hmac::<sha256::Hash>::from_engine(engine).to_string())
 +}
-+fn private_read(path: &Path, maximum: u64) -> Result<Vec<u8>, APIError> {
++#[derive(Clone, Copy)]
++enum LocalReadPolicy {
++    Private,
++    PublicManifest,
++}
++fn bounded_local_read(
++    path: &Path,
++    maximum: u64,
++    policy: LocalReadPolicy,
++) -> Result<Vec<u8>, APIError> {
 +    let mut options = OpenOptions::new();
 +    options.read(true);
 +    #[cfg(unix)]
-+    options.custom_flags(libc::O_NOFOLLOW);
++    options.custom_flags(libc::O_NOFOLLOW | libc::O_NONBLOCK);
 +    let file = options
 +        .open(path)
 +        .map_err(|_| error("VSS_RESTORE_INVALID_RECEIPT"))?;
@@ -7620,10 +7629,24 @@ index 0000000..913f303
 +        .metadata()
 +        .map_err(|_| error("VSS_RESTORE_INVALID_RECEIPT"))?;
 +    #[cfg(unix)]
-+    if meta.uid() != unsafe { libc::geteuid() } || meta.mode() & 0o777 != 0o600 || meta.nlink() != 1
 +    {
-+        return Err(error("VSS_RESTORE_INVALID_RECEIPT"));
++        let permissions = meta.mode() & 0o7777;
++        let permitted = match policy {
++            LocalReadPolicy::Private => permissions == 0o600,
++            // rgb-lib atomically rewrites its explicitly non-secret manifest on
++            // every Wallet::new. Under the usual umask 022 it becomes 0644.
++            // Receipt/key files remain strictly private; the manifest still has
++            // to be owned, single-linked, non-writable by others and identity-bound.
++            LocalReadPolicy::PublicManifest => {
++                permissions & 0o400 != 0 && permissions & !0o644 == 0
++            }
++        };
++        if meta.uid() != unsafe { libc::geteuid() } || !permitted || meta.nlink() != 1 {
++            return Err(error("VSS_RESTORE_INVALID_RECEIPT"));
++        }
 +    }
++    #[cfg(not(unix))]
++    let _ = policy;
 +    if !meta.is_file() || meta.len() > maximum {
 +        return Err(error("VSS_RESTORE_INVALID_RECEIPT"));
 +    }
@@ -7635,6 +7658,12 @@ index 0000000..913f303
 +        return Err(error("VSS_RESTORE_INVALID_RECEIPT"));
 +    }
 +    Ok(bytes)
++}
++fn private_read(path: &Path, maximum: u64) -> Result<Vec<u8>, APIError> {
++    bounded_local_read(path, maximum, LocalReadPolicy::Private)
++}
++fn public_manifest_read(path: &Path) -> Result<Vec<u8>, APIError> {
++    bounded_local_read(path, MAX_MANIFEST, LocalReadPolicy::PublicManifest)
 +}
 +fn read_key(ctx: &Context) -> Result<Vec<u8>, APIError> {
 +    let key = private_read(&ctx.base.join(KEY), 32)?;
@@ -7813,7 +7842,7 @@ index 0000000..913f303
 +    {
 +        return Err(error("VSS_RESTORE_INVALID_RECEIPT"));
 +    }
-+    let manifest = private_read(&target.join("wallet_manifest.json"), MAX_MANIFEST)?;
++    let manifest = public_manifest_read(&target.join("wallet_manifest.json"))?;
 +    if manifest.len() as u64 > MAX_MANIFEST
 +        || manifest_identity(&manifest, ctx)? != f.manifest_identity_sha256
 +    {
@@ -8227,6 +8256,10 @@ index 0000000..913f303
 +        fs::set_permissions(&target, fs::Permissions::from_mode(0o700)).unwrap();
 +        private_file(&target.join("wallet_manifest.json"), &manifest(ctx));
 +        private_file(&target.join(DATABASE_NAME), &database_fixture());
++        install_receipt_for_existing_wallet(ctx)
++    }
++    fn install_receipt_for_existing_wallet(ctx: &Context) -> Fields {
++        let target = ctx.base.join(&ctx.fp);
 +        let fields = Fields {
 +            schema_version: 1,
 +            network: ctx.network.clone(),
@@ -8235,7 +8268,11 @@ index 0000000..913f303
 +            version: 7,
 +            endpoint_sha256: ctx.endpoint_hash.clone(),
 +            target_sha256: ctx.target_hash.clone(),
-+            manifest_identity_sha256: manifest_identity(&manifest(ctx), ctx).unwrap(),
++            manifest_identity_sha256: manifest_identity(
++                &fs::read(target.join("wallet_manifest.json")).unwrap(),
++                ctx,
++            )
++            .unwrap(),
 +        };
 +        let key = receipt_key(ctx, &open_directory(&ctx.base).unwrap()).unwrap();
 +        private_file(
@@ -8483,6 +8520,155 @@ index 0000000..913f303
 +        fs::rename(&key, &saved).unwrap();
 +        std::os::unix::fs::symlink(&saved, &key).unwrap();
 +        assert!(load_receipt(&ctx).is_err());
++    }
++
++    #[cfg(unix)]
++    #[test]
++    fn real_watch_only_wallet_rewrite_under_umask_022_retains_restore_provenance() {
++        // Change umask only in a dedicated child process running this single test.
++        // Other tests and the invoking process never inherit a changed umask.
++        const CHILD: &str = "UTEXO_TEST_PUBLIC_MANIFEST_UMASK_022_CHILD";
++        if std::env::var_os(CHILD).is_none() {
++            let output = std::process::Command::new("/bin/sh")
++                .args(["-c", "umask 022; exec \"$@\"", "vss-manifest-test"])
++                .arg(std::env::current_exe().unwrap())
++                .args([
++                    "--exact",
++                    "uniffi_api::vss_restore::tests::real_watch_only_wallet_rewrite_under_umask_022_retains_restore_provenance",
++                    "--nocapture",
++                    "--test-threads=1",
++                ])
++                .env(CHILD, "1")
++                .output()
++                .unwrap();
++            assert!(
++                output.status.success()
++                    && String::from_utf8_lossy(&output.stdout).contains("running 1 test")
++                    && String::from_utf8_lossy(&output.stdout).contains("1 passed"),
++                "isolated wallet-reopen regression failed: {}{}",
++                String::from_utf8_lossy(&output.stdout),
++                String::from_utf8_lossy(&output.stderr)
++            );
++            return;
++        }
++        use rgb_lib::{
++            keys::{generate_keys, WitnessVersion},
++            wallet::{DatabaseType, RgbWalletOpsOffline, SinglesigKeys, Wallet, WalletData},
++            AssetSchema, BitcoinNetwork,
++        };
++        let temp = tempfile::tempdir().unwrap();
++        let restored = tempfile::tempdir().unwrap();
++        let generated = generate_keys(BitcoinNetwork::Signet, WitnessVersion::Taproot);
++        let keys = SinglesigKeys {
++            account_xpub_vanilla: generated.account_xpub_vanilla,
++            account_xpub_colored: generated.account_xpub_colored,
++            vanilla_keychain: None,
++            master_fingerprint: generated.master_fingerprint,
++            mnemonic: None,
++            witness_version: WitnessVersion::Taproot,
++        };
++        let mut data = WalletData {
++            data_dir: temp.path().display().to_string(),
++            bitcoin_network: BitcoinNetwork::Signet,
++            database_type: DatabaseType::Sqlite,
++            max_allocations_per_utxo: 5,
++            supported_schemas: vec![AssetSchema::Bfa],
++        };
++        let mut ctx = context(restored.path());
++        ctx.fp = keys.master_fingerprint.clone();
++        ctx.vanilla = keys.account_xpub_vanilla.clone();
++        ctx.colored = keys.account_xpub_colored.clone();
++        ctx.target_hash = digest(ctx.base.join(&ctx.fp).as_os_str().as_encoded_bytes());
++        let mut source_wallet = Wallet::new(data.clone(), keys.clone()).unwrap();
++        let snapshot = source_wallet.prepare_snapshot().unwrap();
++        drop(source_wallet);
++        // Use the genuine consistent DB snapshot and private extraction path,
++        // rather than treating a fresh public-permission DB as restored state.
++        archive_plan(&snapshot.data, &ctx).unwrap();
++        extract(&snapshot.data, restored.path(), &ctx).unwrap();
++        data.data_dir = restored.path().display().to_string();
++        let target = ctx.base.join(&ctx.fp);
++        let manifest = target.join("wallet_manifest.json");
++        assert_eq!(fs::metadata(&manifest).unwrap().mode() & 0o777, 0o600);
++        assert_eq!(
++            fs::metadata(target.join(DATABASE_NAME)).unwrap().mode() & 0o777,
++            0o600
++        );
++        install_receipt_for_existing_wallet(&ctx);
++        let key_before = fs::read(ctx.base.join(KEY)).unwrap();
++        let receipt_before = fs::read(target.join(RECEIPT)).unwrap();
++        assert_eq!(load_receipt(&ctx).unwrap().version, 7);
++
++        // Exercise the real library's unconditional atomic manifest rewrite.
++        drop(Wallet::new(data, keys).unwrap());
++        assert_eq!(fs::metadata(&manifest).unwrap().mode() & 0o777, 0o644);
++        assert_eq!(load_receipt(&ctx).unwrap().version, 7);
++        assert_eq!(fs::read(ctx.base.join(KEY)).unwrap(), key_before);
++        assert_eq!(fs::read(target.join(RECEIPT)).unwrap(), receipt_before);
++    }
++
++    #[cfg(unix)]
++    #[test]
++    fn public_manifest_permissions_never_relax_private_receipt_or_key_permissions() {
++        let temp = tempfile::tempdir().unwrap();
++        let ctx = context(temp.path());
++        install_receipt(&ctx);
++        let target = ctx.base.join(&ctx.fp);
++        let manifest = target.join("wallet_manifest.json");
++        for mode in [0o400, 0o440, 0o444, 0o600, 0o604, 0o640, 0o644] {
++            fs::set_permissions(&manifest, fs::Permissions::from_mode(mode)).unwrap();
++            assert_eq!(load_receipt(&ctx).unwrap().version, 7);
++        }
++        for mode in [
++            0o602, 0o620, 0o622, 0o660, 0o666, 0o700, 0o755, 0o1644, 0o4600,
++        ] {
++            fs::set_permissions(&manifest, fs::Permissions::from_mode(mode)).unwrap();
++            assert!(
++                load_receipt(&ctx).is_err(),
++                "accepted manifest mode {mode:o}"
++            );
++        }
++        fs::set_permissions(&manifest, fs::Permissions::from_mode(0o644)).unwrap();
++        for secret in [ctx.base.join(KEY), target.join(RECEIPT)] {
++            fs::set_permissions(&secret, fs::Permissions::from_mode(0o644)).unwrap();
++            assert!(load_receipt(&ctx).is_err());
++            fs::set_permissions(&secret, fs::Permissions::from_mode(0o600)).unwrap();
++            assert_eq!(load_receipt(&ctx).unwrap().version, 7);
++        }
++    }
++
++    #[cfg(unix)]
++    #[test]
++    fn public_manifest_rejects_links_special_files_oversize_and_identity_changes() {
++        let temp = tempfile::tempdir().unwrap();
++        let ctx = context(temp.path());
++        install_receipt(&ctx);
++        let target = ctx.base.join(&ctx.fp);
++        let path = target.join("wallet_manifest.json");
++        let saved = ctx.base.join("saved-manifest");
++        fs::hard_link(&path, &saved).unwrap();
++        assert!(load_receipt(&ctx).is_err());
++        fs::remove_file(&saved).unwrap();
++        fs::rename(&path, &saved).unwrap();
++        std::os::unix::fs::symlink(&saved, &path).unwrap();
++        assert!(load_receipt(&ctx).is_err());
++        fs::remove_file(&path).unwrap();
++        let fifo = std::ffi::CString::new(path.as_os_str().as_encoded_bytes()).unwrap();
++        assert_eq!(unsafe { libc::mkfifo(fifo.as_ptr(), 0o600) }, 0);
++        assert!(public_manifest_read(&path).is_err());
++        fs::remove_file(&path).unwrap();
++        private_file(&path, &vec![b' '; MAX_MANIFEST as usize + 1]);
++        assert!(load_receipt(&ctx).is_err());
++        let mut changed: serde_json::Value =
++            serde_json::from_slice(&fs::read(&saved).unwrap()).unwrap();
++        changed["account_xpub_colored"] = serde_json::json!("other-public-identity");
++        fs::write(&path, serde_json::to_vec(&changed).unwrap()).unwrap();
++        fs::set_permissions(&path, fs::Permissions::from_mode(0o644)).unwrap();
++        assert!(load_receipt(&ctx).is_err());
++        fs::remove_file(&path).unwrap();
++        fs::rename(&saved, &path).unwrap();
++        fs::set_permissions(&path, fs::Permissions::from_mode(0o644)).unwrap();
++        assert_eq!(load_receipt(&ctx).unwrap().version, 7);
 +    }
 +}
 diff --git a/src/utils.rs b/src/utils.rs
