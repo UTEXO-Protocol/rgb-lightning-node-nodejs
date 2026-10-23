@@ -1,6 +1,20 @@
 # Unreleased rgb-lib-bfa migration candidate
 
-Candidate version: `0.2.0-bfa.0`. This branch has not been merged or published. Published beta.5 remains an independent baseline. The native graph is pinned in package.json, the exact maintained patch, Cargo locks and runtime contract; all generated binaries must match those identities.
+Candidate version: `0.2.0-bfa.1`. This branch has not been merged or published. Published beta.5 remains an independent baseline. The native graph is pinned in package.json, the exact maintained patch, Cargo locks and runtime contract; all generated binaries must match those identities.
+
+
+## Strict gateway and proxy compatibility
+
+Candidate `0.2.0-bfa.1` sends an empty JSON-RPC parameter array for EVM methods taking no arguments. Public-network startup requires an explicitly configured protocol-1.0 RGB proxy; the obsolete protocol-0.2 public fallback is removed. The local regtest proxy default remains supported and is validated by the same preflight.
+
+| Source | Exact revision |
+| --- | --- |
+| RGB library | `89c37086a68ef792da75c62bce59b58b1d7952a0` |
+| LDK | `bbe68189872c26088e351d034b05c58769cb996a` |
+| RLN | `d10d679f0dd73246f6b475a44bdf13edd5f9b2a4` |
+| Maintained adapter SHA-256 | `db4511e71a1c770def1aeeb5f1ab5e72e07fdd228627d6d744dce56b4b3bdcfe` |
+
+This graph requires fresh native builds and separately frozen candidate archives. Previous `0.2.0-bfa.0` artifacts and qualification records retain their original identities and do not qualify this candidate.
 
 The candidate adds `SdkNode.sendRgbInvoice` for protocol-1.0 proxy transfers. Pass the complete invoice without reconstructing its recipient keys or encryption fields:
 

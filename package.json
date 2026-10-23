@@ -1,6 +1,6 @@
 {
   "name": "@utexo/rgb-lightning-node-nodejs",
-  "version": "0.2.0-bfa.0",
+  "version": "0.2.0-bfa.1",
   "description": "Node.js (napi-rs) bindings for rgb-lightning-node",
   "keywords": [
     "rgb",
@@ -60,16 +60,16 @@
   "author": "UTEXO",
   "utexoNativeOverlay": {
     "repository": "https://github.com/UTEXO-Protocol/rgb-lightning-node.git",
-    "ref": "c29d1b2dfe43ba95c25ced8984f09e42c789d6af",
-    "commit": "c29d1b2dfe43ba95c25ced8984f09e42c789d6af",
-    "lightningCommit": "510189d5700a6d1406229ce7523e181c3838715e",
+    "ref": "d10d679f0dd73246f6b475a44bdf13edd5f9b2a4",
+    "commit": "d10d679f0dd73246f6b475a44bdf13edd5f9b2a4",
+    "lightningCommit": "bbe68189872c26088e351d034b05c58769cb996a",
     "patch": "patches/release-adapter-v0.17.0-beta.3.patch",
-    "patchSha256": "ae0b1f29d2f81b8b5d219b9e749f97238ce1cc86777cb07a9c01d5e7fdfd88f9",
-    "cffiLockSha256": "460728009d9c1db3abf9a2f2ad4d76f777589b55eff96ff7be1f3c4d301dab30",
+    "patchSha256": "db4511e71a1c770def1aeeb5f1ab5e72e07fdd228627d6d744dce56b4b3bdcfe",
+    "cffiLockSha256": "3039a36910386f9d6f350ed33791cd6461174cd340247998b80726a6581c3763",
     "rustToolchain": "1.94.0",
     "rlnVersion": "0.17.0-beta.3",
     "rgbLibRepository": "https://github.com/UTEXO-Protocol/rgb-lib-bfa.git",
-    "rgbLibCommit": "962730a211f0f7569d7ad8ae777052f433d87655"
+    "rgbLibCommit": "89c37086a68ef792da75c62bce59b58b1d7952a0"
   },
   "dependencies": {
     "lossless-json": "4.3.1"

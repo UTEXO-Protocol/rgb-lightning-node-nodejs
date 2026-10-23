@@ -68,7 +68,7 @@ test('manifest rejects wrong artifact, source, wrapper, lock and target identiti
 
 test('wrapper lock uses the pinned BFA library and path transaction sync', () => {
   const lock = fs.readFileSync(path.join(__dirname, '..', 'Cargo.lock'), 'utf8')
-  assert.match(lock, /rgb-lib-bfa\.git\?rev=962730a211f0f7569d7ad8ae777052f433d87655#962730a211f0f7569d7ad8ae777052f433d87655/)
+  assert.match(lock, /rgb-lib-bfa\.git\?rev=89c37086a68ef792da75c62bce59b58b1d7952a0#89c37086a68ef792da75c62bce59b58b1d7952a0/)
   assert.doesNotMatch(lock, /rgb-lib\.git\?|rgb-(?:consensus|ops|schemas)-s-bfa|95332c41|94b6221|dcorral/)
   const sync = lock.split('[[package]]').find(block => block.includes('name = "lightning-transaction-sync"'))
   assert.ok(sync)

@@ -7,13 +7,13 @@ const { execFileSync } = require('node:child_process')
 
 const RELEASE = Object.freeze({
   'rlnVersion': '0.17.0-beta.3',
-  'ref': 'c29d1b2dfe43ba95c25ced8984f09e42c789d6af',
-  'commit': 'c29d1b2dfe43ba95c25ced8984f09e42c789d6af',
-  'lightningCommit': '510189d5700a6d1406229ce7523e181c3838715e',
+  'ref': 'd10d679f0dd73246f6b475a44bdf13edd5f9b2a4',
+  'commit': 'd10d679f0dd73246f6b475a44bdf13edd5f9b2a4',
+  'lightningCommit': 'bbe68189872c26088e351d034b05c58769cb996a',
   'rgbLibRepository': 'https://github.com/UTEXO-Protocol/rgb-lib-bfa.git',
-  'rgbLibCommit': '962730a211f0f7569d7ad8ae777052f433d87655',
+  'rgbLibCommit': '89c37086a68ef792da75c62bce59b58b1d7952a0',
   'rustToolchain': '1.94.0',
-  'cffiLockSha256': '460728009d9c1db3abf9a2f2ad4d76f777589b55eff96ff7be1f3c4d301dab30'
+  'cffiLockSha256': '3039a36910386f9d6f350ed33791cd6461174cd340247998b80726a6581c3763'
 })
 // Exact reviewed C adapter plus the shared native lifecycle repair. This remains
 // an upstream release with an explicitly hashed runtime overlay, not plain RLN.
@@ -55,8 +55,8 @@ const ALLOWED_FILES = Object.freeze([
 ])
 const GIT_SOURCES = Object.freeze({
   'musig2': 'git+https://github.com/arik-so/rust-musig2?rev=6f95a05718cbb44d8fe3fa6021aea8117aa38d50#6f95a05718cbb44d8fe3fa6021aea8117aa38d50',
-  'rgb-lib': 'git+https://github.com/UTEXO-Protocol/rgb-lib-bfa.git?rev=962730a211f0f7569d7ad8ae777052f433d87655#962730a211f0f7569d7ad8ae777052f433d87655',
-  'rgb-lib-migration': 'git+https://github.com/UTEXO-Protocol/rgb-lib-bfa.git?rev=962730a211f0f7569d7ad8ae777052f433d87655#962730a211f0f7569d7ad8ae777052f433d87655',
+  'rgb-lib': 'git+https://github.com/UTEXO-Protocol/rgb-lib-bfa.git?rev=89c37086a68ef792da75c62bce59b58b1d7952a0#89c37086a68ef792da75c62bce59b58b1d7952a0',
+  'rgb-lib-migration': 'git+https://github.com/UTEXO-Protocol/rgb-lib-bfa.git?rev=89c37086a68ef792da75c62bce59b58b1d7952a0#89c37086a68ef792da75c62bce59b58b1d7952a0',
   'signer-external': 'git+https://github.com/UTEXO-Protocol/rln-external-signer.git?rev=0fb005ec4b927ddbe13e1646d247b5bb11e8ffed#0fb005ec4b927ddbe13e1646d247b5bb11e8ffed',
   'vls-core': 'git+https://github.com/UTEXO-Protocol/vls-core.git?rev=45c72edfd58620849eb486925439a76526b415ae#45c72edfd58620849eb486925439a76526b415ae',
   'vls-protocol-signer': 'git+https://github.com/UTEXO-Protocol/vls-protocol-signer.git?rev=dddd336fcdf84c4febdd7af8363bda8d1721d893#dddd336fcdf84c4febdd7af8363bda8d1721d893',
@@ -83,6 +83,26 @@ function git (root, args) {
   return execFileSync('git', ['-C', root, ...args], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 })
 }
 
+function verifyCompiledRuntimeIdentity (root) {
+  const source = fs.readFileSync(path.join(root, 'bindings/c-ffi/src/lib.rs'), 'utf8')
+  const declarations = [...source.matchAll(/pub extern "C" fn rln_binding_build_info\(\) -> CResultString \{([\s\S]*?)\n\}/g)]
+  if (declarations.length !== 1) throw new Error('Missing or ambiguous compiled C-FFI runtime identity')
+  const expected = {
+    abi_version: 1,
+    rln_version: RELEASE.rlnVersion,
+    rln_commit: RELEASE.commit,
+    lightning_commit: RELEASE.lightningCommit,
+    rgb_lib_commit: RELEASE.rgbLibCommit
+  }
+  for (const [key, value] of Object.entries(expected)) {
+    const fields = [...declarations[0][1].matchAll(new RegExp('"' + key + '"\\s*:', 'g'))]
+    const values = [...declarations[0][1].matchAll(new RegExp('"' + key + '"\\s*:\\s*("[^"\\\\]*"|[0-9]+)\\s*(?=,|\\})', 'g'))]
+    if (fields.length !== 1 || values.length !== 1 || JSON.parse(values[0][1]) !== value) {
+      throw new Error(`Compiled C-FFI runtime identity mismatch: ${key}`)
+    }
+  }
+}
+
 function prepareSource (root, config, applyIfClean = true) {
   validateAdapter(config)
   if (git(root, ['rev-parse', 'HEAD']).trim() !== RELEASE.commit) throw new Error('Unexpected RLN revision')
@@ -97,6 +117,7 @@ function prepareSource (root, config, applyIfClean = true) {
   if (!diff && applyIfClean) git(root, ['apply', '--index', config.patchPath])
   else if (diff !== patch) throw new Error('Native source has changes beyond the exact approved adapter')
   if (git(root, ['diff', '--binary', 'HEAD']) !== patch) throw new Error('Applied native adapter is not exact')
+  verifyCompiledRuntimeIdentity(root)
   if (sha256(path.join(root, 'bindings/c-ffi/Cargo.lock')) !== RELEASE.cffiLockSha256) {
     throw new Error('Unexpected C-FFI lock graph')
   }
@@ -135,4 +156,4 @@ function wrapperSha256 (root, files) {
   return hash.digest('hex')
 }
 
-module.exports = { RELEASE, ALLOWED_FILES, GIT_SOURCES, sha256, validateAdapter, prepareSource, verifyPreparedSource, wrapperSha256, verifyGraph, verifyCargoGraph }
+module.exports = { RELEASE, ALLOWED_FILES, GIT_SOURCES, sha256, validateAdapter, verifyCompiledRuntimeIdentity, prepareSource, verifyPreparedSource, wrapperSha256, verifyGraph, verifyCargoGraph }
