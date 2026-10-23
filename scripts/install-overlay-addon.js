@@ -59,6 +59,8 @@ function identity (config) {
     ref: config.ref,
     commit: config.commit,
     lightningCommit: config.lightningCommit,
+    rgbLibRepository: config.rgbLibRepository,
+    rgbLibCommit: config.rgbLibCommit,
     patchSha256: config.patchSha256,
     rustToolchain: config.rustToolchain,
     macosDeploymentTarget: '13.0',

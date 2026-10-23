@@ -123,6 +123,26 @@ export interface DecodedRgbInvoice {
   network: string
   expiration_timestamp: number | null
   transport_endpoints: string[]
+  /** Legacy field; protocol-1.0 invoices may return null. */
+  proxy_recipient_id?: string | null
+  public_key: string | null
+  encryption: 'Required' | 'Optional' | 'Unsupported'
+}
+
+/** Invoice-first send; Rust validates the complete proxy 1.0 recipient context. */
+export interface SendRgbInvoiceRequest {
+  invoice: string
+  asset_id: string
+  amount: ExactInteger
+  witness_data?: { amount_sat: ExactInteger; blinding?: ExactInteger | null } | null
+  donation: boolean
+  fee_rate: ExactInteger
+  min_confirmations: number
+}
+
+export interface SendRgbResponse {
+  txid: string
+  batch_transfer_idx: number
 }
 
 export interface BtcSendRequest {
@@ -313,6 +333,7 @@ export class SdkNode {
   rgbInvoice(request: JsonRequest): JsonObject
   decodeRgbInvoice(invoice: string): DecodedRgbInvoice
   sendRgb(request: JsonRequest): JsonValue
+  sendRgbInvoice(request: SendRgbInvoiceRequest): SendRgbResponse
   /** Validated metadata import for an already accepted transfer; does not accept ownership. */
   importRgbTransferConsignment(request: ImportRgbTransferConsignmentRequest): ImportRgbResponse
   /** Validated public contract metadata import; does not create allocations or a balance. */
@@ -362,6 +383,7 @@ export interface RuntimeInfo {
   readonly rln_version: '0.17.0-beta.3'
   readonly rln_commit: string
   readonly lightning_commit: string
+  readonly rgb_lib_commit: string
   readonly adapter_sha256: string
   readonly wrapper_sha256: string
   readonly lock_sha256: string

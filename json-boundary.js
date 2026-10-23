@@ -111,4 +111,55 @@ function bip322Request (request) {
   return stringify(request)
 }
 
-module.exports = { bip322Request, parse, stringify, paymentRequest, burnRequest, unsupported, UnsupportedCapabilityError }
+// Keep the invoice intact: proxy 1.0 recipient keys, encryption and expiry must
+// be parsed and validated together by Rust, never reconstructed from an address.
+function sendRgbInvoiceRequest (request) {
+  const object = (value, allowed, field) => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      throw new TypeError(`${field} must be an object`)
+    }
+    if (Object.keys(value).some(key => !allowed.includes(key))) {
+      throw new TypeError(`Unknown ${field} field`)
+    }
+  }
+  object(request, ['invoice', 'asset_id', 'amount', 'witness_data', 'donation', 'fee_rate', 'min_confirmations'], 'sendRgbInvoice')
+  const { invoice, asset_id: assetId, amount, witness_data: witness, donation, fee_rate: feeRate, min_confirmations: confirmations } = request
+  if (typeof invoice !== 'string' || invoice.length === 0 || invoice.length > 16384 || /[\u0000-\u0020\u007f]/.test(invoice)) {
+    throw new TypeError('sendRgbInvoice.invoice must be a bounded RGB invoice without whitespace or control characters')
+  }
+  if (typeof assetId !== 'string' || assetId.length === 0 || assetId.length > 512) {
+    throw new TypeError('sendRgbInvoice.asset_id must be a bounded non-empty string')
+  }
+  if (typeof donation !== 'boolean') throw new TypeError('sendRgbInvoice.donation must be a boolean')
+  if (!Number.isInteger(confirmations) || confirmations < 0 || confirmations > 255) {
+    throw new RangeError('sendRgbInvoice.min_confirmations must be an unsigned 8-bit integer')
+  }
+  const uint64 = (value, field, positive = false) => {
+    checkedNumber(value)
+    if (!((typeof value === 'number' && Number.isSafeInteger(value) && value >= 0) ||
+        (typeof value === 'string' && /^(0|[1-9][0-9]*)$/.test(value))) ||
+        BigInt(value) > 18446744073709551615n || (positive && BigInt(value) === 0n)) {
+      throw new RangeError(`sendRgbInvoice.${field} must be an exact ${positive ? 'positive' : 'unsigned'} 64-bit integer`)
+    }
+    return new LosslessNumber(String(value))
+  }
+  let witnessData = null
+  if (witness != null) {
+    object(witness, ['amount_sat', 'blinding'], 'sendRgbInvoice.witness_data')
+    witnessData = {
+      amount_sat: uint64(witness.amount_sat, 'witness_data.amount_sat', true),
+      blinding: witness.blinding == null ? null : uint64(witness.blinding, 'witness_data.blinding')
+    }
+  }
+  return stringifyLossless({
+    invoice,
+    asset_id: assetId,
+    amount: uint64(amount, 'amount', true),
+    witness_data: witnessData,
+    donation,
+    fee_rate: uint64(feeRate, 'fee_rate', true),
+    min_confirmations: confirmations
+  })
+}
+
+module.exports = { bip322Request, parse, stringify, paymentRequest, burnRequest, sendRgbInvoiceRequest, unsupported, UnsupportedCapabilityError }

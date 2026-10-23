@@ -25,6 +25,7 @@ napi-build = "2"
 lto = true
 opt-level = 3
 strip = "symbols"
+overflow-checks = true
 codegen-units = 1
 
 [profile.dev]
@@ -51,12 +52,8 @@ lightning-net-tokio            = { path = ".native-source/rust-lightning/lightni
 lightning-persister            = { path = ".native-source/rust-lightning/lightning-persister" }
 lightning-rapid-gossip-sync    = { path = ".native-source/rust-lightning/lightning-rapid-gossip-sync" }
 lightning-transaction-sync     = { path = ".native-source/rust-lightning/lightning-transaction-sync" }
-vls-core                       = { git = "https://github.com/UTEXO-Protocol/vls-core.git", branch = "feat/rgb-compatibility" }
-vls-protocol-signer            = { git = "https://github.com/UTEXO-Protocol/vls-protocol-signer.git", branch = "feat/rgb-compatibility" }
-rgb-consensus = { git = "https://github.com/UTEXO-Protocol/rgb-consensus-s-bfa", rev = "2faf6118b2f5fe30dd90dd5244d5a7dc32bcd757" }
-rgb-ops = { git = "https://github.com/UTEXO-Protocol/rgb-ops-s-bfa", rev = "773766b5ca7a9e705ec68c2f9ed0917f505cd6e3" }
-rgb-invoicing = { git = "https://github.com/UTEXO-Protocol/rgb-ops-s-bfa", rev = "773766b5ca7a9e705ec68c2f9ed0917f505cd6e3" }
-rgb-schemas = { git = "https://github.com/UTEXO-Protocol/rgb-schemas-s-bfa", rev = "238dfe7a89db998107fd87d919bf2757a2746d7f" }
+vls-core                       = { git = "https://github.com/UTEXO-Protocol/vls-core.git", rev = "45c72edfd58620849eb486925439a76526b415ae" }
+vls-protocol-signer            = { git = "https://github.com/UTEXO-Protocol/vls-protocol-signer.git", rev = "dddd336fcdf84c4febdd7af8363bda8d1721d893" }
 
 # Keep compile-time proc-macros dyld-compatible on macOS 27 (Rust 1.94).
 # Shipped optimized addons retain [profile.release] strip = "symbols".

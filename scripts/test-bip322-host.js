@@ -1,5 +1,6 @@
 /* global Bare */
 'use strict'
+// rgb-lib-bfa requires fresh addresses; address reuse is explicitly unsupported.
 const bare = typeof Bare !== 'undefined'
 const fs = require(bare ? 'bare-fs' : 'node:fs')
 const os = require(bare ? 'bare-os' : 'node:os')
@@ -34,7 +35,7 @@ try {
     // Public fixture seed. Never fund this wallet.
     signer = api.NativeExternalSigner.createWithStorage('01'.repeat(32), 'regtest', path.join(root, 'signer'))
     node = api.SdkNode.create({ storage_dir_path: path.join(root, 'node'), network: 'regtest', daemon_listening_port: 0,
-      ldk_peer_listening_port: 0, max_media_upload_size_mb: 5, enable_virtual_channels_v0: false, reuse_addresses: true })
+      ldk_peer_listening_port: 0, max_media_upload_size_mb: 5, enable_virtual_channels_v0: false, reuse_addresses: false })
     rejects(() => node.getMessageSigningAddress())
     rejects(() => node.signMessageBip322('locked', 'bcrt1ptest'))
     if (cycle === 0) node.initWithNativeExternalSigner(signer)
@@ -42,10 +43,27 @@ try {
     const address = node.getMessageSigningAddress()
     if (saved) assert(saved === address, 'Canonical address changed on signer reopen')
     saved = address
-    const receive = node.address().address
-    assert(receive === address, 'First vanilla wallet receive address does not match the canonical signing address')
-    assert(node.getMessageSigningAddress() === address)
-    assert(node.address().address === receive, 'Signing getter rotated receive address')
+    // The same deterministic wallet without signing-getter calls provides a
+    // control address sequence. Fresh-address requests advance; signing must not.
+    let control, controlSigner
+    try {
+      controlSigner = api.NativeExternalSigner.createWithStorage('01'.repeat(32), 'regtest', path.join(root, 'control-signer'))
+      control = api.SdkNode.create({ storage_dir_path: path.join(root, 'control-node'), network: 'regtest',
+        daemon_listening_port: 0, ldk_peer_listening_port: 0, max_media_upload_size_mb: 5,
+        enable_virtual_channels_v0: false, reuse_addresses: false })
+      if (cycle === 0) control.initWithNativeExternalSigner(controlSigner)
+      control.unlockWithNativeExternalSigner(controlSigner, request)
+      const receive = node.address().address
+      assert(receive === control.address().address, 'Signing getter advanced the fresh receive sequence')
+      if (cycle === 0) assert(receive === address, 'First vanilla receive key differs from the canonical signing key')
+      assert(node.getMessageSigningAddress() === address)
+      const nextReceive = node.address().address
+      assert(nextReceive !== receive, 'Fresh receive requests reused an address')
+      assert(nextReceive === control.address().address, 'Signing getter rotated the receive sequence')
+    } finally {
+      if (control) control.shutdown()
+      if (controlSigner) { controlSigner.shutdown(); controlSigner.destroy() }
+    }
     const transactions = JSON.stringify(node.listTransactions(true))
     for (const message of ['', '  exact bytes\n', 'Unicode: é e\u0301 😄', 'NUL\0inside', 'a'.repeat(4096)]) {
       const signature = node.signMessageBip322(message, address)

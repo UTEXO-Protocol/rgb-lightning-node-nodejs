@@ -45,8 +45,8 @@ use rlncffi::{
     rln_sdk_node_unlock_with_native_external_signer, rln_sdk_node_vss_backup,
     rln_sdk_node_vss_backup_info, rln_sdk_node_vss_backup_metadata, rln_sdk_node_vss_clear_fence,
     rln_sdk_node_vss_restore_info, rln_send_btc, rln_send_onion_message, rln_send_payment,
-    rln_send_rgb, rln_sign_message, rln_sign_message_bip322, rln_sync, rln_taker,
-    rln_verify_message, rln_verify_message_bip322, rln_verify_message_bip322_offline,
+    rln_send_rgb, rln_send_rgb_invoice, rln_sign_message, rln_sign_message_bip322, rln_sync,
+    rln_taker, rln_verify_message, rln_verify_message_bip322, rln_verify_message_bip322_offline,
     COpaqueStruct, CResultString, CResultValue,
 };
 
@@ -664,6 +664,10 @@ impl SdkNode {
     #[napi]
     pub fn send_rgb(&self, request_json: String) -> Result<String> {
         fwd_json_req!(self, rln_send_rgb, request_json)
+    }
+    #[napi]
+    pub fn send_rgb_invoice(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_send_rgb_invoice, request_json)
     }
 
     /// Preserve the released per-batch refresh status and failure response.

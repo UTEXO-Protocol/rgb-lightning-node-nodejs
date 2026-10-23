@@ -3,9 +3,7 @@
 const fs = require('node:fs')
 
 const repositories = new Set([
-  'UTEXO-Protocol/rgb-consensus-s-bfa',
-  'UTEXO-Protocol/rgb-ops-s-bfa',
-  'UTEXO-Protocol/rgb-schemas-s-bfa'
+  'UTEXO-Protocol/rgb-lib-bfa'
 ])
 
 function credential (operation, input, token) {

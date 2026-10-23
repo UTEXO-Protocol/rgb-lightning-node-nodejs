@@ -12,7 +12,7 @@
 const os = require('os')
 const path = require('path')
 const fs = require('fs')
-const { parse, stringify, bip322Request, paymentRequest, burnRequest, unsupported, UnsupportedCapabilityError } = require('./json-boundary')
+const { parse, stringify, bip322Request, paymentRequest, burnRequest, sendRgbInvoiceRequest, unsupported, UnsupportedCapabilityError } = require('./json-boundary')
 
 // ─── 1. Native addon resolution ──────────────────────────────────────────
 
@@ -57,6 +57,7 @@ for (const [key, expected] of Object.entries({
   rln_version: nativeConfig.rlnVersion,
   rln_commit: expectedIdentity.commit,
   lightning_commit: expectedIdentity.lightningCommit,
+  rgb_lib_commit: expectedIdentity.rgbLibCommit,
   adapter_sha256: expectedIdentity.patchSha256,
   wrapper_sha256: expectedIdentity.wrapperSha256,
   lock_sha256: expectedIdentity.lockSha256,
@@ -296,6 +297,10 @@ class SdkNode {
   }
   sendRgb (request) {
     return parse(this._inner.sendRgb(stringify(request)))
+  }
+
+  sendRgbInvoice (request) {
+    return parse(this._inner.sendRgbInvoice(sendRgbInvoiceRequest(request)))
   }
 
   importRgbTransferConsignment (request) {

@@ -4,7 +4,7 @@ const { spawnSync } = require('node:child_process')
 const path = require('node:path')
 
 if (!process.env.ORG_READ_TOKEN) {
-  throw new Error('Configure ORG_READ_TOKEN with read-only access to the three pinned BFA source repositories; public package consumers must use qualified prebuilds.')
+  throw new Error('Configure ORG_READ_TOKEN with read-only access to the pinned rgb-lib-bfa source repository; public package consumers must use qualified prebuilds.')
 }
 const [command, ...args] = process.argv.slice(2)
 if (!command) throw new Error('A build command is required')
