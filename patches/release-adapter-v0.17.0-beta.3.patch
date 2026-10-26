@@ -919,7 +919,7 @@ index f775f83..86daa71 100644
      println!("cargo:rerun-if-changed=cbindgen.toml");
  
 diff --git a/bindings/c-ffi/rln.h b/bindings/c-ffi/rln.h
-index c8bb08b..69493f2 100644
+index 19a5c4f..7caaf28 100644
 --- a/bindings/c-ffi/rln.h
 +++ b/bindings/c-ffi/rln.h
 @@ -42,6 +42,11 @@ struct CResultString rln_asset_link_create(const struct COpaqueStruct *node,
@@ -934,16 +934,16 @@ index c8bb08b..69493f2 100644
  struct CResultString rln_btc_balance(const struct COpaqueStruct *node, bool skip_sync);
  
  struct CResultString rln_burn(const struct COpaqueStruct *node, const char *request_json);
-@@ -102,6 +107,8 @@ struct CResultString rln_get_consignment_path(const struct COpaqueStruct *node,
-                                               const char *asset_id,
-                                               const char *txid);
+@@ -111,6 +116,8 @@ struct CResultString rln_get_consignment_path(const struct COpaqueStruct *node,
+ struct CResultString rln_get_create_utxos_operation(const struct COpaqueStruct *node,
+                                                     const char *request_json);
  
 +struct CResultString rln_get_message_signing_address(const struct COpaqueStruct *node);
 +
  struct CResultString rln_get_payment(const struct COpaqueStruct *node,
                                       const char *payment_hash_hex,
                                       const char *payment_type);
-@@ -167,6 +174,22 @@ struct CResult rln_native_external_signer_new(const char *seed_hex,
+@@ -180,6 +187,22 @@ struct CResult rln_native_external_signer_new(const char *seed_hex,
                                                const char *network,
                                                bool permissive_policy);
  
@@ -966,7 +966,7 @@ index c8bb08b..69493f2 100644
  struct CResultString rln_network_info(const struct COpaqueStruct *node);
  
  struct CResultString rln_node_info(const struct COpaqueStruct *node);
-@@ -195,6 +218,14 @@ struct CResultString rln_sdk_initialize(const char *request_json);
+@@ -211,6 +234,14 @@ struct CResultString rln_sdk_initialize(const char *request_json);
  struct CResultString rln_sdk_node_apay_new(const struct COpaqueStruct *node,
                                             const char *host_node_id);
  
@@ -981,7 +981,7 @@ index c8bb08b..69493f2 100644
  struct CResultString rln_sdk_node_attach_native_external_signer(const struct COpaqueStruct *node,
                                                                  const struct COpaqueStruct *signer);
  
-@@ -212,6 +243,14 @@ struct CResultString rln_sdk_node_init_with_native_external_signer(const struct
+@@ -228,6 +259,14 @@ struct CResultString rln_sdk_node_init_with_native_external_signer(const struct
  
  struct CResult rln_sdk_node_new(const char *request_json);
  
@@ -996,7 +996,7 @@ index c8bb08b..69493f2 100644
  struct CResultString rln_sdk_node_shutdown(const struct COpaqueStruct *node);
  
  struct CResultString rln_sdk_node_unlock(const struct COpaqueStruct *node,
-@@ -225,28 +264,28 @@ struct CResultString rln_sdk_node_unlock_with_native_external_signer(const struc
+@@ -241,28 +280,28 @@ struct CResultString rln_sdk_node_unlock_with_native_external_signer(const struc
                                                                       const char *request_json);
  
  /**
@@ -1039,7 +1039,7 @@ index c8bb08b..69493f2 100644
  struct CResultString rln_sdk_shutdown(void);
  
  struct CResultString rln_send_btc(const struct COpaqueStruct *node, const char *request_json);
-@@ -258,8 +297,14 @@ struct CResultString rln_send_payment(const struct COpaqueStruct *node, const ch
+@@ -274,8 +313,14 @@ struct CResultString rln_send_payment(const struct COpaqueStruct *node, const ch
  
  struct CResultString rln_send_rgb(const struct COpaqueStruct *node, const char *request_json);
  
@@ -1054,7 +1054,7 @@ index c8bb08b..69493f2 100644
  struct CResultString rln_sync(const struct COpaqueStruct *node);
  
  struct CResultString rln_taker(const struct COpaqueStruct *node, const char *request_json);
-@@ -271,3 +316,8 @@ struct CResultString rln_uniffi_is_initialized(void);
+@@ -287,3 +332,8 @@ struct CResultString rln_uniffi_is_initialized(void);
  struct CResultString rln_verify_message(const struct COpaqueStruct *node,
                                          const char *message,
                                          const char *signature);
@@ -1064,7 +1064,7 @@ index c8bb08b..69493f2 100644
 +
 +struct CResultString rln_verify_message_bip322_offline(const char *request_json);
 diff --git a/bindings/c-ffi/rln.hpp b/bindings/c-ffi/rln.hpp
-index 498a7e1..655ea84 100644
+index 764cc94..b84559f 100644
 --- a/bindings/c-ffi/rln.hpp
 +++ b/bindings/c-ffi/rln.hpp
 @@ -43,6 +43,9 @@ CResultString rln_asset_link_create(const COpaqueStruct *node, const char *reque
@@ -1077,16 +1077,16 @@ index 498a7e1..655ea84 100644
  CResultString rln_btc_balance(const COpaqueStruct *node, bool skip_sync);
  
  CResultString rln_burn(const COpaqueStruct *node, const char *request_json);
-@@ -90,6 +93,8 @@ CResultString rln_get_consignment_path(const COpaqueStruct *node,
-                                        const char *asset_id,
-                                        const char *txid);
+@@ -96,6 +99,8 @@ CResultString rln_get_consignment_path(const COpaqueStruct *node,
+ 
+ CResultString rln_get_create_utxos_operation(const COpaqueStruct *node, const char *request_json);
  
 +CResultString rln_get_message_signing_address(const COpaqueStruct *node);
 +
  CResultString rln_get_payment(const COpaqueStruct *node,
                                const char *payment_hash_hex,
                                const char *payment_type);
-@@ -147,6 +152,18 @@ CResult rln_native_external_signer_new(const char *seed_hex,
+@@ -157,6 +162,18 @@ CResult rln_native_external_signer_new(const char *seed_hex,
                                         const char *network,
                                         bool permissive_policy);
  
@@ -1105,7 +1105,7 @@ index 498a7e1..655ea84 100644
  CResultString rln_network_info(const COpaqueStruct *node);
  
  CResultString rln_node_info(const COpaqueStruct *node);
-@@ -170,6 +187,12 @@ CResultString rln_sdk_initialize(const char *request_json);
+@@ -182,6 +199,12 @@ CResultString rln_sdk_initialize(const char *request_json);
  /// unused_hashes, refill_batch_size, first_hash_index). Upstream PR #51.
  CResultString rln_sdk_node_apay_new(const COpaqueStruct *node, const char *host_node_id);
  
@@ -1118,7 +1118,7 @@ index 498a7e1..655ea84 100644
  CResultString rln_sdk_node_attach_native_external_signer(const COpaqueStruct *node,
                                                           const COpaqueStruct *signer);
  
-@@ -187,6 +210,12 @@ CResultString rln_sdk_node_init_with_native_external_signer(const COpaqueStruct
+@@ -199,6 +222,12 @@ CResultString rln_sdk_node_init_with_native_external_signer(const COpaqueStruct
  
  CResult rln_sdk_node_new(const char *request_json);
  
@@ -1131,7 +1131,7 @@ index 498a7e1..655ea84 100644
  CResultString rln_sdk_node_shutdown(const COpaqueStruct *node);
  
  CResultString rln_sdk_node_unlock(const COpaqueStruct *node, const char *request_json);
-@@ -198,24 +227,20 @@ CResultString rln_sdk_node_unlock_with_native_external_signer(const COpaqueStruc
+@@ -210,24 +239,20 @@ CResultString rln_sdk_node_unlock_with_native_external_signer(const COpaqueStruc
                                                                const COpaqueStruct *signer,
                                                                const char *request_json);
  
@@ -1166,7 +1166,7 @@ index 498a7e1..655ea84 100644
  CResultString rln_sdk_shutdown();
  
  CResultString rln_send_btc(const COpaqueStruct *node, const char *request_json);
-@@ -226,8 +251,12 @@ CResultString rln_send_payment(const COpaqueStruct *node, const char *request_js
+@@ -238,8 +263,12 @@ CResultString rln_send_payment(const COpaqueStruct *node, const char *request_js
  
  CResultString rln_send_rgb(const COpaqueStruct *node, const char *request_json);
  
@@ -1179,7 +1179,7 @@ index 498a7e1..655ea84 100644
  CResultString rln_sync(const COpaqueStruct *node);
  
  CResultString rln_taker(const COpaqueStruct *node, const char *request_json);
-@@ -240,4 +269,8 @@ CResultString rln_verify_message(const COpaqueStruct *node,
+@@ -252,4 +281,8 @@ CResultString rln_verify_message(const COpaqueStruct *node,
                                   const char *message,
                                   const char *signature);
  
@@ -1189,7 +1189,7 @@ index 498a7e1..655ea84 100644
 +
  }  // extern "C"
 diff --git a/bindings/c-ffi/src/api.rs b/bindings/c-ffi/src/api.rs
-index 2b9e873..69683c0 100644
+index 453f97f..6648a9d 100644
 --- a/bindings/c-ffi/src/api.rs
 +++ b/bindings/c-ffi/src/api.rs
 @@ -91,7 +91,7 @@ pub(crate) fn sdk_node_unlock(
@@ -1258,7 +1258,7 @@ index 2b9e873..69683c0 100644
  pub(crate) fn import_rgb_transfer_consignment(
      node: &COpaqueStruct,
      request_json: *const c_char,
-@@ -749,7 +783,7 @@ pub(crate) fn sdk_global_initialize(request_json: *const c_char) -> Result<Strin
+@@ -793,7 +827,7 @@ pub(crate) fn sdk_global_initialize(request_json: *const c_char) -> Result<Strin
  }
  
  pub(crate) fn sdk_global_shutdown() -> Result<String, Error> {
@@ -1267,7 +1267,7 @@ index 2b9e873..69683c0 100644
      ok_void()
  }
  
-@@ -783,6 +817,34 @@ pub(crate) fn native_external_signer_bootstrap(signer: &COpaqueStruct) -> Result
+@@ -827,6 +861,34 @@ pub(crate) fn native_external_signer_bootstrap(signer: &COpaqueStruct) -> Result
      json(JsonSdkExternalSignerBootstrap::from(bootstrap))
  }
  
@@ -1302,7 +1302,7 @@ index 2b9e873..69683c0 100644
  pub(crate) fn sdk_node_init_with_native_external_signer(
      node: &COpaqueStruct,
      signer: &COpaqueStruct,
-@@ -840,3 +902,62 @@ pub(crate) fn sdk_node_unlock_with_attached_external_signer(
+@@ -884,3 +946,62 @@ pub(crate) fn sdk_node_unlock_with_attached_external_signer(
      node.unlock_with_attached_external_signer_request(r.into())?;
      ok_void()
  }
@@ -1366,21 +1366,21 @@ index 2b9e873..69683c0 100644
 +    )?)
 +}
 diff --git a/bindings/c-ffi/src/json_types.rs b/bindings/c-ffi/src/json_types.rs
-index 5b606f1..9c9c59e 100644
+index 7afc138..f6e1681 100644
 --- a/bindings/c-ffi/src/json_types.rs
 +++ b/bindings/c-ffi/src/json_types.rs
 @@ -34,10 +34,10 @@ use rgb_lightning_node::{
-     SdkRefreshTransfersRequest, SdkRefreshTransfersResponse, SdkRgbInvoiceRequest,
-     SdkRgbInvoiceResponse, SdkSendBtcRequest, SdkSendBtcResponse, SdkSendOnionMessageRequest,
-     SdkSendPaymentRequest, SdkSendPaymentResponse, SdkTakerRequest, SdkUnlockRequest,
--    SdkVssClearFenceRequest, SendRgbRequest, SendRgbResponse, SignMessageResponse, Swap, SwapList,
--    SwapStatus, Token, TokenLight, Transaction, TransactionType, Transfer,
--    TransferTransportEndpoint, TransportEndpoint, Txid, Unspent, Utxo, VerifyMessageResponse,
--    WitnessData,
-+    SdkVssClearFenceRequest, SendRgbInvoiceRequest, SendRgbRequest, SendRgbResponse,
-+    SignMessageResponse, Swap, SwapList, SwapStatus, Token, TokenLight, Transaction,
-+    TransactionType, Transfer, TransferTransportEndpoint, TransportEndpoint, Txid, Unspent, Utxo,
-+    VerifyMessageResponse, WitnessData,
+     SdkPrepareCreateUtxosRequest, SdkRefreshTransfersRequest, SdkRefreshTransfersResponse,
+     SdkRgbInvoiceRequest, SdkRgbInvoiceResponse, SdkSendBtcRequest, SdkSendBtcResponse,
+     SdkSendOnionMessageRequest, SdkSendPaymentRequest, SdkSendPaymentResponse, SdkTakerRequest,
+-    SdkUnlockRequest, SdkVssClearFenceRequest, SendRgbRequest, SendRgbResponse,
+-    SignMessageResponse, Swap, SwapList, SwapStatus, Token, TokenLight, Transaction,
+-    TransactionType, Transfer, TransferTransportEndpoint, TransportEndpoint, Txid, Unspent, Utxo,
+-    VerifyMessageResponse, WitnessData,
++    SdkUnlockRequest, SdkVssClearFenceRequest, SendRgbInvoiceRequest, SendRgbRequest,
++    SendRgbResponse, SignMessageResponse, Swap, SwapList, SwapStatus, Token, TokenLight,
++    Transaction, TransactionType, Transfer, TransferTransportEndpoint, TransportEndpoint, Txid,
++    Unspent, Utxo, VerifyMessageResponse, WitnessData,
  };
  use serde::{Deserialize, Serialize};
  
@@ -1669,7 +1669,7 @@ index 5b606f1..9c9c59e 100644
  impl From<JsonWitnessData> for WitnessData {
      fn from(w: JsonWitnessData) -> Self {
          WitnessData {
-@@ -2208,6 +2420,7 @@ impl From<Utxo> for JsonUtxo {
+@@ -2240,6 +2452,7 @@ impl From<Utxo> for JsonUtxo {
  pub(crate) struct JsonUnspent {
      pub utxo: JsonUtxo,
      pub rgb_allocations: Vec<JsonRgbAllocation>,
@@ -1677,7 +1677,7 @@ index 5b606f1..9c9c59e 100644
  }
  
  impl From<Unspent> for JsonUnspent {
-@@ -2215,6 +2428,30 @@ impl From<Unspent> for JsonUnspent {
+@@ -2247,6 +2460,30 @@ impl From<Unspent> for JsonUnspent {
          JsonUnspent {
              utxo: u.utxo.into(),
              rgb_allocations: u.rgb_allocations.into_iter().map(Into::into).collect(),
@@ -1709,7 +1709,7 @@ index 5b606f1..9c9c59e 100644
      }
  }
 diff --git a/bindings/c-ffi/src/lib.rs b/bindings/c-ffi/src/lib.rs
-index e1dded1..92908fd 100644
+index cb94207..8188e7a 100644
 --- a/bindings/c-ffi/src/lib.rs
 +++ b/bindings/c-ffi/src/lib.rs
 @@ -89,6 +89,33 @@ pub extern "C" fn rln_free_string(s: *mut c_char) {
@@ -1722,7 +1722,7 @@ index e1dded1..92908fd 100644
 +    ffi_call!("rln_binding_build_info", Ok::<String, utils::Error>(serde_json::json!({
 +        "abi_version": 1,
 +        "rln_version": "0.17.0-beta.3",
-+        "rln_commit": "d10d679f0dd73246f6b475a44bdf13edd5f9b2a4",
++        "rln_commit": "7cced3aa3c2c904a88d8f8a7832981d25a5ea871",
 +        "lightning_commit": "bbe68189872c26088e351d034b05c58769cb996a",
 +        "rgb_lib_commit": "89c37086a68ef792da75c62bce59b58b1d7952a0",
 +        "adapter_sha256": env!("RLN_ADAPTER_SHA256"),
@@ -1732,7 +1732,7 @@ index e1dded1..92908fd 100644
 +        "capabilities": ["canonical-unlock-v1", "persistent-native-signer", "refresh-transfers-v1",
 +            "apay-address", "decoded-invoice-cltv", "tagged-rgb-assignment", "pending-blinded-v1",
 +            "rgb-contract-import-v1", "rgb-transfer-metadata-import-v1", "invoice-first-send-v1", "rgb-proxy-v1", "consignment-export-v1", "mainnet-lightning-rejection-v1",
-+            "external-signer-eth-rpc-v1", "external-signer-burn-v1",
++            "external-signer-eth-rpc-v1", "external-signer-burn-v1", "rgb-output-operations-v1",
 +            "native-signer-shutdown-v1", "owned-session-cleanup-v1", "bip322-simple-v1",
 +            "vss-backup-v1", "vss-backup-info-v1", "vss-restore-v1", "vss-automatic-backup-v1", "vss-backup-metadata-v1"],
 +        "vss_policy": {
@@ -1836,7 +1836,7 @@ index e1dded1..92908fd 100644
  #[unsafe(no_mangle)]
  pub extern "C" fn rln_import_rgb_transfer_consignment(
      node: &COpaqueStruct,
-@@ -733,6 +796,39 @@ pub extern "C" fn rln_sdk_shutdown() -> CResultString {
+@@ -793,6 +856,39 @@ pub extern "C" fn rln_sdk_shutdown() -> CResultString {
  // External-signer surface
  // ---------------------------------------------------------------------------
  
@@ -1876,7 +1876,7 @@ index e1dded1..92908fd 100644
  /// Drop a `NativeExternalSigner` handle. Safe to call immediately after
  /// attach / init / unlock succeeds: RLN holds its own `Arc` clone.
  #[unsafe(no_mangle)]
-@@ -754,6 +850,86 @@ mod free_tests {
+@@ -814,6 +910,86 @@ mod free_tests {
          free_sdk_node(COpaqueStruct::null());
          free_native_external_signer(COpaqueStruct::null());
      }
@@ -1963,7 +1963,7 @@ index e1dded1..92908fd 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -776,6 +952,21 @@ pub extern "C" fn rln_native_external_signer_bootstrap(signer: &COpaqueStruct) -
+@@ -836,6 +1012,21 @@ pub extern "C" fn rln_native_external_signer_bootstrap(signer: &COpaqueStruct) -
      )
  }
  
@@ -1985,7 +1985,7 @@ index e1dded1..92908fd 100644
  #[unsafe(no_mangle)]
  pub extern "C" fn rln_sdk_node_init_with_native_external_signer(
      node: &COpaqueStruct,
-@@ -839,3 +1030,67 @@ pub extern "C" fn rln_sdk_node_unlock_with_attached_external_signer(
+@@ -899,3 +1090,67 @@ pub extern "C" fn rln_sdk_node_unlock_with_attached_external_signer(
          api::sdk_node_unlock_with_attached_external_signer(node, request_json)
      )
  }
@@ -2090,7 +2090,7 @@ index 98c3372..c4db3c0 100644
  
  #[cfg(test)]
 diff --git a/bindings/rgb_lightning_node.udl b/bindings/rgb_lightning_node.udl
-index a58949a..8c72dfa 100644
+index 219527a..b428476 100644
 --- a/bindings/rgb_lightning_node.udl
 +++ b/bindings/rgb_lightning_node.udl
 @@ -5,6 +5,7 @@ namespace rgb_lightning_node {
@@ -2121,7 +2121,7 @@ index a58949a..8c72dfa 100644
      [Throws=RlnError]
      void connectpeer(string peer_pubkey_and_addr);
      [Throws=RlnError]
-@@ -640,6 +654,7 @@ dictionary SdkInitRequest {
+@@ -652,6 +666,7 @@ dictionary SdkInitRequest {
      string? lsp_bearer_token;
      string? vss_url = null;
      boolean vss_allow_http = false;
@@ -2130,7 +2130,7 @@ index a58949a..8c72dfa 100644
      boolean reuse_addresses = false;
  };
 diff --git a/src/ldk.rs b/src/ldk.rs
-index 3bc967e..3bc9c7b 100644
+index 2c582f4..0797b44 100644
 --- a/src/ldk.rs
 +++ b/src/ldk.rs
 @@ -108,18 +108,17 @@ use std::collections::HashSet;
@@ -2554,7 +2554,7 @@ index 3bc967e..3bc9c7b 100644
          // run them off the async runtime so they don't fail on a single-vCPU host.
          let (rgb_wallet, rgb_online) = tokio::task::spawn_blocking(move || {
              let mut rgb_wallet = RgbLibWallet::new(
-@@ -4977,16 +5290,14 @@ impl NodeStartup {
+@@ -4987,16 +5300,14 @@ impl NodeStartup {
              &master_fingerprint,
          )?;
  
@@ -2579,7 +2579,7 @@ index 3bc967e..3bc9c7b 100644
          #[cfg(feature = "vss")]
          if let Some((url, store_id, key)) = rgb_vss_backup {
              let wrapper = Arc::clone(&rgb_wallet_wrapper);
-@@ -4995,15 +5306,20 @@ impl NodeStartup {
+@@ -5005,15 +5316,20 @@ impl NodeStartup {
                      .configure_vss_backup(
                          crate::rgb_vss::VssBackupConfig::new(url, store_id, key)
                              .with_encryption(true)
@@ -2603,7 +2603,7 @@ index 3bc967e..3bc9c7b 100644
                      wrapper
                          .vss_backup(&client)
                          .map_err(|error| APIError::FailedVssInit(error.to_string()))?;
-@@ -5016,18 +5332,6 @@ impl NodeStartup {
+@@ -5026,18 +5342,6 @@ impl NodeStartup {
              })??;
          }
  
@@ -2622,7 +2622,7 @@ index 3bc967e..3bc9c7b 100644
          Ok(Arc::new(CommonState {
              config: Arc::clone(&static_state.config),
              signer,
-@@ -5397,6 +5701,44 @@ async fn prepare_node(
+@@ -5407,6 +5711,44 @@ async fn prepare_node(
  
  async fn start_lightning(
      #[allow(unused_mut)] mut setup: NodeStartup,
@@ -2667,7 +2667,7 @@ index 3bc967e..3bc9c7b 100644
  ) -> Result<(Option<LdkBackgroundServices>, Arc<UnlockedAppState>), APIError> {
      // Defense in depth: no chain backend, manager or worker precedes this check.
      setup.app_state.check_lightning_supported()?;
-@@ -5404,6 +5746,29 @@ async fn start_lightning(
+@@ -5414,6 +5756,29 @@ async fn start_lightning(
      let static_state = &app_state.static_state;
      let unlock_request = setup.unlock_request.clone();
      let gossip_source_config = unlock_request.gossip_source.clone().unwrap_or_default();
@@ -2697,7 +2697,7 @@ index 3bc967e..3bc9c7b 100644
      let kv_store = Arc::clone(&setup.kv_store);
      let external_signer_mode = setup.external_signer_mode;
      let internal_mnemonic = setup.internal_mnemonic.clone();
-@@ -5420,6 +5785,19 @@ async fn start_lightning(
+@@ -5430,6 +5795,19 @@ async fn start_lightning(
      let bitcoin_network = static_state.network;
      let network: Network = bitcoin_network.into();
      let ldk_peer_listening_port = static_state.ldk_peer_listening_port;
@@ -2717,7 +2717,7 @@ index 3bc967e..3bc9c7b 100644
      #[cfg(feature = "vss")]
      let monitor_kv_store = setup.monitor_kv_store.clone().ok_or_else(|| {
          APIError::Unexpected("Lightning monitor store is not available".to_string())
-@@ -5461,6 +5839,9 @@ async fn start_lightning(
+@@ -5471,6 +5849,9 @@ async fn start_lightning(
                  handle.clone(),
                  Arc::clone(&logger),
                  static_state.config.chain.fee_refresh_interval_secs,
@@ -2727,7 +2727,7 @@ index 3bc967e..3bc9c7b 100644
              )
              .await
              {
-@@ -5469,7 +5850,11 @@ async fn start_lightning(
+@@ -5479,7 +5860,11 @@ async fn start_lightning(
              };
  
              // Check that the bitcoind we've connected to is running the network we expect
@@ -2740,7 +2740,7 @@ index 3bc967e..3bc9c7b 100644
              if bitcoind_chain
                  != match bitcoin_network {
                      BitcoinNetwork::Mainnet => "main",
-@@ -5485,7 +5870,11 @@ async fn start_lightning(
+@@ -5495,7 +5880,11 @@ async fn start_lightning(
              // Poll for the best chain tip, used by the channel manager & spv client
              let polled_chain_tip = init::validate_best_block_header(bitcoind_client.as_ref())
                  .await
@@ -2753,7 +2753,7 @@ index 3bc967e..3bc9c7b 100644
              let initial_best_block = polled_chain_tip.to_best_block();
  
              ChainSetup {
-@@ -5518,16 +5907,14 @@ async fn start_lightning(
+@@ -5528,16 +5917,14 @@ async fn start_lightning(
                      Arc::clone(&logger),
                      static_state.config.chain.indexer_timeout_secs,
                      static_state.config.chain.fee_refresh_interval_secs,
@@ -2774,7 +2774,7 @@ index 3bc967e..3bc9c7b 100644
              );
              let initial_best_block = indexer_client
                  .get_best_block()
-@@ -5563,7 +5950,7 @@ async fn start_lightning(
+@@ -5573,7 +5960,7 @@ async fn start_lightning(
      let (chain_monitor, mut channelmonitors): (Arc<ChainMonitor>, _) = {
          let persister = MonitorUpdatingPersisterAsync::new(
              Arc::clone(&monitor_kv_store),
@@ -2783,7 +2783,7 @@ index 3bc967e..3bc9c7b 100644
              Arc::clone(&logger),
              1000,
              Arc::clone(&keys_manager),
-@@ -5969,7 +6356,7 @@ async fn start_lightning(
+@@ -5979,7 +6366,7 @@ async fn start_lightning(
      });
  
      // The UTXO verifier can only attach to a P2P sync, and only after PeerManager
@@ -2792,7 +2792,7 @@ index 3bc967e..3bc9c7b 100644
      let (p2p_gossip_sync_for_verifier, route_handler): (
          Option<Arc<P2PGossipSync>>,
          Arc<RoutingMessageHandler>,
-@@ -6084,61 +6471,110 @@ async fn start_lightning(
+@@ -6094,61 +6481,110 @@ async fn start_lightning(
      // provide a verifier, so announcements are checked whatever the sync mode is.
      if let Some(p2p) = &p2p_gossip_sync_for_verifier {
          let peer_manager_wake = Arc::new({
@@ -2932,7 +2932,7 @@ index 3bc967e..3bc9c7b 100644
      match backend {
          #[cfg(feature = "block-sync")]
          ChainBackend::BlockSync { client, .. } => {
-@@ -6148,7 +6584,7 @@ async fn start_lightning(
+@@ -6158,7 +6594,7 @@ async fn start_lightning(
              let chain_tip =
                  block_sync_chain_tip.expect("block-sync chain tip is set while syncing listeners");
              let mut cache = block_sync_cache;
@@ -2941,7 +2941,7 @@ index 3bc967e..3bc9c7b 100644
                  let chain_poller = poll::ChainPoller::new(client.as_ref(), network);
                  let chain_listener = (
                      chain_monitor_listener,
-@@ -6157,13 +6593,21 @@ async fn start_lightning(
+@@ -6167,13 +6603,21 @@ async fn start_lightning(
                  let mut spv_client =
                      SpvClient::new(chain_tip, chain_poller, &mut cache, &chain_listener);
                  loop {
@@ -2967,7 +2967,7 @@ index 3bc967e..3bc9c7b 100644
                  }
              });
          }
-@@ -6174,19 +6618,19 @@ async fn start_lightning(
+@@ -6184,19 +6628,19 @@ async fn start_lightning(
                  chain_monitor.clone(),
                  output_sweeper.clone(),
              ];
@@ -2994,7 +2994,7 @@ index 3bc967e..3bc9c7b 100644
                  }
              });
          }
-@@ -6387,6 +6831,7 @@ async fn start_lightning(
+@@ -6397,6 +6841,7 @@ async fn start_lightning(
  
      let unlocked_state = Arc::new(LightningState {
          common: Arc::clone(&common),
@@ -3002,7 +3002,7 @@ index 3bc967e..3bc9c7b 100644
          channel_manager: Arc::clone(&channel_manager),
          gossip_source: Arc::clone(&gossip_source),
          inbound_payments,
-@@ -6414,15 +6859,19 @@ async fn start_lightning(
+@@ -6424,15 +6869,19 @@ async fn start_lightning(
  
      asset_link_handler.set_authorizer(Arc::new(NodeAssetLinkAuthorizer));
  
@@ -3030,7 +3030,7 @@ index 3bc967e..3bc9c7b 100644
      }
  
      let recent_payments_payment_ids = channel_manager
-@@ -6489,17 +6938,22 @@ async fn start_lightning(
+@@ -6499,17 +6948,22 @@ async fn start_lightning(
      let connect_cm = Arc::clone(&channel_manager);
      let connect_pm = Arc::clone(&peer_manager);
      let connect_db = static_state.db();
@@ -3057,7 +3057,7 @@ index 3bc967e..3bc9c7b 100644
                  return;
              }
              let db = RlnDatabase::new((*connect_db).clone());
-@@ -6511,14 +6965,18 @@ async fn start_lightning(
+@@ -6521,14 +6975,18 @@ async fn start_lightning(
                          .map(|chan| chan.counterparty.node_id)
                          .filter(|id| connect_pm.peer_by_node_id(id).is_none())
                      {
@@ -3080,7 +3080,7 @@ index 3bc967e..3bc9c7b 100644
                              }
                          }
                      }
-@@ -6550,16 +7008,16 @@ async fn start_lightning(
+@@ -6560,16 +7018,16 @@ async fn start_lightning(
      if let Some(link) = external_signer_link_watch {
          let su_channel_manager = Arc::clone(&channel_manager);
          let su_chain_monitor = Arc::clone(&chain_monitor);
@@ -3101,7 +3101,7 @@ index 3bc967e..3bc9c7b 100644
                      return;
                  }
                  if link_event && link.is_connected() {
-@@ -6581,10 +7039,12 @@ async fn start_lightning(
+@@ -6591,10 +7049,12 @@ async fn start_lightning(
                  interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
                  loop {
                      tokio::select! {
@@ -3115,7 +3115,7 @@ index 3bc967e..3bc9c7b 100644
                          return;
                      }
                      su_chain_monitor.signer_unblocked(None);
-@@ -6597,45 +7057,17 @@ async fn start_lightning(
+@@ -6607,45 +7067,17 @@ async fn start_lightning(
          });
      }
  
@@ -3167,7 +3167,7 @@ index 3bc967e..3bc9c7b 100644
              }
              sweep_handler.sweep_stale_state();
          }
-@@ -6645,15 +7077,24 @@ async fn start_lightning(
+@@ -6655,15 +7087,24 @@ async fn start_lightning(
      let chan_man = Arc::clone(&channel_manager);
      let announce_initial_delay_secs = static_state.config.node.announce_initial_delay_secs;
      let announce_refresh_interval_secs = static_state.config.node.announce_refresh_interval_secs;
@@ -3196,7 +3196,7 @@ index 3bc967e..3bc9c7b 100644
              // Don't bother trying to announce if we don't have any public channls, though our
              // peers should drop such an announcement anyway. Note that announcement may not
              // propagate until we have a channel with 6+ confirmations.
-@@ -6682,7 +7123,8 @@ async fn start_lightning(
+@@ -6692,7 +7133,8 @@ async fn start_lightning(
      Ok((
          Some(LdkBackgroundServices {
              stop_processing,
@@ -3206,7 +3206,7 @@ index 3bc967e..3bc9c7b 100644
              peer_manager: peer_manager.clone(),
              bp_exit,
              background_processor: Some(background_processor),
-@@ -6711,6 +7153,8 @@ pub(crate) fn attach_external_signer_transport(
+@@ -6721,6 +7163,8 @@ pub(crate) fn attach_external_signer_transport(
      Ok(ExternalSignerAttachment {
          bootstrap,
          transport,
@@ -3215,7 +3215,7 @@ index 3bc967e..3bc9c7b 100644
      })
  }
  
-@@ -6725,15 +7169,11 @@ impl AppState {
+@@ -6735,15 +7179,11 @@ impl AppState {
          ldk_background_services
              .stop_processing
              .store(true, Ordering::Release);
@@ -3234,7 +3234,7 @@ index 3bc967e..3bc9c7b 100644
          Some(ldk_background_services)
      }
  }
-@@ -6854,13 +7294,19 @@ async fn release_vss_fence(kv_store: Arc<SyncedKvStore>, teardown: VssTeardown)
+@@ -6864,13 +7304,19 @@ async fn release_vss_fence(kv_store: Arc<SyncedKvStore>, teardown: VssTeardown)
  
  // Runs while shutting down, possibly because the background processor itself
  // died, so its outcome is reported instead of unwrapped.
@@ -3259,7 +3259,7 @@ index 3bc967e..3bc9c7b 100644
      }
  }
  
-@@ -6926,7 +7372,16 @@ mod vss_teardown_tests {
+@@ -6936,7 +7382,16 @@ mod vss_teardown_tests {
  }
  
  /// Stop the resources owned by the unlocked session, including wallet-only persistence.
@@ -3277,7 +3277,7 @@ index 3bc967e..3bc9c7b 100644
      tracing::info!("Stopping node services");
      // Wait for wallet operations holding the API mutex, then remove both session owners together.
      // New callers cannot use a wallet after its VSS fence has been handed over; concurrent stops
-@@ -6948,19 +7403,33 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
+@@ -6958,19 +7413,33 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
          )
      });
  
@@ -3313,7 +3313,7 @@ index 3bc967e..3bc9c7b 100644
              }
          }
      }
-@@ -6969,9 +7438,13 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
+@@ -6979,9 +7448,13 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
          .as_mut()
          .and_then(|services| services.background_processor.take())
      {
@@ -3328,7 +3328,7 @@ index 3bc967e..3bc9c7b 100644
      #[cfg(feature = "vss")]
      if let Some((common, monitor_store)) = common_and_monitor {
          let deadline = Instant::now() + VSS_TEARDOWN_TIMEOUT;
-@@ -6986,34 +7459,95 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
+@@ -6996,34 +7469,95 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
              .is_err()
              {
                  worker.abort();
@@ -3983,10 +3983,10 @@ index a635117..d126aa3 100644
      });
  }
 diff --git a/src/lib.rs b/src/lib.rs
-index c85e309..6bd8869 100644
+index 235aab8..650780e 100644
 --- a/src/lib.rs
 +++ b/src/lib.rs
-@@ -76,6 +76,8 @@ pub mod test_utils;
+@@ -77,6 +77,8 @@ pub mod test_utils;
  mod uniffi_api;
  mod utils;
  #[cfg(feature = "vss")]
@@ -3996,10 +3996,10 @@ index c85e309..6bd8869 100644
  
  pub use node::{NodeConfig, NodeHandle};
 diff --git a/src/main.rs b/src/main.rs
-index 003572d..7def4e9 100644
+index 34fb4e1..96dcb12 100644
 --- a/src/main.rs
 +++ b/src/main.rs
-@@ -48,6 +48,8 @@ mod swap;
+@@ -49,6 +49,8 @@ mod swap;
  mod synced_kv_store;
  mod utils;
  #[cfg(feature = "vss")]
@@ -4008,7 +4008,7 @@ index 003572d..7def4e9 100644
  mod vss_kv_store;
  
  // the test suite calls into `electrum_client` to wait for electrs to catch up with bitcoind, and
-@@ -371,7 +373,9 @@ async fn shutdown_signal(app_state: Arc<AppState>) {
+@@ -372,7 +374,9 @@ async fn shutdown_signal(app_state: Arc<AppState>) {
          tracing::info!("Will shutdown after change state is complete");
          tokio::time::sleep(Duration::from_millis(300)).await;
      }
@@ -4059,10 +4059,129 @@ index d6f571f..8b920d5 100644
              ldk_background_services: Arc::new(Mutex::new(None)),
              attached_external_signer: Arc::new(Mutex::new(None)),
 diff --git a/src/mainnet_vss_tests.rs b/src/mainnet_vss_tests.rs
-index f9c88b7..e040833 100644
+index f9c88b7..00e2789 100644
 --- a/src/mainnet_vss_tests.rs
 +++ b/src/mainnet_vss_tests.rs
-@@ -678,18 +678,20 @@ async fn mainnet_vss_concurrent_stop_keeps_fence_with_teardown_owner() {
+@@ -317,10 +317,38 @@ impl Wallet {
+         let indexer = Indexer::new(bitcoin::Network::Bitcoin).await;
+         let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+         let proxy = format!("rpc://{}/json-rpc", listener.local_addr().unwrap());
+-        let router = Router::new().route("/json-rpc", post(|Json(request): Json<Value>| async move {
+-            assert_eq!(request["method"], "server.info");
+-            Json(json!({"jsonrpc":"2.0", "id":request["id"], "result":{"protocol_version":"0.2", "version":"fixture", "uptime":1}}))
+-        }));
++        let router = Router::new().route(
++            "/json-rpc",
++            post(|Json(request): Json<Value>| async move {
++                assert_eq!(request["jsonrpc"], "2.0");
++                let now = chrono::Utc::now().timestamp();
++                let result = match request["method"].as_str().unwrap() {
++                    "server.info" => {
++                        json!({"protocol_version":"1.0", "version":"fixture", "uptime":1,
++                    "current_time":now.to_string(), "max_expiry_secs":"2592000", "max_quota":"1",
++                    "max_pow_difficulty":"0", "retention_grace_secs":"86400"})
++                    }
++                    "invoice.prepare" => {
++                        let params = request["params"].as_object().unwrap();
++                        assert_eq!(params.len(), 3);
++                        for name in ["invoice_id", "recipient_pk"] {
++                            let value = params[name].as_str().unwrap();
++                            assert_eq!(value.len(), 64);
++                            assert!(value.bytes().all(|byte| byte.is_ascii_hexdigit()));
++                        }
++                        let expiry = params["expires_at"]
++                            .as_str()
++                            .unwrap()
++                            .parse::<i64>()
++                            .unwrap();
++                        assert!(expiry > now && expiry <= now + 2_592_000);
++                        json!(true)
++                    }
++                    other => panic!("Unexpected VSS fixture proxy method: {other}"),
++                };
++                Json(json!({"jsonrpc":"2.0", "id":request["id"], "result":result}))
++            }),
++        );
+         let proxy_task = tokio::spawn(async move { axum::serve(listener, router).await.unwrap() });
+         let state = start_daemon(&UserArgs {
+             storage_dir_path: directory.path().into(),
+@@ -338,7 +366,7 @@ impl Wallet {
+             lsp_bearer_token: None,
+             vss_url: Some(server.url.clone()),
+             vss_allow_empty_restore: false,
+-            reuse_addresses: true,
++            reuse_addresses: false,
+             remote_signer_listen_addr: None,
+             config: Default::default(),
+         })
+@@ -356,6 +384,34 @@ impl Wallet {
+         }
+     }
+ 
++    async fn vanilla_address_at(&self, index: u32) -> String {
++        use rgb_lib::bdk_wallet::miniscript::{Descriptor, DescriptorPublicKey};
++        use rgb_lib::wallet::RgbWalletOpsOffline;
++        let state = self.state.unlocked_app_state.lock().await;
++        let descriptor = state
++            .as_ref()
++            .unwrap()
++            .rgb_wallet_wrapper
++            .get_rgb_wallet()
++            .get_descriptors()
++            .vanilla;
++        // This disposable internal-signer fixture may return private descriptors.
++        // Convert them in memory to their public descriptor before deriving expectations.
++        let (descriptor, _) = Descriptor::<DescriptorPublicKey>::parse_descriptor(
++            &bitcoin::secp256k1::Secp256k1::new(),
++            &descriptor,
++        )
++        .unwrap();
++        let derived = descriptor
++            .at_derivation_index(index)
++            .unwrap()
++            .derived_descriptor(&bitcoin::secp256k1::Secp256k1::verification_only())
++            .unwrap();
++        bitcoin::Address::from_script(&derived.script_pubkey(), bitcoin::Network::Bitcoin)
++            .unwrap()
++            .to_string()
++    }
++
+     fn request(&self) -> sdk::UnlockRequest {
+         sdk::UnlockRequest {
+             password: PASSWORD.into(),
+@@ -450,11 +506,13 @@ async fn mainnet_vss_wallet_backup_reopen_and_fresh_device_restore() {
+         .is_none());
+     let first_fence = server.rows(&node_store)[FENCE].clone();
+     let initial = sdk::address(wallet.state.clone()).await.unwrap().address;
++    assert_eq!(initial, wallet.vanilla_address_at(0).await);
+     let rotated = sdk::rotate_address(wallet.state.clone())
+         .await
+         .unwrap()
+         .address;
+     assert_ne!(initial, rotated);
++    assert_eq!(rotated, wallet.vanilla_address_at(1).await);
+     let version = sdk::vss_backup(wallet.state.clone()).await.unwrap();
+     let backup = server.rows(&rgb_store);
+     assert_eq!(backup["backup/data"].version, version);
+@@ -480,7 +538,7 @@ async fn mainnet_vss_wallet_backup_reopen_and_fresh_device_restore() {
+     assert_ne!(server.rows(&node_store)[FENCE].value, first_fence.value);
+     assert_eq!(
+         sdk::address(wallet.state.clone()).await.unwrap().address,
+-        rotated
++        wallet.vanilla_address_at(2).await
+     );
+     wallet.lock().await;
+     let request_start = server.state.lock().unwrap().requests.len();
+@@ -489,7 +547,7 @@ async fn mainnet_vss_wallet_backup_reopen_and_fresh_device_restore() {
+         .unwrap();
+     assert_eq!(
+         sdk::address(other.state.clone()).await.unwrap().address,
+-        rotated
++        other.vanilla_address_at(3).await
+     );
+     assert!(other
+         .state
+@@ -678,18 +736,20 @@ async fn mainnet_vss_concurrent_stop_keeps_fence_with_teardown_owner() {
          .forget();
      assert!(wallet.state.unlocked_app_state.lock().await.is_none());
      assert!(!first.is_finished());
@@ -4213,9 +4332,18 @@ index d504a55..9294786 100644
      /// left in `uniffi_api::handle_from_request`) must be able to configure the remote-signer daemon
      /// address; without this field, `NodeHandle`-embedding callers could configure external-signer
 diff --git a/src/rgb.rs b/src/rgb.rs
-index 83202d4..8afd8bf 100644
+index 14d98b1..67a40f9 100644
 --- a/src/rgb.rs
 +++ b/src/rgb.rs
+@@ -30,7 +30,7 @@ use rgb_lib::{
+ use std::collections::{HashMap, HashSet};
+ use std::path::PathBuf;
+ use std::str::FromStr;
+-use std::sync::{Arc, Mutex, MutexGuard};
++use std::sync::{Arc, Mutex, MutexGuard, RwLock, RwLockReadGuard, RwLockWriteGuard};
+ 
+ use crate::{error::APIError, utils::CommonState};
+ 
 @@ -285,7 +285,7 @@ impl CommonState {
              // Keep preparation, signing and completion serialized against other wallet operations.
              // Persist Initiated before asking the signer: an interrupted call must retain its inputs.
@@ -4225,15 +4353,20 @@ index 83202d4..8afd8bf 100644
              let prepared = wallet.burn_begin(
                  wrapper.online,
                  asset_id,
-@@ -658,71 +658,140 @@ fn validate_burn_signed_psbt(unsigned: &str, signed: &str) -> Result<String, Rgb
+@@ -658,74 +658,229 @@ fn validate_burn_signed_psbt(unsigned: &str, signed: &str) -> Result<String, Rgb
      Ok(prepared.to_string())
  }
  
 -#[cfg(not(feature = "vss"))]
 -type RgbWalletGuard<'a> = MutexGuard<'a, RgbLibWallet>;
 +pub(crate) struct RgbLibWalletWrapper {
++    // Snapshot admission always precedes the RGB mutex. Output-operation writers own it
++    // through every DB+journal transition; ordinary mutators/snapshots hold a reader.
++    snapshot_barrier: RwLock<()>,
 +    pub(crate) wallet: Arc<Mutex<RgbLibWallet>>,
 +    pub(crate) online: Online,
++    /// Serializes durable output-plan ownership, signing and exact-transaction retries.
++    pub(crate) output_operations: Mutex<()>,
 +    #[cfg(feature = "vss")]
 +    pub(crate) snapshot_policy: Option<Arc<crate::vss_snapshot_policy::SnapshotPolicy>>,
 +    #[cfg(feature = "vss")]
@@ -4257,6 +4390,8 @@ index 83202d4..8afd8bf 100644
 +    mutated: bool,
 +    wrapper: &'a RgbLibWalletWrapper,
 +    sync_before: Option<bool>,
++    // Fields are dropped in declaration order: release RGB first, then snapshot admission.
++    _snapshot_admission: Option<RwLockReadGuard<'a, ()>>,
  }
 -#[cfg(feature = "vss")]
  impl std::ops::Deref for RgbWalletGuard<'_> {
@@ -4339,6 +4474,8 @@ index 83202d4..8afd8bf 100644
 -pub(crate) struct RgbLibWalletWrapper {
 -    pub(crate) wallet: Arc<Mutex<RgbLibWallet>>,
 -    pub(crate) online: Online,
+-    /// Serializes durable output-plan ownership, signing and exact-transaction retries.
+-    pub(crate) output_operations: Mutex<()>,
 -    #[cfg(feature = "vss")]
 -    vss_client: Mutex<Option<Arc<crate::rgb_vss::VssBackupClient>>>,
 -}
@@ -4346,8 +4483,10 @@ index 83202d4..8afd8bf 100644
  impl RgbLibWalletWrapper {
      pub(crate) fn new(wallet: Arc<Mutex<RgbLibWallet>>, online: Online) -> Self {
          RgbLibWalletWrapper {
++            snapshot_barrier: RwLock::new(()),
              wallet,
              online,
+             output_operations: Mutex::new(()),
              #[cfg(feature = "vss")]
 +            snapshot_policy: None,
 +            #[cfg(feature = "vss")]
@@ -4363,12 +4502,92 @@ index 83202d4..8afd8bf 100644
 +            mutated: false,
 +            wrapper: self,
 +            sync_before: None,
++            _snapshot_admission: None,
 +        }
++    }
++
++    fn snapshot_reader(&self) -> RwLockReadGuard<'_, ()> {
++        self.snapshot_barrier.read().unwrap_or_else(|poisoned| {
++            tracing::error!(
++                "Snapshot barrier poisoned; retaining wallet journal recovery admission"
++            );
++            poisoned.into_inner()
++        })
++    }
++
++    fn snapshot_writer(&self) -> RwLockWriteGuard<'_, ()> {
++        self.snapshot_barrier.write().unwrap_or_else(|poisoned| {
++            tracing::error!(
++                "Snapshot barrier poisoned; retaining wallet journal recovery admission"
++            );
++            poisoned.into_inner()
++        })
++    }
++
++    /// A snapshot caller must acquire this guard before the RGB mutex; never nest it
++    /// inside an output-operation writer or another wallet/snapshot guard.
++    pub(crate) fn get_rgb_wallet_for_snapshot(&self) -> RgbWalletGuard<'_> {
++        let admission = self.snapshot_reader();
++        let mut wallet = self.get_rgb_wallet();
++        wallet._snapshot_admission = Some(admission);
++        wallet
++    }
++
++    /// Serialize the complete owned operation with every automatic/manual snapshot.
++    /// Raw backend wallet guards do not upload between reservation and PSBT journal writes.
++    pub(crate) fn with_output_operation_snapshot<T>(
++        &self,
++        operation: impl FnOnce() -> Result<T, APIError>,
++    ) -> Result<T, APIError> {
++        let _admission = self.snapshot_writer();
++        #[cfg(feature = "vss")]
++        let can_clear = {
++            let wallet = self.get_rgb_wallet();
++            self.snapshot_policy.as_ref().is_some_and(|policy| {
++                !policy.pending()
++                    && policy.has_completed_backup().unwrap_or(false)
++                    && snapshot_is_clean(&wallet.guard)
++            })
++        };
++        #[cfg(feature = "vss")]
++        if let Some(policy) = &self.snapshot_policy {
++            // Persist admission before any journal or DB write, including uncertain failures.
++            policy.before_mutation();
++        }
++        let result = operation();
++        #[cfg(feature = "vss")]
++        if let Some(policy) = &self.snapshot_policy {
++            let mut wallet = self.get_rgb_wallet();
++            // A status read with identical acknowledged contents is not a new backup.
++            let unchanged = can_clear
++                && snapshot_is_clean(&wallet.guard)
++                && policy.clear_unchanged_intent().is_ok();
++            if !unchanged && policy.enabled.load(std::sync::atomic::Ordering::SeqCst) {
++                if let Some(client) = self.vss_client() {
++                    if std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
++                        policy.after_mutation(&mut wallet.guard, &client)
++                    }))
++                    .is_err()
++                    {
++                        policy
++                            .failed
++                            .store(true, std::sync::atomic::Ordering::SeqCst);
++                        tracing::error!("Automatic output-operation snapshot panicked; financial result is preserved");
++                    }
++                } else {
++                    policy
++                        .failed
++                        .store(true, std::sync::atomic::Ordering::SeqCst);
++                    tracing::error!("Automatic output-operation snapshot client unavailable; financial result is preserved");
++                }
++            }
++        }
++        result
 +    }
 +
 +    /// Explicit admission covers SDK mutators taking &self as well as &mut self.
 +    pub(crate) fn get_rgb_wallet_mutating(&self) -> RgbWalletGuard<'_> {
-+        let mut guard = self.get_rgb_wallet();
++        let mut guard = self.get_rgb_wallet_for_snapshot();
 +        guard.mutated = true;
 +        #[cfg(feature = "vss")]
 +        if let Some(policy) = &self.snapshot_policy {
@@ -4381,7 +4600,7 @@ index 83202d4..8afd8bf 100644
 +        if skip_sync {
 +            return self.get_rgb_wallet();
 +        }
-+        let mut guard = self.get_rgb_wallet();
++        let mut guard = self.get_rgb_wallet_for_snapshot();
 +        #[cfg(feature = "vss")]
 +        if let Some(policy) = &self.snapshot_policy {
 +            // A fresh/never-backed-up wallet has no acknowledged content digest. Do not
@@ -4401,7 +4620,7 @@ index 83202d4..8afd8bf 100644
          // In FFI builds a panic crossing `extern "C"` frames aborts via
          // `panic_cannot_unwind`, cascading to every subsequent wallet op,
          // so we recover from mutex poisoning instead of propagating.
-@@ -744,18 +813,6 @@ impl RgbLibWalletWrapper {
+@@ -747,18 +902,6 @@ impl RgbLibWalletWrapper {
          self.wallet.lock().unwrap()
      }
  
@@ -4420,34 +4639,34 @@ index 83202d4..8afd8bf 100644
      #[cfg(feature = "vss")]
      pub(crate) fn vss_client(&self) -> Option<Arc<crate::rgb_vss::VssBackupClient>> {
          self.vss_client.lock().unwrap().clone()
-@@ -781,8 +838,15 @@ impl RgbLibWalletWrapper {
+@@ -784,8 +927,15 @@ impl RgbLibWalletWrapper {
          &self,
          client: &crate::rgb_vss::VssBackupClient,
      ) -> Result<i64, crate::rgb_vss::Error> {
 -        let mut wallet = self.lock_wallet();
 -        crate::rgb_vss::backup_wallet(&mut wallet, client)
-+        let mut wallet = self.lock_rgb_wallet();
++        let mut wallet = self.get_rgb_wallet_for_snapshot();
 +        match &self.snapshot_policy {
-+            Some(policy) => policy.backup(&mut wallet, client).map_err(|error| {
++            Some(policy) => policy.backup(&mut wallet.guard, client).map_err(|error| {
 +                crate::rgb_vss::Error::Internal {
 +                    details: error.to_string(),
 +                }
 +            }),
-+            None => crate::rgb_vss::backup_wallet(&mut wallet, client),
++            None => crate::rgb_vss::backup_wallet(&mut wallet.guard, client),
 +        }
      }
  
      #[cfg(feature = "vss")]
-@@ -790,7 +854,7 @@ impl RgbLibWalletWrapper {
+@@ -793,7 +943,7 @@ impl RgbLibWalletWrapper {
          &self,
          client: &crate::rgb_vss::VssBackupClient,
      ) -> Result<crate::rgb_vss::VssBackupInfo, crate::rgb_vss::Error> {
 -        let backup_required = self.lock_wallet().backup_info()?;
-+        let backup_required = self.lock_rgb_wallet().backup_info()?;
++        let backup_required = self.get_rgb_wallet_for_snapshot().backup_info()?;
          let server_version = std::thread::scope(|scope| {
              scope
                  .spawn(|| client.handle().block_on(client.get_backup_version()))
-@@ -810,7 +874,8 @@ impl RgbLibWalletWrapper {
+@@ -813,7 +963,8 @@ impl RgbLibWalletWrapper {
      // Upstream API retained through the merge; not yet wired into utexo's flow.
      #[allow(dead_code)]
      pub(crate) fn abort_pending_vanilla_tx(&self, txid: String) -> Result<(), RgbLibError> {
@@ -4457,7 +4676,7 @@ index 83202d4..8afd8bf 100644
      }
  
      pub(crate) fn bitcoin_network(&self) -> BitcoinNetwork {
-@@ -825,7 +890,7 @@ impl RgbLibWalletWrapper {
+@@ -828,7 +979,7 @@ impl RgbLibWalletWrapper {
          transport_endpoints: Vec<String>,
          min_confirmations: u8,
      ) -> Result<ReceiveData, RgbLibError> {
@@ -4466,7 +4685,7 @@ index 83202d4..8afd8bf 100644
              Some(self.online),
              asset_id,
              assignment,
-@@ -841,7 +906,8 @@ impl RgbLibWalletWrapper {
+@@ -844,7 +995,8 @@ impl RgbLibWalletWrapper {
          fascia: Fascia,
          witness_ord: Option<WitnessOrd>,
      ) -> Result<(), RgbLibError> {
@@ -4476,7 +4695,7 @@ index 83202d4..8afd8bf 100644
      }
  
      #[allow(unused_variables)]
-@@ -866,7 +932,7 @@ impl RgbLibWalletWrapper {
+@@ -869,7 +1021,7 @@ impl RgbLibWalletWrapper {
      }
  
      pub(crate) fn create_consigments(&self, psbt: String) -> Result<(), RgbLibError> {
@@ -4485,7 +4704,7 @@ index 83202d4..8afd8bf 100644
      }
  
      pub(crate) fn create_utxos(
-@@ -877,7 +943,7 @@ impl RgbLibWalletWrapper {
+@@ -880,7 +1032,7 @@ impl RgbLibWalletWrapper {
          fee_rate: u64,
          skip_sync: bool,
      ) -> Result<u8, RgbLibError> {
@@ -4494,7 +4713,7 @@ index 83202d4..8afd8bf 100644
              self.online,
              up_to,
              Some(num),
-@@ -895,7 +961,7 @@ impl RgbLibWalletWrapper {
+@@ -898,7 +1050,7 @@ impl RgbLibWalletWrapper {
          fee_rate: u64,
          skip_sync: bool,
      ) -> Result<String, RgbLibError> {
@@ -4503,7 +4722,7 @@ index 83202d4..8afd8bf 100644
              self.online,
              up_to,
              Some(num),
-@@ -911,7 +977,7 @@ impl RgbLibWalletWrapper {
+@@ -914,7 +1066,7 @@ impl RgbLibWalletWrapper {
          signed_psbt: String,
          _skip_sync: bool,
      ) -> Result<u8, RgbLibError> {
@@ -4512,7 +4731,7 @@ index 83202d4..8afd8bf 100644
              .create_utxos_end(self.online, signed_psbt)
      }
  
-@@ -921,7 +987,7 @@ impl RgbLibWalletWrapper {
+@@ -924,7 +1076,7 @@ impl RgbLibWalletWrapper {
          no_asset_only: bool,
          skip_sync: bool,
      ) -> Result<bool, RgbLibError> {
@@ -4521,7 +4740,7 @@ index 83202d4..8afd8bf 100644
              self.online,
              batch_transfer_idx,
              no_asset_only,
-@@ -930,11 +996,11 @@ impl RgbLibWalletWrapper {
+@@ -933,11 +1085,11 @@ impl RgbLibWalletWrapper {
      }
  
      pub(crate) fn get_address(&self) -> Result<String, RgbLibError> {
@@ -4535,7 +4754,7 @@ index 83202d4..8afd8bf 100644
      }
  
      pub(crate) fn get_asset_balance(
-@@ -955,7 +1021,8 @@ impl RgbLibWalletWrapper {
+@@ -958,7 +1110,8 @@ impl RgbLibWalletWrapper {
  
      pub(crate) fn get_btc_balance(&self, skip_sync: bool) -> Result<BtcBalance, RgbLibError> {
          let online = if skip_sync { None } else { Some(self.online) };
@@ -4545,7 +4764,7 @@ index 83202d4..8afd8bf 100644
      }
  
      pub(crate) fn get_fee_estimation(&self, blocks: u16) -> Result<f64, RgbLibError> {
-@@ -988,7 +1055,7 @@ impl RgbLibWalletWrapper {
+@@ -991,7 +1144,7 @@ impl RgbLibWalletWrapper {
          fee_rate: u64,
          min_confirmations: u8,
      ) -> Result<OperationResult, RgbLibError> {
@@ -4554,7 +4773,7 @@ index 83202d4..8afd8bf 100644
              self.online,
              asset_id,
              amount,
-@@ -1005,7 +1072,7 @@ impl RgbLibWalletWrapper {
+@@ -1008,7 +1161,7 @@ impl RgbLibWalletWrapper {
          fee_rate: u64,
          min_confirmations: u8,
      ) -> Result<OperationResult, RgbLibError> {
@@ -4563,7 +4782,7 @@ index 83202d4..8afd8bf 100644
              self.online,
              asset_id,
              inflation_amounts,
-@@ -1022,7 +1089,7 @@ impl RgbLibWalletWrapper {
+@@ -1025,7 +1178,7 @@ impl RgbLibWalletWrapper {
          amounts: Vec<u64>,
          file_path: Option<String>,
      ) -> Result<AssetCFA, RgbLibError> {
@@ -4572,7 +4791,7 @@ index 83202d4..8afd8bf 100644
              .issue_asset_cfa(name, details, precision, amounts, file_path)
      }
  
-@@ -1042,7 +1109,7 @@ impl RgbLibWalletWrapper {
+@@ -1045,7 +1198,7 @@ impl RgbLibWalletWrapper {
                  details: "IFA link rights are unavailable in the BFA RGB library".into(),
              });
          }
@@ -4581,7 +4800,7 @@ index 83202d4..8afd8bf 100644
              ticker,
              name,
              precision,
-@@ -1059,7 +1126,7 @@ impl RgbLibWalletWrapper {
+@@ -1062,7 +1215,7 @@ impl RgbLibWalletWrapper {
          precision: u8,
          amounts: Vec<u64>,
      ) -> Result<AssetNIA, RgbLibError> {
@@ -4590,7 +4809,7 @@ index 83202d4..8afd8bf 100644
              .issue_asset_nia(ticker, name, precision, amounts)
      }
  
-@@ -1072,7 +1139,7 @@ impl RgbLibWalletWrapper {
+@@ -1075,7 +1228,7 @@ impl RgbLibWalletWrapper {
          media_file_path: Option<String>,
          attachments_file_paths: Vec<String>,
      ) -> Result<AssetUDA, RgbLibError> {
@@ -4599,7 +4818,7 @@ index 83202d4..8afd8bf 100644
              ticker,
              name,
              details,
-@@ -1098,7 +1165,8 @@ impl RgbLibWalletWrapper {
+@@ -1101,7 +1254,8 @@ impl RgbLibWalletWrapper {
          skip_sync: bool,
      ) -> Result<Vec<RgbLibTransaction>, RgbLibError> {
          let online = if skip_sync { None } else { Some(self.online) };
@@ -4609,7 +4828,7 @@ index 83202d4..8afd8bf 100644
      }
  
      pub(crate) fn list_transfers(
-@@ -1115,7 +1183,7 @@ impl RgbLibWalletWrapper {
+@@ -1118,7 +1272,7 @@ impl RgbLibWalletWrapper {
          skip_sync: bool,
      ) -> Result<Vec<Unspent>, RgbLibError> {
          let online = if skip_sync { None } else { Some(self.online) };
@@ -4618,7 +4837,7 @@ index 83202d4..8afd8bf 100644
              .list_unspents(online, settled_only, skip_sync)
      }
  
-@@ -1126,7 +1194,7 @@ impl RgbLibWalletWrapper {
+@@ -1129,7 +1283,7 @@ impl RgbLibWalletWrapper {
          vout: u32,
          blinding: u64,
      ) -> Result<(RgbTransfer, Vec<Assignment>, HashSet<String>), RgbLibError> {
@@ -4627,7 +4846,7 @@ index 83202d4..8afd8bf 100644
              self.online,
              consignment_path,
              txid,
-@@ -1139,7 +1207,7 @@ impl RgbLibWalletWrapper {
+@@ -1142,7 +1296,7 @@ impl RgbLibWalletWrapper {
          &self,
          recipient_id: String,
      ) -> Result<Option<OperationResult>, RgbLibError> {
@@ -4636,7 +4855,7 @@ index 83202d4..8afd8bf 100644
              .provide_out_of_band_ack(self.online, recipient_id)
      }
  
-@@ -1148,11 +1216,8 @@ impl RgbLibWalletWrapper {
+@@ -1151,11 +1305,8 @@ impl RgbLibWalletWrapper {
          consignment_path: String,
          media_file_paths: Vec<String>,
      ) -> Result<HashMap<i32, RefreshedTransfer>, RgbLibError> {
@@ -4650,7 +4869,7 @@ index 83202d4..8afd8bf 100644
      }
  
      pub(crate) fn refresh(
-@@ -1161,7 +1226,10 @@ impl RgbLibWalletWrapper {
+@@ -1164,7 +1315,10 @@ impl RgbLibWalletWrapper {
          filter: Vec<RefreshFilter>,
          skip_sync: bool,
      ) -> Result<RefreshResult, RgbLibError> {
@@ -4662,7 +4881,7 @@ index 83202d4..8afd8bf 100644
              .refresh(self.online, asset_id, filter, skip_sync)
      }
  
-@@ -1170,7 +1238,7 @@ impl RgbLibWalletWrapper {
+@@ -1173,7 +1327,7 @@ impl RgbLibWalletWrapper {
          consignment: RgbTransfer,
          offchain_txid: String,
      ) -> Result<(), RgbLibError> {
@@ -4671,7 +4890,7 @@ index 83202d4..8afd8bf 100644
              .save_new_asset(self.online, consignment, offchain_txid)
      }
  
-@@ -1183,7 +1251,7 @@ impl RgbLibWalletWrapper {
+@@ -1186,7 +1340,7 @@ impl RgbLibWalletWrapper {
          expiration_timestamp: u64,
          sender_endpoint: Option<String>,
      ) -> Result<OperationResult, RgbLibError> {
@@ -4680,7 +4899,7 @@ index 83202d4..8afd8bf 100644
              self.online,
              recipient_map,
              donation,
-@@ -1211,7 +1279,7 @@ impl RgbLibWalletWrapper {
+@@ -1214,7 +1368,7 @@ impl RgbLibWalletWrapper {
                  details: "Custom RGB funding locktime is unavailable in the BFA RGB library".into(),
              });
          }
@@ -4689,7 +4908,7 @@ index 83202d4..8afd8bf 100644
              self.online,
              recipient_map,
              donation,
-@@ -1230,7 +1298,7 @@ impl RgbLibWalletWrapper {
+@@ -1233,7 +1387,7 @@ impl RgbLibWalletWrapper {
          fee_rate: u64,
          skip_sync: bool,
      ) -> Result<String, RgbLibError> {
@@ -4698,7 +4917,7 @@ index 83202d4..8afd8bf 100644
              .send_btc(self.online, address, amount, fee_rate, skip_sync)
      }
  
-@@ -1241,8 +1309,14 @@ impl RgbLibWalletWrapper {
+@@ -1244,8 +1398,14 @@ impl RgbLibWalletWrapper {
          fee_rate: u64,
          dry_run: bool,
      ) -> Result<String, RgbLibError> {
@@ -4715,7 +4934,7 @@ index 83202d4..8afd8bf 100644
      }
  
      pub(crate) fn send_btc_channel_funding_begin(
-@@ -1261,18 +1335,20 @@ impl RgbLibWalletWrapper {
+@@ -1264,18 +1424,20 @@ impl RgbLibWalletWrapper {
      }
  
      pub(crate) fn send_btc_end(&self, signed_psbt: String) -> Result<String, RgbLibError> {
@@ -4739,7 +4958,7 @@ index 83202d4..8afd8bf 100644
              .send_end_db_update_only(self.online, signed_psbt)
      }
  
-@@ -1281,7 +1357,7 @@ impl RgbLibWalletWrapper {
+@@ -1284,7 +1446,7 @@ impl RgbLibWalletWrapper {
      }
  
      pub(crate) fn sync(&self, options: SyncOptions) -> Result<(), RgbLibError> {
@@ -4748,7 +4967,7 @@ index 83202d4..8afd8bf 100644
      }
  
      pub(crate) fn update_witnesses(
-@@ -1289,7 +1365,7 @@ impl RgbLibWalletWrapper {
+@@ -1292,7 +1454,7 @@ impl RgbLibWalletWrapper {
          after_height: u32,
          force_witnesses: Vec<RgbTxid>,
      ) -> Result<UpdateRes, RgbLibError> {
@@ -4757,7 +4976,7 @@ index 83202d4..8afd8bf 100644
              .update_witnesses(self.online, after_height, force_witnesses)
      }
  
-@@ -1298,7 +1374,7 @@ impl RgbLibWalletWrapper {
+@@ -1301,7 +1463,7 @@ impl RgbLibWalletWrapper {
          witness_id: RgbTxid,
          witness_ord: WitnessOrd,
      ) -> Result<(), RgbLibError> {
@@ -4766,7 +4985,7 @@ index 83202d4..8afd8bf 100644
              .upsert_witness(witness_id, witness_ord)
      }
  
-@@ -1310,7 +1386,7 @@ impl RgbLibWalletWrapper {
+@@ -1313,7 +1475,7 @@ impl RgbLibWalletWrapper {
          transport_endpoints: Vec<String>,
          min_confirmations: u8,
      ) -> Result<ReceiveData, RgbLibError> {
@@ -4775,7 +4994,7 @@ index 83202d4..8afd8bf 100644
              Some(self.online),
              asset_id,
              assignment,
-@@ -1413,7 +1489,7 @@ impl WalletSource for RgbLibWalletWrapper {
+@@ -1416,7 +1578,7 @@ impl WalletSource for RgbLibWalletWrapper {
          Box::pin(async move {
              let network = Network::from(self.bitcoin_network());
              let unspents = self
@@ -4784,7 +5003,7 @@ index 83202d4..8afd8bf 100644
                  .list_unspents_vanilla(self.online, 1, false)
                  .map_err(|e| {
                      tracing::error!(error = %e, "failed to list unspents for fee bumping");
-@@ -1456,7 +1532,7 @@ impl WalletSource for RgbLibWalletWrapper {
+@@ -1459,7 +1621,7 @@ impl WalletSource for RgbLibWalletWrapper {
  
      fn get_change_script<'a>(&'a self) -> AsyncResult<'a, ScriptBuf, ()> {
          Box::pin(async move {
@@ -4793,10 +5012,131 @@ index 83202d4..8afd8bf 100644
                  tracing::error!(error = %e, "failed to get change address for fee bumping");
              })?;
              let parsed = Address::from_str(&address).map_err(|e| {
-@@ -1725,6 +1801,368 @@ mod wallet_source_tests {
+@@ -1728,6 +1890,489 @@ mod wallet_source_tests {
          RgbLibWalletWrapper::new(Arc::new(Mutex::new(wallet)), Online { id: 0 })
      }
  
++    #[test]
++    fn output_journal_transition_excludes_an_already_waiting_snapshot() {
++        use std::io::{Cursor, Read};
++        use std::sync::mpsc;
++        use std::time::Duration;
++
++        let wrapper = Arc::new(signetcustom_wallet_source());
++        let directory = wrapper.get_rgb_wallet().get_wallet_dir();
++        let fingerprint = directory.file_name().unwrap().to_str().unwrap().to_owned();
++        let journal = directory.join("rln_output_operations_v1");
++        std::fs::create_dir_all(&journal).unwrap();
++        let journal_file = journal.join("coherence-fixture.json");
++        let (partial_tx, partial_rx) = mpsc::channel();
++        let (finish_tx, finish_rx) = mpsc::channel();
++        let (attempt_tx, attempt_rx) = mpsc::channel();
++        let (captured_tx, captured_rx) = mpsc::channel();
++
++        std::thread::scope(|scope| {
++            let writer_wrapper = Arc::clone(&wrapper);
++            let writer_file = journal_file.clone();
++            let writer = scope.spawn(move || {
++                writer_wrapper.with_output_operation_snapshot(|| {
++                    // Simulate a real DB mutation followed by an interrupted journal write.
++                    writer_wrapper.get_rgb_wallet().get_address().unwrap();
++                    std::fs::write(&writer_file, br#"{"status":"preparing"}"#).unwrap();
++                    partial_tx.send(()).unwrap();
++                    finish_rx.recv_timeout(Duration::from_secs(10)).unwrap();
++                    std::fs::write(&writer_file, br#"{"status":"prepared","psbt":"exact"}"#)
++                        .unwrap();
++                    Ok(())
++                })
++            });
++            partial_rx.recv_timeout(Duration::from_secs(10)).unwrap();
++            let backup_wrapper = Arc::clone(&wrapper);
++            let backup = scope.spawn(move || {
++                attempt_tx.send(()).unwrap();
++                // This is the same admission used by manual backup and policy catch-up.
++                let snapshot = backup_wrapper
++                    .get_rgb_wallet_for_snapshot()
++                    .prepare_snapshot()
++                    .unwrap();
++                captured_tx.send(()).unwrap();
++                snapshot
++            });
++            attempt_rx.recv_timeout(Duration::from_secs(10)).unwrap();
++            assert_eq!(
++                captured_rx.recv_timeout(Duration::from_millis(100)),
++                Err(mpsc::RecvTimeoutError::Timeout),
++                "snapshot captured a DB/journal transition before the prepared record"
++            );
++            finish_tx.send(()).unwrap();
++            writer.join().unwrap().unwrap();
++            let snapshot = backup.join().unwrap();
++            let mut archive = zip::ZipArchive::new(Cursor::new(snapshot.data)).unwrap();
++            let mut saved = String::new();
++            archive
++                .by_name(&format!(
++                    "{fingerprint}/rln_output_operations_v1/coherence-fixture.json"
++                ))
++                .unwrap()
++                .read_to_string(&mut saved)
++                .unwrap();
++            assert_eq!(saved, r#"{"status":"prepared","psbt":"exact"}"#);
++        });
++    }
++
++    #[test]
++    fn an_existing_snapshot_completes_before_output_operation_admission() {
++        use std::sync::mpsc;
++        use std::time::Duration;
++
++        let wrapper = Arc::new(signetcustom_wallet_source());
++        let reader = wrapper.get_rgb_wallet_for_snapshot();
++        let (attempt_tx, attempt_rx) = mpsc::channel();
++        let (entered_tx, entered_rx) = mpsc::channel();
++        std::thread::scope(|scope| {
++            let writer_wrapper = Arc::clone(&wrapper);
++            let writer = scope.spawn(move || {
++                attempt_tx.send(()).unwrap();
++                writer_wrapper.with_output_operation_snapshot(|| {
++                    entered_tx.send(()).unwrap();
++                    Ok(())
++                })
++            });
++            attempt_rx.recv_timeout(Duration::from_secs(10)).unwrap();
++            assert_eq!(
++                entered_rx.recv_timeout(Duration::from_millis(100)),
++                Err(mpsc::RecvTimeoutError::Timeout),
++                "output mutation entered while an existing snapshot owned admission"
++            );
++            drop(reader);
++            entered_rx.recv_timeout(Duration::from_secs(10)).unwrap();
++            writer.join().unwrap().unwrap();
++        });
++    }
++
++    #[cfg(feature = "vss")]
++    #[test]
++    fn unchanged_output_status_read_retains_backup_receipt_and_leaves_no_new_upload() {
++        let tmp = tempfile::tempdir().unwrap();
++        let policy = Arc::new(
++            crate::vss_snapshot_policy::SnapshotPolicy::load(
++                tmp.path(),
++                BitcoinNetwork::SignetCustom,
++                "https://example.invalid/vss".into(),
++                "test-node".into(),
++                true,
++            )
++            .unwrap(),
++        );
++        let mut wrapper = signetcustom_wallet_source();
++        wrapper.snapshot_policy = Some(policy.clone());
++        completed_snapshot_fixture(&wrapper, tmp.path());
++        let before = policy.metadata().unwrap();
++        wrapper.with_output_operation_snapshot(|| Ok(())).unwrap();
++        assert!(!policy.pending());
++        assert!(!policy.failed.load(std::sync::atomic::Ordering::SeqCst));
++        assert_eq!(policy.metadata().unwrap(), before);
++        assert!(!wrapper.get_rgb_wallet().backup_info().unwrap());
++    }
++
 +    #[test]
 +    fn ordinary_bitcoin_prepare_is_distinct_from_unsupported_channel_funding() {
 +        let wrapper = signetcustom_wallet_source();
@@ -5175,8 +5515,52 @@ index a665290..135045c 100644
          let already_imported = wallet.is_asset_known(contract_id)?;
          let imported_id = rgb_lib::wallet::RgbWalletOpsOffline::import_contract(
              &mut *wallet,
+diff --git a/src/rgb_output_operations.rs b/src/rgb_output_operations.rs
+index 803e7a8..e15cf14 100644
+--- a/src/rgb_output_operations.rs
++++ b/src/rgb_output_operations.rs
+@@ -284,13 +284,18 @@ impl OutputBackend for NativeOutputBackend {
+         // A prior read must not hide the transaction that this exact retry broadcasts.
+         *self.observed_cache.lock().map_err(|_| journal_error())? = None;
+         self.wallet
+-            .rgb_create_utxos_end(signed_psbt, true)
++            .rgb_wallet_wrapper
++            .get_rgb_wallet()
++            .create_utxos_end(self.wallet.rgb_wallet_wrapper.online, signed_psbt)
+             .map_err(APIError::from)
+     }
+ 
+     fn cancel(&self, txid: String) -> Result<(), APIError> {
++        use rgb_lib::wallet::RgbWalletOpsOffline;
+         self.wallet
+-            .rgb_abort_pending_vanilla_tx(txid)
++            .rgb_wallet_wrapper
++            .get_rgb_wallet()
++            .abort_pending_vanilla_tx(txid)
+             .map_err(APIError::from)
+     }
+ 
+@@ -298,10 +303,14 @@ impl OutputBackend for NativeOutputBackend {
+         let mut cache = self.observed_cache.lock().map_err(|_| journal_error())?;
+         if cache.is_none() {
+             *cache = Some(
+-                self.wallet
+-                    .rgb_wallet_wrapper
+-                    .list_transactions(false)
+-                    .map_err(|_| ()),
++                {
++                    use rgb_lib::wallet::RgbWalletOpsOffline;
++                    self.wallet
++                        .rgb_wallet_wrapper
++                        .get_rgb_wallet()
++                        .list_transactions(Some(self.wallet.rgb_wallet_wrapper.online), false)
++                }
++                .map_err(|_| ()),
+             );
+         }
+         match cache.as_ref().unwrap() {
 diff --git a/src/routes.rs b/src/routes.rs
-index 9f660f5..ec10901 100644
+index 20945c4..23cefcc 100644
 --- a/src/routes.rs
 +++ b/src/routes.rs
 @@ -1760,6 +1760,9 @@ impl From<WitnessData> for RgbLibWitnessData {
@@ -5199,7 +5583,25 @@ index 9f660f5..ec10901 100644
              let db = state.get_db();
              db.persist_channel_peer(&peer_pubkey, &peer_addr)?;
          } else {
-@@ -4130,7 +4132,7 @@ pub(crate) async fn lock(
+@@ -2606,7 +2608,7 @@ pub(crate) async fn create_utxos(
+             use rgb_lib::wallet::RgbWalletOpsOffline;
+             wallet.rgb_wallet_wrapper.get_rgb_wallet().get_wallet_dir().join("rln_output_operations_v1")
+         };
+-        tokio::task::spawn_blocking(move || {
++        tokio::task::spawn_blocking(move || wallet.rgb_wallet_wrapper.with_output_operation_snapshot(|| {
+             let _ownership = wallet.rgb_wallet_wrapper.output_operations.lock().map_err(|_| APIError::Unexpected("RGB output operation ownership is unavailable".into()))?;
+             let request = crate::rgb_output_operations::OutputRequest {
+                 operation_id: format!("{:032x}", rand::random::<u128>()), up_to: payload.up_to,
+@@ -2620,7 +2622,7 @@ pub(crate) async fn create_utxos(
+             let result = store.commit(&backend, &operation.operation_id)?;
+             if matches!(result.status.as_str(), "broadcast" | "confirmed") { Ok(()) }
+             else { Err(APIError::Unexpected("RGB output transaction submission is unresolved; inspect its exact operation before retrying".into())) }
+-        }).await.map_err(|_| APIError::Unexpected("RGB output operation worker failed; inspect its exact operation before retrying".into()))??;
++        })).await.map_err(|_| APIError::Unexpected("RGB output operation worker failed; inspect its exact operation before retrying".into()))??;
+         tracing::debug!("UTXO creation complete");
+ 
+         Ok(Json(EmptyResponse {}))
+@@ -4124,7 +4126,7 @@ pub(crate) async fn lock(
          };
  
          tracing::debug!("Stopping node...");
@@ -5208,7 +5610,7 @@ index 9f660f5..ec10901 100644
          tracing::debug!("Node stopped");
  
          state.update_unlocked_app_state(None).await;
-@@ -4680,7 +4682,7 @@ pub(crate) async fn open_channel(
+@@ -4674,7 +4676,7 @@ pub(crate) async fn open_channel(
              }
          }
          if let Some(peer_addr) = peer_addr {
@@ -5217,7 +5619,7 @@ index 9f660f5..ec10901 100644
                  .await?;
              db.persist_channel_peer(&peer_pubkey, &peer_addr)?;
          } else {
-@@ -6143,11 +6145,13 @@ mod state_mocks {
+@@ -6137,11 +6139,13 @@ mod state_mocks {
                  lsp_base_url: None,
                  lsp_bearer_token: None,
                  vss_url: None,
@@ -5232,7 +5634,7 @@ index 9f660f5..ec10901 100644
              ldk_background_services: Arc::new(Mutex::new(None)),
              attached_external_signer: Arc::new(Mutex::new(None)),
 diff --git a/src/sdk/mod.rs b/src/sdk/mod.rs
-index 6ec97cf..723e483 100644
+index 14bb967..5b237a1 100644
 --- a/src/sdk/mod.rs
 +++ b/src/sdk/mod.rs
 @@ -140,6 +140,9 @@ impl Drop for OpenChannelVirtualIntentGuard {
@@ -5316,7 +5718,7 @@ index 6ec97cf..723e483 100644
 +        let guard = check_unlocked(&state).await?;
 +        let wrapper = guard.as_ref().unwrap().rgb_wallet_wrapper.clone();
 +        tokio::task::spawn_blocking(move || {
-+            let mut wallet = wrapper.get_rgb_wallet();
++            let mut wallet = wrapper.get_rgb_wallet_for_snapshot();
 +            let policy = wrapper
 +                .snapshot_policy
 +                .as_ref()
@@ -5363,7 +5765,45 @@ index 6ec97cf..723e483 100644
          state
              .get_db()
              .persist_channel_peer(&peer_pubkey, &peer_addr)?;
-@@ -3157,8 +3251,7 @@ pub(crate) async fn open_channel(
+@@ -2653,18 +2747,26 @@ where
+             .join("rln_output_operations_v1")
+     };
+     wallet_task(wallet, move |wallet| {
+-        let _ownership = wallet
++        wallet
+             .rgb_wallet_wrapper
+-            .output_operations
+-            .lock()
+-            .map_err(|_| {
+-                APIError::Unexpected("RGB output operation ownership is unavailable".into())
+-            })?;
+-        let backend = crate::rgb_output_operations::NativeOutputBackend::new(Arc::clone(&wallet));
+-        operation(
+-            &crate::rgb_output_operations::OutputStore::new(directory),
+-            &backend,
+-        )
++            .with_output_operation_snapshot(|| {
++                let _ownership =
++                    wallet
++                        .rgb_wallet_wrapper
++                        .output_operations
++                        .lock()
++                        .map_err(|_| {
++                            APIError::Unexpected(
++                                "RGB output operation ownership is unavailable".into(),
++                            )
++                        })?;
++                let backend =
++                    crate::rgb_output_operations::NativeOutputBackend::new(Arc::clone(&wallet));
++                operation(
++                    &crate::rgb_output_operations::OutputStore::new(directory),
++                    &backend,
++                )
++            })
+     })
+     .await
+ }
+@@ -3234,8 +3336,7 @@ pub(crate) async fn open_channel(
          }
      }
      if let Some(peer_addr) = peer_addr {
@@ -5373,7 +5813,7 @@ index 6ec97cf..723e483 100644
          state
              .get_db()
              .persist_channel_peer(&peer_pubkey, &peer_addr)?;
-@@ -4939,11 +5032,13 @@ mod tests {
+@@ -5016,11 +5117,13 @@ mod tests {
                  lsp_bearer_token: None,
                  database: RwLock::new(Arc::new(database)),
                  vss_url: None,
@@ -6622,7 +7062,7 @@ index 0000000..c9f968e
 +    }
 +}
 diff --git a/src/uniffi_api/mod.rs b/src/uniffi_api/mod.rs
-index 2724b8d..6df2db9 100644
+index e9d5080..b90a61b 100644
 --- a/src/uniffi_api/mod.rs
 +++ b/src/uniffi_api/mod.rs
 @@ -1,7 +1,10 @@
@@ -6740,7 +7180,7 @@ index 2724b8d..6df2db9 100644
      pub fn connectpeer(&self, peer_pubkey_and_addr: String) -> Result<(), RlnError> {
          let state = self.handle.app_state();
          block_on_sdk(sdk::connect_peer(state, peer_pubkey_and_addr))?;
-@@ -1784,8 +1842,23 @@ impl SdkNode {
+@@ -1857,8 +1915,23 @@ impl SdkNode {
      ) -> Result<(), RlnError> {
          let state = self.handle.app_state();
          let expected = key_source_from_uniffi_bootstrap(signer.bootstrap()?);
@@ -6766,7 +7206,7 @@ index 2724b8d..6df2db9 100644
      }
  
      #[allow(clippy::too_many_arguments)]
-@@ -1828,15 +1901,18 @@ pub fn sdk_initialize(request: SdkInitRequest) -> Result<(), RlnError> {
+@@ -1901,15 +1974,18 @@ pub fn sdk_initialize(request: SdkInitRequest) -> Result<(), RlnError> {
      Ok(())
  }
  
@@ -6793,7 +7233,7 @@ index 2724b8d..6df2db9 100644
  }
  
  pub fn sdk_init_with_external_signer(
-@@ -2087,6 +2163,115 @@ impl crate::signer::ExternalSignerTransport for UniffiExternalSignerTransport {
+@@ -2160,6 +2236,115 @@ impl crate::signer::ExternalSignerTransport for UniffiExternalSignerTransport {
  #[cfg(test)]
  mod tests;
  
@@ -7438,10 +7878,10 @@ index 27ea384..d4abc7f 100644
  }
  
 diff --git a/src/uniffi_api/types.rs b/src/uniffi_api/types.rs
-index 1bf91a1..2251e5b 100644
+index 875ae18..b59e0fe 100644
 --- a/src/uniffi_api/types.rs
 +++ b/src/uniffi_api/types.rs
-@@ -863,6 +863,7 @@ pub struct SdkInitRequest {
+@@ -922,6 +922,7 @@ pub struct SdkInitRequest {
      pub lsp_bearer_token: Option<String>,
      pub vss_url: Option<String>,
      pub vss_allow_http: bool,

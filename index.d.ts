@@ -160,6 +160,30 @@ export interface CreateUtxosRequest {
   skip_sync: boolean
 }
 
+/** Caller identity is persisted before constructing/reserving an unsigned transaction. */
+export interface PrepareCreateUtxosRequest extends Omit<CreateUtxosRequest, 'fee_rate'> {
+  operation_id: string
+  fee_rate: number | string
+}
+
+export interface CreateUtxosOperationRequest { operation_id: string }
+export type CreateUtxosOperationStatus = 'preparing' | 'prepared' | 'submitting' | 'broadcast' | 'confirmed' | 'cancelled' | 'failed'
+export interface CreateUtxosOperation {
+  operation_id: string
+  txid: string | null
+  status: CreateUtxosOperationStatus
+  /** False after restore unless native evidence proves cancellation cannot discard a broadcast. */
+  can_cancel: boolean
+  /** True only when the exact persisted transaction may be committed. */
+  can_commit: boolean
+  inputs: Array<{ txid: string; vout: number }>
+  num_outputs: number
+  size_sat: number
+  fee_sat: number | string
+  fee_rate: number | string
+}
+export interface PendingVanillaTransaction { txid: string; type: 'CreateUtxos' | 'SendBtc' | 'Drain' }
+
 export interface SendBtcResponse {
   txid: string
 }
@@ -288,14 +312,15 @@ export class SdkNode {
   commitPreparedBtcSend(request: JsonRequest): never
   /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
   cancelBtcSendPlan(request: { plan_id: string }): never
-  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
-  prepareCreateUtxos(request: CreateUtxosRequest): never
-  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
-  commitPreparedCreateUtxos(request: JsonRequest): never
-  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
-  cancelCreateUtxosPlan(request: { plan_id: string }): never
-  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
-  listPendingVanillaTransactions(): never
+  /** Idempotent unsigned review with exact native txid, fee and owned input reservations. */
+  prepareCreateUtxos(request: PrepareCreateUtxosRequest): CreateUtxosOperation
+  /** Signs/broadcasts the prepared transaction once; uncertain retries retain the exact txid. */
+  commitPreparedCreateUtxos(request: CreateUtxosOperationRequest): CreateUtxosOperation
+  /** Only a provably unbroadcast operation can release its owned reservations. */
+  cancelCreateUtxosPlan(request: CreateUtxosOperationRequest): CreateUtxosOperation
+  getCreateUtxosOperation(request: CreateUtxosOperationRequest): CreateUtxosOperation | null
+  listCreateUtxosOperations(): CreateUtxosOperation[]
+  listPendingVanillaTransactions(): PendingVanillaTransaction[]
   /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
   listAddressReceipts(address: string): never
   createUtxos(request: JsonRequest): JsonValue

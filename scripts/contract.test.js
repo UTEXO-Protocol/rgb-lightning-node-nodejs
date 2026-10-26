@@ -128,8 +128,7 @@ test('all unsupported APIs throw before accessing a native handle', () => {
   for (const method of [
     'startUnlockWithNativeExternalSigner', 'nativeOperationStatus', 'adoptNativeOperation',
     'cancelNativeOperation', 'vssDeleteAll', 'syncWallet', 'walletSnapshot', 'prepareBtcSend',
-    'commitPreparedBtcSend', 'cancelBtcSendPlan', 'prepareCreateUtxos', 'commitPreparedCreateUtxos',
-    'cancelCreateUtxosPlan', 'listPendingVanillaTransactions', 'listAddressReceipts',
+    'commitPreparedBtcSend', 'cancelBtcSendPlan', 'listAddressReceipts',
     'prepareRgbSend',
     'commitPreparedRgbSend', 'cancelRgbSendPlan', 'listPendingRgbSendPlans'
   ]) assert.throws(() => node[method]({}), UnsupportedCapabilityError, method)
@@ -316,4 +315,66 @@ test('invoice-first send forwards full invoice, exact amounts and native failure
   fail = true
   assert.throws(() => node.sendRgbInvoice(request), error)
   assert.equal(calls.length, 2)
+})
+
+
+test('RGB output operations preserve exact identities, phases, integer tokens and native failures', () => {
+  const operationId = 'ab'.repeat(16)
+  const txid = 'cd'.repeat(32)
+  const calls = []
+  let failure = false
+  const nativeError = new Error('RGB output transaction may have been broadcast; cannot cancel')
+  const dto = { operation_id: operationId, txid, status: 'submitting', can_cancel: false, can_commit: true,
+    inputs: [{ txid: 'ef'.repeat(32), vout: 0 }], num_outputs: 3, size_sat: 20000,
+    fee_sat: '9007199254740993', fee_rate: '18446744073709551615' }
+  const native = Object.fromEntries(['prepareCreateUtxos', 'commitPreparedCreateUtxos',
+    'cancelCreateUtxosPlan', 'getCreateUtxosOperation'].map(method => [method, (...args) => {
+    if (failure) throw nativeError
+    calls.push([method, args.at(-1)])
+    return JSON.stringify(dto).replace(/"(9007199254740993|18446744073709551615)"/g, '$1')
+  }]))
+  native.listCreateUtxosOperations = () => JSON.stringify([dto])
+  native.listPendingVanillaTransactions = () => JSON.stringify([{ txid, type: 'CreateUtxos' }])
+  const node = new (facade().SdkNode)(native)
+  const request = { operation_id: operationId, up_to: false, num: 4, size: 20000,
+    fee_rate: '18446744073709551615', skip_sync: false }
+  for (const method of ['prepareCreateUtxos', 'commitPreparedCreateUtxos', 'cancelCreateUtxosPlan', 'getCreateUtxosOperation']) {
+    const input = method === 'prepareCreateUtxos' ? request : { operation_id: operationId }
+    assert.deepEqual(node[method](input), dto)
+    assert.equal(calls.at(-1)[0], method)
+    assert.deepEqual(boundary.parse(calls.at(-1)[1]), input)
+    if (method === 'prepareCreateUtxos') assert.match(calls.at(-1)[1], /"fee_rate":18446744073709551615/)
+    failure = true
+    assert.throws(() => node[method](input), nativeError)
+    failure = false
+  }
+  assert.deepEqual(node.listCreateUtxosOperations(), [dto])
+  assert.deepEqual(node.listPendingVanillaTransactions(), [{ txid, type: 'CreateUtxos' }])
+  native.getCreateUtxosOperation = () => 'null'
+  const missingNode = new (facade().SdkNode)(native)
+  assert.equal(missingNode.getCreateUtxosOperation({ operation_id: operationId }), null)
+  assert.equal(request.fee_rate, '18446744073709551615')
+})
+
+test('RGB output operation validation rejects lossy or unowned requests before native access', () => {
+  let calls = 0
+  const native = Object.fromEntries(['prepareCreateUtxos', 'commitPreparedCreateUtxos',
+    'cancelCreateUtxosPlan', 'getCreateUtxosOperation'].map(method => [method, () => { calls++; return '{}' }]))
+  const node = new (facade().SdkNode)(native)
+  const request = { operation_id: 'ab'.repeat(16), up_to: false, num: 4, size: 20000, fee_rate: 2, skip_sync: false }
+  for (const bad of [undefined, null, [], {}, { ...request, operation_id: 'AB'.repeat(16) },
+    { ...request, operation_id: 'x'.repeat(32) }, { ...request, operation_id: 'a'.repeat(65) },
+    { ...request, num: 0 }, { ...request, num: 256 }, { ...request, size: -1 },
+    { ...request, size: 4294967296 }, { ...request, up_to: 0 }, { ...request, skip_sync: 'false' },
+    { ...request, fee_rate: 0 }, { ...request, fee_rate: 1.5 }, { ...request, fee_rate: 2 ** 53 },
+    { ...request, fee_rate: '01' }, { ...request, fee_rate: '18446744073709551616' },
+    { ...request, fee_rate: null }, { ...request, psbt: 'not-owned-by-operation' }]) {
+    assert.throws(() => node.prepareCreateUtxos(bad))
+  }
+  for (const method of ['commitPreparedCreateUtxos', 'cancelCreateUtxosPlan', 'getCreateUtxosOperation']) {
+    for (const bad of [undefined, null, [], {}, { plan_id: request.operation_id },
+      { operation_id: request.operation_id, txid: 'cd'.repeat(32) },
+      { operation_id: request.operation_id, psbt: 'signed-transaction' }]) assert.throws(() => node[method](bad))
+  }
+  assert.equal(calls, 0)
 })

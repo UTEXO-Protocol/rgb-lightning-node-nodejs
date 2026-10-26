@@ -12,7 +12,7 @@
 const os = require('os')
 const path = require('path')
 const fs = require('fs')
-const { parse, stringify, bip322Request, paymentRequest, burnRequest, sendRgbInvoiceRequest, unsupported, UnsupportedCapabilityError } = require('./json-boundary')
+const { parse, stringify, bip322Request, paymentRequest, burnRequest, sendRgbInvoiceRequest, createUtxosOperationRequest, unsupported, UnsupportedCapabilityError } = require('./json-boundary')
 
 // ─── 1. Native addon resolution ──────────────────────────────────────────
 
@@ -198,13 +198,29 @@ class SdkNode {
 
   cancelBtcSendPlan (request) { unsupported('cancelBtcSendPlan') }
 
-  prepareCreateUtxos (request) { unsupported('prepareCreateUtxos') }
+  prepareCreateUtxos (request) {
+    return parse(this._inner.prepareCreateUtxos(createUtxosOperationRequest(request, true)))
+  }
 
-  commitPreparedCreateUtxos (request) { unsupported('commitPreparedCreateUtxos') }
+  commitPreparedCreateUtxos (request) {
+    return parse(this._inner.commitPreparedCreateUtxos(createUtxosOperationRequest(request)))
+  }
 
-  cancelCreateUtxosPlan (request) { unsupported('cancelCreateUtxosPlan') }
+  cancelCreateUtxosPlan (request) {
+    return parse(this._inner.cancelCreateUtxosPlan(createUtxosOperationRequest(request)))
+  }
 
-  listPendingVanillaTransactions () { unsupported('listPendingVanillaTransactions') }
+  getCreateUtxosOperation (request) {
+    return parse(this._inner.getCreateUtxosOperation(createUtxosOperationRequest(request)))
+  }
+
+  listCreateUtxosOperations () {
+    return parse(this._inner.listCreateUtxosOperations())
+  }
+
+  listPendingVanillaTransactions () {
+    return parse(this._inner.listPendingVanillaTransactions())
+  }
 
   listAddressReceipts (address) { unsupported('listAddressReceipts') }
 

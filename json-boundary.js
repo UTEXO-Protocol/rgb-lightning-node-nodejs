@@ -162,4 +162,37 @@ function sendRgbInvoiceRequest (request) {
   })
 }
 
-module.exports = { bip322Request, parse, stringify, paymentRequest, burnRequest, sendRgbInvoiceRequest, unsupported, UnsupportedCapabilityError }
+// An operation ID is durable caller intent, never a txid inferred from history.
+function createUtxosOperationRequest (request, prepare = false) {
+  if (!request || typeof request !== 'object' || Array.isArray(request)) {
+    throw new TypeError('RGB output operation request must be an object')
+  }
+  const allowed = prepare
+    ? ['operation_id', 'up_to', 'num', 'size', 'fee_rate', 'skip_sync']
+    : ['operation_id']
+  if (Object.keys(request).some(key => !allowed.includes(key))) {
+    throw new TypeError('Unknown RGB output operation request field')
+  }
+  if (typeof request.operation_id !== 'string' || !/^[a-f0-9]{32,64}$/.test(request.operation_id)) {
+    throw new TypeError('RGB output operation_id must contain 32 to 64 lowercase hex characters')
+  }
+  if (!prepare) return stringify({ operation_id: request.operation_id })
+  if (typeof request.up_to !== 'boolean' || typeof request.skip_sync !== 'boolean') {
+    throw new TypeError('RGB output up_to and skip_sync must be booleans')
+  }
+  for (const [field, max] of [['num', 255], ['size', 4294967295]]) {
+    const value = request[field]
+    if (value != null && (!Number.isInteger(value) || value < 1 || value > max)) {
+      throw new RangeError(`RGB output ${field} must be a positive ${field === 'num' ? '8' : '32'}-bit integer`)
+    }
+  }
+  const fee = request.fee_rate
+  checkedNumber(fee)
+  if (!((typeof fee === 'number' && Number.isSafeInteger(fee) && fee > 0) ||
+      (typeof fee === 'string' && /^[1-9][0-9]*$/.test(fee))) || BigInt(fee) > 18446744073709551615n) {
+    throw new RangeError('RGB output fee_rate must be an exact positive 64-bit integer')
+  }
+  return stringifyLossless({ ...request, fee_rate: new LosslessNumber(String(fee)) })
+}
+
+module.exports = { createUtxosOperationRequest, bip322Request, parse, stringify, paymentRequest, burnRequest, sendRgbInvoiceRequest, unsupported, UnsupportedCapabilityError }
