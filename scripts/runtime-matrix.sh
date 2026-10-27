@@ -12,7 +12,7 @@ if [[ "$EXPECTED_TARGET" == linux-* ]]; then
 fi
 node test.js
 node scripts/test-native-adapter.js
-npm pack --ignore-scripts
+node scripts/test-packed-consumer.js
 node -e '
   const fs = require("node:fs");
   const info = require("./index").getRuntimeInfo();

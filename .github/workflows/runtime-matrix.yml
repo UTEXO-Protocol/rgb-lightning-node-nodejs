@@ -2,7 +2,20 @@ name: Runtime matrix
 
 on:
   workflow_dispatch:
+    inputs:
+      target:
+        description: Exact host consumer target; all is reserved for final platform qualification
+        type: choice
+        required: true
+        default: darwin-arm64
+        options: [darwin-arm64, darwin-x64, linux-x64-gnu, linux-arm64-gnu, linux-x64-musl, all]
   workflow_call:
+    inputs:
+      target:
+        description: Exact candidate target or explicit all-platform qualification
+        type: string
+        required: false
+        default: darwin-arm64
     secrets:
       ORG_READ_TOKEN:
         required: true
@@ -24,18 +37,11 @@ permissions:
 
 jobs:
   native-runtime:
+    if: inputs.target != 'linux-x64-musl'
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - runner: macos-15
-            target: darwin-arm64
-          - runner: macos-15-intel
-            target: darwin-x64
-          - runner: ubuntu-22.04
-            target: linux-x64-gnu
-          - runner: ubuntu-24.04-arm
-            target: linux-arm64-gnu
+        include: ${{ inputs.target == 'all' && fromJSON('[{"runner":"macos-15","target":"darwin-arm64"},{"runner":"macos-15-intel","target":"darwin-x64"},{"runner":"ubuntu-22.04","target":"linux-x64-gnu"},{"runner":"ubuntu-24.04-arm","target":"linux-arm64-gnu"}]') || inputs.target == 'darwin-arm64' && fromJSON('[{"runner":"macos-15","target":"darwin-arm64"}]') || inputs.target == 'darwin-x64' && fromJSON('[{"runner":"macos-15-intel","target":"darwin-x64"}]') || inputs.target == 'linux-arm64-gnu' && fromJSON('[{"runner":"ubuntu-24.04-arm","target":"linux-arm64-gnu"}]') || fromJSON('[{"runner":"ubuntu-22.04","target":"linux-x64-gnu"}]') }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: ${{ matrix.target == 'darwin-x64' && 150 || 90 }}
     env:
@@ -44,6 +50,11 @@ jobs:
       EXPECTED_TARGET: ${{ matrix.target }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Validate exact requested target
+        env:
+          REQUESTED_TARGET: ${{ inputs.target }}
+        run: |
+          case "$REQUESTED_TARGET" in ""|darwin-arm64|darwin-x64|linux-x64-gnu|linux-arm64-gnu|linux-x64-musl|all) ;; *) exit 1 ;; esac
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         if: runner.os == 'macOS'
         with:
@@ -80,6 +91,7 @@ jobs:
           name: runtime-${{ matrix.target }}-${{ github.sha }}
           path: |
             runtime-evidence.json
+            packed-consumer-evidence.json
             linux-runtime-compatibility.json
             index-*.provenance.json
             *.tgz
@@ -92,6 +104,7 @@ jobs:
           if-no-files-found: warn
 
   musl-runtime:
+    if: inputs.target == 'all' || inputs.target == 'linux-x64-musl'
     runs-on: ubuntu-22.04
     timeout-minutes: 90
     steps:
@@ -115,6 +128,7 @@ jobs:
           name: runtime-linux-x64-musl-${{ github.sha }}
           path: |
             runtime-evidence.json
+            packed-consumer-evidence.json
             linux-runtime-compatibility.json
             index-*.provenance.json
             *.tgz

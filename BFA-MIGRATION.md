@@ -9,10 +9,10 @@ Candidate `0.2.0-bfa.1` sends an empty JSON-RPC parameter array for EVM methods 
 
 | Source | Exact revision |
 | --- | --- |
-| RGB library | `89c37086a68ef792da75c62bce59b58b1d7952a0` |
-| LDK | `bbe68189872c26088e351d034b05c58769cb996a` |
-| RLN | `7cced3aa3c2c904a88d8f8a7832981d25a5ea871` |
-| Maintained adapter SHA-256 | `b70bb70610ff1b47eb55ea2bdf67a65af85e89fbabc006f2345302cbe74f1082` |
+| RGB library | `abd41d3afff6d8fb11461e26e843301650e22df3` |
+| LDK | `17f2fb56f8d96d0ec512c715d2ebc65f829eb2c2` |
+| RLN | `89ebe9fdb1be94cbba0b2bd722cea9af297399f1` |
+| Maintained adapter SHA-256 | `4a730e3036e1197b2d9cd2d2584de722745f35e74dd1707dfe9b08e251b8b12b` |
 
 This graph requires fresh native builds and separately frozen candidate archives. Previous `0.2.0-bfa.0` artifacts and qualification records retain their original identities and do not qualify this candidate.
 
@@ -64,8 +64,14 @@ Persist a random `operation_id` containing 32–64 lowercase hexadecimal charact
 
 The legacy one-shot `createUtxos()` remains available for compatibility. Applications needing review, interruption recovery and exact idempotent retries should use the prepared operation API. Host JavaScript tests are distinct from funded native and Android application qualification; retain the exact source and artifact receipts for each tested build.
 
-## Output-operation qualification scope
+## Final accepted graph and maintained-overlay qualification
 
-This source candidate passes 21 durable-output Rust cases, including two real funded isolated regtest fixtures, 13 wallet-source/snapshot-barrier cases and 53 VSS cases. Snapshot capture and every output-operation journal/database transition share an ordered barrier, so an already-running automatic backup cannot capture a reservation without its prepared transaction. Existing automatic-backup ownership and completion semantics remain in place. Status-only reads of an unchanged acknowledged wallet do not invent a new backup receipt.
+The maintained overlay is rebased on RLN `89ebe9fdb1be94cbba0b2bd722cea9af297399f1`, RGB `abd41d3afff6d8fb11461e26e843301650e22df3` and the canonical merged LDK `17f2fb56f8d96d0ec512c715d2ebc65f829eb2c2`. LDK's earlier reviewed branch commit is not substituted for its merged identity. The inherited LDK legacy test-harness limitation remains separate.
 
-Bare passes 112 host installer/contract tests; Node passes 47 host contract tests. Both pass their TypeScript checks. These counts do not qualify a packaged native platform. Only an Android ARM64 candidate artifact is requested now; all other platform binaries, full distribution assembly and corresponding runtime qualification remain deferred. The normal all-target publication gates remain unchanged. No package has been published.
+All six newly reachable native funding/prepared-sweep mutation sites explicitly admit durable snapshot intent. Nonzero custom locktimes reject before mutation admission; prepared-sweep inspection remains read-only. The complete output-operation writer still spans native reservation and RLN journal writes. Its inner backend guards remain raw to avoid recursive barrier acquisition and incomplete snapshots. Full authenticated invoices, native prepared-sweep confirmation/receipt checks and uncancellable native session owners remain intact.
+
+Final maintained library qualification passes 453 tests with no failures. Four entries are explicitly ignored in that default invocation: one subprocess helper and three owned funded fixtures. All three funded fixtures were separately executed and passed: watch-only output setup/recovery; independent funding despite a retained legacy reservation; and funding/protected-sweep snapshot admission in both paused and enabled automatic-backup modes. The latter checks actual fixed-zero funding, fee-input retry, prepare/cancel/recovery, stale snapshot rejection, handoff protection, zero-confirmation rejection, confirmed idempotent consumption and exact 100-unit self-receive. Upload failure never changes the financial result or invents a backup completion.
+
+The full library run includes actual protobuf VSS client/server backup, reopen, fresh restore, legacy-record preservation, canceled-caller lock barriers, durable policy, native signer shutdown/reopen and BIP-322. The supplied 639-byte Dev-USDT public contract imports on native Signet with its exact asset identity, name, ticker and precision; importing it on a different native chain rejects. This metadata-only test creates no USDT allocation and is not a funded hosted-bridge acceptance claim. Only a confirmed cloud commit with matching content acknowledgement can clear pending state; local snapshot acknowledgement alone cannot.
+
+Bare passes 112 installer/contract tests and Node passes 47 host contract tests; both TypeScript checks pass. These source/host scopes do not qualify an Android APK. Android ARM64 native artifact production and final consumer/application acceptance are recorded separately with exact source, adapter, lock, wrapper and binary identities. Other platform binaries and full distribution assembly remain deferred. Strict all-target publication gates remain unchanged; this candidate is not published.

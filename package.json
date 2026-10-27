@@ -60,16 +60,16 @@
   "author": "UTEXO",
   "utexoNativeOverlay": {
     "repository": "https://github.com/UTEXO-Protocol/rgb-lightning-node.git",
-    "ref": "7cced3aa3c2c904a88d8f8a7832981d25a5ea871",
-    "commit": "7cced3aa3c2c904a88d8f8a7832981d25a5ea871",
-    "lightningCommit": "bbe68189872c26088e351d034b05c58769cb996a",
+    "ref": "89ebe9fdb1be94cbba0b2bd722cea9af297399f1",
+    "commit": "89ebe9fdb1be94cbba0b2bd722cea9af297399f1",
+    "lightningCommit": "17f2fb56f8d96d0ec512c715d2ebc65f829eb2c2",
     "patch": "patches/release-adapter-v0.17.0-beta.3.patch",
-    "patchSha256": "b70bb70610ff1b47eb55ea2bdf67a65af85e89fbabc006f2345302cbe74f1082",
-    "cffiLockSha256": "3039a36910386f9d6f350ed33791cd6461174cd340247998b80726a6581c3763",
+    "patchSha256": "4a730e3036e1197b2d9cd2d2584de722745f35e74dd1707dfe9b08e251b8b12b",
+    "cffiLockSha256": "741bd3d0f81b28c1f40e426b44f5c9ae152d777269934d7c0dc919d74f908da9",
     "rustToolchain": "1.94.0",
     "rlnVersion": "0.17.0-beta.3",
     "rgbLibRepository": "https://github.com/UTEXO-Protocol/rgb-lib-bfa.git",
-    "rgbLibCommit": "89c37086a68ef792da75c62bce59b58b1d7952a0"
+    "rgbLibCommit": "abd41d3afff6d8fb11461e26e843301650e22df3"
   },
   "dependencies": {
     "lossless-json": "4.3.1"

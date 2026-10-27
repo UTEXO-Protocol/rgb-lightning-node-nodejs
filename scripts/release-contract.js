@@ -7,13 +7,13 @@ const { execFileSync } = require('node:child_process')
 
 const RELEASE = Object.freeze({
   'rlnVersion': '0.17.0-beta.3',
-  'ref': '7cced3aa3c2c904a88d8f8a7832981d25a5ea871',
-  'commit': '7cced3aa3c2c904a88d8f8a7832981d25a5ea871',
-  'lightningCommit': 'bbe68189872c26088e351d034b05c58769cb996a',
+  'ref': '89ebe9fdb1be94cbba0b2bd722cea9af297399f1',
+  'commit': '89ebe9fdb1be94cbba0b2bd722cea9af297399f1',
+  'lightningCommit': '17f2fb56f8d96d0ec512c715d2ebc65f829eb2c2',
   'rgbLibRepository': 'https://github.com/UTEXO-Protocol/rgb-lib-bfa.git',
-  'rgbLibCommit': '89c37086a68ef792da75c62bce59b58b1d7952a0',
+  'rgbLibCommit': 'abd41d3afff6d8fb11461e26e843301650e22df3',
   'rustToolchain': '1.94.0',
-  'cffiLockSha256': '3039a36910386f9d6f350ed33791cd6461174cd340247998b80726a6581c3763'
+  'cffiLockSha256': '741bd3d0f81b28c1f40e426b44f5c9ae152d777269934d7c0dc919d74f908da9'
 })
 // Exact reviewed C adapter plus the shared native lifecycle repair. This remains
 // an upstream release with an explicitly hashed runtime overlay, not plain RLN.
@@ -56,8 +56,8 @@ const ALLOWED_FILES = Object.freeze([
 ])
 const GIT_SOURCES = Object.freeze({
   'musig2': 'git+https://github.com/arik-so/rust-musig2?rev=6f95a05718cbb44d8fe3fa6021aea8117aa38d50#6f95a05718cbb44d8fe3fa6021aea8117aa38d50',
-  'rgb-lib': 'git+https://github.com/UTEXO-Protocol/rgb-lib-bfa.git?rev=89c37086a68ef792da75c62bce59b58b1d7952a0#89c37086a68ef792da75c62bce59b58b1d7952a0',
-  'rgb-lib-migration': 'git+https://github.com/UTEXO-Protocol/rgb-lib-bfa.git?rev=89c37086a68ef792da75c62bce59b58b1d7952a0#89c37086a68ef792da75c62bce59b58b1d7952a0',
+  'rgb-lib': 'git+https://github.com/UTEXO-Protocol/rgb-lib-bfa.git?rev=abd41d3afff6d8fb11461e26e843301650e22df3#abd41d3afff6d8fb11461e26e843301650e22df3',
+  'rgb-lib-migration': 'git+https://github.com/UTEXO-Protocol/rgb-lib-bfa.git?rev=abd41d3afff6d8fb11461e26e843301650e22df3#abd41d3afff6d8fb11461e26e843301650e22df3',
   'signer-external': 'git+https://github.com/UTEXO-Protocol/rln-external-signer.git?rev=0fb005ec4b927ddbe13e1646d247b5bb11e8ffed#0fb005ec4b927ddbe13e1646d247b5bb11e8ffed',
   'vls-core': 'git+https://github.com/UTEXO-Protocol/vls-core.git?rev=45c72edfd58620849eb486925439a76526b415ae#45c72edfd58620849eb486925439a76526b415ae',
   'vls-protocol-signer': 'git+https://github.com/UTEXO-Protocol/vls-protocol-signer.git?rev=dddd336fcdf84c4febdd7af8363bda8d1721d893#dddd336fcdf84c4febdd7af8363bda8d1721d893',

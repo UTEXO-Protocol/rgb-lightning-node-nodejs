@@ -1,825 +1,8 @@
 diff --git a/bindings/c-ffi/Cargo.lock b/bindings/c-ffi/Cargo.lock
-index be5eede..980a432 100644
+index 904b9b4..f3afb74 100644
 --- a/bindings/c-ffi/Cargo.lock
 +++ b/bindings/c-ffi/Cargo.lock
-@@ -95,8 +95,6 @@ dependencies = [
-  "amplify_syn",
-  "ascii",
-  "rand 0.8.7",
-- "serde",
-- "stringly_conversions",
-  "wasm-bindgen",
- ]
- 
-@@ -129,7 +127,6 @@ version = "0.5.4"
- source = "registry+https://github.com/rust-lang/crates.io-index"
- checksum = "afed304556696656d2d71495e1e5f2c4b524a3fb6eb0f2f3778ffc482a40b8a8"
- dependencies = [
-- "serde",
-  "wasm-bindgen",
- ]
- 
-@@ -400,9 +397,6 @@ name = "ascii"
- version = "1.1.0"
- source = "registry+https://github.com/rust-lang/crates.io-index"
- checksum = "d92bec98840b8f03a5ff5413de5293bfcd8bf96467cf5452609f939ec6f5de16"
--dependencies = [
-- "serde",
--]
- 
- [[package]]
- name = "askama"
-@@ -679,6 +673,12 @@ version = "0.22.1"
- source = "registry+https://github.com/rust-lang/crates.io-index"
- checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
- 
-+[[package]]
-+name = "base64"
-+version = "0.23.1"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "ac07cdecf99051d9a5238b80f35af32cdeba5b336e55d957b318b50137e18da5"
-+
- [[package]]
- name = "base64ct"
- version = "1.8.3"
-@@ -715,6 +715,12 @@ dependencies = [
-  "serde",
- ]
- 
-+[[package]]
-+name = "bdk_coin_select"
-+version = "0.4.1"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "43064fa3dd1d3a8b24079cfcb5ede6b785857edc782277f17a1736511ccc1916"
-+
- [[package]]
- name = "bdk_core"
- version = "0.6.3"
-@@ -747,24 +753,25 @@ dependencies = [
- ]
- 
- [[package]]
--name = "bdk_file_store"
--version = "0.22.0"
-+name = "bdk_tx"
-+version = "0.2.0"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "c7b9a98edb58d02b601239832674a9ca9f1465e08e1dd1fac3a0e34004372406"
-+checksum = "40406c9952f15ed30893826bd83b7d67b6bf11d56574c1efc3db3a5d70cdfcea"
- dependencies = [
-- "bdk_core",
-- "bincode",
-- "serde",
-+ "bdk_coin_select",
-+ "miniscript",
-+ "rand 0.8.7",
-+ "rand_core 0.6.4",
- ]
- 
- [[package]]
- name = "bdk_wallet"
--version = "3.1.0"
-+version = "3.2.0"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "1284fb23acc3e3022673712b55f4d5ce7e38aadc2c49bbef830dc3935f0a3289"
-+checksum = "163ec032e0a5a795ded2a7e47fc40a887c75743326483147e4465159c53abdc4"
- dependencies = [
-  "bdk_chain",
-- "bdk_file_store",
-+ "bdk_tx",
-  "bip39",
-  "bitcoin",
-  "miniscript",
-@@ -829,7 +836,7 @@ dependencies = [
-  "biscuit-parser",
-  "biscuit-quote",
-  "ecdsa",
-- "ed25519-dalek",
-+ "ed25519-dalek 2.2.0",
-  "elliptic-curve",
-  "getrandom 0.2.17",
-  "hex",
-@@ -1110,9 +1117,9 @@ dependencies = [
- 
- [[package]]
- name = "bumpalo"
--version = "3.20.2"
-+version = "3.20.3"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "5d20789868f4b01b2f2caec9f5c4e0213b41e3e5702a50157d699ae31ced2fcb"
-+checksum = "72f5acc6cb2ba439de613abc23857ec3d78374d8ed5ac84e9d11336e87da8649"
- 
- [[package]]
- name = "bytecheck"
-@@ -1150,9 +1157,9 @@ checksum = "fc652a48c352aef3ea3aed32080501cf3ef6ed5da78602a020c991775b0aff04"
- 
- [[package]]
- name = "camino"
--version = "1.2.4"
-+version = "1.2.5"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "5f2d30e4173c4026932d51d31d6b0613b1fd3014bf3f9f8943d4ba139c437ba0"
-+checksum = "bb1307f12aa967b5a58416e87b3653360e0fd614a016b6e970db08fecbb1b80d"
- dependencies = [
-  "serde_core",
- ]
-@@ -1583,12 +1590,27 @@ dependencies = [
-  "cpufeatures 0.2.17",
-  "curve25519-dalek-derive",
-  "digest 0.10.7",
-- "fiat-crypto",
-+ "fiat-crypto 0.2.9",
-  "rustc_version",
-  "subtle",
-  "zeroize",
- ]
- 
-+[[package]]
-+name = "curve25519-dalek"
-+version = "5.0.0"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "b5eed333089e2e1c1ac8c6c0398e5e2497b4c9926ca6d0365ed1e099afa5bc23"
-+dependencies = [
-+ "cfg-if",
-+ "cpufeatures 0.3.0",
-+ "curve25519-dalek-derive",
-+ "digest 0.11.3",
-+ "fiat-crypto 0.3.0",
-+ "rustc_version",
-+ "subtle",
-+]
-+
- [[package]]
- name = "curve25519-dalek-derive"
- version = "0.1.1"
-@@ -1891,7 +1913,7 @@ dependencies = [
-  "elliptic-curve",
-  "rfc6979",
-  "serdect",
-- "signature",
-+ "signature 2.2.0",
-  "spki 0.7.3",
- ]
- 
-@@ -1902,7 +1924,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
- checksum = "115531babc129696a58c64a4fef0a8bf9e9698629fb97e9e40767d235cfbcd53"
- dependencies = [
-  "pkcs8 0.10.2",
-- "signature",
-+ "signature 2.2.0",
-+]
-+
-+[[package]]
-+name = "ed25519"
-+version = "3.0.0"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "29fcf32e6c73d1079f83ab4d782de2d81620346a5f38c6237a86a22f8368980a"
-+dependencies = [
-+ "signature 3.0.0",
- ]
- 
- [[package]]
-@@ -1911,8 +1942,8 @@ version = "2.2.0"
- source = "registry+https://github.com/rust-lang/crates.io-index"
- checksum = "70e796c081cee67dc755e1a36a0a172b897fab85fc3f6bc48307991f64e4eca9"
- dependencies = [
-- "curve25519-dalek",
-- "ed25519",
-+ "curve25519-dalek 4.1.3",
-+ "ed25519 2.2.3",
-  "rand_core 0.6.4",
-  "serde",
-  "sha2 0.10.9",
-@@ -1920,6 +1951,18 @@ dependencies = [
-  "zeroize",
- ]
- 
-+[[package]]
-+name = "ed25519-dalek"
-+version = "3.0.0"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "6ebaa1a2bf1290ab3bfe5a7b771d050ebffab2711c19a81691c683a5144a25de"
-+dependencies = [
-+ "curve25519-dalek 5.0.0",
-+ "ed25519 3.0.0",
-+ "sha2 0.11.0",
-+ "subtle",
-+]
-+
- [[package]]
- name = "either"
- version = "1.17.0"
-@@ -2114,6 +2157,12 @@ version = "0.2.9"
- source = "registry+https://github.com/rust-lang/crates.io-index"
- checksum = "28dea519a9695b9977216879a3ebfddf92f1c08c05d984f8996aecd6ecdc811d"
- 
-+[[package]]
-+name = "fiat-crypto"
-+version = "0.3.0"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "64cd1e32ddd350061ae6edb1b082d7c54915b5c672c389143b9a63403a109f24"
-+
- [[package]]
- name = "file-format"
- version = "0.29.0"
-@@ -3084,13 +3133,12 @@ dependencies = [
- 
- [[package]]
- name = "js-sys"
--version = "0.3.98"
-+version = "0.3.103"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "67df7112613f8bfd9150013a0314e196f4800d3201ae742489d999db2f979f08"
-+checksum = "53b44bfcdb3f8d5837a46dae1ca9660a837176eee74a28b229bc626816589102"
- dependencies = [
-  "cfg-if",
-  "futures-util",
-- "once_cell",
-  "wasm-bindgen",
- ]
- 
-@@ -3174,14 +3222,14 @@ checksum = "b6d2cec3eae94f9f509c767b45932f1ada8350c4bdb85af2fcab4a3c14807981"
- 
- [[package]]
- name = "libredox"
--version = "0.1.16"
-+version = "0.1.18"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "e02f3bb43d335493c96bf3fd3a321600bf6bd07ed34bc64118e9293bdffea46c"
-+checksum = "c943259e342f1e06ff2da7a83eabdfe7f92ce10262688dbf1895ff0b3e6e4652"
- dependencies = [
-  "bitflags 2.13.1",
-  "libc",
-  "plain",
-- "redox_syscall 0.7.5",
-+ "redox_syscall 0.9.0",
- ]
- 
- [[package]]
-@@ -3231,6 +3279,7 @@ dependencies = [
-  "rgb-lib",
-  "rgb-strict-encoding",
-  "serde",
-+ "serde_json",
-  "tokio",
- ]
- 
-@@ -3356,14 +3405,12 @@ dependencies = [
- [[package]]
- name = "lightning-transaction-sync"
- version = "0.2.1"
--source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "b7260095a79a44b09ebd97e77855ec8b7996ab939223369f66244974a374bd2c"
- dependencies = [
-  "bitcoin",
-  "electrum-client 0.24.1",
-  "esplora-client",
-  "lightning 0.2.2",
-- "lightning-macros 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
-+ "lightning-macros 0.2.1",
- ]
- 
- [[package]]
-@@ -3626,15 +3673,6 @@ dependencies = [
-  "minimal-lexical",
- ]
- 
--[[package]]
--name = "nonasync"
--version = "0.1.3"
--source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "d81f7335a3fa37124e24461d6164485760d4c056dd92a81a70c23fc28c2b63c8"
--dependencies = [
-- "amplify",
--]
--
- [[package]]
- name = "nu-ansi-term"
- version = "0.50.3"
-@@ -3743,9 +3781,9 @@ checksum = "c08d65885ee38876c4f86fa503fb49d7b507c2b62552df7c70b2fce627e06381"
- 
- [[package]]
- name = "openssl"
--version = "0.10.80"
-+version = "0.10.81"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "a45fa2aa886c42762255da344f0a0d313e254066c46aad76f300c3d3da62d967"
-+checksum = "77823a27f0babb03091cb9ed9ef80af3b39dbc82f97e8fa530374b7dafd87a45"
- dependencies = [
-  "bitflags 2.13.1",
-  "cfg-if",
-@@ -3783,9 +3821,9 @@ dependencies = [
- 
- [[package]]
- name = "openssl-sys"
--version = "0.9.116"
-+version = "0.9.117"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "f28a22dc7140cda5f096e5e7724a6962ca81a7f8bfd2979f9b18c11af56318c4"
-+checksum = "b47e7e6bb2c38cd930d25a23b40fa52e068c10e85f3e03a7f5ba5aaca5713695"
- dependencies = [
-  "cc",
-  "libc",
-@@ -4059,9 +4097,9 @@ dependencies = [
- 
- [[package]]
- name = "portable-atomic"
--version = "1.13.1"
-+version = "1.14.0"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "c33a9471896f1c69cecef8d20cbe2f7accd12527ce60845ff44c153bb2a21b49"
-+checksum = "3d20d5497ef88037a52ff98267d066e7f11fcc5e99bbfbd58a42336193aacec3"
- 
- [[package]]
- name = "portable-atomic-util"
-@@ -4512,9 +4550,9 @@ dependencies = [
- 
- [[package]]
- name = "redox_syscall"
--version = "0.7.5"
-+version = "0.9.0"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "4666a1a60d8412eab19d94f6d13dcc9cea0a5ef4fdf6a5db306537413c661b1b"
-+checksum = "c5102a6aaa05aa011a238e178e6bca86d2cb56fc9f586d37cb80f5bca6e07759"
- dependencies = [
-  "bitflags 2.13.1",
- ]
-@@ -4682,16 +4720,14 @@ dependencies = [
- 
- [[package]]
- name = "rgb-aluvm"
--version = "0.11.1-rc.4"
-+version = "0.11.2-rc.1"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "dcf4d92478fcff567ff0bd9f18684fd954f8426c74f16e5517254b0a2d34023a"
-+checksum = "21de8dc75b4ce90dffe66cff585053e9f5d2abe6436589c95e6308f0605195f4"
- dependencies = [
-  "amplify",
-  "baid64",
-  "blake3",
-- "getrandom 0.3.4",
-  "half",
-- "paste",
-  "rgb-ascii-armor",
-  "rgb-strict-encoding",
-  "rgb-strict-types",
-@@ -4703,9 +4739,9 @@ dependencies = [
- 
- [[package]]
- name = "rgb-ascii-armor"
--version = "1.0.2"
-+version = "1.0.5"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "fcde5a129540e5911c24930fd854ea658a715b50a690d254273088f907a63516"
-+checksum = "0b3a739537822793adce1f9539bb3fae3d54a16f409e8353ac85281bdfcec078"
- dependencies = [
-  "amplify",
-  "baid64",
-@@ -4716,8 +4752,9 @@ dependencies = [
- 
- [[package]]
- name = "rgb-consensus"
--version = "0.11.1-rc.11"
--source = "git+https://github.com/UTEXO-Protocol/rgb-consensus-s-bfa?rev=2faf6118b2f5fe30dd90dd5244d5a7dc32bcd757#2faf6118b2f5fe30dd90dd5244d5a7dc32bcd757"
-+version = "0.11.2-rc.1"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "cd5d6c21f60f24976d8b983b6b5925cd87a4865af8ad6d965d45360518bbfd24"
- dependencies = [
-  "amplify",
-  "baid64",
-@@ -4730,11 +4767,11 @@ dependencies = [
-  "hex-conservative 1.2.0",
-  "rand 0.9.5",
-  "rgb-aluvm",
-+ "rgb-ascii-armor",
-  "rgb-strict-encoding",
-  "rgb-strict-types",
-  "ripemd",
-- "secp256k1 0.31.1",
-- "secp256k1 0.32.0-beta.2",
-+ "secp256k1 0.33.1",
-  "serde",
-  "sha2 0.11.0",
-  "wasm-bindgen",
-@@ -4742,8 +4779,9 @@ dependencies = [
- 
- [[package]]
- name = "rgb-invoicing"
--version = "0.11.1-rc.11"
--source = "git+https://github.com/UTEXO-Protocol/rgb-ops-s-bfa?rev=773766b5ca7a9e705ec68c2f9ed0917f505cd6e3#773766b5ca7a9e705ec68c2f9ed0917f505cd6e3"
-+version = "0.11.2-rc.1"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "76692ae2017e3b4789d2539dcf483b5e5e9f4468030d9ffb619aabeab7cd43b4"
- dependencies = [
-  "amplify",
-  "baid64",
-@@ -4760,17 +4798,20 @@ dependencies = [
- [[package]]
- name = "rgb-lib"
- version = "0.3.0-beta.7"
--source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?tag=v0.3.0-beta.50-bfa#1b951af0c8233308c919975552487be19ad2a930"
-+source = "git+https://github.com/UTEXO-Protocol/rgb-lib-bfa.git?rev=89c37086a68ef792da75c62bce59b58b1d7952a0#89c37086a68ef792da75c62bce59b58b1d7952a0"
- dependencies = [
-  "amplify",
-- "base64 0.22.1",
-+ "base64 0.23.1",
-  "bdk_electrum",
-  "bdk_esplora",
-  "bdk_wallet",
-  "chacha20poly1305 0.11.0",
-+ "ed25519-dalek 3.0.0",
-  "file-format",
-  "hex",
-- "hkdf 0.12.4",
-+ "hkdf 0.13.0",
-+ "hmac 0.13.0",
-+ "libc",
-  "rand 0.10.2",
-  "reqwest 0.13.4",
-  "rgb-invoicing",
-@@ -4786,7 +4827,7 @@ dependencies = [
-  "sea-query 1.0.2",
-  "serde",
-  "serde_json",
-- "sha2 0.10.9",
-+ "sha2 0.11.0",
-  "slog",
-  "slog-async",
-  "slog-term",
-@@ -4795,15 +4836,15 @@ dependencies = [
-  "time",
-  "tokio",
-  "url",
-- "vss-client-ng",
-  "walkdir",
-+ "x25519-dalek",
-  "zip 8.6.0",
- ]
- 
- [[package]]
- name = "rgb-lib-migration"
- version = "0.3.0-beta.5"
--source = "git+https://github.com/UTEXO-Protocol/rgb-lib.git?tag=v0.3.0-beta.50-bfa#1b951af0c8233308c919975552487be19ad2a930"
-+source = "git+https://github.com/UTEXO-Protocol/rgb-lib-bfa.git?rev=89c37086a68ef792da75c62bce59b58b1d7952a0#89c37086a68ef792da75c62bce59b58b1d7952a0"
- dependencies = [
-  "sea-orm-migration 2.0.2",
-  "tokio",
-@@ -4831,7 +4872,9 @@ dependencies = [
-  "electrum-client 0.24.1",
-  "esplora-client",
-  "futures",
-+ "hex",
-  "hex-conservative 0.3.2",
-+ "hkdf 0.12.4",
-  "libc",
-  "lightning 0.2.2",
-  "lightning-background-processor",
-@@ -4855,6 +4898,7 @@ dependencies = [
-  "sea-orm 1.1.20",
-  "serde",
-  "serde_json",
-+ "sha2 0.10.9",
-  "signer-external",
-  "tempfile",
-  "thiserror 2.0.19",
-@@ -4880,8 +4924,9 @@ dependencies = [
- 
- [[package]]
- name = "rgb-ops"
--version = "0.11.1-rc.11"
--source = "git+https://github.com/UTEXO-Protocol/rgb-ops-s-bfa?rev=773766b5ca7a9e705ec68c2f9ed0917f505cd6e3#773766b5ca7a9e705ec68c2f9ed0917f505cd6e3"
-+version = "0.11.2-rc.1"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "a0b0b332a32be0e41ce328d534d559e67a0add6381d250bdc188e44eb8777ca7"
- dependencies = [
-  "amplify",
-  "baid64",
-@@ -4889,8 +4934,6 @@ dependencies = [
-  "electrum-client 0.25.0",
-  "esplora-client",
-  "getrandom 0.3.4",
-- "nonasync",
-- "rand 0.9.5",
-  "rgb-aluvm",
-  "rgb-ascii-armor",
-  "rgb-consensus",
-@@ -4904,9 +4947,9 @@ dependencies = [
- 
- [[package]]
- name = "rgb-psbt-utils"
--version = "0.11.1-rc.11"
-+version = "0.11.2-rc.1"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "9df8f48e7c851814306af91411d7d6f7e8571939d509d4a786597a5eba0efbbf"
-+checksum = "16167fb6520c432702b42dbc6344c94573ff8873082386c129718a66bcb535ce"
- dependencies = [
-  "amplify",
-  "getrandom 0.3.4",
-@@ -4918,8 +4961,9 @@ dependencies = [
- 
- [[package]]
- name = "rgb-schemas"
--version = "0.11.1-rc.11"
--source = "git+https://github.com/UTEXO-Protocol/rgb-schemas-s-bfa?rev=238dfe7a89db998107fd87d919bf2757a2746d7f#238dfe7a89db998107fd87d919bf2757a2746d7f"
-+version = "0.11.2-rc.1"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "480f3d71e0f1b23b3c75b59255d62de178259e074f4a74410c330c734f52246f"
- dependencies = [
-  "amplify",
-  "rgb-aluvm",
-@@ -4929,9 +4973,9 @@ dependencies = [
- 
- [[package]]
- name = "rgb-strict-encoding"
--version = "1.0.2"
-+version = "1.0.5"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "0f68326e14d4b627f86634ea324510135cb551e27c5583a74811fa230b0cf34d"
-+checksum = "43cf06a3afea7b29f92f279a5fabb39215d1287f796a8d1a75ce77dd4f807fd4"
- dependencies = [
-  "amplify",
-  "bitcoin",
-@@ -4942,9 +4986,9 @@ dependencies = [
- 
- [[package]]
- name = "rgb-strict-encoding-derive"
--version = "1.0.2"
-+version = "1.0.5"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "33367536cfef03cb582cd9f8f25e193c2298d3ec3112eb59018a376b465f1ed9"
-+checksum = "473d4bc563f8db593abf7213f82fafc5bc667125f2c39222cd66ead369e60421"
- dependencies = [
-  "amplify_syn",
-  "heck 0.5.0",
-@@ -4955,9 +4999,9 @@ dependencies = [
- 
- [[package]]
- name = "rgb-strict-types"
--version = "1.0.2"
-+version = "1.0.5"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "e920bdf61b662a3743572a03696b0d88992eeb7d4f7afa0902915968327b3ce6"
-+checksum = "5efea5be04a66a22f96580fb8c7fd9558f7c5d74039c096bb024e4f325f4529a"
- dependencies = [
-  "amplify",
-  "baid64",
-@@ -5060,7 +5104,7 @@ dependencies = [
-  "pkcs1",
-  "pkcs8 0.10.2",
-  "rand_core 0.6.4",
-- "signature",
-+ "signature 2.2.0",
-  "spki 0.7.3",
-  "subtle",
-  "zeroize",
-@@ -5674,24 +5718,12 @@ dependencies = [
- 
- [[package]]
- name = "secp256k1"
--version = "0.31.1"
--source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "2c3c81b43dc2d8877c216a3fccf76677ee1ebccd429566d3e67447290d0c42b2"
--dependencies = [
-- "bitcoin_hashes",
-- "rand 0.9.5",
-- "secp256k1-sys 0.11.0",
-- "serde",
--]
--
--[[package]]
--name = "secp256k1"
--version = "0.32.0-beta.2"
-+version = "0.33.1"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "3c5fdc7d6e800869d3fd60ff857c479bf0a83ea7bf44b389e64461e844204994"
-+checksum = "d7f404a8dab7a7a5a631e741d8699aa9c8e1d689fc26ccf897c7187565490b69"
- dependencies = [
-  "rand 0.9.5",
-- "secp256k1-sys 0.12.0",
-+ "secp256k1-sys 0.14.1",
-  "serde",
- ]
- 
-@@ -5706,18 +5738,9 @@ dependencies = [
- 
- [[package]]
- name = "secp256k1-sys"
--version = "0.11.0"
--source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "dcb913707158fadaf0d8702c2db0e857de66eb003ccfdda5924b5f5ac98efb38"
--dependencies = [
-- "cc",
--]
--
--[[package]]
--name = "secp256k1-sys"
--version = "0.12.0"
-+version = "0.14.1"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "6d3be00697c88c00fe102af8dc316038cc2062eab8da646e7463f4c0e70ca9fd"
-+checksum = "f6b2992d4a3cd244539a7d5d0966aadbe5ca7fb868a5d7e38c29499b9e709bbd"
- dependencies = [
-  "cc",
- ]
-@@ -5840,16 +5863,6 @@ dependencies = [
-  "serde_core",
- ]
- 
--[[package]]
--name = "serde_str_helpers"
--version = "0.1.2"
--source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "b744a7c94f2f3785496af33a0d93857dfc0c521e25c38e993e9c5bb45f09c841"
--dependencies = [
-- "serde",
-- "serde_derive",
--]
--
- [[package]]
- name = "serde_urlencoded"
- version = "0.7.1"
-@@ -6005,10 +6018,16 @@ dependencies = [
-  "rand_core 0.6.4",
- ]
- 
-+[[package]]
-+name = "signature"
-+version = "3.0.0"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "28d567dcbaf0049cb8ac2608a76cd95ff9e4412e1899d389ee400918ca7537f5"
-+
- [[package]]
- name = "signer-external"
- version = "0.1.0-alpha"
--source = "git+https://github.com/UTEXO-Protocol/rln-external-signer.git?branch=main#0fb005ec4b927ddbe13e1646d247b5bb11e8ffed"
-+source = "git+https://github.com/UTEXO-Protocol/rln-external-signer.git?rev=0fb005ec4b927ddbe13e1646d247b5bb11e8ffed#0fb005ec4b927ddbe13e1646d247b5bb11e8ffed"
- dependencies = [
-  "base64 0.22.1",
-  "bitcoin",
-@@ -6028,9 +6047,9 @@ dependencies = [
- 
- [[package]]
- name = "simd_cesu8"
--version = "1.1.1"
-+version = "1.2.0"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "94f90157bb87cddf702797c5dadfa0be7d266cdf49e22da2fcaa32eff75b2c33"
-+checksum = "11031e251abf8611c80f460e19dbdeb54a66db918e49c65a7065b46ac7aec520"
- dependencies = [
-  "rustc_version",
-  "simdutf8",
-@@ -6538,16 +6557,6 @@ version = "1.1.0"
- source = "registry+https://github.com/rust-lang/crates.io-index"
- checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
- 
--[[package]]
--name = "stringly_conversions"
--version = "0.1.1"
--source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "ff63080f492dd4d289ffcaed8d7ece38adfb423db910eb342c0e04d409536a7a"
--dependencies = [
-- "paste",
-- "serde_str_helpers",
--]
--
- [[package]]
- name = "stringprep"
- version = "0.1.5"
-@@ -6977,16 +6986,16 @@ dependencies = [
-  "indexmap",
-  "toml_datetime 1.1.1+spec-1.1.0",
-  "toml_parser",
-- "winnow 1.0.3",
-+ "winnow 1.0.4",
- ]
- 
- [[package]]
- name = "toml_parser"
--version = "1.1.2+spec-1.1.0"
-+version = "1.1.3+spec-1.1.0"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "a2abe9b86193656635d2411dc43050282ca48aa31c2451210f4202550afb7526"
-+checksum = "1d38ac1cf9b95face32296c0a3ede1fdc270627c9d9c02a7274dd6d960dc4d56"
- dependencies = [
-- "winnow 1.0.3",
-+ "winnow 1.0.4",
- ]
- 
- [[package]]
-@@ -7421,7 +7430,7 @@ dependencies = [
- [[package]]
- name = "vls-core"
- version = "0.14.0"
--source = "git+https://github.com/UTEXO-Protocol/vls-core.git?branch=feat%2Frgb-compatibility#45c72edfd58620849eb486925439a76526b415ae"
-+source = "git+https://github.com/UTEXO-Protocol/vls-core.git?rev=45c72edfd58620849eb486925439a76526b415ae#45c72edfd58620849eb486925439a76526b415ae"
- dependencies = [
-  "ahash 0.8.12",
-  "anyhow",
-@@ -7511,7 +7520,7 @@ dependencies = [
- [[package]]
- name = "vls-protocol-signer"
- version = "0.14.0"
--source = "git+https://github.com/UTEXO-Protocol/vls-protocol-signer.git?branch=feat%2Frgb-compatibility#dddd336fcdf84c4febdd7af8363bda8d1721d893"
-+source = "git+https://github.com/UTEXO-Protocol/vls-protocol-signer.git?rev=dddd336fcdf84c4febdd7af8363bda8d1721d893#dddd336fcdf84c4febdd7af8363bda8d1721d893"
- dependencies = [
-  "bit-vec",
-  "log",
-@@ -7565,9 +7574,9 @@ checksum = "ccf3ec651a847eb01de73ccad15eb7d99f80485de043efb2f370cd654f4ea44b"
- 
- [[package]]
- name = "wasip2"
--version = "1.0.3+wasi-0.2.9"
-+version = "1.0.4+wasi-0.2.12"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "20064672db26d7cdc89c7798c48a0fdfac8213434a1186e5ef29fd560ae223d6"
-+checksum = "b67efb37e106e55ce722a510d6b5f9c17f083e5fc79afc2badeb12cc313d9487"
- dependencies = [
-  "wit-bindgen",
- ]
-@@ -7580,9 +7589,9 @@ checksum = "b8dad83b4f25e74f184f64c43b150b91efe7647395b42289f38e50566d82855b"
- 
- [[package]]
- name = "wasm-bindgen"
--version = "0.2.121"
-+version = "0.2.126"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "49ace1d07c165b0864824eee619580c4689389afa9dc9ed3a4c75040d82e6790"
-+checksum = "4b067c0c11094aef6b7a801c1e34a26affafdf3d051dba08456b868789aaf9a4"
- dependencies = [
-  "cfg-if",
-  "once_cell",
-@@ -7594,9 +7603,9 @@ dependencies = [
- 
- [[package]]
- name = "wasm-bindgen-futures"
--version = "0.4.71"
-+version = "0.4.76"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "96492d0d3ffba25305a7dc88720d250b1401d7edca02cc3bcd50633b424673b8"
-+checksum = "c62df1340f32221cb9c54d6a27b030e3dba64361d4a95bed55f9aacb44da291d"
- dependencies = [
-  "js-sys",
-  "wasm-bindgen",
-@@ -7604,9 +7613,9 @@ dependencies = [
- 
- [[package]]
- name = "wasm-bindgen-macro"
--version = "0.2.121"
-+version = "0.2.126"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "8e68e6f4afd367a562002c05637acb8578ff2dea1943df76afb9e83d177c8578"
-+checksum = "167ce5e579f6bcf889c4f7175a8a5a585de84e8ff93976ce393efa5f2837aab1"
- dependencies = [
-  "quote",
-  "wasm-bindgen-macro-support",
-@@ -7614,9 +7623,9 @@ dependencies = [
- 
- [[package]]
- name = "wasm-bindgen-macro-support"
--version = "0.2.121"
-+version = "0.2.126"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "d95a9ec35c64b2a7cb35d3fead40c4238d0940c86d107136999567a4703259f2"
-+checksum = "f3997c7839262f4ef12cf90b818d6340c18e80f263f1a94bf157d0ec4420380e"
- dependencies = [
-  "bumpalo",
-  "proc-macro2",
-@@ -7627,18 +7636,18 @@ dependencies = [
- 
- [[package]]
- name = "wasm-bindgen-shared"
--version = "0.2.121"
-+version = "0.2.126"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "c4e0100b01e9f0d03189a92b96772a1fb998639d981193d7dbab487302513441"
-+checksum = "dc1b4cb0cc549fcf58d7dfc081778139b3d283a081644e833e84682ad71cea24"
- dependencies = [
-  "unicode-ident",
- ]
- 
- [[package]]
- name = "web-sys"
--version = "0.3.98"
-+version = "0.3.103"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "4b572dff8bcf38bad0fa19729c89bb5748b2b9b1d8be70cf90df697e3a8f32aa"
-+checksum = "8622dcb61c0bcc9fffa6938bed81210af2da9a7e4a1a834b2e37a59b6dfb6141"
- dependencies = [
-  "js-sys",
-  "wasm-bindgen",
-@@ -7656,9 +7665,9 @@ dependencies = [
- 
- [[package]]
- name = "webpki-root-certs"
--version = "1.0.7"
-+version = "1.0.9"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "f31141ce3fc3e300ae89b78c0dd67f9708061d1d2eda54b8209346fd6be9a92c"
-+checksum = "b96554aa2acc8ccdb7e1c9a58a7a68dd5d13bccc69cd124cb09406db612a1c9b"
- dependencies = [
-  "rustls-pki-types",
- ]
-@@ -7746,7 +7755,7 @@ version = "0.1.11"
+@@ -7263,7 +7263,7 @@ version = "0.1.11"
  source = "registry+https://github.com/rust-lang/crates.io-index"
  checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
  dependencies = [
@@ -828,54 +11,14 @@ index be5eede..980a432 100644
  ]
  
  [[package]]
-@@ -7993,9 +8002,9 @@ dependencies = [
- 
- [[package]]
- name = "winnow"
--version = "1.0.3"
-+version = "1.0.4"
- source = "registry+https://github.com/rust-lang/crates.io-index"
--checksum = "0592e1c9d151f854e6fd382574c3a0855250e1d9b2f99d9281c6e6391af352f1"
-+checksum = "23b97319f7b8343df12cc98938e5c3eb436064524c8d2b4e30a1d3a36eecdf81"
- dependencies = [
-  "memchr",
- ]
-@@ -8021,6 +8030,16 @@ dependencies = [
-  "tap",
- ]
- 
-+[[package]]
-+name = "x25519-dalek"
-+version = "3.0.0"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "e7e8131a03190127fb2263afc72b322ecadae46b6ff8c6f399ff5d02f5559af6"
-+dependencies = [
-+ "curve25519-dalek 5.0.0",
-+ "rand_core 0.10.1",
-+]
-+
- [[package]]
- name = "yansi"
- version = "1.0.1"
 diff --git a/bindings/c-ffi/Cargo.toml b/bindings/c-ffi/Cargo.toml
-index 546e27d..7ad7229 100644
+index 53d5925..7ad7229 100644
 --- a/bindings/c-ffi/Cargo.toml
 +++ b/bindings/c-ffi/Cargo.toml
-@@ -55,11 +55,20 @@ lightning-invoice = { path = "../../rust-lightning/lightning-invoice" }
- lightning-net-tokio = { path = "../../rust-lightning/lightning-net-tokio" }
- lightning-persister = { path = "../../rust-lightning/lightning-persister" }
- lightning-rapid-gossip-sync = { path = "../../rust-lightning/lightning-rapid-gossip-sync" }
--vls-core = { git = "https://github.com/UTEXO-Protocol/vls-core.git", branch = "feat/rgb-compatibility" }
--vls-protocol-signer = { git = "https://github.com/UTEXO-Protocol/vls-protocol-signer.git", branch = "feat/rgb-compatibility" }
--# BFA-enabled RGB crates required by the parent's rgb-lib revision; keep in lock-step with the
--# parent's pins.
--rgb-consensus = { git = "https://github.com/UTEXO-Protocol/rgb-consensus-s-bfa", rev = "2faf6118b2f5fe30dd90dd5244d5a7dc32bcd757" }
--rgb-ops = { git = "https://github.com/UTEXO-Protocol/rgb-ops-s-bfa", rev = "773766b5ca7a9e705ec68c2f9ed0917f505cd6e3" }
--rgb-invoicing = { git = "https://github.com/UTEXO-Protocol/rgb-ops-s-bfa", rev = "773766b5ca7a9e705ec68c2f9ed0917f505cd6e3" }
--rgb-schemas = { git = "https://github.com/UTEXO-Protocol/rgb-schemas-s-bfa", rev = "238dfe7a89db998107fd87d919bf2757a2746d7f" }
-+lightning-transaction-sync = { path = "../../rust-lightning/lightning-transaction-sync" }
-+vls-core = { git = "https://github.com/UTEXO-Protocol/vls-core.git", rev = "45c72edfd58620849eb486925439a76526b415ae" }
-+vls-protocol-signer = { git = "https://github.com/UTEXO-Protocol/vls-protocol-signer.git", rev = "dddd336fcdf84c4febdd7af8363bda8d1721d893" }
+@@ -58,3 +58,17 @@ lightning-rapid-gossip-sync = { path = "../../rust-lightning/lightning-rapid-gos
+ lightning-transaction-sync = { path = "../../rust-lightning/lightning-transaction-sync" }
+ vls-core = { git = "https://github.com/UTEXO-Protocol/vls-core.git", rev = "45c72edfd58620849eb486925439a76526b415ae" }
+ vls-protocol-signer = { git = "https://github.com/UTEXO-Protocol/vls-protocol-signer.git", rev = "dddd336fcdf84c4febdd7af8363bda8d1721d893" }
 +
 +# The new RGB library owns its complete graph; do not reintroduce the retired s-bfa overrides.
 +# This separate workspace must preserve the checked arithmetic required by that graph.
@@ -1189,7 +332,7 @@ index 764cc94..b84559f 100644
 +
  }  // extern "C"
 diff --git a/bindings/c-ffi/src/api.rs b/bindings/c-ffi/src/api.rs
-index 453f97f..6648a9d 100644
+index 453f97f..248c8b7 100644
 --- a/bindings/c-ffi/src/api.rs
 +++ b/bindings/c-ffi/src/api.rs
 @@ -91,7 +91,7 @@ pub(crate) fn sdk_node_unlock(
@@ -1244,11 +387,14 @@ index 453f97f..6648a9d 100644
  }
  
  pub(crate) fn get_payment(
-@@ -338,6 +365,13 @@ pub(crate) fn send_rgb(node: &COpaqueStruct, request_json: *const c_char) -> Res
+@@ -338,6 +365,16 @@ pub(crate) fn send_rgb(node: &COpaqueStruct, request_json: *const c_char) -> Res
      json(JsonSendRgbResponse::from(resp))
  }
  
-+pub(crate) fn send_rgb_invoice(node: &COpaqueStruct, request_json: *const c_char) -> Result<String, Error> {
++pub(crate) fn send_rgb_invoice(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> Result<String, Error> {
 +    let node = require_handle(node)?;
 +    let req: JsonSendRgbInvoiceRequest = parse_req(request_json)?;
 +    let resp = node.sendrgbinvoice(req.try_into()?)?;
@@ -1258,7 +404,7 @@ index 453f97f..6648a9d 100644
  pub(crate) fn import_rgb_transfer_consignment(
      node: &COpaqueStruct,
      request_json: *const c_char,
-@@ -793,7 +827,7 @@ pub(crate) fn sdk_global_initialize(request_json: *const c_char) -> Result<Strin
+@@ -793,7 +830,7 @@ pub(crate) fn sdk_global_initialize(request_json: *const c_char) -> Result<Strin
  }
  
  pub(crate) fn sdk_global_shutdown() -> Result<String, Error> {
@@ -1267,7 +413,7 @@ index 453f97f..6648a9d 100644
      ok_void()
  }
  
-@@ -827,6 +861,34 @@ pub(crate) fn native_external_signer_bootstrap(signer: &COpaqueStruct) -> Result
+@@ -827,6 +864,34 @@ pub(crate) fn native_external_signer_bootstrap(signer: &COpaqueStruct) -> Result
      json(JsonSdkExternalSignerBootstrap::from(bootstrap))
  }
  
@@ -1302,7 +448,7 @@ index 453f97f..6648a9d 100644
  pub(crate) fn sdk_node_init_with_native_external_signer(
      node: &COpaqueStruct,
      signer: &COpaqueStruct,
-@@ -884,3 +946,62 @@ pub(crate) fn sdk_node_unlock_with_attached_external_signer(
+@@ -884,3 +949,62 @@ pub(crate) fn sdk_node_unlock_with_attached_external_signer(
      node.unlock_with_attached_external_signer_request(r.into())?;
      ok_void()
  }
@@ -1366,7 +512,7 @@ index 453f97f..6648a9d 100644
 +    )?)
 +}
 diff --git a/bindings/c-ffi/src/json_types.rs b/bindings/c-ffi/src/json_types.rs
-index 7afc138..f6e1681 100644
+index 06dd5dc..d6820dc 100644
 --- a/bindings/c-ffi/src/json_types.rs
 +++ b/bindings/c-ffi/src/json_types.rs
 @@ -34,10 +34,10 @@ use rgb_lightning_node::{
@@ -1417,7 +563,7 @@ index 7afc138..f6e1681 100644
              payment_hash: fmt_payment_hash(&r.payment_hash),
              payment_secret: r.payment_secret,
              payee_pubkey: r.payee_pubkey.as_ref().map(fmt_pubkey),
-@@ -836,31 +841,147 @@ impl From<DecodeLnInvoiceResponse> for JsonDecodeLnInvoiceResponse {
+@@ -836,6 +841,45 @@ impl From<DecodeLnInvoiceResponse> for JsonDecodeLnInvoiceResponse {
      }
  }
  
@@ -1463,8 +609,7 @@ index 7afc138..f6e1681 100644
  #[derive(Debug, Serialize)]
  pub(crate) struct JsonDecodeRgbInvoiceResponse {
      pub recipient_id: String,
--    pub proxy_recipient_id: String,
-+    pub proxy_recipient_id: Option<String>,
+@@ -843,7 +887,7 @@ pub(crate) struct JsonDecodeRgbInvoiceResponse {
      pub recipient_type: String,
      pub asset_schema: Option<String>,
      pub asset_id: Option<String>,
@@ -1473,8 +618,8 @@ index 7afc138..f6e1681 100644
      pub network: String,
      pub expiration_timestamp: Option<i64>,
      pub transport_endpoints: Vec<String>,
-+    pub public_key: Option<String>,
-+    pub encryption: String,
+@@ -851,20 +895,93 @@ pub(crate) struct JsonDecodeRgbInvoiceResponse {
+     pub encryption: String,
  }
  
 -impl From<DecodeRgbInvoiceResponse> for JsonDecodeRgbInvoiceResponse {
@@ -1495,8 +640,8 @@ index 7afc138..f6e1681 100644
              network: r.network,
              expiration_timestamp: r.expiration_timestamp,
              transport_endpoints: r.transport_endpoints,
-+            public_key: r.public_key,
-+            encryption: r.encryption,
+             public_key: r.public_key,
+             encryption: r.encryption,
 +        })
 +    }
 +}
@@ -1571,7 +716,7 @@ index 7afc138..f6e1681 100644
          }
      }
  }
-@@ -926,6 +1047,97 @@ pub(crate) struct JsonWitnessData {
+@@ -930,6 +1047,97 @@ pub(crate) struct JsonWitnessData {
      pub blinding: Option<u64>,
  }
  
@@ -1669,7 +814,7 @@ index 7afc138..f6e1681 100644
  impl From<JsonWitnessData> for WitnessData {
      fn from(w: JsonWitnessData) -> Self {
          WitnessData {
-@@ -2240,6 +2452,7 @@ impl From<Utxo> for JsonUtxo {
+@@ -2244,6 +2452,7 @@ impl From<Utxo> for JsonUtxo {
  pub(crate) struct JsonUnspent {
      pub utxo: JsonUtxo,
      pub rgb_allocations: Vec<JsonRgbAllocation>,
@@ -1677,7 +822,7 @@ index 7afc138..f6e1681 100644
  }
  
  impl From<Unspent> for JsonUnspent {
-@@ -2247,6 +2460,30 @@ impl From<Unspent> for JsonUnspent {
+@@ -2251,6 +2460,30 @@ impl From<Unspent> for JsonUnspent {
          JsonUnspent {
              utxo: u.utxo.into(),
              rgb_allocations: u.rgb_allocations.into_iter().map(Into::into).collect(),
@@ -1708,8 +853,18 @@ index 7afc138..f6e1681 100644
          }
      }
  }
+@@ -2476,7 +2709,8 @@ mod tests {
+                     encryption: encryption.into(),
+                 };
+                 let json =
+-                    serde_json::to_value(JsonDecodeRgbInvoiceResponse::from(response)).unwrap();
++                    serde_json::to_value(JsonDecodeRgbInvoiceResponse::try_from(response).unwrap())
++                        .unwrap();
+                 assert_eq!(
+                     json["proxy_recipient_id"],
+                     serde_json::json!(proxy_recipient_id)
 diff --git a/bindings/c-ffi/src/lib.rs b/bindings/c-ffi/src/lib.rs
-index cb94207..8188e7a 100644
+index cb94207..474160b 100644
 --- a/bindings/c-ffi/src/lib.rs
 +++ b/bindings/c-ffi/src/lib.rs
 @@ -89,6 +89,33 @@ pub extern "C" fn rln_free_string(s: *mut c_char) {
@@ -1722,9 +877,9 @@ index cb94207..8188e7a 100644
 +    ffi_call!("rln_binding_build_info", Ok::<String, utils::Error>(serde_json::json!({
 +        "abi_version": 1,
 +        "rln_version": "0.17.0-beta.3",
-+        "rln_commit": "7cced3aa3c2c904a88d8f8a7832981d25a5ea871",
-+        "lightning_commit": "bbe68189872c26088e351d034b05c58769cb996a",
-+        "rgb_lib_commit": "89c37086a68ef792da75c62bce59b58b1d7952a0",
++        "rln_commit": "89ebe9fdb1be94cbba0b2bd722cea9af297399f1",
++        "lightning_commit": "17f2fb56f8d96d0ec512c715d2ebc65f829eb2c2",
++        "rgb_lib_commit": "abd41d3afff6d8fb11461e26e843301650e22df3",
 +        "adapter_sha256": env!("RLN_ADAPTER_SHA256"),
 +        "wrapper_sha256": env!("RLN_WRAPPER_SHA256"),
 +        "lock_sha256": env!("RLN_LOCK_SHA256"),
@@ -1824,19 +979,25 @@ index cb94207..8188e7a 100644
  /// APay receiver-side registration with an LSP. Argument is the LSP's
  /// node_id as a hex string (compressed secp256k1). Returns JSON of
  /// `AsyncOrderNewResponse` (request_id, host_node_id, protocol_version,
-@@ -342,6 +400,11 @@ pub extern "C" fn rln_send_rgb(node: &COpaqueStruct, request_json: *const c_char
+@@ -342,6 +400,17 @@ pub extern "C" fn rln_send_rgb(node: &COpaqueStruct, request_json: *const c_char
      ffi_call!("rln_send_rgb", api::send_rgb(node, request_json))
  }
  
 +#[unsafe(no_mangle)]
-+pub extern "C" fn rln_send_rgb_invoice(node: &COpaqueStruct, request_json: *const c_char) -> CResultString {
-+    ffi_call!("rln_send_rgb_invoice", api::send_rgb_invoice(node, request_json))
++pub extern "C" fn rln_send_rgb_invoice(
++    node: &COpaqueStruct,
++    request_json: *const c_char,
++) -> CResultString {
++    ffi_call!(
++        "rln_send_rgb_invoice",
++        api::send_rgb_invoice(node, request_json)
++    )
 +}
 +
  #[unsafe(no_mangle)]
  pub extern "C" fn rln_import_rgb_transfer_consignment(
      node: &COpaqueStruct,
-@@ -793,6 +856,39 @@ pub extern "C" fn rln_sdk_shutdown() -> CResultString {
+@@ -793,6 +862,39 @@ pub extern "C" fn rln_sdk_shutdown() -> CResultString {
  // External-signer surface
  // ---------------------------------------------------------------------------
  
@@ -1876,7 +1037,7 @@ index cb94207..8188e7a 100644
  /// Drop a `NativeExternalSigner` handle. Safe to call immediately after
  /// attach / init / unlock succeeds: RLN holds its own `Arc` clone.
  #[unsafe(no_mangle)]
-@@ -814,6 +910,86 @@ mod free_tests {
+@@ -814,6 +916,86 @@ mod free_tests {
          free_sdk_node(COpaqueStruct::null());
          free_native_external_signer(COpaqueStruct::null());
      }
@@ -1963,7 +1124,7 @@ index cb94207..8188e7a 100644
  }
  
  #[unsafe(no_mangle)]
-@@ -836,6 +1012,21 @@ pub extern "C" fn rln_native_external_signer_bootstrap(signer: &COpaqueStruct) -
+@@ -836,6 +1018,21 @@ pub extern "C" fn rln_native_external_signer_bootstrap(signer: &COpaqueStruct) -
      )
  }
  
@@ -1985,7 +1146,7 @@ index cb94207..8188e7a 100644
  #[unsafe(no_mangle)]
  pub extern "C" fn rln_sdk_node_init_with_native_external_signer(
      node: &COpaqueStruct,
-@@ -899,3 +1090,67 @@ pub extern "C" fn rln_sdk_node_unlock_with_attached_external_signer(
+@@ -899,3 +1096,67 @@ pub extern "C" fn rln_sdk_node_unlock_with_attached_external_signer(
          api::sdk_node_unlock_with_attached_external_signer(node, request_json)
      )
  }
@@ -2090,7 +1251,7 @@ index 98c3372..c4db3c0 100644
  
  #[cfg(test)]
 diff --git a/bindings/rgb_lightning_node.udl b/bindings/rgb_lightning_node.udl
-index 219527a..b428476 100644
+index f54f150..fe7751a 100644
 --- a/bindings/rgb_lightning_node.udl
 +++ b/bindings/rgb_lightning_node.udl
 @@ -5,6 +5,7 @@ namespace rgb_lightning_node {
@@ -2121,7 +1282,7 @@ index 219527a..b428476 100644
      [Throws=RlnError]
      void connectpeer(string peer_pubkey_and_addr);
      [Throws=RlnError]
-@@ -652,6 +666,7 @@ dictionary SdkInitRequest {
+@@ -654,6 +668,7 @@ dictionary SdkInitRequest {
      string? lsp_bearer_token;
      string? vss_url = null;
      boolean vss_allow_http = false;
@@ -2130,10 +1291,10 @@ index 219527a..b428476 100644
      boolean reuse_addresses = false;
  };
 diff --git a/src/ldk.rs b/src/ldk.rs
-index 2c582f4..0797b44 100644
+index 0b40cc2..599e10b 100644
 --- a/src/ldk.rs
 +++ b/src/ldk.rs
-@@ -108,18 +108,17 @@ use std::collections::HashSet;
+@@ -109,18 +109,17 @@ use std::collections::HashSet;
  use std::convert::TryInto;
  use std::fs;
  use std::hash::{DefaultHasher, Hash, Hasher};
@@ -2154,7 +1315,7 @@ index 2c582f4..0797b44 100644
  use tokio::runtime::Handle;
  use tokio::sync::watch::Sender;
  use tokio::task::JoinHandle;
-@@ -183,8 +182,8 @@ use crate::signer::{
+@@ -184,8 +183,8 @@ use crate::signer::{
  };
  use crate::swap::SwapData;
  use crate::utils::{
@@ -2165,7 +1326,7 @@ index 2c582f4..0797b44 100644
      validate_and_parse_payment_hash, validate_and_parse_payment_preimage, AppState, CommonState,
      LightningState, StaticState, UnlockedAppState, FATAL_ERROR, PROXY_ENDPOINT_LOCAL,
  };
-@@ -336,14 +335,290 @@ pub(crate) fn node_override_matches(
+@@ -337,14 +336,290 @@ pub(crate) fn node_override_matches(
          .is_some_and(|id| *id == our_node_id)
  }
  
@@ -2457,7 +1618,7 @@ index 2c582f4..0797b44 100644
  #[derive(Clone, Debug)]
  pub(crate) struct PaymentInfo {
      pub(crate) preimage: Option<PaymentPreimage>,
-@@ -1098,12 +1373,14 @@ impl LightningState {
+@@ -1099,12 +1374,14 @@ impl LightningState {
  /// `FutureSpawner` backed by `tokio::spawn`, used to drive async monitor
  /// persistence completions for `MonitorUpdatingPersisterAsync`.
  #[cfg(feature = "vss")]
@@ -2510,7 +1671,7 @@ index 2c582f4..0797b44 100644
          }
          Event::SplicePending { .. } => {
              // We don't use the splice feature, so this event should never be seen.
-@@ -4848,6 +5133,19 @@ impl NodeStartup {
+@@ -4883,6 +5168,19 @@ impl NodeStartup {
                      Some(mnemonic_str.clone()),
                  )
              };
@@ -2530,7 +1691,7 @@ index 2c582f4..0797b44 100644
          let data_dir = static_state
              .storage_dir_path
              .clone()
-@@ -4897,7 +5195,22 @@ impl NodeStartup {
+@@ -4932,7 +5230,22 @@ impl NodeStartup {
              )),
              _ => None,
          };
@@ -2554,7 +1715,7 @@ index 2c582f4..0797b44 100644
          // run them off the async runtime so they don't fail on a single-vCPU host.
          let (rgb_wallet, rgb_online) = tokio::task::spawn_blocking(move || {
              let mut rgb_wallet = RgbLibWallet::new(
-@@ -4987,16 +5300,14 @@ impl NodeStartup {
+@@ -5022,16 +5335,14 @@ impl NodeStartup {
              &master_fingerprint,
          )?;
  
@@ -2579,7 +1740,7 @@ index 2c582f4..0797b44 100644
          #[cfg(feature = "vss")]
          if let Some((url, store_id, key)) = rgb_vss_backup {
              let wrapper = Arc::clone(&rgb_wallet_wrapper);
-@@ -5005,15 +5316,20 @@ impl NodeStartup {
+@@ -5040,15 +5351,20 @@ impl NodeStartup {
                      .configure_vss_backup(
                          crate::rgb_vss::VssBackupConfig::new(url, store_id, key)
                              .with_encryption(true)
@@ -2603,7 +1764,7 @@ index 2c582f4..0797b44 100644
                      wrapper
                          .vss_backup(&client)
                          .map_err(|error| APIError::FailedVssInit(error.to_string()))?;
-@@ -5026,18 +5342,6 @@ impl NodeStartup {
+@@ -5061,18 +5377,6 @@ impl NodeStartup {
              })??;
          }
  
@@ -2622,7 +1783,7 @@ index 2c582f4..0797b44 100644
          Ok(Arc::new(CommonState {
              config: Arc::clone(&static_state.config),
              signer,
-@@ -5407,6 +5711,44 @@ async fn prepare_node(
+@@ -5442,6 +5746,44 @@ async fn prepare_node(
  
  async fn start_lightning(
      #[allow(unused_mut)] mut setup: NodeStartup,
@@ -2667,7 +1828,7 @@ index 2c582f4..0797b44 100644
  ) -> Result<(Option<LdkBackgroundServices>, Arc<UnlockedAppState>), APIError> {
      // Defense in depth: no chain backend, manager or worker precedes this check.
      setup.app_state.check_lightning_supported()?;
-@@ -5414,6 +5756,29 @@ async fn start_lightning(
+@@ -5449,6 +5791,29 @@ async fn start_lightning(
      let static_state = &app_state.static_state;
      let unlock_request = setup.unlock_request.clone();
      let gossip_source_config = unlock_request.gossip_source.clone().unwrap_or_default();
@@ -2697,7 +1858,7 @@ index 2c582f4..0797b44 100644
      let kv_store = Arc::clone(&setup.kv_store);
      let external_signer_mode = setup.external_signer_mode;
      let internal_mnemonic = setup.internal_mnemonic.clone();
-@@ -5430,6 +5795,19 @@ async fn start_lightning(
+@@ -5465,6 +5830,19 @@ async fn start_lightning(
      let bitcoin_network = static_state.network;
      let network: Network = bitcoin_network.into();
      let ldk_peer_listening_port = static_state.ldk_peer_listening_port;
@@ -2717,7 +1878,7 @@ index 2c582f4..0797b44 100644
      #[cfg(feature = "vss")]
      let monitor_kv_store = setup.monitor_kv_store.clone().ok_or_else(|| {
          APIError::Unexpected("Lightning monitor store is not available".to_string())
-@@ -5471,6 +5849,9 @@ async fn start_lightning(
+@@ -5506,6 +5884,9 @@ async fn start_lightning(
                  handle.clone(),
                  Arc::clone(&logger),
                  static_state.config.chain.fee_refresh_interval_secs,
@@ -2727,7 +1888,7 @@ index 2c582f4..0797b44 100644
              )
              .await
              {
-@@ -5479,7 +5860,11 @@ async fn start_lightning(
+@@ -5514,7 +5895,11 @@ async fn start_lightning(
              };
  
              // Check that the bitcoind we've connected to is running the network we expect
@@ -2740,7 +1901,7 @@ index 2c582f4..0797b44 100644
              if bitcoind_chain
                  != match bitcoin_network {
                      BitcoinNetwork::Mainnet => "main",
-@@ -5495,7 +5880,11 @@ async fn start_lightning(
+@@ -5530,7 +5915,11 @@ async fn start_lightning(
              // Poll for the best chain tip, used by the channel manager & spv client
              let polled_chain_tip = init::validate_best_block_header(bitcoind_client.as_ref())
                  .await
@@ -2753,7 +1914,7 @@ index 2c582f4..0797b44 100644
              let initial_best_block = polled_chain_tip.to_best_block();
  
              ChainSetup {
-@@ -5528,16 +5917,14 @@ async fn start_lightning(
+@@ -5563,16 +5952,14 @@ async fn start_lightning(
                      Arc::clone(&logger),
                      static_state.config.chain.indexer_timeout_secs,
                      static_state.config.chain.fee_refresh_interval_secs,
@@ -2774,7 +1935,7 @@ index 2c582f4..0797b44 100644
              );
              let initial_best_block = indexer_client
                  .get_best_block()
-@@ -5573,7 +5960,7 @@ async fn start_lightning(
+@@ -5608,7 +5995,7 @@ async fn start_lightning(
      let (chain_monitor, mut channelmonitors): (Arc<ChainMonitor>, _) = {
          let persister = MonitorUpdatingPersisterAsync::new(
              Arc::clone(&monitor_kv_store),
@@ -2783,7 +1944,7 @@ index 2c582f4..0797b44 100644
              Arc::clone(&logger),
              1000,
              Arc::clone(&keys_manager),
-@@ -5979,7 +6366,7 @@ async fn start_lightning(
+@@ -6014,7 +6401,7 @@ async fn start_lightning(
      });
  
      // The UTXO verifier can only attach to a P2P sync, and only after PeerManager
@@ -2792,7 +1953,7 @@ index 2c582f4..0797b44 100644
      let (p2p_gossip_sync_for_verifier, route_handler): (
          Option<Arc<P2PGossipSync>>,
          Arc<RoutingMessageHandler>,
-@@ -6094,61 +6481,110 @@ async fn start_lightning(
+@@ -6129,61 +6516,110 @@ async fn start_lightning(
      // provide a verifier, so announcements are checked whatever the sync mode is.
      if let Some(p2p) = &p2p_gossip_sync_for_verifier {
          let peer_manager_wake = Arc::new({
@@ -2932,7 +2093,7 @@ index 2c582f4..0797b44 100644
      match backend {
          #[cfg(feature = "block-sync")]
          ChainBackend::BlockSync { client, .. } => {
-@@ -6158,7 +6594,7 @@ async fn start_lightning(
+@@ -6193,7 +6629,7 @@ async fn start_lightning(
              let chain_tip =
                  block_sync_chain_tip.expect("block-sync chain tip is set while syncing listeners");
              let mut cache = block_sync_cache;
@@ -2941,7 +2102,7 @@ index 2c582f4..0797b44 100644
                  let chain_poller = poll::ChainPoller::new(client.as_ref(), network);
                  let chain_listener = (
                      chain_monitor_listener,
-@@ -6167,13 +6603,21 @@ async fn start_lightning(
+@@ -6202,13 +6638,21 @@ async fn start_lightning(
                  let mut spv_client =
                      SpvClient::new(chain_tip, chain_poller, &mut cache, &chain_listener);
                  loop {
@@ -2967,7 +2128,7 @@ index 2c582f4..0797b44 100644
                  }
              });
          }
-@@ -6184,19 +6628,19 @@ async fn start_lightning(
+@@ -6219,19 +6663,19 @@ async fn start_lightning(
                  chain_monitor.clone(),
                  output_sweeper.clone(),
              ];
@@ -2994,7 +2155,7 @@ index 2c582f4..0797b44 100644
                  }
              });
          }
-@@ -6397,6 +6841,7 @@ async fn start_lightning(
+@@ -6432,6 +6876,7 @@ async fn start_lightning(
  
      let unlocked_state = Arc::new(LightningState {
          common: Arc::clone(&common),
@@ -3002,7 +2163,7 @@ index 2c582f4..0797b44 100644
          channel_manager: Arc::clone(&channel_manager),
          gossip_source: Arc::clone(&gossip_source),
          inbound_payments,
-@@ -6424,15 +6869,19 @@ async fn start_lightning(
+@@ -6459,15 +6904,19 @@ async fn start_lightning(
  
      asset_link_handler.set_authorizer(Arc::new(NodeAssetLinkAuthorizer));
  
@@ -3030,7 +2191,7 @@ index 2c582f4..0797b44 100644
      }
  
      let recent_payments_payment_ids = channel_manager
-@@ -6499,17 +6948,22 @@ async fn start_lightning(
+@@ -6534,17 +6983,22 @@ async fn start_lightning(
      let connect_cm = Arc::clone(&channel_manager);
      let connect_pm = Arc::clone(&peer_manager);
      let connect_db = static_state.db();
@@ -3057,7 +2218,7 @@ index 2c582f4..0797b44 100644
                  return;
              }
              let db = RlnDatabase::new((*connect_db).clone());
-@@ -6521,14 +6975,18 @@ async fn start_lightning(
+@@ -6556,14 +7010,18 @@ async fn start_lightning(
                          .map(|chan| chan.counterparty.node_id)
                          .filter(|id| connect_pm.peer_by_node_id(id).is_none())
                      {
@@ -3080,7 +2241,7 @@ index 2c582f4..0797b44 100644
                              }
                          }
                      }
-@@ -6560,16 +7018,16 @@ async fn start_lightning(
+@@ -6595,16 +7053,16 @@ async fn start_lightning(
      if let Some(link) = external_signer_link_watch {
          let su_channel_manager = Arc::clone(&channel_manager);
          let su_chain_monitor = Arc::clone(&chain_monitor);
@@ -3101,7 +2262,7 @@ index 2c582f4..0797b44 100644
                      return;
                  }
                  if link_event && link.is_connected() {
-@@ -6591,10 +7049,12 @@ async fn start_lightning(
+@@ -6626,10 +7084,12 @@ async fn start_lightning(
                  interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
                  loop {
                      tokio::select! {
@@ -3115,7 +2276,7 @@ index 2c582f4..0797b44 100644
                          return;
                      }
                      su_chain_monitor.signer_unblocked(None);
-@@ -6607,45 +7067,17 @@ async fn start_lightning(
+@@ -6642,45 +7102,17 @@ async fn start_lightning(
          });
      }
  
@@ -3167,7 +2328,7 @@ index 2c582f4..0797b44 100644
              }
              sweep_handler.sweep_stale_state();
          }
-@@ -6655,15 +7087,24 @@ async fn start_lightning(
+@@ -6690,15 +7122,24 @@ async fn start_lightning(
      let chan_man = Arc::clone(&channel_manager);
      let announce_initial_delay_secs = static_state.config.node.announce_initial_delay_secs;
      let announce_refresh_interval_secs = static_state.config.node.announce_refresh_interval_secs;
@@ -3196,7 +2357,7 @@ index 2c582f4..0797b44 100644
              // Don't bother trying to announce if we don't have any public channls, though our
              // peers should drop such an announcement anyway. Note that announcement may not
              // propagate until we have a channel with 6+ confirmations.
-@@ -6692,7 +7133,8 @@ async fn start_lightning(
+@@ -6727,7 +7168,8 @@ async fn start_lightning(
      Ok((
          Some(LdkBackgroundServices {
              stop_processing,
@@ -3206,7 +2367,7 @@ index 2c582f4..0797b44 100644
              peer_manager: peer_manager.clone(),
              bp_exit,
              background_processor: Some(background_processor),
-@@ -6721,6 +7163,8 @@ pub(crate) fn attach_external_signer_transport(
+@@ -6756,6 +7198,8 @@ pub(crate) fn attach_external_signer_transport(
      Ok(ExternalSignerAttachment {
          bootstrap,
          transport,
@@ -3215,7 +2376,7 @@ index 2c582f4..0797b44 100644
      })
  }
  
-@@ -6735,15 +7179,11 @@ impl AppState {
+@@ -6770,15 +7214,11 @@ impl AppState {
          ldk_background_services
              .stop_processing
              .store(true, Ordering::Release);
@@ -3234,7 +2395,7 @@ index 2c582f4..0797b44 100644
          Some(ldk_background_services)
      }
  }
-@@ -6864,13 +7304,19 @@ async fn release_vss_fence(kv_store: Arc<SyncedKvStore>, teardown: VssTeardown)
+@@ -6899,13 +7339,19 @@ async fn release_vss_fence(kv_store: Arc<SyncedKvStore>, teardown: VssTeardown)
  
  // Runs while shutting down, possibly because the background processor itself
  // died, so its outcome is reported instead of unwrapped.
@@ -3259,7 +2420,7 @@ index 2c582f4..0797b44 100644
      }
  }
  
-@@ -6936,7 +7382,16 @@ mod vss_teardown_tests {
+@@ -6971,7 +7417,16 @@ mod vss_teardown_tests {
  }
  
  /// Stop the resources owned by the unlocked session, including wallet-only persistence.
@@ -3277,7 +2438,7 @@ index 2c582f4..0797b44 100644
      tracing::info!("Stopping node services");
      // Wait for wallet operations holding the API mutex, then remove both session owners together.
      // New callers cannot use a wallet after its VSS fence has been handed over; concurrent stops
-@@ -6958,19 +7413,33 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
+@@ -6993,19 +7448,33 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
          )
      });
  
@@ -3313,7 +2474,7 @@ index 2c582f4..0797b44 100644
              }
          }
      }
-@@ -6979,9 +7448,13 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
+@@ -7014,9 +7483,13 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
          .as_mut()
          .and_then(|services| services.background_processor.take())
      {
@@ -3328,7 +2489,7 @@ index 2c582f4..0797b44 100644
      #[cfg(feature = "vss")]
      if let Some((common, monitor_store)) = common_and_monitor {
          let deadline = Instant::now() + VSS_TEARDOWN_TIMEOUT;
-@@ -6996,34 +7469,95 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
+@@ -7031,34 +7504,95 @@ pub(crate) async fn stop_node(app_state: Arc<AppState>) {
              .is_err()
              {
                  worker.abort();
@@ -3983,32 +3144,32 @@ index a635117..d126aa3 100644
      });
  }
 diff --git a/src/lib.rs b/src/lib.rs
-index 235aab8..650780e 100644
+index 235aab8..993d74a 100644
 --- a/src/lib.rs
 +++ b/src/lib.rs
-@@ -77,6 +77,8 @@ pub mod test_utils;
- mod uniffi_api;
+@@ -78,6 +78,8 @@ mod uniffi_api;
  mod utils;
  #[cfg(feature = "vss")]
-+mod vss_snapshot_policy;
-+#[cfg(feature = "vss")]
  mod vss_kv_store;
++#[cfg(feature = "vss")]
++mod vss_snapshot_policy;
  
  pub use node::{NodeConfig, NodeHandle};
+ 
 diff --git a/src/main.rs b/src/main.rs
-index 34fb4e1..96dcb12 100644
+index ba473e1..868436f 100644
 --- a/src/main.rs
 +++ b/src/main.rs
-@@ -49,6 +49,8 @@ mod swap;
- mod synced_kv_store;
+@@ -50,6 +50,8 @@ mod synced_kv_store;
  mod utils;
  #[cfg(feature = "vss")]
-+mod vss_snapshot_policy;
-+#[cfg(feature = "vss")]
  mod vss_kv_store;
++#[cfg(feature = "vss")]
++mod vss_snapshot_policy;
  
  // the test suite calls into `electrum_client` to wait for electrs to catch up with bitcoind, and
-@@ -372,7 +374,9 @@ async fn shutdown_signal(app_state: Arc<AppState>) {
+ // that crate is only pulled in by the `electrum` feature
+@@ -373,7 +375,9 @@ async fn shutdown_signal(app_state: Arc<AppState>) {
          tracing::info!("Will shutdown after change state is complete");
          tokio::time::sleep(Duration::from_millis(300)).await;
      }
@@ -4059,7 +3220,7 @@ index d6f571f..8b920d5 100644
              ldk_background_services: Arc::new(Mutex::new(None)),
              attached_external_signer: Arc::new(Mutex::new(None)),
 diff --git a/src/mainnet_vss_tests.rs b/src/mainnet_vss_tests.rs
-index f9c88b7..00e2789 100644
+index f9c88b7..95ac894 100644
 --- a/src/mainnet_vss_tests.rs
 +++ b/src/mainnet_vss_tests.rs
 @@ -317,10 +317,38 @@ impl Wallet {
@@ -4208,6 +3369,126 @@ index f9c88b7..00e2789 100644
      assert!(!server.rows(&node_store).contains_key(FENCE));
      assert!(common.persistence_worker.lock().unwrap().is_none());
  }
+@@ -766,3 +826,119 @@ async fn mainnet_vss_lock_waits_for_canceled_manual_backup_callers() {
+         );
+     }
+ }
++
++/// Exercise the real SDK policy switch against the actual encrypted protobuf client.
++/// Temporary suspension never turns a local content acknowledgement into cloud completion.
++#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
++async fn automatic_snapshot_policy_pauses_and_acknowledges_only_confirmed_cloud_commit() {
++    let server = Server::new().await;
++    let wallet = Wallet::new(&server).await;
++    sdk::unlock(wallet.state.clone(), wallet.request())
++        .await
++        .unwrap();
++    let wrapper = wallet
++        .state
++        .unlocked_app_state
++        .lock()
++        .await
++        .as_ref()
++        .unwrap()
++        .rgb_wallet_wrapper
++        .clone();
++    let policy = wrapper.snapshot_policy.as_ref().unwrap().clone();
++    let rgb_store = format!("{}_rgb", store_id());
++    sdk::address(wallet.state.clone()).await.unwrap();
++    let initial: Value = serde_json::from_str(&policy.metadata().unwrap()).unwrap();
++    assert_eq!(initial["automatic_backup_enabled"], true);
++    assert!(initial["last_backup"]["completed_at_ms"].as_u64().unwrap() > 0);
++    assert!(!policy.pending());
++    let first = server.rows(&rgb_store)["backup/manifest"].version;
++    sdk::set_vss_automatic_backup_enabled(wallet.state.clone(), false)
++        .await
++        .unwrap();
++    sdk::rotate_address(wallet.state.clone()).await.unwrap();
++    assert!(policy.pending());
++    assert!(!policy.enabled.load(std::sync::atomic::Ordering::SeqCst));
++    assert_eq!(server.rows(&rgb_store)["backup/manifest"].version, first);
++    let paused: Value = serde_json::from_str(&policy.metadata().unwrap()).unwrap();
++    assert_eq!(paused["last_backup"], initial["last_backup"]);
++    let gate = Arc::new(BackupGate {
++        store: rgb_store.clone(),
++        entered: Semaphore::new(0),
++        resume: Semaphore::new(0),
++    });
++    server.state.lock().unwrap().backup_gate = Some(gate.clone());
++    let state = wallet.state.clone();
++    let enabling =
++        tokio::spawn(async move { sdk::set_vss_automatic_backup_enabled(state, true).await });
++    tokio::time::timeout(std::time::Duration::from_secs(10), gate.entered.acquire())
++        .await
++        .unwrap()
++        .unwrap()
++        .forget();
++    assert!(
++        policy.pending(),
++        "inflight cloud write cleared pending before confirmation"
++    );
++    assert!(
++        !policy.enabled.load(std::sync::atomic::Ordering::SeqCst),
++        "switch acknowledged before catch-up commit"
++    );
++    assert_eq!(
++        serde_json::from_str::<Value>(&policy.metadata().unwrap()).unwrap()["last_backup"],
++        initial["last_backup"]
++    );
++    // A canceled UI waiter cannot cancel the admitted policy catch-up or reopen its writer.
++    enabling.abort();
++    assert!(enabling.await.unwrap_err().is_cancelled());
++    gate.resume.add_permits(1);
++    let until = tokio::time::Instant::now() + std::time::Duration::from_secs(10);
++    while !policy.enabled.load(std::sync::atomic::Ordering::SeqCst) {
++        assert!(
++            tokio::time::Instant::now() < until,
++            "policy catch-up did not complete"
++        );
++        tokio::time::sleep(std::time::Duration::from_millis(10)).await;
++    }
++    assert!(!policy.pending());
++    assert!(!policy.failed.load(std::sync::atomic::Ordering::SeqCst));
++    assert_eq!(
++        server.rows(&rgb_store)["backup/manifest"].version,
++        first + 1
++    );
++    let acknowledged: Value = serde_json::from_str(&policy.metadata().unwrap()).unwrap();
++    assert!(
++        acknowledged["last_backup"]["completed_at_ms"]
++            .as_u64()
++            .unwrap()
++            >= initial["last_backup"]["completed_at_ms"].as_u64().unwrap()
++    );
++    sdk::rotate_address(wallet.state.clone()).await.unwrap();
++    assert!(!policy.pending());
++    assert_eq!(
++        server.rows(&rgb_store)["backup/manifest"].version,
++        first + 2
++    );
++    sdk::set_vss_automatic_backup_enabled(wallet.state.clone(), false)
++        .await
++        .unwrap();
++    wallet.lock().await;
++    sdk::unlock(wallet.state.clone(), wallet.request())
++        .await
++        .unwrap();
++    let reopened: Value = serde_json::from_str(
++        &sdk::vss_backup_metadata(wallet.state.clone())
++            .await
++            .unwrap(),
++    )
++    .unwrap();
++    assert_eq!(reopened["automatic_backup_enabled"], false);
++    wallet.lock().await;
++    assert!(server
++        .state
++        .lock()
++        .unwrap()
++        .requests
++        .iter()
++        .all(|r| r.authenticated));
++}
 diff --git a/src/node.rs b/src/node.rs
 index d504a55..9294786 100644
 --- a/src/node.rs
@@ -4332,7 +3613,7 @@ index d504a55..9294786 100644
      /// left in `uniffi_api::handle_from_request`) must be able to configure the remote-signer daemon
      /// address; without this field, `NodeHandle`-embedding callers could configure external-signer
 diff --git a/src/rgb.rs b/src/rgb.rs
-index 14d98b1..67a40f9 100644
+index 84c070c..00f71e2 100644
 --- a/src/rgb.rs
 +++ b/src/rgb.rs
 @@ -30,7 +30,7 @@ use rgb_lib::{
@@ -4344,7 +3625,7 @@ index 14d98b1..67a40f9 100644
  
  use crate::{error::APIError, utils::CommonState};
  
-@@ -285,7 +285,7 @@ impl CommonState {
+@@ -261,7 +261,7 @@ impl CommonState {
              // Keep preparation, signing and completion serialized against other wallet operations.
              // Persist Initiated before asking the signer: an interrupted call must retain its inputs.
              let wrapper = &self.rgb_wallet_wrapper;
@@ -4353,7 +3634,7 @@ index 14d98b1..67a40f9 100644
              let prepared = wallet.burn_begin(
                  wrapper.online,
                  asset_id,
-@@ -658,74 +658,229 @@ fn validate_burn_signed_psbt(unsigned: &str, signed: &str) -> Result<String, Rgb
+@@ -634,74 +634,229 @@ fn validate_burn_signed_psbt(unsigned: &str, signed: &str) -> Result<String, Rgb
      Ok(prepared.to_string())
  }
  
@@ -4620,7 +3901,7 @@ index 14d98b1..67a40f9 100644
          // In FFI builds a panic crossing `extern "C"` frames aborts via
          // `panic_cannot_unwind`, cascading to every subsequent wallet op,
          // so we recover from mutex poisoning instead of propagating.
-@@ -747,18 +902,6 @@ impl RgbLibWalletWrapper {
+@@ -723,18 +878,6 @@ impl RgbLibWalletWrapper {
          self.wallet.lock().unwrap()
      }
  
@@ -4639,7 +3920,7 @@ index 14d98b1..67a40f9 100644
      #[cfg(feature = "vss")]
      pub(crate) fn vss_client(&self) -> Option<Arc<crate::rgb_vss::VssBackupClient>> {
          self.vss_client.lock().unwrap().clone()
-@@ -784,8 +927,15 @@ impl RgbLibWalletWrapper {
+@@ -760,8 +903,15 @@ impl RgbLibWalletWrapper {
          &self,
          client: &crate::rgb_vss::VssBackupClient,
      ) -> Result<i64, crate::rgb_vss::Error> {
@@ -4657,7 +3938,7 @@ index 14d98b1..67a40f9 100644
      }
  
      #[cfg(feature = "vss")]
-@@ -793,7 +943,7 @@ impl RgbLibWalletWrapper {
+@@ -769,7 +919,7 @@ impl RgbLibWalletWrapper {
          &self,
          client: &crate::rgb_vss::VssBackupClient,
      ) -> Result<crate::rgb_vss::VssBackupInfo, crate::rgb_vss::Error> {
@@ -4666,7 +3947,7 @@ index 14d98b1..67a40f9 100644
          let server_version = std::thread::scope(|scope| {
              scope
                  .spawn(|| client.handle().block_on(client.get_backup_version()))
-@@ -813,7 +963,8 @@ impl RgbLibWalletWrapper {
+@@ -789,7 +939,8 @@ impl RgbLibWalletWrapper {
      // Upstream API retained through the merge; not yet wired into utexo's flow.
      #[allow(dead_code)]
      pub(crate) fn abort_pending_vanilla_tx(&self, txid: String) -> Result<(), RgbLibError> {
@@ -4676,7 +3957,7 @@ index 14d98b1..67a40f9 100644
      }
  
      pub(crate) fn bitcoin_network(&self) -> BitcoinNetwork {
-@@ -828,7 +979,7 @@ impl RgbLibWalletWrapper {
+@@ -804,7 +955,7 @@ impl RgbLibWalletWrapper {
          transport_endpoints: Vec<String>,
          min_confirmations: u8,
      ) -> Result<ReceiveData, RgbLibError> {
@@ -4685,7 +3966,7 @@ index 14d98b1..67a40f9 100644
              Some(self.online),
              asset_id,
              assignment,
-@@ -844,7 +995,8 @@ impl RgbLibWalletWrapper {
+@@ -820,7 +971,8 @@ impl RgbLibWalletWrapper {
          fascia: Fascia,
          witness_ord: Option<WitnessOrd>,
      ) -> Result<(), RgbLibError> {
@@ -4694,8 +3975,48 @@ index 14d98b1..67a40f9 100644
 +            .consume_fascia(fascia, witness_ord)
      }
  
-     #[allow(unused_variables)]
-@@ -869,7 +1021,7 @@ impl RgbLibWalletWrapper {
+     pub(crate) fn color_psbt_and_prepare_consume(
+@@ -828,12 +980,9 @@ impl RgbLibWalletWrapper {
+         psbt_to_color: &mut BitcoinPsbt,
+         coloring_info: ColoringInfo,
+     ) -> Result<ColorPrepareResult, RgbLibError> {
+-        let prepared = self.get_rgb_wallet().color_psbt_and_prepare_consume(
+-            psbt_to_color,
+-            coloring_info,
+-            1,
+-            None,
+-        )?;
++        let prepared = self
++            .get_rgb_wallet_mutating()
++            .color_psbt_and_prepare_consume(psbt_to_color, coloring_info, 1, None)?;
+         Ok(ColorPrepareResult {
+             batch_transfer_idx: prepared.batch_transfer_idx,
+             transfers: prepared.transfers,
+@@ -841,7 +990,7 @@ impl RgbLibWalletWrapper {
+     }
+ 
+     pub(crate) fn cancel_prepared_sweep(&self, batch_transfer_idx: i32) -> Result<(), RgbLibError> {
+-        self.get_rgb_wallet()
++        self.get_rgb_wallet_mutating()
+             .cancel_prepared_sweep(batch_transfer_idx)
+     }
+ 
+@@ -850,7 +999,7 @@ impl RgbLibWalletWrapper {
+         batch_transfer_idx: i32,
+         expected_txid: String,
+     ) -> Result<(), RgbLibError> {
+-        self.get_rgb_wallet()
++        self.get_rgb_wallet_mutating()
+             .mark_prepared_sweep_handed_off(batch_transfer_idx, expected_txid)
+     }
+ 
+@@ -884,12 +1033,12 @@ impl RgbLibWalletWrapper {
+         &self,
+         batch_transfer_idx: i32,
+     ) -> Result<(), RgbLibError> {
+-        self.get_rgb_wallet()
++        self.get_rgb_wallet_mutating()
+             .consume_transfer_fascia(self.online, batch_transfer_idx)
      }
  
      pub(crate) fn create_consigments(&self, psbt: String) -> Result<(), RgbLibError> {
@@ -4703,26 +4024,8 @@ index 14d98b1..67a40f9 100644
 +        self.get_rgb_wallet_mutating().create_consignments(psbt)
      }
  
-     pub(crate) fn create_utxos(
-@@ -880,7 +1032,7 @@ impl RgbLibWalletWrapper {
-         fee_rate: u64,
-         skip_sync: bool,
-     ) -> Result<u8, RgbLibError> {
--        self.get_rgb_wallet().create_utxos(
-+        self.get_rgb_wallet_mutating().create_utxos(
-             self.online,
-             up_to,
-             Some(num),
-@@ -898,7 +1050,7 @@ impl RgbLibWalletWrapper {
-         fee_rate: u64,
-         skip_sync: bool,
-     ) -> Result<String, RgbLibError> {
--        self.get_rgb_wallet().create_utxos_begin(
-+        self.get_rgb_wallet_mutating().create_utxos_begin(
-             self.online,
-             up_to,
-             Some(num),
-@@ -914,7 +1066,7 @@ impl RgbLibWalletWrapper {
+     pub(crate) fn create_utxos_end(
+@@ -897,7 +1046,7 @@ impl RgbLibWalletWrapper {
          signed_psbt: String,
          _skip_sync: bool,
      ) -> Result<u8, RgbLibError> {
@@ -4731,7 +4034,7 @@ index 14d98b1..67a40f9 100644
              .create_utxos_end(self.online, signed_psbt)
      }
  
-@@ -924,7 +1076,7 @@ impl RgbLibWalletWrapper {
+@@ -907,7 +1056,7 @@ impl RgbLibWalletWrapper {
          no_asset_only: bool,
          skip_sync: bool,
      ) -> Result<bool, RgbLibError> {
@@ -4740,7 +4043,7 @@ index 14d98b1..67a40f9 100644
              self.online,
              batch_transfer_idx,
              no_asset_only,
-@@ -933,11 +1085,11 @@ impl RgbLibWalletWrapper {
+@@ -916,11 +1065,11 @@ impl RgbLibWalletWrapper {
      }
  
      pub(crate) fn get_address(&self) -> Result<String, RgbLibError> {
@@ -4754,7 +4057,7 @@ index 14d98b1..67a40f9 100644
      }
  
      pub(crate) fn get_asset_balance(
-@@ -958,7 +1110,8 @@ impl RgbLibWalletWrapper {
+@@ -941,7 +1090,8 @@ impl RgbLibWalletWrapper {
  
      pub(crate) fn get_btc_balance(&self, skip_sync: bool) -> Result<BtcBalance, RgbLibError> {
          let online = if skip_sync { None } else { Some(self.online) };
@@ -4764,7 +4067,7 @@ index 14d98b1..67a40f9 100644
      }
  
      pub(crate) fn get_fee_estimation(&self, blocks: u16) -> Result<f64, RgbLibError> {
-@@ -991,7 +1144,7 @@ impl RgbLibWalletWrapper {
+@@ -974,7 +1124,7 @@ impl RgbLibWalletWrapper {
          fee_rate: u64,
          min_confirmations: u8,
      ) -> Result<OperationResult, RgbLibError> {
@@ -4773,7 +4076,7 @@ index 14d98b1..67a40f9 100644
              self.online,
              asset_id,
              amount,
-@@ -1008,7 +1161,7 @@ impl RgbLibWalletWrapper {
+@@ -991,7 +1141,7 @@ impl RgbLibWalletWrapper {
          fee_rate: u64,
          min_confirmations: u8,
      ) -> Result<OperationResult, RgbLibError> {
@@ -4782,7 +4085,7 @@ index 14d98b1..67a40f9 100644
              self.online,
              asset_id,
              inflation_amounts,
-@@ -1025,7 +1178,7 @@ impl RgbLibWalletWrapper {
+@@ -1008,7 +1158,7 @@ impl RgbLibWalletWrapper {
          amounts: Vec<u64>,
          file_path: Option<String>,
      ) -> Result<AssetCFA, RgbLibError> {
@@ -4791,7 +4094,7 @@ index 14d98b1..67a40f9 100644
              .issue_asset_cfa(name, details, precision, amounts, file_path)
      }
  
-@@ -1045,7 +1198,7 @@ impl RgbLibWalletWrapper {
+@@ -1028,7 +1178,7 @@ impl RgbLibWalletWrapper {
                  details: "IFA link rights are unavailable in the BFA RGB library".into(),
              });
          }
@@ -4800,7 +4103,7 @@ index 14d98b1..67a40f9 100644
              ticker,
              name,
              precision,
-@@ -1062,7 +1215,7 @@ impl RgbLibWalletWrapper {
+@@ -1045,7 +1195,7 @@ impl RgbLibWalletWrapper {
          precision: u8,
          amounts: Vec<u64>,
      ) -> Result<AssetNIA, RgbLibError> {
@@ -4809,7 +4112,7 @@ index 14d98b1..67a40f9 100644
              .issue_asset_nia(ticker, name, precision, amounts)
      }
  
-@@ -1075,7 +1228,7 @@ impl RgbLibWalletWrapper {
+@@ -1058,7 +1208,7 @@ impl RgbLibWalletWrapper {
          media_file_path: Option<String>,
          attachments_file_paths: Vec<String>,
      ) -> Result<AssetUDA, RgbLibError> {
@@ -4818,7 +4121,7 @@ index 14d98b1..67a40f9 100644
              ticker,
              name,
              details,
-@@ -1101,7 +1254,8 @@ impl RgbLibWalletWrapper {
+@@ -1084,7 +1234,8 @@ impl RgbLibWalletWrapper {
          skip_sync: bool,
      ) -> Result<Vec<RgbLibTransaction>, RgbLibError> {
          let online = if skip_sync { None } else { Some(self.online) };
@@ -4828,7 +4131,7 @@ index 14d98b1..67a40f9 100644
      }
  
      pub(crate) fn list_transfers(
-@@ -1118,7 +1272,7 @@ impl RgbLibWalletWrapper {
+@@ -1101,7 +1252,7 @@ impl RgbLibWalletWrapper {
          skip_sync: bool,
      ) -> Result<Vec<Unspent>, RgbLibError> {
          let online = if skip_sync { None } else { Some(self.online) };
@@ -4837,7 +4140,7 @@ index 14d98b1..67a40f9 100644
              .list_unspents(online, settled_only, skip_sync)
      }
  
-@@ -1129,7 +1283,7 @@ impl RgbLibWalletWrapper {
+@@ -1112,7 +1263,7 @@ impl RgbLibWalletWrapper {
          vout: u32,
          blinding: u64,
      ) -> Result<(RgbTransfer, Vec<Assignment>, HashSet<String>), RgbLibError> {
@@ -4846,7 +4149,7 @@ index 14d98b1..67a40f9 100644
              self.online,
              consignment_path,
              txid,
-@@ -1142,7 +1296,7 @@ impl RgbLibWalletWrapper {
+@@ -1125,7 +1276,7 @@ impl RgbLibWalletWrapper {
          &self,
          recipient_id: String,
      ) -> Result<Option<OperationResult>, RgbLibError> {
@@ -4855,7 +4158,7 @@ index 14d98b1..67a40f9 100644
              .provide_out_of_band_ack(self.online, recipient_id)
      }
  
-@@ -1151,11 +1305,8 @@ impl RgbLibWalletWrapper {
+@@ -1134,11 +1285,8 @@ impl RgbLibWalletWrapper {
          consignment_path: String,
          media_file_paths: Vec<String>,
      ) -> Result<HashMap<i32, RefreshedTransfer>, RgbLibError> {
@@ -4869,7 +4172,7 @@ index 14d98b1..67a40f9 100644
      }
  
      pub(crate) fn refresh(
-@@ -1164,7 +1315,10 @@ impl RgbLibWalletWrapper {
+@@ -1147,7 +1295,10 @@ impl RgbLibWalletWrapper {
          filter: Vec<RefreshFilter>,
          skip_sync: bool,
      ) -> Result<RefreshResult, RgbLibError> {
@@ -4881,7 +4184,7 @@ index 14d98b1..67a40f9 100644
              .refresh(self.online, asset_id, filter, skip_sync)
      }
  
-@@ -1173,7 +1327,7 @@ impl RgbLibWalletWrapper {
+@@ -1156,7 +1307,7 @@ impl RgbLibWalletWrapper {
          consignment: RgbTransfer,
          offchain_txid: String,
      ) -> Result<(), RgbLibError> {
@@ -4890,7 +4193,7 @@ index 14d98b1..67a40f9 100644
              .save_new_asset(self.online, consignment, offchain_txid)
      }
  
-@@ -1186,7 +1340,7 @@ impl RgbLibWalletWrapper {
+@@ -1169,7 +1320,7 @@ impl RgbLibWalletWrapper {
          expiration_timestamp: u64,
          sender_endpoint: Option<String>,
      ) -> Result<OperationResult, RgbLibError> {
@@ -4899,16 +4202,25 @@ index 14d98b1..67a40f9 100644
              self.online,
              recipient_map,
              donation,
-@@ -1214,7 +1368,7 @@ impl RgbLibWalletWrapper {
-                 details: "Custom RGB funding locktime is unavailable in the BFA RGB library".into(),
-             });
+@@ -1194,7 +1345,7 @@ impl RgbLibWalletWrapper {
+     ) -> Result<SendBeginResult, RgbLibError> {
+         match lock_time {
+             Some(0) => {
+-                return self.get_rgb_wallet().send_channel_funding_begin(
++                return self.get_rgb_wallet_mutating().send_channel_funding_begin(
+                     self.online,
+                     recipient_map,
+                     donation,
+@@ -1212,7 +1363,7 @@ impl RgbLibWalletWrapper {
+             }
+             None => {}
          }
 -        self.get_rgb_wallet().send_begin(
 +        self.get_rgb_wallet_mutating().send_begin(
              self.online,
              recipient_map,
              donation,
-@@ -1233,7 +1387,7 @@ impl RgbLibWalletWrapper {
+@@ -1231,7 +1382,7 @@ impl RgbLibWalletWrapper {
          fee_rate: u64,
          skip_sync: bool,
      ) -> Result<String, RgbLibError> {
@@ -4917,7 +4229,7 @@ index 14d98b1..67a40f9 100644
              .send_btc(self.online, address, amount, fee_rate, skip_sync)
      }
  
-@@ -1244,8 +1398,14 @@ impl RgbLibWalletWrapper {
+@@ -1242,8 +1393,14 @@ impl RgbLibWalletWrapper {
          fee_rate: u64,
          dry_run: bool,
      ) -> Result<String, RgbLibError> {
@@ -4934,7 +4246,20 @@ index 14d98b1..67a40f9 100644
      }
  
      pub(crate) fn send_btc_channel_funding_begin(
-@@ -1264,18 +1424,20 @@ impl RgbLibWalletWrapper {
+@@ -1252,29 +1409,25 @@ impl RgbLibWalletWrapper {
+         amount: u64,
+         fee_rate: u64,
+     ) -> Result<String, RgbLibError> {
+-        self.get_rgb_wallet().send_btc_channel_funding_begin(
+-            self.online,
+-            address,
+-            amount,
+-            fee_rate,
+-            false,
+-            false,
+-        )
++        self.get_rgb_wallet_mutating()
++            .send_btc_channel_funding_begin(self.online, address, amount, fee_rate, false, false)
      }
  
      pub(crate) fn send_btc_end(&self, signed_psbt: String) -> Result<String, RgbLibError> {
@@ -4958,7 +4283,7 @@ index 14d98b1..67a40f9 100644
              .send_end_db_update_only(self.online, signed_psbt)
      }
  
-@@ -1284,7 +1446,7 @@ impl RgbLibWalletWrapper {
+@@ -1283,7 +1436,7 @@ impl RgbLibWalletWrapper {
      }
  
      pub(crate) fn sync(&self, options: SyncOptions) -> Result<(), RgbLibError> {
@@ -4967,7 +4292,7 @@ index 14d98b1..67a40f9 100644
      }
  
      pub(crate) fn update_witnesses(
-@@ -1292,7 +1454,7 @@ impl RgbLibWalletWrapper {
+@@ -1291,7 +1444,7 @@ impl RgbLibWalletWrapper {
          after_height: u32,
          force_witnesses: Vec<RgbTxid>,
      ) -> Result<UpdateRes, RgbLibError> {
@@ -4976,7 +4301,7 @@ index 14d98b1..67a40f9 100644
              .update_witnesses(self.online, after_height, force_witnesses)
      }
  
-@@ -1301,7 +1463,7 @@ impl RgbLibWalletWrapper {
+@@ -1300,7 +1453,7 @@ impl RgbLibWalletWrapper {
          witness_id: RgbTxid,
          witness_ord: WitnessOrd,
      ) -> Result<(), RgbLibError> {
@@ -4985,7 +4310,7 @@ index 14d98b1..67a40f9 100644
              .upsert_witness(witness_id, witness_ord)
      }
  
-@@ -1313,7 +1475,7 @@ impl RgbLibWalletWrapper {
+@@ -1312,7 +1465,7 @@ impl RgbLibWalletWrapper {
          transport_endpoints: Vec<String>,
          min_confirmations: u8,
      ) -> Result<ReceiveData, RgbLibError> {
@@ -4994,7 +4319,7 @@ index 14d98b1..67a40f9 100644
              Some(self.online),
              asset_id,
              assignment,
-@@ -1416,7 +1578,7 @@ impl WalletSource for RgbLibWalletWrapper {
+@@ -1415,7 +1568,7 @@ impl WalletSource for RgbLibWalletWrapper {
          Box::pin(async move {
              let network = Network::from(self.bitcoin_network());
              let unspents = self
@@ -5003,7 +4328,7 @@ index 14d98b1..67a40f9 100644
                  .list_unspents_vanilla(self.online, 1, false)
                  .map_err(|e| {
                      tracing::error!(error = %e, "failed to list unspents for fee bumping");
-@@ -1459,7 +1621,7 @@ impl WalletSource for RgbLibWalletWrapper {
+@@ -1458,7 +1611,7 @@ impl WalletSource for RgbLibWalletWrapper {
  
      fn get_change_script<'a>(&'a self) -> AsyncResult<'a, ScriptBuf, ()> {
          Box::pin(async move {
@@ -5012,7 +4337,30 @@ index 14d98b1..67a40f9 100644
                  tracing::error!(error = %e, "failed to get change address for fee bumping");
              })?;
              let parsed = Address::from_str(&address).map_err(|e| {
-@@ -1728,6 +1890,489 @@ mod wallet_source_tests {
+@@ -1704,15 +1857,19 @@ mod wallet_source_tests {
+     }
+ 
+     fn signetcustom_wallet_source() -> RgbLibWalletWrapper {
++        wallet_source_for_network(BitcoinNetwork::SignetCustom)
++    }
++
++    fn wallet_source_for_network(network: BitcoinNetwork) -> RgbLibWalletWrapper {
+         let tmp = tempfile::tempdir().expect("tempdir");
+-        let keys = generate_keys(BitcoinNetwork::SignetCustom, WitnessVersion::Taproot);
++        let keys = generate_keys(network, WitnessVersion::Taproot);
+         let wallet = RgbLibWallet::new(
+             WalletData {
+                 data_dir: tmp.keep().display().to_string(),
+-                bitcoin_network: BitcoinNetwork::SignetCustom,
++                bitcoin_network: network,
+                 database_type: DatabaseType::Sqlite,
+                 max_allocations_per_utxo: 1,
+-                supported_schemas: vec![AssetSchema::Nia],
++                supported_schemas: vec![AssetSchema::Nia, AssetSchema::Bfa],
+             },
+             SinglesigKeys {
+                 account_xpub_vanilla: keys.account_xpub_vanilla,
+@@ -1727,6 +1884,1068 @@ mod wallet_source_tests {
          RgbLibWalletWrapper::new(Arc::new(Mutex::new(wallet)), Online { id: 0 })
      }
  
@@ -5138,7 +4486,7 @@ index 14d98b1..67a40f9 100644
 +    }
 +
 +    #[test]
-+    fn ordinary_bitcoin_prepare_is_distinct_from_unsupported_channel_funding() {
++    fn ordinary_and_fixed_zero_bitcoin_funding_reach_native_online_admission() {
 +        let wrapper = signetcustom_wallet_source();
 +        // This fresh offline fixture reaches the actual RGB wallet's online check.
 +        assert!(matches!(
@@ -5147,7 +4495,7 @@ index 14d98b1..67a40f9 100644
 +        ));
 +        assert!(matches!(
 +            wrapper.send_btc_channel_funding_begin("unused".into(), 1000, 1),
-+            Err(RgbLibError::Internal { details }) if details.contains("channel funding locktime")
++            Err(RgbLibError::Offline)
 +        ));
 +    }
 +
@@ -5407,6 +4755,581 @@ index 14d98b1..67a40f9 100644
 +
 +    #[cfg(feature = "vss")]
 +    #[test]
++    fn final_graph_mutation_branches_durably_admit_paused_and_enabled_backup() {
++        for enabled in [false, true] {
++            for operation in [
++                "rgb_funding",
++                "btc_funding",
++                "prepare",
++                "cancel",
++                "handoff",
++                "consume",
++            ] {
++                let tmp = tempfile::tempdir().unwrap();
++                let policy = Arc::new(
++                    crate::vss_snapshot_policy::SnapshotPolicy::load(
++                        tmp.path(),
++                        BitcoinNetwork::SignetCustom,
++                        "https://example.invalid/vss".into(),
++                        "test-node".into(),
++                        enabled,
++                    )
++                    .unwrap(),
++                );
++                let mut wrapper = signetcustom_wallet_source();
++                wrapper.snapshot_policy = Some(policy.clone());
++                completed_snapshot_fixture(&wrapper, tmp.path());
++                let before = policy.metadata().unwrap();
++                assert!(!policy.pending());
++                let failed = match operation {
++                    // Some(0) must enter the real builder, independently of the ordinary None branch.
++                    "rgb_funding" => wrapper
++                        .send_begin(HashMap::new(), false, 1, 1, 0, false, Some(0), None)
++                        .is_err(),
++                    "btc_funding" => wrapper
++                        .send_btc_channel_funding_begin("unused".into(), 1000, 1)
++                        .is_err(),
++                    "prepare" => {
++                        let tx = bitcoin::Transaction {
++                            version: bitcoin::transaction::Version::TWO,
++                            lock_time: bitcoin::absolute::LockTime::ZERO,
++                            input: vec![],
++                            output: vec![],
++                        };
++                        let mut psbt = BitcoinPsbt::from_unsigned_tx(tx).unwrap();
++                        wrapper
++                            .color_psbt_and_prepare_consume(
++                                &mut psbt,
++                                ColoringInfo {
++                                    asset_info_map: HashMap::new(),
++                                    static_blinding: None,
++                                    nonce: None,
++                                },
++                            )
++                            .is_err()
++                    }
++                    "cancel" => wrapper.cancel_prepared_sweep(i32::MAX).is_err(),
++                    "handoff" => wrapper
++                        .mark_prepared_sweep_handed_off(i32::MAX, "00".repeat(32))
++                        .is_err(),
++                    "consume" => wrapper.consume_transfer_fascia(i32::MAX).is_err(),
++                    _ => unreachable!(),
++                };
++                assert!(
++                    failed,
++                    "{operation}: invalid offline fixture unexpectedly succeeded"
++                );
++                assert!(policy.pending(), "{operation}: mutation admission missing");
++                assert_eq!(
++                    policy.failed.load(std::sync::atomic::Ordering::SeqCst),
++                    enabled,
++                    "only enabled automatic backup should attempt the absent client"
++                );
++                assert_eq!(
++                    policy.metadata().unwrap(),
++                    before,
++                    "failed/unattempted upload changed completion"
++                );
++                let reopened = crate::vss_snapshot_policy::SnapshotPolicy::load(
++                    tmp.path(),
++                    BitcoinNetwork::SignetCustom,
++                    "https://example.invalid/vss".into(),
++                    "test-node".into(),
++                    !enabled,
++                )
++                .unwrap();
++                assert!(reopened.pending(), "{operation}: admission was not durable");
++                assert_eq!(
++                    reopened.enabled.load(std::sync::atomic::Ordering::SeqCst),
++                    enabled
++                );
++            }
++        }
++    }
++
++    #[cfg(feature = "vss")]
++    #[test]
++    fn rejected_locktime_and_prepared_recovery_never_admit_mutation() {
++        let tmp = tempfile::tempdir().unwrap();
++        let policy = Arc::new(
++            crate::vss_snapshot_policy::SnapshotPolicy::load(
++                tmp.path(),
++                BitcoinNetwork::SignetCustom,
++                "https://example.invalid/vss".into(),
++                "test-node".into(),
++                true,
++            )
++            .unwrap(),
++        );
++        let mut wrapper = signetcustom_wallet_source();
++        wrapper.snapshot_policy = Some(policy.clone());
++        completed_snapshot_fixture(&wrapper, tmp.path());
++        for locktime in [1, u32::MAX] {
++            assert!(
++                matches!(wrapper.send_begin(HashMap::new(), false, 1, 1, 0, false, Some(locktime), None),
++                Err(RgbLibError::Internal { details }) if details.contains("final-zero-locktime"))
++            );
++            assert!(!policy.pending());
++            assert!(!policy.failed.load(std::sync::atomic::Ordering::SeqCst));
++        }
++        assert!(wrapper
++            .recover_prepared_sweep(&HashSet::new())
++            .unwrap()
++            .is_none());
++        assert!(!policy.pending());
++        assert!(!policy.failed.load(std::sync::atomic::Ordering::SeqCst));
++    }
++
++    #[cfg(feature = "vss")]
++    #[test]
++    fn public_dev_bfa_contract_import_retains_pending_until_confirmed_cloud_commit() {
++        use base64::Engine;
++        const CONTRACT: &str = "UkdCAENPTgEAAAAAAEcpeXkGdyB61NOXtwFnUGSUeBQeRr8WT8venMISYgKX71PSagAAAAANAHNzaTphbm9ueW1vdXMDAAAE0AcBABUABUJVU0RUDEJyaWRnZWQgVVNEVAAG0QcBAAMAAAAAwAsBAB0AALGkAAAAAAAAvv2h8A1USz/KeLiVhUix/AKmSjbCCwEAHQABsaQAAAAAAACLDCXD5DLIx/5v0GUtFEC14W1WAwEArQ8ACgAAJl57BwYGZ0aMOJBIO1Vd9fByD/NuhzI25XndZZ5Wb7YAAAAAzOVnzSjGG2IAJl57BwYGZ0aMOJBIO1Vd9fByD/NuhzI25XndZZ5Wb7YBAAAAtlb1Tqs0b8gAJl57BwYGZ0aMOJBIO1Vd9fByD/NuhzI25XndZZ5Wb7YDAAAAN/jlgQ0tV2oAJl57BwYGZ0aMOJBIO1Vd9fByD/NuhzI25XndZZ5Wb7YFAAAAKOWYjX6TiA0AJl57BwYGZ0aMOJBIO1Vd9fByD/NuhzI25XndZZ5Wb7YGAAAAVJHxgbimjzMAJl57BwYGZ0aMOJBIO1Vd9fByD/NuhzI25XndZZ5Wb7YIAAAAZXC2LjNLRekAJl57BwYGZ0aMOJBIO1Vd9fByD/NuhzI25XndZZ5Wb7YJAAAAkkcrglMERl4AJl57BwYGZ0aMOJBIO1Vd9fByD/NuhzI25XndZZ5Wb7YKAAAAZuR27o7HDs0AJl57BwYGZ0aMOJBIO1Vd9fByD/NuhzI25XndZZ5Wb7YLAAAA8ysnr6oXWnEAJl57BwYGZ0aMOJBIO1Vd9fByD/NuhzI25XndZZ5Wb7YMAAAAK7dVveLPBloAAAAA";
++        const ASSET: &str = "rgb:OG9No4hZ-UrxoWmR-09ohtOk-ppxBN7h-g~KkQro-ncKc9A4";
++        let bytes = base64::engine::general_purpose::STANDARD
++            .decode(CONTRACT)
++            .unwrap();
++        assert_eq!(bytes.len(), 639);
++        assert_eq!(
++            bitcoin::hashes::sha256::Hash::hash(&bytes).to_string(),
++            "dfb49261fed5ad3dd237dd3a03913793b76fe70e486372bbeb0769b82158a895"
++        );
++        // The transport alias does not change the contract's native chain identity.
++        let wrong_network = signetcustom_wallet_source();
++        let negative = tempfile::tempdir().unwrap();
++        let wrong_contract = negative.path().join("dev-usdt.con");
++        std::fs::write(&wrong_contract, &bytes).unwrap();
++        assert!(wrong_network
++            .get_rgb_wallet_mutating()
++            .import_contract(wrong_contract.display().to_string(), Some(ASSET.into()))
++            .is_err());
++        for enabled in [false, true] {
++            let tmp = tempfile::tempdir().unwrap();
++            let policy = Arc::new(
++                crate::vss_snapshot_policy::SnapshotPolicy::load(
++                    tmp.path(),
++                    BitcoinNetwork::Signet,
++                    "https://example.invalid/vss".into(),
++                    "test-node".into(),
++                    enabled,
++                )
++                .unwrap(),
++            );
++            let mut wrapper = wallet_source_for_network(BitcoinNetwork::Signet);
++            wrapper.snapshot_policy = Some(policy.clone());
++            let contract = tmp.path().join("dev-usdt.con");
++            std::fs::write(&contract, &bytes).unwrap();
++            {
++                let mut guard = wrapper.get_rgb_wallet_mutating();
++                let id = guard
++                    .import_contract(contract.display().to_string(), Some(ASSET.into()))
++                    .unwrap();
++                assert_eq!(id, ASSET);
++                let metadata = guard.get_asset_metadata(id.clone()).unwrap();
++                assert_eq!(metadata.name, "Bridged USDT");
++                assert_eq!(metadata.ticker.as_deref(), Some("BUSDT"));
++                assert_eq!(metadata.precision, 6);
++                assert_eq!(guard.get_asset_balance(id).unwrap().settled, 0);
++            }
++            assert!(policy.pending());
++            assert_eq!(
++                policy.failed.load(std::sync::atomic::Ordering::SeqCst),
++                enabled
++            );
++            let snapshot = wrapper
++                .get_rgb_wallet_for_snapshot()
++                .prepare_snapshot()
++                .unwrap();
++            assert!(wrapper
++                .get_rgb_wallet_for_snapshot()
++                .acknowledge_snapshot(&snapshot.token)
++                .unwrap());
++            assert!(
++                policy.pending(),
++                "local acknowledgement cannot assert a cloud upload"
++            );
++            let metadata: serde_json::Value =
++                serde_json::from_str(&policy.metadata().unwrap()).unwrap();
++            assert!(metadata["last_backup"].is_null());
++        }
++    }
++    /// Uses only the explicitly owned fixture, never the shared Iris stack or hosted services.
++    /// An absent cloud client intentionally proves upload failure cannot roll back financial work.
++    #[cfg(feature = "vss")]
++    #[test]
++    #[ignore = "requires explicitly admitted isolated regtest fixture"]
++    fn final_graph_funded_mutations_preserve_snapshot_admission_and_exact_sweeps() {
++        use rgb_lib::wallet::{OnlineOptions, SyncKeychain, SyncStrategy, WitnessData};
++        use rgb_lib::{no_wallet::IndexerConfig, Encryption, FileContent};
++        use serde_json::{json, Value};
++        use std::{
++            process::Command,
++            time::{Duration, Instant},
++        };
++        const PROJECT: &str = "iris_rgb_output_20261026";
++        const CONTAINER: &str = "iris_rgb_output_20261026-bitcoind-1";
++        assert_eq!(std::env::var("COMPOSE_PROJECT_NAME").unwrap(), PROJECT);
++        let compose = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
++            .parent()
++            .unwrap()
++            .join("qualification-consumers/rgb-output-native-fixture-20261026/compose.yaml")
++            .canonicalize()
++            .unwrap();
++        assert_eq!(
++            PathBuf::from(std::env::var("COMPOSE_FILE").unwrap())
++                .canonicalize()
++                .unwrap(),
++            compose
++        );
++        let rpc = |wallet: bool, method: &str, params: Vec<Value>| -> Value {
++            let inspected = Command::new("docker")
++                .args(["inspect", CONTAINER, "--format", "{{json .Config.Labels}}"])
++                .output()
++                .unwrap();
++            assert!(inspected.status.success());
++            let labels: Value = serde_json::from_slice(&inspected.stdout).unwrap();
++            assert_eq!(labels["com.docker.compose.project"], PROJECT);
++            assert_eq!(
++                PathBuf::from(
++                    labels["com.docker.compose.project.config_files"]
++                        .as_str()
++                        .unwrap()
++                )
++                .canonicalize()
++                .unwrap(),
++                compose
++            );
++            let mut args = vec![
++                "exec".to_owned(),
++                CONTAINER.into(),
++                "bitcoin-cli".into(),
++                "-regtest".into(),
++                "-rpcuser=user".into(),
++                "-rpcpassword=password".into(),
++            ];
++            if wallet {
++                args.push("-rpcwallet=iris-output-tests".into());
++            }
++            args.push(method.into());
++            args.extend(params.into_iter().map(|p| {
++                p.as_str()
++                    .map(str::to_owned)
++                    .unwrap_or_else(|| p.to_string())
++            }));
++            let result = Command::new("docker").args(&args).output().unwrap();
++            assert!(result.status.success(), "owned fixture RPC {method} failed");
++            serde_json::from_slice(&result.stdout).unwrap_or_else(|_| {
++                Value::String(String::from_utf8(result.stdout).unwrap().trim().into())
++            })
++        };
++        assert_eq!(rpc(false, "getblockchaininfo", vec![])["chain"], "regtest");
++        assert_eq!(rpc(false, "getmempoolinfo", vec![])["size"], 0);
++        let mining = rpc(true, "getnewaddress", vec![]);
++        let mine = || {
++            rpc(false, "generatetoaddress", vec![json!(1), mining.clone()]);
++            let target = rpc(false, "getblockcount", vec![]).as_u64().unwrap();
++            let until = Instant::now() + Duration::from_secs(30);
++            loop {
++                let result = Command::new("curl")
++                    .args([
++                        "--fail",
++                        "--silent",
++                        "--max-time",
++                        "2",
++                        "http://127.0.0.1:3002/blocks/tip/height",
++                    ])
++                    .output()
++                    .unwrap();
++                let seen = result.status.success().then(|| {
++                    String::from_utf8(result.stdout)
++                        .unwrap()
++                        .trim()
++                        .parse::<u64>()
++                        .unwrap()
++                });
++                if seen == Some(target) {
++                    break;
++                }
++                assert!(
++                    Instant::now() < until,
++                    "owned indexer did not reach mined height"
++                );
++                std::thread::sleep(Duration::from_millis(100));
++            }
++        };
++        for enabled in [false, true] {
++            let storage = tempfile::tempdir().unwrap();
++            let keys = generate_keys(BitcoinNetwork::Regtest, WitnessVersion::Taproot);
++            let mut native = RgbLibWallet::new(
++                WalletData {
++                    data_dir: storage.path().display().to_string(),
++                    bitcoin_network: BitcoinNetwork::Regtest,
++                    database_type: DatabaseType::Sqlite,
++                    max_allocations_per_utxo: 5,
++                    supported_schemas: vec![AssetSchema::Nia],
++                },
++                SinglesigKeys {
++                    account_xpub_vanilla: keys.account_xpub_vanilla,
++                    account_xpub_colored: keys.account_xpub_colored,
++                    vanilla_keychain: None,
++                    master_fingerprint: keys.master_fingerprint,
++                    mnemonic: Some(keys.mnemonic),
++                    witness_version: WitnessVersion::Taproot,
++                },
++            )
++            .unwrap();
++            let address = native.get_address().unwrap();
++            rpc(true, "sendtoaddress", vec![json!(address), json!(0.01)]);
++            mine();
++            let online = native
++                .go_online(OnlineOptions {
++                    indexer_config: IndexerConfig::Esplora {
++                        url: "http://127.0.0.1:3002".into(),
++                    },
++                    skip_consistency_check: false,
++                    vanilla_sync_lookback: 20,
++                    failed_witness_receive_grace_secs: 604800,
++                    proxy_auth_keys: HashMap::new(),
++                    evm_rpc_urls: HashMap::new(),
++                })
++                .unwrap();
++            let policy = Arc::new(
++                crate::vss_snapshot_policy::SnapshotPolicy::load(
++                    storage.path(),
++                    BitcoinNetwork::Regtest,
++                    "https://example.invalid/vss".into(),
++                    "funded-node".into(),
++                    enabled,
++                )
++                .unwrap(),
++            );
++            let mut wrapper = RgbLibWalletWrapper::new(Arc::new(Mutex::new(native)), online);
++            wrapper.snapshot_policy = Some(policy.clone());
++            // Keep the complete existing writer around native reservation and its RLN journal cutpoint.
++            wrapper
++                .with_output_operation_snapshot(|| {
++                    let count = wrapper.get_rgb_wallet().create_utxos(
++                        online,
++                        false,
++                        Some(5),
++                        Some(10_000),
++                        2,
++                        false,
++                    )?;
++                    assert_eq!(count, 5);
++                    Ok(())
++                })
++                .unwrap();
++            mine();
++            wrapper
++                .sync(SyncOptions {
++                    keychain: SyncKeychain::Colored,
++                    strategy: SyncStrategy::FullSync,
++                })
++                .unwrap();
++            let asset = wrapper
++                .issue_asset_nia("SNAP".into(), "Snapshot admission".into(), 0, vec![100])
++                .unwrap()
++                .asset_id;
++            let funding = wrapper
++                .send_btc_channel_funding_begin(mining.as_str().unwrap().into(), 25_000, 2)
++                .unwrap();
++            let funding = BitcoinPsbt::from_str(&funding).unwrap();
++            assert_eq!(
++                funding.unsigned_tx.lock_time,
++                bitcoin::absolute::LockTime::ZERO
++            );
++            wrapper
++                .abort_pending_vanilla_tx(funding.unsigned_tx.compute_txid().to_string())
++                .unwrap();
++            let expires = std::time::SystemTime::now()
++                .duration_since(std::time::UNIX_EPOCH)
++                .unwrap()
++                .as_secs()
++                + 3600;
++            let receive = wrapper
++                .witness_receive(None, Assignment::Fungible(40), expires, vec![], 1)
++                .unwrap();
++            let recipients = HashMap::from([(
++                asset.clone(),
++                vec![Recipient {
++                    recipient_id: receive.recipient_id,
++                    witness_data: Some(WitnessData {
++                        amount_sat: 30_000,
++                        blinding: None,
++                    }),
++                    assignment: Assignment::Fungible(40),
++                    transport_endpoints: vec![],
++                    public_key: None,
++                    encryption: Encryption::Optional,
++                    expiration_timestamp: None,
++                }],
++            )]);
++            let begin = wrapper
++                .send_begin(recipients, true, 2, 1, expires, true, Some(0), None)
++                .unwrap();
++            let preview = BitcoinPsbt::from_str(&begin.psbt).unwrap();
++            assert_eq!(
++                preview.unsigned_tx.lock_time,
++                bitcoin::absolute::LockTime::ZERO
++            );
++            assert!(begin.batch_transfer_idx.is_none());
++            assert!(
++                preview.unsigned_tx.input.len() >= 4,
++                "real fixed-zero retry must include fee inputs"
++            );
++            let receive = wrapper
++                .witness_receive(None, Assignment::Fungible(100), expires, vec![], 1)
++                .unwrap();
++            let script = rgb_lib::utils::script_buf_from_recipient_id(receive.recipient_id)
++                .unwrap()
++                .unwrap();
++            let unspent = wrapper
++                .list_unspents(false, false)
++                .unwrap()
++                .into_iter()
++                .find(|u| {
++                    u.rgb_allocations.iter().any(|a| {
++                        a.asset_id.as_deref() == Some(asset.as_str())
++                            && a.assignment == Assignment::Fungible(100)
++                    })
++                })
++                .unwrap();
++            let input: OutPoint = unspent.utxo.outpoint.into();
++            let txout = rpc(
++                false,
++                "gettxout",
++                vec![json!(input.txid.to_string()), json!(input.vout)],
++            );
++            let prev = TxOut {
++                value: bitcoin::Amount::from_sat(unspent.utxo.btc_amount),
++                script_pubkey: ScriptBuf::from_hex(txout["scriptPubKey"]["hex"].as_str().unwrap())
++                    .unwrap(),
++            };
++            let tx = Transaction {
++                version: bitcoin::transaction::Version::TWO,
++                lock_time: bitcoin::absolute::LockTime::ZERO,
++                input: vec![bitcoin::TxIn {
++                    previous_output: input,
++                    script_sig: ScriptBuf::new(),
++                    sequence: bitcoin::Sequence::ENABLE_RBF_NO_LOCKTIME,
++                    witness: bitcoin::Witness::new(),
++                }],
++                output: vec![TxOut {
++                    value: bitcoin::Amount::from_sat(unspent.utxo.btc_amount - 1000),
++                    script_pubkey: script,
++                }],
++            };
++            let mut psbt = BitcoinPsbt::from_unsigned_tx(tx).unwrap();
++            psbt.inputs[0].witness_utxo = Some(prev);
++            let original = psbt.clone();
++            let coloring = ColoringInfo {
++                asset_info_map: HashMap::from([(
++                    ContractId::from_str(&asset).unwrap(),
++                    rgb_lib::wallet::rust_only::AssetColoringInfo {
++                        output_map: HashMap::from([(0, 100)]),
++                        static_blinding: Some(777),
++                    },
++                )]),
++                static_blinding: None,
++                nonce: None,
++            };
++            let first = wrapper
++                .color_psbt_and_prepare_consume(&mut psbt, coloring.clone())
++                .unwrap();
++            let inputs = HashSet::from([input]);
++            assert!(wrapper.recover_prepared_sweep(&inputs).unwrap().is_some());
++            let snapshot = wrapper
++                .get_rgb_wallet_for_snapshot()
++                .prepare_snapshot()
++                .unwrap();
++            wrapper
++                .cancel_prepared_sweep(first.batch_transfer_idx)
++                .unwrap();
++            assert!(
++                !wrapper
++                    .get_rgb_wallet_for_snapshot()
++                    .acknowledge_snapshot(&snapshot.token)
++                    .unwrap(),
++                "stale snapshot acknowledged cancelled preparation"
++            );
++            psbt = original;
++            let prepared = wrapper
++                .color_psbt_and_prepare_consume(&mut psbt, coloring)
++                .unwrap();
++            let batch = prepared.batch_transfer_idx;
++            let txid = psbt.unsigned_tx.compute_txid().to_string();
++            let proof_directory = tempfile::tempdir().unwrap();
++            let proof = proof_directory.path().join("sweep.rgb");
++            prepared.transfers[0].save_file(&proof).unwrap();
++            wrapper
++                .provide_out_of_band_consignment(proof.display().to_string(), vec![])
++                .unwrap();
++            assert!(wrapper.consume_transfer_fascia(batch).is_err());
++            wrapper
++                .mark_prepared_sweep_handed_off(batch, txid.clone())
++                .unwrap();
++            assert!(
++                wrapper.cancel_prepared_sweep(batch).is_err(),
++                "handoff reservations must not be discarded"
++            );
++            let signed = wrapper.sign_psbt(psbt.to_string()).unwrap();
++            let tx = BitcoinPsbt::from_str(&signed)
++                .unwrap()
++                .extract_tx()
++                .unwrap();
++            assert_eq!(tx.compute_txid().to_string(), txid);
++            rpc(
++                false,
++                "sendrawtransaction",
++                vec![json!(bitcoin::consensus::encode::serialize_hex(&tx))],
++            );
++            assert!(
++                wrapper.consume_transfer_fascia(batch).is_err(),
++                "zero-confirmation consume was admitted"
++            );
++            mine();
++            wrapper.consume_transfer_fascia(batch).unwrap();
++            wrapper.consume_transfer_fascia(batch).unwrap();
++            wrapper.refresh(None, vec![], false).unwrap();
++            assert_eq!(
++                wrapper
++                    .get_asset_balance(ContractId::from_str(&asset).unwrap())
++                    .unwrap()
++                    .settled,
++                100
++            );
++            assert!(
++                policy.pending(),
++                "successful financial mutation lost its pending backup"
++            );
++            assert_eq!(
++                policy.failed.load(std::sync::atomic::Ordering::SeqCst),
++                enabled
++            );
++            let metadata: Value = serde_json::from_str(&policy.metadata().unwrap()).unwrap();
++            assert!(
++                metadata["last_backup"].is_null(),
++                "failed/unattempted upload cannot invent a completion"
++            );
++            let current = wrapper
++                .get_rgb_wallet_for_snapshot()
++                .prepare_snapshot()
++                .unwrap();
++            assert!(wrapper
++                .get_rgb_wallet_for_snapshot()
++                .acknowledge_snapshot(&current.token)
++                .unwrap());
++            assert!(
++                policy.pending(),
++                "local content acknowledgement is not cloud commit"
++            );
++            assert!(wrapper.recover_prepared_sweep(&inputs).unwrap().is_none());
++        }
++        assert_eq!(rpc(false, "getmempoolinfo", vec![])["size"], 0);
++    }
++    #[cfg(feature = "vss")]
++    #[test]
 +    fn every_adapter_state_mutator_uses_explicit_snapshot_admission() {
 +        let source = include_str!("rgb.rs");
 +        let adapter = source
@@ -5420,9 +5343,11 @@ index 14d98b1..67a40f9 100644
 +            "abort_pending_vanilla_tx",
 +            "blind_receive",
 +            "consume_fascia",
++            "color_psbt_and_prepare_consume",
++            "cancel_prepared_sweep",
++            "mark_prepared_sweep_handed_off",
++            "consume_transfer_fascia",
 +            "create_consigments",
-+            "create_utxos",
-+            "create_utxos_begin",
 +            "create_utxos_end",
 +            "fail_transfers",
 +            "get_address",
@@ -5441,6 +5366,7 @@ index 14d98b1..67a40f9 100644
 +            "send_begin",
 +            "send_btc",
 +            "send_btc_begin",
++            "send_btc_channel_funding_begin",
 +            "send_btc_end",
 +            "send_end",
 +            "send_end_db_update_only",
@@ -5482,6 +5408,7 @@ index 14d98b1..67a40f9 100644
 +            "list_transactions",
 +            "list_transfers",
 +            "list_unspents",
++            "recover_prepared_sweep",
 +            "sign_psbt",
 +        ] {
 +            let signature = format!("fn {method}(");
@@ -5503,7 +5430,7 @@ index 14d98b1..67a40f9 100644
      async fn wallet_source_does_not_panic_on_signetcustom() {
          let wrapper = signetcustom_wallet_source();
 diff --git a/src/rgb_import.rs b/src/rgb_import.rs
-index a665290..135045c 100644
+index 490de05..dbf9a9f 100644
 --- a/src/rgb_import.rs
 +++ b/src/rgb_import.rs
 @@ -209,7 +209,7 @@ pub(crate) async fn import_rgb_contract(
@@ -5516,7 +5443,7 @@ index a665290..135045c 100644
          let imported_id = rgb_lib::wallet::RgbWalletOpsOffline::import_contract(
              &mut *wallet,
 diff --git a/src/rgb_output_operations.rs b/src/rgb_output_operations.rs
-index 803e7a8..e15cf14 100644
+index 73072b0..6ccae47 100644
 --- a/src/rgb_output_operations.rs
 +++ b/src/rgb_output_operations.rs
 @@ -284,13 +284,18 @@ impl OutputBackend for NativeOutputBackend {
@@ -5560,7 +5487,7 @@ index 803e7a8..e15cf14 100644
          }
          match cache.as_ref().unwrap() {
 diff --git a/src/routes.rs b/src/routes.rs
-index 20945c4..23cefcc 100644
+index 7265f37..94c396a 100644
 --- a/src/routes.rs
 +++ b/src/routes.rs
 @@ -1760,6 +1760,9 @@ impl From<WitnessData> for RgbLibWitnessData {
@@ -5601,7 +5528,7 @@ index 20945c4..23cefcc 100644
          tracing::debug!("UTXO creation complete");
  
          Ok(Json(EmptyResponse {}))
-@@ -4124,7 +4126,7 @@ pub(crate) async fn lock(
+@@ -4126,7 +4128,7 @@ pub(crate) async fn lock(
          };
  
          tracing::debug!("Stopping node...");
@@ -5610,7 +5537,7 @@ index 20945c4..23cefcc 100644
          tracing::debug!("Node stopped");
  
          state.update_unlocked_app_state(None).await;
-@@ -4674,7 +4676,7 @@ pub(crate) async fn open_channel(
+@@ -4676,7 +4678,7 @@ pub(crate) async fn open_channel(
              }
          }
          if let Some(peer_addr) = peer_addr {
@@ -5619,7 +5546,7 @@ index 20945c4..23cefcc 100644
                  .await?;
              db.persist_channel_peer(&peer_pubkey, &peer_addr)?;
          } else {
-@@ -6137,11 +6139,13 @@ mod state_mocks {
+@@ -6234,11 +6236,13 @@ mod state_mocks {
                  lsp_base_url: None,
                  lsp_bearer_token: None,
                  vss_url: None,
@@ -5634,7 +5561,7 @@ index 20945c4..23cefcc 100644
              ldk_background_services: Arc::new(Mutex::new(None)),
              attached_external_signer: Arc::new(Mutex::new(None)),
 diff --git a/src/sdk/mod.rs b/src/sdk/mod.rs
-index 14bb967..5b237a1 100644
+index 5bfa190..96c1154 100644
 --- a/src/sdk/mod.rs
 +++ b/src/sdk/mod.rs
 @@ -140,6 +140,9 @@ impl Drop for OpenChannelVirtualIntentGuard {
@@ -5656,7 +5583,7 @@ index 14bb967..5b237a1 100644
      state: &Arc<AppState>,
  ) -> Result<tokio::sync::MutexGuard<'_, Option<Arc<crate::utils::UnlockedAppState>>>, APIError> {
      check_changing_state(state)?;
-@@ -2152,6 +2155,98 @@ pub(crate) async fn vss_backup(state: Arc<AppState>) -> Result<i64, APIError> {
+@@ -2211,6 +2214,98 @@ pub(crate) async fn vss_backup(state: Arc<AppState>) -> Result<i64, APIError> {
      .await
  }
  
@@ -5755,7 +5682,7 @@ index 14bb967..5b237a1 100644
  /// Clears the VSS single-writer fence so a fresh instance can take over a
  /// store whose previous owner did not release it, for example after a crash
  /// or an incomplete persistence flush during shutdown.
-@@ -2389,8 +2484,7 @@ pub(crate) async fn connect_peer(
+@@ -2448,8 +2543,7 @@ pub(crate) async fn connect_peer(
      let (peer_pubkey, peer_addr) = parse_peer_info(peer_pubkey_and_addr.to_string())?;
  
      if let Some(peer_addr) = peer_addr {
@@ -5765,7 +5692,7 @@ index 14bb967..5b237a1 100644
          state
              .get_db()
              .persist_channel_peer(&peer_pubkey, &peer_addr)?;
-@@ -2653,18 +2747,26 @@ where
+@@ -2712,18 +2806,26 @@ where
              .join("rln_output_operations_v1")
      };
      wallet_task(wallet, move |wallet| {
@@ -5803,7 +5730,7 @@ index 14bb967..5b237a1 100644
      })
      .await
  }
-@@ -3234,8 +3336,7 @@ pub(crate) async fn open_channel(
+@@ -3294,8 +3396,7 @@ pub(crate) async fn open_channel(
          }
      }
      if let Some(peer_addr) = peer_addr {
@@ -5813,7 +5740,7 @@ index 14bb967..5b237a1 100644
          state
              .get_db()
              .persist_channel_peer(&peer_pubkey, &peer_addr)?;
-@@ -5016,11 +5117,13 @@ mod tests {
+@@ -5352,11 +5453,13 @@ mod tests {
                  lsp_bearer_token: None,
                  database: RwLock::new(Arc::new(database)),
                  vss_url: None,
@@ -5853,7 +5780,7 @@ index 535a698..0d6ace8 100644
          ldk_background_services: Arc::new(Mutex::new(None)),
          attached_external_signer: Arc::new(Mutex::new(None)),
 diff --git a/src/test_utils.rs b/src/test_utils.rs
-index df8a444..dedc116 100644
+index 764a9f0..bb2d758 100644
 --- a/src/test_utils.rs
 +++ b/src/test_utils.rs
 @@ -41,11 +41,13 @@ pub fn mock_locked_app_state() -> TestAppState {
@@ -7062,7 +6989,7 @@ index 0000000..c9f968e
 +    }
 +}
 diff --git a/src/uniffi_api/mod.rs b/src/uniffi_api/mod.rs
-index e9d5080..b90a61b 100644
+index 39479e7..4fea44d 100644
 --- a/src/uniffi_api/mod.rs
 +++ b/src/uniffi_api/mod.rs
 @@ -1,7 +1,10 @@
@@ -7180,7 +7107,7 @@ index e9d5080..b90a61b 100644
      pub fn connectpeer(&self, peer_pubkey_and_addr: String) -> Result<(), RlnError> {
          let state = self.handle.app_state();
          block_on_sdk(sdk::connect_peer(state, peer_pubkey_and_addr))?;
-@@ -1857,8 +1915,23 @@ impl SdkNode {
+@@ -1912,8 +1970,23 @@ impl SdkNode {
      ) -> Result<(), RlnError> {
          let state = self.handle.app_state();
          let expected = key_source_from_uniffi_bootstrap(signer.bootstrap()?);
@@ -7206,7 +7133,7 @@ index e9d5080..b90a61b 100644
      }
  
      #[allow(clippy::too_many_arguments)]
-@@ -1901,15 +1974,18 @@ pub fn sdk_initialize(request: SdkInitRequest) -> Result<(), RlnError> {
+@@ -1956,15 +2029,18 @@ pub fn sdk_initialize(request: SdkInitRequest) -> Result<(), RlnError> {
      Ok(())
  }
  
@@ -7233,7 +7160,7 @@ index e9d5080..b90a61b 100644
  }
  
  pub fn sdk_init_with_external_signer(
-@@ -2160,6 +2236,115 @@ impl crate::signer::ExternalSignerTransport for UniffiExternalSignerTransport {
+@@ -2215,6 +2291,115 @@ impl crate::signer::ExternalSignerTransport for UniffiExternalSignerTransport {
  #[cfg(test)]
  mod tests;
  
@@ -7350,10 +7277,10 @@ index e9d5080..b90a61b 100644
      let handle = NodeHandle::from_app_state(get_uniffi_app_state()?);
      SdkNode { handle }.sendrgbinvoice(request)
 diff --git a/src/uniffi_api/native_signer.rs b/src/uniffi_api/native_signer.rs
-index 42f6c14..a587e0d 100644
+index 42f6c14..365b3ea 100644
 --- a/src/uniffi_api/native_signer.rs
 +++ b/src/uniffi_api/native_signer.rs
-@@ -11,15 +11,63 @@ use bitcoin::Network;
+@@ -11,15 +11,67 @@ use bitcoin::Network;
  use rand::rngs::OsRng;
  use rand::RngCore;
  use signer_external::contract::{BootstrapData, ExternalSignerBackend, SignerRequest};
@@ -7387,7 +7314,11 @@ index 42f6c14..a587e0d 100644
 +    ) -> Arc<Self> {
 +        Arc::new(Self {
 +            shutting_down: AtomicBool::new(false),
-+            state: RwLock::new(Some(NativeExternalSignerState { backend, transport, message_key })),
++            state: RwLock::new(Some(NativeExternalSignerState {
++                backend,
++                transport,
++                message_key,
++            })),
 +        })
 +    }
 +
@@ -7420,32 +7351,42 @@ index 42f6c14..a587e0d 100644
      fn parse_network(network: &str) -> Result<Network, RlnError> {
          match network.to_lowercase().as_str() {
              "mainnet" | "bitcoin" => Ok(Network::Bitcoin),
-@@ -94,7 +142,14 @@ impl NativeExternalSigner {
+@@ -94,7 +146,19 @@ impl NativeExternalSigner {
                  tracing::error!(error = ?e, "native signer transport init failed");
                  RlnError::internal(format!("native signer transport init failed: {e}"))
              })?;
 -        Ok(Arc::new(Self { backend, transport }))
-+        let message_key = super::bip322::MessageKey::from_seed(&seed, network).map_err(RlnError::InvalidRequest)?;
++        let message_key = super::bip322::MessageKey::from_seed(&seed, network)
++            .map_err(RlnError::InvalidRequest)?;
 +        let signer = Self::from_backend(backend, transport, message_key);
 +        let bootstrap = signer.bootstrap()?;
 +        signer.with_state(|state| {
-+            if state.message_key.account_xpub != bootstrap.account_xpub_vanilla { return Err(RlnError::ExternalSignerMismatch("BIP-322 key does not match wallet bootstrap".into())); }
++            if state.message_key.account_xpub != bootstrap.account_xpub_vanilla {
++                return Err(RlnError::ExternalSignerMismatch(
++                    "BIP-322 key does not match wallet bootstrap".into(),
++                ));
++            }
 +            Ok(())
 +        })?;
 +        Ok(signer)
      }
  
      /// Like [`Self::new`], but with a disk-backed VLS store under `storage_dir_path`, so a
-@@ -133,34 +188,65 @@ impl NativeExternalSigner {
+@@ -133,34 +197,70 @@ impl NativeExternalSigner {
                      "native signer persistent transport init failed: {e}"
                  ))
              })?;
 -        Ok(Arc::new(Self { backend, transport }))
-+        let message_key = super::bip322::MessageKey::from_seed(&seed, network).map_err(RlnError::InvalidRequest)?;
++        let message_key = super::bip322::MessageKey::from_seed(&seed, network)
++            .map_err(RlnError::InvalidRequest)?;
 +        let signer = Self::from_backend(backend, transport, message_key);
 +        let bootstrap = signer.bootstrap()?;
 +        signer.with_state(|state| {
-+            if state.message_key.account_xpub != bootstrap.account_xpub_vanilla { return Err(RlnError::ExternalSignerMismatch("BIP-322 key does not match wallet bootstrap".into())); }
++            if state.message_key.account_xpub != bootstrap.account_xpub_vanilla {
++                return Err(RlnError::ExternalSignerMismatch(
++                    "BIP-322 key does not match wallet bootstrap".into(),
++                ));
++            }
 +            Ok(())
 +        })?;
 +        Ok(signer)
@@ -7521,7 +7462,32 @@ index 42f6c14..a587e0d 100644
      }
  }
  
-@@ -210,4 +296,185 @@ mod tests {
+@@ -168,12 +268,23 @@ impl ExternalSignerHost for NativeExternalSigner {
+ mod tests {
+     use super::*;
+ 
++    fn private_signer_directory() -> tempfile::TempDir {
++        let directory = tempfile::tempdir().unwrap();
++        #[cfg(unix)]
++        {
++            use std::os::unix::fs::PermissionsExt;
++            std::fs::set_permissions(directory.path(), std::fs::Permissions::from_mode(0o700))
++                .unwrap();
++        }
++        directory
++    }
++
+     /// The production/persistent native signer must never run VLS with
+     /// `PolicyFilter::new_permissive()` on mainnet — the same rule the remote signer daemon
+     /// enforces for its `--permissive` flag.
+     #[test]
+     fn native_persistent_signer_rejects_mainnet_permissive() {
+-        let dir = tempfile::tempdir().unwrap();
++        let dir = private_signer_directory();
+         let res = NativeExternalSigner::new_with_storage(
+             "11".repeat(32),
+             "bitcoin".to_string(),
+@@ -210,4 +321,204 @@ mod tests {
                  .expect("explicit permissive is allowed off-mainnet")
          );
      }
@@ -7543,10 +7509,20 @@ index 42f6c14..a587e0d 100644
 +        let message = "  exact\nUTF-8😄\0message";
 +        let signature = signer.sign_message_bip322(message, &address).unwrap();
 +        assert!(signature.starts_with("smp"));
-+        assert!(super::super::bip322::verify(message, &address, &signature, Network::Regtest).unwrap());
-+        assert!(!super::super::bip322::verify(message.trim(), &address, &signature, Network::Regtest).unwrap());
++        assert!(
++            super::super::bip322::verify(message, &address, &signature, Network::Regtest).unwrap()
++        );
++        assert!(!super::super::bip322::verify(
++            message.trim(),
++            &address,
++            &signature,
++            Network::Regtest
++        )
++        .unwrap());
 +        let other = NativeExternalSigner::new("02".repeat(32), "regtest".into(), None).unwrap();
-+        assert!(signer.sign_message_bip322(message, &other.message_signing_address().unwrap()).is_err());
++        assert!(signer
++            .sign_message_bip322(message, &other.message_signing_address().unwrap())
++            .is_err());
 +        let clone = signer.clone();
 +        signer.shutdown().unwrap();
 +        assert!(clone.message_signing_address().is_err());
@@ -7587,7 +7563,7 @@ index 42f6c14..a587e0d 100644
 +
 +    #[test]
 +    fn shutdown_releases_store_and_revokes_every_outstanding_clone() {
-+        let dir = tempfile::tempdir().unwrap();
++        let dir = private_signer_directory();
 +        let signer = persistent_signer(dir.path());
 +        let retained_clone = Arc::clone(&signer);
 +        let before = signer.bootstrap().unwrap();
@@ -7610,7 +7586,7 @@ index 42f6c14..a587e0d 100644
 +
 +    #[test]
 +    fn ordinary_handle_drop_does_not_revoke_retained_signer() {
-+        let dir = tempfile::tempdir().unwrap();
++        let dir = private_signer_directory();
 +        let signer = persistent_signer(dir.path());
 +        let attached_clone = Arc::clone(&signer);
 +        drop(signer);
@@ -7624,7 +7600,7 @@ index 42f6c14..a587e0d 100644
 +        use std::sync::mpsc;
 +        use std::time::{Duration, Instant};
 +
-+        let dir = tempfile::tempdir().unwrap();
++        let dir = private_signer_directory();
 +        let signer = persistent_signer(dir.path());
 +        let (entered_tx, entered_rx) = mpsc::channel();
 +        let (release_tx, release_rx) = mpsc::channel();
@@ -7665,7 +7641,7 @@ index 42f6c14..a587e0d 100644
 +
 +    #[test]
 +    fn concurrent_shutdown_is_idempotent_and_waits_for_store_release() {
-+        let dir = tempfile::tempdir().unwrap();
++        let dir = private_signer_directory();
 +        let signer = persistent_signer(dir.path());
 +        let closes: Vec<_> = (0..8)
 +            .map(|_| {
@@ -7682,7 +7658,7 @@ index 42f6c14..a587e0d 100644
 +
 +    #[test]
 +    fn shutdown_recovers_poison_without_reusing_signing_state() {
-+        let dir = tempfile::tempdir().unwrap();
++        let dir = private_signer_directory();
 +        let signer = persistent_signer(dir.path());
 +        let poisoned = Arc::clone(&signer);
 +        assert!(std::thread::spawn(move || {
@@ -7703,12 +7679,21 @@ index 42f6c14..a587e0d 100644
 +    pub(crate) fn message_signing_address(&self) -> Result<String, RlnError> {
 +        self.with_state(|state| Ok(state.message_key.address.to_string()))
 +    }
-+    pub(crate) fn sign_message_bip322(&self, message: &str, address: &str) -> Result<String, RlnError> {
-+        self.with_state(|state| state.message_key.sign(message, address).map_err(RlnError::InvalidRequest))
++    pub(crate) fn sign_message_bip322(
++        &self,
++        message: &str,
++        address: &str,
++    ) -> Result<String, RlnError> {
++        self.with_state(|state| {
++            state
++                .message_key
++                .sign(message, address)
++                .map_err(RlnError::InvalidRequest)
++        })
 +    }
  }
 diff --git a/src/uniffi_api/tests.rs b/src/uniffi_api/tests.rs
-index 27ea384..d4abc7f 100644
+index 26157cb..d647ce8 100644
 --- a/src/uniffi_api/tests.rs
 +++ b/src/uniffi_api/tests.rs
 @@ -176,6 +176,124 @@ mod uniffi_smoke_tests {
@@ -7850,16 +7835,15 @@ index 27ea384..d4abc7f 100644
              unlocked_app_state: Arc::new(TokioMutex::new(None)),
              ldk_background_services: Arc::new(Mutex::new(None)),
              attached_external_signer: Arc::new(Mutex::new(None)),
-@@ -608,7 +728,7 @@ mod uniffi_smoke_tests {
-     }
- 
-     #[test]
--    fn sdk_create_rejects_invalid_vss_url() {
-+    fn sdk_create_rejects_insecure_vss_url_before_storage() {
-         let res = SdkNode::create(SdkInitRequest {
-             storage_dir_path: "/tmp/rln_vss_validation_test".to_string(),
-             daemon_listening_port: 3001,
-@@ -621,10 +741,16 @@ mod uniffi_smoke_tests {
+@@ -624,6 +744,7 @@ mod uniffi_smoke_tests {
+             vss_url: None,
+             vss_allow_http: false,
+             vss_allow_empty_restore: false,
++            vss_automatic_backup_enabled: None,
+             reuse_addresses: true,
+         });
+         assert!(
+@@ -646,10 +767,16 @@ mod uniffi_smoke_tests {
              lsp_bearer_token: None,
              vss_url: Some("http://example.com/vss".to_string()),
              vss_allow_http: false,
@@ -7878,7 +7862,7 @@ index 27ea384..d4abc7f 100644
  }
  
 diff --git a/src/uniffi_api/types.rs b/src/uniffi_api/types.rs
-index 875ae18..b59e0fe 100644
+index b31e9b9..734de97 100644
 --- a/src/uniffi_api/types.rs
 +++ b/src/uniffi_api/types.rs
 @@ -922,6 +922,7 @@ pub struct SdkInitRequest {
@@ -7891,10 +7875,10 @@ index 875ae18..b59e0fe 100644
  }
 diff --git a/src/uniffi_api/vss_restore.rs b/src/uniffi_api/vss_restore.rs
 new file mode 100644
-index 0000000..1d36b2c
+index 0000000..9c1b034
 --- /dev/null
 +++ b/src/uniffi_api/vss_restore.rs
-@@ -0,0 +1,1216 @@
+@@ -0,0 +1,1219 @@
 +//! Maintained external-signer RGB restore admission. Uses public transport and
 +//! crypto APIs, with bounded extraction and a local, destination-bound receipt.
 +use crate::rgb_vss::{VssBackupClient, VssBackupConfig};
@@ -8436,7 +8420,10 @@ index 0000000..1d36b2c
 +        let entry = archive
 +            .by_index(i)
 +            .map_err(|_| error("VSS_RESTORE_INVALID_ARCHIVE"))?;
-+        let name = entry.name().trim_end_matches('/').to_owned();
++        let name = std::str::from_utf8(entry.name_raw())
++            .map_err(|_| error("VSS_RESTORE_INVALID_ARCHIVE"))?
++            .trim_end_matches('/')
++            .to_owned();
 +        if name == format!("{}/{RECEIPT}", ctx.fp) {
 +            continue;
 +        }
@@ -9112,7 +9099,7 @@ index 0000000..1d36b2c
 +    }
 +}
 diff --git a/src/utils.rs b/src/utils.rs
-index 069153f..132ca59 100644
+index 0f52204..077df5b 100644
 --- a/src/utils.rs
 +++ b/src/utils.rs
 @@ -30,7 +30,7 @@ use std::{
@@ -9270,7 +9257,7 @@ index 069153f..132ca59 100644
                      return Ok(());
                  }
              }
-@@ -806,6 +828,7 @@ pub(crate) async fn start_daemon(args: &UserArgs) -> Result<Arc<AppState>, AppEr
+@@ -814,6 +836,7 @@ pub(crate) async fn start_daemon(args: &UserArgs) -> Result<Arc<AppState>, AppEr
          lsp_base_url: args.lsp_base_url.clone(),
          lsp_bearer_token: args.lsp_bearer_token.clone(),
          vss_url: args.vss_url.clone(),
@@ -9278,7 +9265,7 @@ index 069153f..132ca59 100644
          vss_allow_empty_restore: args.vss_allow_empty_restore,
          reuse_addresses: args.reuse_addresses,
          remote_signer_listen_addr: args.remote_signer_listen_addr,
-@@ -817,6 +840,7 @@ pub(crate) async fn start_daemon(args: &UserArgs) -> Result<Arc<AppState>, AppEr
+@@ -825,6 +848,7 @@ pub(crate) async fn start_daemon(args: &UserArgs) -> Result<Arc<AppState>, AppEr
      let app_state = Arc::new(AppState {
          static_state,
          cancel_token,
@@ -9286,7 +9273,7 @@ index 069153f..132ca59 100644
          unlocked_app_state: Arc::new(TokioMutex::new(None)),
          ldk_background_services: Arc::new(Mutex::new(None)),
          attached_external_signer: Arc::new(Mutex::new(None)),
-@@ -1069,6 +1093,24 @@ mod utils_tests {
+@@ -1108,6 +1132,24 @@ mod utils_tests {
          assert!(validate_vss_url("http://example.com/vss", true).is_ok());
      }
  
