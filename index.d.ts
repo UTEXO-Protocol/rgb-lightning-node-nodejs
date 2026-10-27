@@ -123,6 +123,26 @@ export interface DecodedRgbInvoice {
   network: string
   expiration_timestamp: number | null
   transport_endpoints: string[]
+  /** Legacy field; protocol-1.0 invoices may return null. */
+  proxy_recipient_id?: string | null
+  public_key: string | null
+  encryption: 'Required' | 'Optional' | 'Unsupported'
+}
+
+/** Invoice-first send; Rust validates the complete proxy 1.0 recipient context. */
+export interface SendRgbInvoiceRequest {
+  invoice: string
+  asset_id: string
+  amount: ExactInteger
+  witness_data?: { amount_sat: ExactInteger; blinding?: ExactInteger | null } | null
+  donation: boolean
+  fee_rate: ExactInteger
+  min_confirmations: number
+}
+
+export interface SendRgbResponse {
+  txid: string
+  batch_transfer_idx: number
 }
 
 export interface BtcSendRequest {
@@ -139,6 +159,30 @@ export interface CreateUtxosRequest {
   fee_rate: number
   skip_sync: boolean
 }
+
+/** Caller identity is persisted before constructing/reserving an unsigned transaction. */
+export interface PrepareCreateUtxosRequest extends Omit<CreateUtxosRequest, 'fee_rate'> {
+  operation_id: string
+  fee_rate: number | string
+}
+
+export interface CreateUtxosOperationRequest { operation_id: string }
+export type CreateUtxosOperationStatus = 'preparing' | 'prepared' | 'submitting' | 'broadcast' | 'confirmed' | 'cancelled' | 'failed'
+export interface CreateUtxosOperation {
+  operation_id: string
+  txid: string | null
+  status: CreateUtxosOperationStatus
+  /** False after restore unless native evidence proves cancellation cannot discard a broadcast. */
+  can_cancel: boolean
+  /** True only when the exact persisted transaction may be committed. */
+  can_commit: boolean
+  inputs: Array<{ txid: string; vout: number }>
+  num_outputs: number
+  size_sat: number
+  fee_sat: number | string
+  fee_rate: number | string
+}
+export interface PendingVanillaTransaction { txid: string; type: 'CreateUtxos' | 'SendBtc' | 'Drain' }
 
 export interface SendBtcResponse {
   txid: string
@@ -268,14 +312,15 @@ export class SdkNode {
   commitPreparedBtcSend(request: JsonRequest): never
   /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
   cancelBtcSendPlan(request: { plan_id: string }): never
-  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
-  prepareCreateUtxos(request: CreateUtxosRequest): never
-  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
-  commitPreparedCreateUtxos(request: JsonRequest): never
-  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
-  cancelCreateUtxosPlan(request: { plan_id: string }): never
-  /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
-  listPendingVanillaTransactions(): never
+  /** Idempotent unsigned review with exact native txid, fee and owned input reservations. */
+  prepareCreateUtxos(request: PrepareCreateUtxosRequest): CreateUtxosOperation
+  /** Signs/broadcasts the prepared transaction once; uncertain retries retain the exact txid. */
+  commitPreparedCreateUtxos(request: CreateUtxosOperationRequest): CreateUtxosOperation
+  /** Only a provably unbroadcast operation can release its owned reservations. */
+  cancelCreateUtxosPlan(request: CreateUtxosOperationRequest): CreateUtxosOperation
+  getCreateUtxosOperation(request: CreateUtxosOperationRequest): CreateUtxosOperation | null
+  listCreateUtxosOperations(): CreateUtxosOperation[]
+  listPendingVanillaTransactions(): PendingVanillaTransaction[]
   /** @deprecated Unsupported by released RLN; always throws UnsupportedCapabilityError. */
   listAddressReceipts(address: string): never
   createUtxos(request: JsonRequest): JsonValue
@@ -313,6 +358,7 @@ export class SdkNode {
   rgbInvoice(request: JsonRequest): JsonObject
   decodeRgbInvoice(invoice: string): DecodedRgbInvoice
   sendRgb(request: JsonRequest): JsonValue
+  sendRgbInvoice(request: SendRgbInvoiceRequest): SendRgbResponse
   /** Validated metadata import for an already accepted transfer; does not accept ownership. */
   importRgbTransferConsignment(request: ImportRgbTransferConsignmentRequest): ImportRgbResponse
   /** Validated public contract metadata import; does not create allocations or a balance. */
@@ -362,6 +408,7 @@ export interface RuntimeInfo {
   readonly rln_version: '0.17.0-beta.3'
   readonly rln_commit: string
   readonly lightning_commit: string
+  readonly rgb_lib_commit: string
   readonly adapter_sha256: string
   readonly wrapper_sha256: string
   readonly lock_sha256: string

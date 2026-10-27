@@ -2,6 +2,13 @@ name: Build Candidate Artifacts (No Publication)
 
 on:
   workflow_dispatch:
+    inputs:
+      target:
+        description: Exact host consumer target; select all only for final platform qualification
+        required: true
+        type: choice
+        default: darwin-arm64
+        options: [darwin-arm64, darwin-x64, linux-x64-gnu, linux-arm64-gnu, linux-x64-musl, all]
 
 permissions:
   contents: read
@@ -9,5 +16,7 @@ permissions:
 jobs:
   candidate:
     uses: ./.github/workflows/runtime-matrix.yml
+    with:
+      target: ${{ inputs.target }}
     secrets:
       ORG_READ_TOKEN: ${{ secrets.ORG_READ_TOKEN }}

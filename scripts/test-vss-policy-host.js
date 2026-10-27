@@ -1,5 +1,6 @@
 /* global Bare */
 'use strict'
+// rgb-lib-bfa requires fresh addresses; address reuse is explicitly unsupported.
 const bare = typeof Bare !== 'undefined'
 const fs = require(bare ? 'bare-fs' : 'node:fs')
 const os = require(bare ? 'bare-os' : 'node:os')
@@ -26,7 +27,7 @@ let fundedQualified = false
 let syntheticClockReceiptQualified = false
 const config = { storage_dir_path: path.join(root, 'wallet'), network, daemon_listening_port: 0,
   ldk_peer_listening_port: 0, max_media_upload_size_mb: 5, enable_virtual_channels_v0: false,
-  reuse_addresses: true, vss_url: endpoint, vss_allow_http: false, vss_allow_empty_restore: false }
+  reuse_addresses: false, vss_url: endpoint, vss_allow_http: false, vss_allow_empty_restore: false }
 const unlock = { ldk_chain_sync: { mode: 'TransactionSync', config: { indexer_url: indexer } },
   indexer_url: indexer, proxy_endpoint: proxy, eth_rpc_url: eth, announce_addresses: [] }
 function open (initialize, override) {

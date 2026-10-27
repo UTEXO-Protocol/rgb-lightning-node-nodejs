@@ -12,7 +12,7 @@
 const os = require('os')
 const path = require('path')
 const fs = require('fs')
-const { parse, stringify, bip322Request, paymentRequest, burnRequest, unsupported, UnsupportedCapabilityError } = require('./json-boundary')
+const { parse, stringify, bip322Request, paymentRequest, burnRequest, sendRgbInvoiceRequest, createUtxosOperationRequest, unsupported, UnsupportedCapabilityError } = require('./json-boundary')
 
 // ─── 1. Native addon resolution ──────────────────────────────────────────
 
@@ -57,6 +57,7 @@ for (const [key, expected] of Object.entries({
   rln_version: nativeConfig.rlnVersion,
   rln_commit: expectedIdentity.commit,
   lightning_commit: expectedIdentity.lightningCommit,
+  rgb_lib_commit: expectedIdentity.rgbLibCommit,
   adapter_sha256: expectedIdentity.patchSha256,
   wrapper_sha256: expectedIdentity.wrapperSha256,
   lock_sha256: expectedIdentity.lockSha256,
@@ -197,13 +198,29 @@ class SdkNode {
 
   cancelBtcSendPlan (request) { unsupported('cancelBtcSendPlan') }
 
-  prepareCreateUtxos (request) { unsupported('prepareCreateUtxos') }
+  prepareCreateUtxos (request) {
+    return parse(this._inner.prepareCreateUtxos(createUtxosOperationRequest(request, true)))
+  }
 
-  commitPreparedCreateUtxos (request) { unsupported('commitPreparedCreateUtxos') }
+  commitPreparedCreateUtxos (request) {
+    return parse(this._inner.commitPreparedCreateUtxos(createUtxosOperationRequest(request)))
+  }
 
-  cancelCreateUtxosPlan (request) { unsupported('cancelCreateUtxosPlan') }
+  cancelCreateUtxosPlan (request) {
+    return parse(this._inner.cancelCreateUtxosPlan(createUtxosOperationRequest(request)))
+  }
 
-  listPendingVanillaTransactions () { unsupported('listPendingVanillaTransactions') }
+  getCreateUtxosOperation (request) {
+    return parse(this._inner.getCreateUtxosOperation(createUtxosOperationRequest(request)))
+  }
+
+  listCreateUtxosOperations () {
+    return parse(this._inner.listCreateUtxosOperations())
+  }
+
+  listPendingVanillaTransactions () {
+    return parse(this._inner.listPendingVanillaTransactions())
+  }
 
   listAddressReceipts (address) { unsupported('listAddressReceipts') }
 
@@ -296,6 +313,10 @@ class SdkNode {
   }
   sendRgb (request) {
     return parse(this._inner.sendRgb(stringify(request)))
+  }
+
+  sendRgbInvoice (request) {
+    return parse(this._inner.sendRgbInvoice(sendRgbInvoiceRequest(request)))
   }
 
   importRgbTransferConsignment (request) {

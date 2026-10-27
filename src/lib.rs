@@ -23,20 +23,24 @@ use napi_derive::napi;
 
 use rlncffi::{
     free_native_external_signer, free_sdk_node, rln_address, rln_asset_balance,
-    rln_asset_link_create, rln_asset_metadata, rln_btc_balance, rln_burn, rln_cancel_hodl_invoice,
-    rln_check_indexer_url, rln_check_proxy_endpoint, rln_claim_hodl_invoice, rln_close_channel,
-    rln_connect_peer, rln_create_utxos, rln_decode_ln_invoice, rln_decode_rgb_invoice,
-    rln_disconnect_peer, rln_estimate_fee, rln_fail_transfers, rln_free_string,
-    rln_get_asset_media, rln_get_channel_id, rln_get_consignment, rln_get_consignment_path,
-    rln_get_message_signing_address, rln_get_payment, rln_get_swap, rln_import_rgb_contract,
-    rln_import_rgb_transfer_consignment, rln_inflate, rln_invoice_status, rln_issue_asset_cfa,
-    rln_issue_asset_ifa, rln_issue_asset_nia, rln_issue_asset_uda, rln_keysend, rln_list_assets,
-    rln_list_channels, rln_list_payments, rln_list_peers, rln_list_swaps, rln_list_transactions,
+    rln_asset_link_create, rln_asset_metadata, rln_btc_balance, rln_burn,
+    rln_cancel_create_utxos_plan, rln_cancel_hodl_invoice, rln_check_indexer_url,
+    rln_check_proxy_endpoint, rln_claim_hodl_invoice, rln_close_channel,
+    rln_commit_prepared_create_utxos, rln_connect_peer, rln_create_utxos, rln_decode_ln_invoice,
+    rln_decode_rgb_invoice, rln_disconnect_peer, rln_estimate_fee, rln_fail_transfers,
+    rln_free_string, rln_get_asset_media, rln_get_channel_id, rln_get_consignment,
+    rln_get_consignment_path, rln_get_create_utxos_operation, rln_get_message_signing_address,
+    rln_get_payment, rln_get_swap, rln_import_rgb_contract, rln_import_rgb_transfer_consignment,
+    rln_inflate, rln_invoice_status, rln_issue_asset_cfa, rln_issue_asset_ifa, rln_issue_asset_nia,
+    rln_issue_asset_uda, rln_keysend, rln_list_assets, rln_list_channels,
+    rln_list_create_utxos_operations, rln_list_payments, rln_list_peers,
+    rln_list_pending_vanilla_transactions, rln_list_swaps, rln_list_transactions,
     rln_list_transfers, rln_list_unspents, rln_ln_invoice, rln_maker_execute, rln_maker_init,
     rln_native_external_signer_bootstrap, rln_native_external_signer_new,
     rln_native_external_signer_new_with_storage, rln_native_external_signer_shutdown,
-    rln_network_info, rln_node_info, rln_open_channel, rln_post_asset_media, rln_refresh_transfers,
-    rln_rgb_invoice, rln_rotate_address, rln_sdk_node_apay_new, rln_sdk_node_apay_new_with_address,
+    rln_network_info, rln_node_info, rln_open_channel, rln_post_asset_media,
+    rln_prepare_create_utxos, rln_refresh_transfers, rln_rgb_invoice, rln_rotate_address,
+    rln_sdk_node_apay_new, rln_sdk_node_apay_new_with_address,
     rln_sdk_node_attach_native_external_signer, rln_sdk_node_detach_external_signer,
     rln_sdk_node_init_with_external_signer, rln_sdk_node_init_with_native_external_signer,
     rln_sdk_node_new, rln_sdk_node_prepare_vss_restore,
@@ -45,8 +49,8 @@ use rlncffi::{
     rln_sdk_node_unlock_with_native_external_signer, rln_sdk_node_vss_backup,
     rln_sdk_node_vss_backup_info, rln_sdk_node_vss_backup_metadata, rln_sdk_node_vss_clear_fence,
     rln_sdk_node_vss_restore_info, rln_send_btc, rln_send_onion_message, rln_send_payment,
-    rln_send_rgb, rln_sign_message, rln_sign_message_bip322, rln_sync, rln_taker,
-    rln_verify_message, rln_verify_message_bip322, rln_verify_message_bip322_offline,
+    rln_send_rgb, rln_send_rgb_invoice, rln_sign_message, rln_sign_message_bip322, rln_sync,
+    rln_taker, rln_verify_message, rln_verify_message_bip322, rln_verify_message_bip322_offline,
     COpaqueStruct, CResultString, CResultValue,
 };
 
@@ -508,6 +512,36 @@ impl SdkNode {
         fwd_json_req!(self, rln_create_utxos, request_json)
     }
     #[napi]
+    pub fn prepare_create_utxos(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_prepare_create_utxos, request_json)
+    }
+
+    #[napi]
+    pub fn commit_prepared_create_utxos(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_commit_prepared_create_utxos, request_json)
+    }
+
+    #[napi]
+    pub fn cancel_create_utxos_plan(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_cancel_create_utxos_plan, request_json)
+    }
+
+    #[napi]
+    pub fn get_create_utxos_operation(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_get_create_utxos_operation, request_json)
+    }
+
+    #[napi]
+    pub fn list_create_utxos_operations(&self) -> Result<String> {
+        fwd_noarg!(self, rln_list_create_utxos_operations)
+    }
+
+    #[napi]
+    pub fn list_pending_vanilla_transactions(&self) -> Result<String> {
+        fwd_noarg!(self, rln_list_pending_vanilla_transactions)
+    }
+
+    #[napi]
     pub fn list_transactions(&self, skip_sync: bool) -> Result<String> {
         let res = rln_list_transactions(&self.handle, skip_sync, std::ptr::null());
         take_cresult_string(res)
@@ -664,6 +698,10 @@ impl SdkNode {
     #[napi]
     pub fn send_rgb(&self, request_json: String) -> Result<String> {
         fwd_json_req!(self, rln_send_rgb, request_json)
+    }
+    #[napi]
+    pub fn send_rgb_invoice(&self, request_json: String) -> Result<String> {
+        fwd_json_req!(self, rln_send_rgb_invoice, request_json)
     }
 
     /// Preserve the released per-batch refresh status and failure response.

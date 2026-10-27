@@ -6,12 +6,14 @@ const path = require('node:path')
 const { execFileSync } = require('node:child_process')
 
 const RELEASE = Object.freeze({
-  rlnVersion: '0.17.0-beta.3',
-  ref: 'ecc69f20308231400561f6f060fea88acfa40cc4',
-  commit: 'ecc69f20308231400561f6f060fea88acfa40cc4',
-  lightningCommit: '79b9eb5166546c62692d3a672986f385c7fe047d',
-  rustToolchain: '1.94.0',
-  cffiLockSha256: '5fcdc9ad9179d3230e48973cdfa514a863d13a837752027febf8ea04713bbeb5'
+  'rlnVersion': '0.17.0-beta.3',
+  'ref': '89ebe9fdb1be94cbba0b2bd722cea9af297399f1',
+  'commit': '89ebe9fdb1be94cbba0b2bd722cea9af297399f1',
+  'lightningCommit': '17f2fb56f8d96d0ec512c715d2ebc65f829eb2c2',
+  'rgbLibRepository': 'https://github.com/UTEXO-Protocol/rgb-lib-bfa.git',
+  'rgbLibCommit': 'abd41d3afff6d8fb11461e26e843301650e22df3',
+  'rustToolchain': '1.94.0',
+  'cffiLockSha256': '741bd3d0f81b28c1f40e426b44f5c9ae152d777269934d7c0dc919d74f908da9'
 })
 // Exact reviewed C adapter plus the shared native lifecycle repair. This remains
 // an upstream release with an explicitly hashed runtime overlay, not plain RLN.
@@ -29,6 +31,8 @@ const ALLOWED_FILES = Object.freeze([
   'src/ldk.rs',
   'src/lib.rs',
   'src/rgb.rs',
+  'src/rgb_import.rs',
+  'src/rgb_output_operations.rs',
   'src/vss_snapshot_policy.rs',
   'src/uniffi_api/types.rs',
   'src/ldk_chain_backend/block_sync.rs',
@@ -52,15 +56,11 @@ const ALLOWED_FILES = Object.freeze([
 ])
 const GIT_SOURCES = Object.freeze({
   'musig2': 'git+https://github.com/arik-so/rust-musig2?rev=6f95a05718cbb44d8fe3fa6021aea8117aa38d50#6f95a05718cbb44d8fe3fa6021aea8117aa38d50',
-  'rgb-consensus': 'git+https://github.com/UTEXO-Protocol/rgb-consensus-s-bfa?rev=2faf6118b2f5fe30dd90dd5244d5a7dc32bcd757#2faf6118b2f5fe30dd90dd5244d5a7dc32bcd757',
-  'rgb-invoicing': 'git+https://github.com/UTEXO-Protocol/rgb-ops-s-bfa?rev=773766b5ca7a9e705ec68c2f9ed0917f505cd6e3#773766b5ca7a9e705ec68c2f9ed0917f505cd6e3',
-  'rgb-lib': 'git+https://github.com/UTEXO-Protocol/rgb-lib.git?tag=v0.3.0-beta.50-bfa#1b951af0c8233308c919975552487be19ad2a930',
-  'rgb-lib-migration': 'git+https://github.com/UTEXO-Protocol/rgb-lib.git?tag=v0.3.0-beta.50-bfa#1b951af0c8233308c919975552487be19ad2a930',
-  'rgb-ops': 'git+https://github.com/UTEXO-Protocol/rgb-ops-s-bfa?rev=773766b5ca7a9e705ec68c2f9ed0917f505cd6e3#773766b5ca7a9e705ec68c2f9ed0917f505cd6e3',
-  'rgb-schemas': 'git+https://github.com/UTEXO-Protocol/rgb-schemas-s-bfa?rev=238dfe7a89db998107fd87d919bf2757a2746d7f#238dfe7a89db998107fd87d919bf2757a2746d7f',
-  'signer-external': 'git+https://github.com/UTEXO-Protocol/rln-external-signer.git?branch=main#0fb005ec4b927ddbe13e1646d247b5bb11e8ffed',
-  'vls-core': 'git+https://github.com/UTEXO-Protocol/vls-core.git?branch=feat/rgb-compatibility#45c72edfd58620849eb486925439a76526b415ae',
-  'vls-protocol-signer': 'git+https://github.com/UTEXO-Protocol/vls-protocol-signer.git?branch=feat/rgb-compatibility#dddd336fcdf84c4febdd7af8363bda8d1721d893',
+  'rgb-lib': 'git+https://github.com/UTEXO-Protocol/rgb-lib-bfa.git?rev=abd41d3afff6d8fb11461e26e843301650e22df3#abd41d3afff6d8fb11461e26e843301650e22df3',
+  'rgb-lib-migration': 'git+https://github.com/UTEXO-Protocol/rgb-lib-bfa.git?rev=abd41d3afff6d8fb11461e26e843301650e22df3#abd41d3afff6d8fb11461e26e843301650e22df3',
+  'signer-external': 'git+https://github.com/UTEXO-Protocol/rln-external-signer.git?rev=0fb005ec4b927ddbe13e1646d247b5bb11e8ffed#0fb005ec4b927ddbe13e1646d247b5bb11e8ffed',
+  'vls-core': 'git+https://github.com/UTEXO-Protocol/vls-core.git?rev=45c72edfd58620849eb486925439a76526b415ae#45c72edfd58620849eb486925439a76526b415ae',
+  'vls-protocol-signer': 'git+https://github.com/UTEXO-Protocol/vls-protocol-signer.git?rev=dddd336fcdf84c4febdd7af8363bda8d1721d893#dddd336fcdf84c4febdd7af8363bda8d1721d893',
   'vss-client-ng': 'git+https://github.com/lightningdevkit/vss-client?rev=ad63805047561dcf3117cd992ad6d8bc3881adef#ad63805047561dcf3117cd992ad6d8bc3881adef'
 })
 
@@ -84,6 +84,26 @@ function git (root, args) {
   return execFileSync('git', ['-C', root, ...args], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 })
 }
 
+function verifyCompiledRuntimeIdentity (root) {
+  const source = fs.readFileSync(path.join(root, 'bindings/c-ffi/src/lib.rs'), 'utf8')
+  const declarations = [...source.matchAll(/pub extern "C" fn rln_binding_build_info\(\) -> CResultString \{([\s\S]*?)\n\}/g)]
+  if (declarations.length !== 1) throw new Error('Missing or ambiguous compiled C-FFI runtime identity')
+  const expected = {
+    abi_version: 1,
+    rln_version: RELEASE.rlnVersion,
+    rln_commit: RELEASE.commit,
+    lightning_commit: RELEASE.lightningCommit,
+    rgb_lib_commit: RELEASE.rgbLibCommit
+  }
+  for (const [key, value] of Object.entries(expected)) {
+    const fields = [...declarations[0][1].matchAll(new RegExp('"' + key + '"\\s*:', 'g'))]
+    const values = [...declarations[0][1].matchAll(new RegExp('"' + key + '"\\s*:\\s*("[^"\\\\]*"|[0-9]+)\\s*(?=,|\\})', 'g'))]
+    if (fields.length !== 1 || values.length !== 1 || JSON.parse(values[0][1]) !== value) {
+      throw new Error(`Compiled C-FFI runtime identity mismatch: ${key}`)
+    }
+  }
+}
+
 function prepareSource (root, config, applyIfClean = true) {
   validateAdapter(config)
   if (git(root, ['rev-parse', 'HEAD']).trim() !== RELEASE.commit) throw new Error('Unexpected RLN revision')
@@ -98,6 +118,7 @@ function prepareSource (root, config, applyIfClean = true) {
   if (!diff && applyIfClean) git(root, ['apply', '--index', config.patchPath])
   else if (diff !== patch) throw new Error('Native source has changes beyond the exact approved adapter')
   if (git(root, ['diff', '--binary', 'HEAD']) !== patch) throw new Error('Applied native adapter is not exact')
+  verifyCompiledRuntimeIdentity(root)
   if (sha256(path.join(root, 'bindings/c-ffi/Cargo.lock')) !== RELEASE.cffiLockSha256) {
     throw new Error('Unexpected C-FFI lock graph')
   }
@@ -136,4 +157,4 @@ function wrapperSha256 (root, files) {
   return hash.digest('hex')
 }
 
-module.exports = { RELEASE, ALLOWED_FILES, GIT_SOURCES, sha256, validateAdapter, prepareSource, verifyPreparedSource, wrapperSha256, verifyGraph, verifyCargoGraph }
+module.exports = { RELEASE, ALLOWED_FILES, GIT_SOURCES, sha256, validateAdapter, verifyCompiledRuntimeIdentity, prepareSource, verifyPreparedSource, wrapperSha256, verifyGraph, verifyCargoGraph }

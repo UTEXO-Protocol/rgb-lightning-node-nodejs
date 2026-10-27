@@ -1,4 +1,5 @@
 'use strict'
+// rgb-lib-bfa requires fresh addresses; address reuse is explicitly unsupported.
 
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
@@ -22,7 +23,7 @@ if (!isMainThread) {
       network: 'regtest',
       max_media_upload_size_mb: 5,
       enable_virtual_channels_v0: false,
-      reuse_addresses: true
+      reuse_addresses: false
     })
     global.node.initWithNativeExternalSigner(global.signer)
     global.node.attachNativeExternalSigner(global.signer)

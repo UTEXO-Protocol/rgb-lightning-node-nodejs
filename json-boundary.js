@@ -111,4 +111,88 @@ function bip322Request (request) {
   return stringify(request)
 }
 
-module.exports = { bip322Request, parse, stringify, paymentRequest, burnRequest, unsupported, UnsupportedCapabilityError }
+// Keep the invoice intact: proxy 1.0 recipient keys, encryption and expiry must
+// be parsed and validated together by Rust, never reconstructed from an address.
+function sendRgbInvoiceRequest (request) {
+  const object = (value, allowed, field) => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      throw new TypeError(`${field} must be an object`)
+    }
+    if (Object.keys(value).some(key => !allowed.includes(key))) {
+      throw new TypeError(`Unknown ${field} field`)
+    }
+  }
+  object(request, ['invoice', 'asset_id', 'amount', 'witness_data', 'donation', 'fee_rate', 'min_confirmations'], 'sendRgbInvoice')
+  const { invoice, asset_id: assetId, amount, witness_data: witness, donation, fee_rate: feeRate, min_confirmations: confirmations } = request
+  if (typeof invoice !== 'string' || invoice.length === 0 || invoice.length > 16384 || /[\u0000-\u0020\u007f]/.test(invoice)) {
+    throw new TypeError('sendRgbInvoice.invoice must be a bounded RGB invoice without whitespace or control characters')
+  }
+  if (typeof assetId !== 'string' || assetId.length === 0 || assetId.length > 512) {
+    throw new TypeError('sendRgbInvoice.asset_id must be a bounded non-empty string')
+  }
+  if (typeof donation !== 'boolean') throw new TypeError('sendRgbInvoice.donation must be a boolean')
+  if (!Number.isInteger(confirmations) || confirmations < 0 || confirmations > 255) {
+    throw new RangeError('sendRgbInvoice.min_confirmations must be an unsigned 8-bit integer')
+  }
+  const uint64 = (value, field, positive = false) => {
+    checkedNumber(value)
+    if (!((typeof value === 'number' && Number.isSafeInteger(value) && value >= 0) ||
+        (typeof value === 'string' && /^(0|[1-9][0-9]*)$/.test(value))) ||
+        BigInt(value) > 18446744073709551615n || (positive && BigInt(value) === 0n)) {
+      throw new RangeError(`sendRgbInvoice.${field} must be an exact ${positive ? 'positive' : 'unsigned'} 64-bit integer`)
+    }
+    return new LosslessNumber(String(value))
+  }
+  let witnessData = null
+  if (witness != null) {
+    object(witness, ['amount_sat', 'blinding'], 'sendRgbInvoice.witness_data')
+    witnessData = {
+      amount_sat: uint64(witness.amount_sat, 'witness_data.amount_sat', true),
+      blinding: witness.blinding == null ? null : uint64(witness.blinding, 'witness_data.blinding')
+    }
+  }
+  return stringifyLossless({
+    invoice,
+    asset_id: assetId,
+    amount: uint64(amount, 'amount', true),
+    witness_data: witnessData,
+    donation,
+    fee_rate: uint64(feeRate, 'fee_rate', true),
+    min_confirmations: confirmations
+  })
+}
+
+// An operation ID is durable caller intent, never a txid inferred from history.
+function createUtxosOperationRequest (request, prepare = false) {
+  if (!request || typeof request !== 'object' || Array.isArray(request)) {
+    throw new TypeError('RGB output operation request must be an object')
+  }
+  const allowed = prepare
+    ? ['operation_id', 'up_to', 'num', 'size', 'fee_rate', 'skip_sync']
+    : ['operation_id']
+  if (Object.keys(request).some(key => !allowed.includes(key))) {
+    throw new TypeError('Unknown RGB output operation request field')
+  }
+  if (typeof request.operation_id !== 'string' || !/^[a-f0-9]{32,64}$/.test(request.operation_id)) {
+    throw new TypeError('RGB output operation_id must contain 32 to 64 lowercase hex characters')
+  }
+  if (!prepare) return stringify({ operation_id: request.operation_id })
+  if (typeof request.up_to !== 'boolean' || typeof request.skip_sync !== 'boolean') {
+    throw new TypeError('RGB output up_to and skip_sync must be booleans')
+  }
+  for (const [field, max] of [['num', 255], ['size', 4294967295]]) {
+    const value = request[field]
+    if (value != null && (!Number.isInteger(value) || value < 1 || value > max)) {
+      throw new RangeError(`RGB output ${field} must be a positive ${field === 'num' ? '8' : '32'}-bit integer`)
+    }
+  }
+  const fee = request.fee_rate
+  checkedNumber(fee)
+  if (!((typeof fee === 'number' && Number.isSafeInteger(fee) && fee > 0) ||
+      (typeof fee === 'string' && /^[1-9][0-9]*$/.test(fee))) || BigInt(fee) > 18446744073709551615n) {
+    throw new RangeError('RGB output fee_rate must be an exact positive 64-bit integer')
+  }
+  return stringifyLossless({ ...request, fee_rate: new LosslessNumber(String(fee)) })
+}
+
+module.exports = { createUtxosOperationRequest, bip322Request, parse, stringify, paymentRequest, burnRequest, sendRgbInvoiceRequest, unsupported, UnsupportedCapabilityError }
