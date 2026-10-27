@@ -43,7 +43,9 @@ try {
   const copied = path.join(installed, `index-${suffix}.node`)
   assert.equal(digest(copied), digest(original))
   fs.writeFileSync(path.join(root, 'packed-consumer-evidence.json'), JSON.stringify({
-    sourceCommit: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(),
+    // Docker's /candidate is owned by the runner, not the container's root UID.
+    // Trust only this exact source root for this read; do not persist global trust.
+    sourceCommit: execFileSync('git', ['-c', `safe.directory=${root}`, 'rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(),
     target: suffix, tarball: path.basename(tarball), tarballSha256: digest(tarball),
     nativeSha256: digest(copied), info,
     scope: 'Actual clean npm archive install/native load, exact identities, VSS admission, signer persistence/reopen and lifecycle; no funded network or mobile claim'
